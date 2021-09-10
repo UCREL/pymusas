@@ -1,2 +1,2 @@
-# pymusas
+# PymUSAS
 PYthon Multilingual Ucrel Semantic Analysis System
