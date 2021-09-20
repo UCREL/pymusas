@@ -1,0 +1,5 @@
+__pycache__
+.vscode
+resources/welsh/output
+resources/welsh/cytag_output.xml
+resources/welsh/txt_gold_standard_data.txt
