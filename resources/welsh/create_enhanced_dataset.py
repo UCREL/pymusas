@@ -20,7 +20,7 @@ def read_gold_data(gold_data_path: Path,
             for token_data in line.split():
                 token, basic_pos, usas_tag = token_data.split('|')
                 core_pos = basic_to_core_pos_mapper[basic_pos]
-                sentence_data.append({'token': token, 'basic_pos': basic_pos, 
+                sentence_data.append({'token': token.strip(' '), 'basic_pos': basic_pos, 
                                       'core_pos': core_pos, 'usas_tag': usas_tag})
             all_sentence_data.append(sentence_data)
     return all_sentence_data
@@ -32,7 +32,9 @@ def read_cytag_data(cytag_data_path: Path
     :returns: A list whereby the outer list represents each sentence/line data. 
               The inner list represents each token's data. The dictionary is 
               made up of the following keys: 1. `lemma`, 2. `enhanced_pos`, 
-              3. `token`.
+              3. `token`. **NOTE** the lemmas if they have a space in them e.g. 
+              `mod rewrite` the space is replace with an underscore e.g. 
+              `mod_rewrite`
     '''
     all_sentence_data: list[list[dict[str, str]]] = []
     tree = ET.parse(str(cytag_data_path))
@@ -46,11 +48,12 @@ def read_cytag_data(cytag_data_path: Path
             # have to split on `|` as some tokens can have more than one potential 
             # lemma we take the first lemma and associated rich pos tag.
             token_data['lemma'] = token.get('lemma').split('|')[0].strip(' ')
+            token_data['lemma'] = token_data['lemma'].replace(' ', '_')
             enhanced_pos = token.get('rich_pos').split('|')[0].strip(' ')
             if enhanced_pos in rich_pos_error_mapper:
                 enhanced_pos = rich_pos_error_mapper[enhanced_pos]
             token_data['enhanced_pos'] = enhanced_pos
-            token_data['token'] = token.text
+            token_data['token'] = token.text.strip(' ')
             sentence_data.append(token_data)
         all_sentence_data.append(sentence_data)
     return all_sentence_data
