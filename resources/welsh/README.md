@@ -56,9 +56,7 @@ rm cytag_output.xml
 
 To map between the basic CorCenCC POS tags to the core USAS POS tags we have created a JSON file that contains these mappings, [./basic_cy_tags_to_core_tags.json](./resources/basic_cy_tags_to_core_tags.json). This mapping is based off table A.1 in [Leveraging Pre-Trained Embeddings for Welsh Taggers](https://aclanthology.org/W19-4332.pdf).
 
-
-
-
+Another way of mapping from the CorCenCC POS tags to the core USAS POS tags would be through the rich/enriched tagset rather than the basic. This was not done as the basic POS tags in the Gold dataset are hand annotated, whereas the rich POS tags would be predicted. However for the interested reader the rich to USAS core POS tags mapper can be found in [table 6 of the paper Towards A Welsh Semantic Annotation System](https://aclanthology.org/L18-1158.pdf). 
 
 ## Semantic Tagger Resources
 
