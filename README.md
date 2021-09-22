@@ -1,7 +1,17 @@
-# PymUSAS
+# PymUSAS 
 
 PYthon Multilingual Ucrel Semantic Analysis System
 
+<hr/>
+
+<p align="center">
+    <a href="https://github.com/UCREL/pymusas/actions/workflows/ci.yml">
+        <img alt="CI" src="https://github.com/UCREL/pymusas/actions/workflows/ci.yml/badge.svg?branch=main&event=push"/>
+    </a>
+    <a href="https://codecov.io/gh/UCREL/pymusas">
+        <img alt="Code coverage" src="https://codecov.io/gh/UCREL/pymusas/branch/main/graph/badge.svg" />
+    </a>
+</p>
 
 ## Requirements
 
