@@ -1,0 +1,52 @@
+name: test
+
+on:
+  push:
+  pull_request:
+  
+jobs:
+  test:
+    name: test
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.7, 3.8, 3.9]
+    
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Setting Python and OS environment variables
+        run: |
+          PYTHON=`python -c "import sys; print('.'.join([str(version) for version in sys.version_info[:3]])"`
+          echo "PYTHON=${PYTHON}" >> $GITHUB_ENV
+          echo "OS=${{ runner.os }}" >> $GITHUB_ENV
+      
+      - name: Python location
+        run: echo "Python location ${{ env.pythonLocation }}"
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-${{ env.pythonLocation }}-${{ matrix.stanza-version }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/dev-requirements.txt') }}
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade --upgrade-strategy eager -r requirements.txt
+          pip install --upgrade --upgrade-strategy eager -r dev-requirements.txt
+
+      - name: Pytest and code coverage
+        run: python -m pytest --cov=pymusas --cov-report term-missing --cov-report xml
+
+      - name: CodeCov
+        uses: actions/codecov-action@v2
+        with:
+          files: ./coverage.xml
+          env_vars: OS,PYTHON
+          fail_ci_if_error: false 

@@ -1,0 +1,20 @@
+[
+    {"token": "London", "lemma": "london", "pos": "noun", "usas": "Z2"},
+    {"token": "has", "lemma": "has", "pos": "det", "usas": "A1"},
+    {"token": "east", "lemma": "east", "pos": "noun", "usas": "Z2"},
+    {"token": "Eastt", "lemma": "none", "pos": "conj", "usas": "D1"},
+    {"token": "Easttttt", "lemma": "Eastt", "pos": "noun", "usas": "C1"},
+    {"token": "East", "lemma": "east", "pos": "noun", "usas": "Z1"},
+    {"token": "another", "lemma": "ano", "pos": "det", "usas": "A3"},
+    {"token": "London", "lemma": "london", "pos": "det", "usas": "Z2"},
+    {"token": ".", "lemma": ".", "pos": "punc", "usas": "PUNCT"},
+    {"token": "hshfka", "lemma": "hshfka", "pos": "det", "usas": "Z99"},
+    {"token": "other", "lemma": "ano", "pos": "det", "usas": "A2"},
+    {"token": "Eastt", "lemma": "East", "pos": "noun", "usas": "Z1"},
+    {"token": "Eastt", "lemma": "eastttt", "pos": "obj", "usas": "Z4"},
+    {"token": "something", "lemma": "some", "pos": "det", "usas": "A8"},
+    {"token": "Objective", "lemma": "can", "pos": "obj", "usas": "A7"},
+    {"token": "Good", "lemma": "Go", "pos": "obj", "usas": "A6"},
+    {"token": "Two", "lemma": "two", "pos": "num", "usas": "N4"},
+    {"token": "two", "lemma": "tw", "pos": "num", "usas": "N1"}
+]
