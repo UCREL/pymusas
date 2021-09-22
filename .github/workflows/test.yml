@@ -23,8 +23,7 @@ jobs:
 
       - name: Setting Python and OS environment variables
         run: |
-          PYTHON=`python -c "import sys; print('.'.join([str(version) for version in sys.version_info[:3]]))"`
-          echo "PYTHON=${PYTHON}" >> $GITHUB_ENV
+          echo "PYTHON=${{ matrix.python-version }}" >> $GITHUB_ENV
           echo "OS=${{ runner.os }}" >> $GITHUB_ENV
       
       - name: Python location
