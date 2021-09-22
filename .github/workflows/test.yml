@@ -45,7 +45,7 @@ jobs:
         run: python -m pytest --cov=pymusas --cov-report term-missing --cov-report xml
 
       - name: CodeCov
-        uses: actions/codecov-action@v2
+        uses: codecov/codecov-action@v2
         with:
           files: ./coverage.xml
           env_vars: OS,PYTHON
