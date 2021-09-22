@@ -25,6 +25,20 @@ To test:
 python -m pytest --cov=pymusas --cov-report term-missing
 ```
 
+## Rule based tagging process
+
+1. If `pos==punc` label as `PUNCT`
+2. Lookup token and pos tag
+3. Lookup lemma and pos tag
+4. Lookup lower case token and pos tag
+5. Lookup lower case lemma and pos tag
+6. if `pos==num` label as `N1`
+7. Lookup token with any POS tag and choose first entry in lexicon.
+8. Lookup lemma with any POS tag and choose first entry in lexicon.
+9. Lookup lower case token with any POS tag and choose first entry in lexicon.
+10. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
+11. Label as `Z99`, this is the unmatched semantic tag.
+
 ## Resources
 
 1. [Multilingual USAS lexicons](https://github.com/UCREL/Multilingual-USAS)
