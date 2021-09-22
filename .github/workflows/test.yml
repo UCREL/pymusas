@@ -1,12 +1,12 @@
-name: test
+name: Test
 
 on:
   push:
   pull_request:
   
 jobs:
-  test:
-    name: test
+  checks:
+    name: checks
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -33,13 +33,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-${{ env.pythonLocation }}-${{ matrix.stanza-version }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/dev-requirements.txt') }}
+          key: ${{ runner.os }}-${{ env.pythonLocation }}-${{ matrix.stanza-version }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/dev_requirements.txt') }}
       
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade --upgrade-strategy eager -r requirements.txt
-          pip install --upgrade --upgrade-strategy eager -r dev-requirements.txt
+          pip install --upgrade --upgrade-strategy eager -r dev_requirements.txt
 
       - name: Pytest and code coverage
         run: python -m pytest --cov=pymusas --cov-report term-missing --cov-report xml
