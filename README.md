@@ -15,8 +15,6 @@ PYthon Multilingual Ucrel Semantic Analysis System
 
 ## Requirements
 
-Python >=3.7. As I am developing on Python 3.9 a type hint issue may come up for Python version prior to this, of which this import might be the solution `from __future__ import annotations`
-
 ```
 pip install -r requirements.txt
 ```
