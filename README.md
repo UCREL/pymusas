@@ -25,6 +25,20 @@ To test:
 python -m pytest --cov=pymusas --cov-report term-missing
 ```
 
+### Development
+
+When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
+
+```bash
+pip install -e .[tests]
+```
+
+For a `zsh` shell, which is the default shell for the new Macs you will need to escape with `\` the brackets:
+
+```zsh
+pip install -e .\[tests\]
+```
+
 ## Rule based tagging process
 
 1. If `pos==punc` label as `PUNCT`

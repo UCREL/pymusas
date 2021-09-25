@@ -2,6 +2,8 @@ __pycache__
 .vscode
 .coverage
 coverage.xml
+pymusas.egg-info
+dist
 resources/welsh/output
 resources/welsh/cytag_output.xml
 resources/welsh/txt_gold_standard_data.txt
