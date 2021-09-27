@@ -43,15 +43,24 @@ pip install -e .\[tests\]
 
 **NOTE** all of the benchmarking code requires a Linux based operating system due to the requirement to access the amount of memory used, using the [resource `getrusage` method.](https://docs.python.org/3/library/resource.html#resource.getrusage)
 
-In this section we benchmark the taggers (currently only the one tagger), based on resource utilisation (memory and speed).
+In this section we benchmark the taggers (currently only the one tagger), based on resource utilisation (memory and speed) and performance. The performance uses two metrics, both are percentages:
+
+1. Accuracy
+2. Coverage -- the number of tokens that have been tagged, that are not tagged with the unmatched tag (the `Z99` tag).
 
 ### Rule based tagger
 
-Currently uses `450MB` of memory and processes `26,921.73` tokens per second based on the following benchmarking code:
+Code to benchmark the rule based tagger:
 
 ``` bash
-python benchmarks/rule_based_tagger.py
+python benchmarks/rule_based_tagger.py --markdown
 ```
+
+Output, this is based on the [Welsh gold standard dataset](https://github.com/CorCenCC/welsh_pos_sem_tagger/blob/master/data/cy_both_tagged.data), from the paper [Leveraging Pre-Trained Embeddings for Welsh Taggers.](https://aclanthology.org/W19-4332.pdf):
+
+| Memory (MB) | Tokens Per Second | Accuracy (%) | Coverage (%) |
+|-------------|-------------------|--------------|--------------|
+| 458.20  | 26,846  | 68.94 | 91.97 |
 
 
 ## Rule based tagging process
