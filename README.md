@@ -39,6 +39,21 @@ For a `zsh` shell, which is the default shell for the new Macs you will need to 
 pip install -e .\[tests\]
 ```
 
+## Benchmarking
+
+**NOTE** all of the benchmarking code requires a Linux based operating system due to the requirement to access the amount of memory used, using the [resource `getrusage` method.](https://docs.python.org/3/library/resource.html#resource.getrusage)
+
+In this section we benchmark the taggers (currently only the one tagger), based on resource utilisation (memory and speed).
+
+### Rule based tagger
+
+Currently uses `450MB` of memory and processes `26,921.73` tokens per second based on the following benchmarking code:
+
+``` bash
+python benchmarks/rule_based_tagger.py
+```
+
+
 ## Rule based tagging process
 
 1. If `pos==punc` label as `PUNCT`
