@@ -60,7 +60,9 @@ Output, this is based on the [Welsh gold standard dataset](https://github.com/Co
 
 | Memory (MB) | Tokens Per Second | Accuracy (%) | Coverage (%) |
 |-------------|-------------------|--------------|--------------|
-| 458.20  | 26,846  | 68.94 | 91.97 |
+| 112.78  | 20,046  | 68.94 | 91.97 |
+
+**Note** that between different computers these figures are going to be different. On the Apple MacBook Air 2021 (M1) this uses a lot more memory, but is quicker than the Ubuntu desktop. The figures above are generated from my AMD Ryzen 5 1600 Six-Core Processor with 16GB of RAM on the Ubuntu operating system.
 
 
 ## Rule based tagging process
