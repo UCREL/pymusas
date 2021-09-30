@@ -6,7 +6,7 @@ from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 from tqdm import tqdm
 
-from pymusas import config
+from . import config
 
 def _session_with_backoff() -> requests.Session:
     """
