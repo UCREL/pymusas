@@ -1,4 +1,4 @@
-#semantic lexicon
+lemma	pos	semantic_tags
 London	noun	Z2
 has	det	A1
 East	noun	Z1
@@ -14,3 +14,4 @@ go	prep	A6
 Two	num	N4
 two	prep	N5
 random	prep	N5
+Laptop	noun	Z3 Z0
