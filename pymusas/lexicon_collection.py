@@ -2,8 +2,11 @@ from __future__ import annotations
 from collections.abc import Iterable, MutableMapping
 import csv
 from dataclasses import dataclass
-from pathlib import Path
-from typing import Optional
+from os import PathLike
+from typing import Optional, Union
+from urllib.parse import urlparse
+
+from . import file_utils
 
 @dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=True)
 class LexiconEntry:
@@ -101,15 +104,22 @@ class LexiconCollection(MutableMapping):
         self[lemma] = value.semantic_tags
 
     @staticmethod
-    def from_tsv(tsv_file_path: Path, include_pos: bool = True
+    def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
                  ) -> type['LexiconCollection']:
         '''
-        **NOTE** if `include_pos` is True and the TSV file does not contain a 
+        If `include_pos` is True and the TSV file does not contain a 
         `pos` field heading then this will return a LexiconCollection that is 
         identical to a collection that ran this method with `include_pos` equal 
         to False.
 
-        :param tsv_file_path: A path to a TSV file that contains at least two 
+        If the file path is a URL, the file will be downloaded and cached using 
+        `file_utils.download_url_file` function.
+
+        Reference, the identification of a URL and the idea to do this has 
+        come from the AllenNLP library:
+        https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205
+
+        :param tsv_file_path: A path or URL to a TSV file that contains at least two 
                               fields with the following headings: 1. `lemma`, 
                               and 2. `semantic_tags`. With an optional field 
                               `pos`. All other fields will be ignored. 
@@ -131,7 +141,15 @@ class LexiconCollection(MutableMapping):
 
         collection_from_tsv = LexiconCollection()
 
-        with tsv_file_path.open('r', newline='') as fp:
+        if not isinstance(tsv_file_path, str):
+            tsv_file_path = str(tsv_file_path)
+
+        parsed = urlparse(tsv_file_path)
+        if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
+            tsv_file_path = str(file_utils.download_url_file(tsv_file_path))
+
+
+        with open(tsv_file_path, 'r', newline='') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
             file_field_names = set(csv_reader.fieldnames)
             if minimum_field_names.issubset(file_field_names):

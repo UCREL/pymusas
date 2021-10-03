@@ -2,10 +2,15 @@ from __future__ import annotations
 from collections.abc import MutableMapping
 from dataclasses import FrozenInstanceError
 from pathlib import Path
+import tempfile
+import os
+import importlib
 
 import pytest
+import responses
 
 from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
+from pymusas import config
 
 DATA_DIR = Path(__file__, '..', 'data').resolve()
 LEXICON_FILE_PATH = Path(DATA_DIR, 'lexicon.tsv')
@@ -161,5 +166,21 @@ def test_lexicon_collection_from_tsv() -> None:
     # Test `include_pos`
     assert LexiconCollection.from_tsv(LEXICON_FILE_PATH, include_pos=False) ==  minimum_lexicon_collection
 
-
+    # Test using a string rather than a Path like object
+    lexicon_collection = LexiconCollection.from_tsv(str(LEXICON_FILE_PATH))
+    assert 16 == len(lexicon_collection)
+    assert lexicon_collection['Laptop|noun'] == ['Z3', 'Z0']
+    
+    # Test using a URL
+    with tempfile.TemporaryDirectory() as temp_dir:
+        os.environ['PYMUSAS_HOME'] = temp_dir
+        importlib.reload(config)
+        with responses.RequestsMock() as rsps:
+            expected_response = 'lemma\tsemantic_tags\nhello\tZ5 Z2\n'
+            lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.usas'
+            rsps.add(responses.GET, lexicon_url, status=200, 
+                    body=expected_response, stream=True)
+            url_lexicon_collection = LexiconCollection.from_tsv(lexicon_url)
+            assert 1 == len(url_lexicon_collection)
+            url_lexicon_collection['hello'] == ['Z5', 'Z2']
 
