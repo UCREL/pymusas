@@ -1,10 +1,10 @@
-from __future__ import annotations
 from collections.abc import MutableMapping
 from dataclasses import FrozenInstanceError
 from pathlib import Path
 import tempfile
 import os
 import importlib
+from typing import List, Dict
 
 import pytest
 import responses
@@ -22,7 +22,7 @@ LEXICON_ENTRY = LexiconEntry('London', ['Z2'], 'noun')
 LEXICON_ENTRY_MULTI_SEM = LexiconEntry('Laptop', ['Z3', 'Z0'], 'noun')
 NON_POS_ENTRY = LexiconEntry('London', ['Z2'])
 
-LEXICON_ENTRIES: dict[str, list[str]] = {}
+LEXICON_ENTRIES: Dict[str, List[str]] = {}
 for entry in [LEXICON_ENTRY, LEXICON_ENTRY_MULTI_SEM, NON_POS_ENTRY]:
     lemma = entry.lemma
     if entry.pos is not None:

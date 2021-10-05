@@ -1,13 +1,13 @@
-from __future__ import annotations
 import csv
 import logging
 from pathlib import Path
+from typing import List, Tuple, Dict
 
 logger = logging.getLogger(__name__)
 
 def load_lexicon(lexicon_path: Path, has_headers: bool = True, 
                  include_pos: bool = True
-                 ) -> dict[str, list[str]]:
+                 ) -> Dict[str, List[str]]:
     '''
     :param lexicon_path: File path to the lexicon data. This data should be in 
                          TSV format with the following data in this column / field 
@@ -27,7 +27,7 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True,
               most likely USAS label, for more details on the USAS tagset see 
               the USAS tagset documentation.
     '''
-    lemma_pos_usas: dict[str, str] = {}
+    lemma_pos_usas: Dict[str, str] = {}
     number_tags = 0
     number_duplicate_entires = 0
     with lexicon_path.open('r') as lexicon_data:
@@ -70,13 +70,13 @@ class RuleBasedTagger():
         self.lexicon_lemma_lookup = load_lexicon(lexicon_path, has_headers, 
                                                  include_pos=False)
 
-    def tag_data(self, tokens: list[tuple[str, str, str]]) -> list[list[str]]:
+    def tag_data(self, tokens: List[Tuple[str, str, str]]) -> List[List[str]]:
         '''
         :param tokens: Each tuple represents a token. The tuple must contain the 
                        following lingustic information per token: 1. token text,
                        2. lemma, 3. Part Of Speech.
         '''
-        sem_tags: list[list[str]] = []
+        sem_tags: List[List[str]] = []
         for token in tokens:
             token_text = token[0]
             lemma = token[1]

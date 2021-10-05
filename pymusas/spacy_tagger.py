@@ -1,6 +1,4 @@
-from __future__ import annotations
-from collections.abc import Iterable, Callable
-from typing import Optional
+from typing import Optional, List, Iterable, Callable
 
 from spacy.training import Example
 from spacy.language import Language
@@ -25,7 +23,7 @@ class SpacyRuleBasedTagger:
     @staticmethod
     def tag_token(text: str, lemma: str, pos: str, 
                   lexicon_lookup: LexiconCollection,
-                  lemma_lexicon_lookup: LexiconCollection) -> list[str]:
+                  lemma_lexicon_lookup: LexiconCollection) -> List[str]:
         if pos == 'punc':
             return ["PUNCT"]
 

@@ -1,10 +1,10 @@
-from __future__ import annotations
-from collections.abc import Iterable, MutableMapping
+from collections.abc import MutableMapping
 import csv
 from dataclasses import dataclass
 from os import PathLike
 from typing import Optional, Union
 from urllib.parse import urlparse
+from typing import List, Dict, Iterable
 
 from . import file_utils
 
@@ -16,7 +16,7 @@ class LexiconEntry:
     '''
 
     lemma: str
-    semantic_tags: list[str]
+    semantic_tags: List[str]
     pos: str = None
 
 
@@ -41,16 +41,16 @@ class LexiconCollection(MutableMapping):
     ```
     '''
     
-    def __init__(self, data: Optional[dict[str, list[str]]] = None) -> None:
+    def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
 
-        self.data: dict[str, list[str]] = {}
+        self.data: Dict[str, List[str]] = {}
         if data is not None:
             self.data = data
 
-    def __setitem__(self, key: str, value: list[str]) -> None:
+    def __setitem__(self, key: str, value: List[str]) -> None:
         self.data[key] = value
 
-    def __getitem__(self, key: str) -> list[str]:
+    def __getitem__(self, key: str) -> List[str]:
         return self.data[key]
 
     def __delitem__(self, key: str) -> None:
@@ -105,7 +105,7 @@ class LexiconCollection(MutableMapping):
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
-                 ) -> type['LexiconCollection']:
+                 ) -> "LexiconCollection":
         '''
         If `include_pos` is True and the TSV file does not contain a 
         `pos` field heading then this will return a LexiconCollection that is 
