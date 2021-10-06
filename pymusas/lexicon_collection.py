@@ -105,7 +105,7 @@ class LexiconCollection(MutableMapping):
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
-                 ) -> "LexiconCollection":
+                 ) -> Dict[str, List[str]]:
         '''
         If `include_pos` is True and the TSV file does not contain a 
         `pos` field heading then this will return a LexiconCollection that is 
@@ -130,8 +130,8 @@ class LexiconCollection(MutableMapping):
                             adding the `LexiconEntry` into the returned 
                             `LexiconCollection`. For more information on this 
                             see the `add_lexicon_entry` method.
-        :returns: A `LexiconCollection` that has been created from the data 
-                  within the TSV file.
+        :returns: A dictionary object that can be used to create a 
+                  `LexiconCollection`
         :raises: ValueError if the minimum field headings, lemma and 
                  semantic_tags, do not exist in the given TSV file.
         '''
@@ -175,4 +175,4 @@ class LexiconCollection(MutableMapping):
                 collection_from_tsv.add_lexicon_entry(LexiconEntry(**row_data), 
                                                       include_pos=include_pos)
         
-        return collection_from_tsv
+        return collection_from_tsv.data

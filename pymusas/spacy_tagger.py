@@ -1,4 +1,4 @@
-from typing import Optional, List, Iterable, Callable
+from typing import Optional, List, Iterable, Callable, Dict
 
 from spacy.training import Example
 from spacy.language import Language
@@ -13,6 +13,8 @@ class SpacyRuleBasedTagger:
                  lexicon_lemma_lookup: Optional[LexiconCollection] = None
                  ) -> None:
         print(nlp.pipe_names)
+        self.lexicon_lookup = lexicon_lookup
+        self.lexicon_lemma_lookup = lexicon_lemma_lookup
         if lexicon_lookup is None:
             self.lexicon_lookup: LexiconCollection = LexiconCollection()
         if lexicon_lemma_lookup is None:
@@ -27,21 +29,21 @@ class SpacyRuleBasedTagger:
         if pos == 'punc':
             return ["PUNCT"]
 
-        text_pos = f"{text}_{pos}"
+        text_pos = f"{text}|{pos}"
         if text_pos in lexicon_lookup:
             return lexicon_lookup[text_pos]
 
-        lemma_pos = f"{lemma}_{pos}"
+        lemma_pos = f"{lemma}|{pos}"
         if lemma_pos in lexicon_lookup:
             return lexicon_lookup[lemma_pos]
 
         text_lower = text.lower()
-        text_pos_lower = f"{text_lower}_{pos}"
+        text_pos_lower = f"{text_lower}|{pos}"
         if text_pos_lower in lexicon_lookup:
             return lexicon_lookup[text_pos_lower]
 
         lemma_lower = lemma.lower()
-        lemma_pos_lower = f"{lemma_lower}_{pos}"
+        lemma_pos_lower = f"{lemma_lower}|{pos}"
         if lemma_pos_lower in lexicon_lookup:
             return lexicon_lookup[lemma_pos_lower]
 
@@ -102,6 +104,5 @@ class SpacyRuleBasedTagger:
 
 @Language.factory("usas_tagger")
 def create_spacy_rule_based_tagger_component(nlp: Language, name: str, 
-                                             lexicon_lookup: Optional[LexiconCollection] = None, 
-                                             lexicon_lemma_lookup: Optional[LexiconCollection] = None):
-    return SpacyRuleBasedTagger(nlp, lexicon_lookup, lexicon_lemma_lookup)
+                                             lexicon_lookup: Optional[Dict[str, List[str]]] = None):
+    return SpacyRuleBasedTagger(nlp, lexicon_lookup, None)
