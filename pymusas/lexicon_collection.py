@@ -29,13 +29,14 @@ class LexiconCollection(MutableMapping):
 
     The value to each key is the associated semantic tags, whereby the semantic 
     tags are in rank order, the most likely tag is the first tag in the list. 
-    For example in the collection below, for the lemma London_noun the most 
-    likely semantic tag is Z3 and the least likely tag is A1:
+    For example in the collection below, for the lemma London with a POS tag noun 
+    the most likely semantic tag is Z3 and the least likely tag is A1:
 
     ```
     from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
     lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
-    collection = LexiconCollection([lexicon_entry])
+    collection = LexiconCollection()
+    collection.add_lexicon_entry(lexicon_entry)
     most_likely_tag = collection['London|noun'][0]
     least_likely_tag = collection['London|noun'][-1]
     ```
@@ -102,6 +103,13 @@ class LexiconCollection(MutableMapping):
         if value.pos is not None and include_pos:
             lemma += f'|{value.pos}'
         self[lemma] = value.semantic_tags
+
+    def to_dictionary(self) -> Dict[str, List[str]]:
+        '''
+        :returns: The dictionary object that stores all of the data.
+        '''
+
+        return self.data
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
@@ -175,4 +183,4 @@ class LexiconCollection(MutableMapping):
                 collection_from_tsv.add_lexicon_entry(LexiconEntry(**row_data), 
                                                       include_pos=include_pos)
         
-        return collection_from_tsv.data
+        return collection_from_tsv.to_dictionary()

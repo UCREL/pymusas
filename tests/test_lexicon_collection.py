@@ -8,6 +8,7 @@ from typing import List, Dict
 
 import pytest
 import responses
+from pymusas import lexicon_collection
 
 from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
 from pymusas import config
@@ -142,9 +143,22 @@ def test_lexicon_collection_add_lexicon_entry() -> None:
     assert lexicon_collection['London'] == ['Z2']
     assert 2 == len(lexicon_collection)
 
+def test_lexicon_collection_to_dictionary():
+    lexicon_collection = LexiconCollection()
+    assert dict() == lexicon_collection.to_dictionary()
+
+    lexicon_collection.add_lexicon_entry(LEXICON_ENTRY)
+    expected_dictionary = {'London|noun': ['Z2']}
+    assert type(expected_dictionary) != type(lexicon_collection)
+    assert type(expected_dictionary) == type(lexicon_collection.to_dictionary())
+    assert expected_dictionary == lexicon_collection.to_dictionary()
+    assert isinstance(lexicon_collection.to_dictionary(), dict)
+
+
 def test_lexicon_collection_from_tsv() -> None:
 
     lexicon_collection = LexiconCollection.from_tsv(LEXICON_FILE_PATH)
+    assert isinstance(lexicon_collection, dict)
     assert 16 == len(lexicon_collection)
     assert lexicon_collection['Laptop|noun'] == ['Z3', 'Z0']
 
