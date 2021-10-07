@@ -27,7 +27,7 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True,
               most likely USAS label, for more details on the USAS tagset see 
               the USAS tagset documentation.
     '''
-    lemma_pos_usas: Dict[str, str] = {}
+    lemma_pos_usas: Dict[str, List[str]] = {}
     number_tags = 0
     number_duplicate_entires = 0
     with lexicon_path.open('r') as lexicon_data:

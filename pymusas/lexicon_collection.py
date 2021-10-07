@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from os import PathLike
 from typing import Optional, Union
 from urllib.parse import urlparse
-from typing import List, Dict, Iterable
+import typing
+from typing import List, Dict, Generator, Optional, Set
 
 from . import file_utils
 
@@ -17,7 +18,7 @@ class LexiconEntry:
 
     lemma: str
     semantic_tags: List[str]
-    pos: str = None
+    pos: Optional[str] = None
 
 
 class LexiconCollection(MutableMapping):
@@ -60,7 +61,7 @@ class LexiconCollection(MutableMapping):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __iter__(self) -> Iterable[str]:
+    def __iter__(self) -> Generator[str, None, None]:
         for key in self.data:
             yield key
 
@@ -154,12 +155,14 @@ class LexiconCollection(MutableMapping):
 
         parsed = urlparse(tsv_file_path)
         if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
-            tsv_file_path = str(file_utils.download_url_file(tsv_file_path))
+            tsv_file_path = file_utils.download_url_file(tsv_file_path)
 
 
         with open(tsv_file_path, 'r', newline='') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
-            file_field_names = set(csv_reader.fieldnames)
+            file_field_names: Set[str] = set()
+            if csv_reader.fieldnames is not None:
+                file_field_names = set(csv_reader.fieldnames)
             if minimum_field_names.issubset(file_field_names):
                 field_names_to_extract.extend(list(minimum_field_names))
             else:
@@ -174,7 +177,7 @@ class LexiconCollection(MutableMapping):
                     field_names_to_extract.append(extra_field_name)
             
             for row in csv_reader:
-                row_data = {}
+                row_data: typing.MutableMapping[str, Union[str, List[str]]] = {}
                 for field_name in field_names_to_extract:
                     if field_name == 'semantic_tags':
                         row_data[field_name] = row[field_name].split()

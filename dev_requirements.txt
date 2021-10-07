@@ -1,3 +1,5 @@
 pytest>=5.2.0
 pytest-cov
 responses
+mypy==0.910
+types-requests

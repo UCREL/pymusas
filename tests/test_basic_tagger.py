@@ -5,7 +5,7 @@ from pymusas.basic_tagger import RuleBasedTagger
 
 DATA_DIR = Path(__file__, '..', 'data').resolve()
 
-def test_tag_data():
+def test_tag_data() -> None:
     lexicon_path = Path(DATA_DIR, 'lexicon.tsv')
     test_data_path = Path(DATA_DIR, 'rule_based_input_output.json')
     test_data: list[tuple[str, str, str]] = []

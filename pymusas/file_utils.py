@@ -41,7 +41,7 @@ def _resource_to_filename(resource: str) -> str:
 
     return filename
 
-def download_url_file(url: str) -> Path:
+def download_url_file(url: str) -> str:
     '''
     Reference AllenNLP:
     https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L536
@@ -57,7 +57,7 @@ def download_url_file(url: str) -> Path:
     filename = _resource_to_filename(url)
     download_file_path = Path(cache_dir, filename)
     if download_file_path.exists():
-        return download_file_path
+        return str(download_file_path)
     
     with _session_with_backoff() as session:
         req = session.get(url, stream=True, timeout=5)
@@ -70,4 +70,4 @@ def download_url_file(url: str) -> Path:
                     if chunk:  # filter out keep-alive new chunks
                         progress.update(len(chunk))
                         download_file.write(chunk)
-    return download_file_path
+    return str(download_file_path)

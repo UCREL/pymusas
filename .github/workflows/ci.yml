@@ -41,6 +41,9 @@ jobs:
           pip install --upgrade --upgrade-strategy eager -r requirements.txt
           pip install --upgrade --upgrade-strategy eager -r dev_requirements.txt
 
+      - name: mypy
+        run: mypy
+
       - name: Pytest and code coverage
         run: python -m pytest --cov=pymusas --cov-report term-missing --cov-report xml
 

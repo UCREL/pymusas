@@ -4,3 +4,27 @@ requires = [
     "wheel"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.mypy]
+files = ["tests/", "pymusas/"]
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+no_strict_optional = false
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+allow_untyped_globals = false
+allow_redefinition = false
+local_partial_types = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    'urllib3.*', 
+    'tqdm.*'
+]
+ignore_missing_imports = true

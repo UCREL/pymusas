@@ -2,30 +2,35 @@ from typing import Optional, List, Iterable, Callable, Dict
 
 from spacy.training import Example
 from spacy.language import Language
-from spacy.tokens import Token
+from spacy.tokens import Token, Doc
 
 from .config import LANG_LEXICON_RESOUCRE_MAPPER
 from .lexicon_collection import LexiconCollection
 
-class SpacyRuleBasedTagger:
 
-    def __init__(self, nlp: Language, lexicon_lookup: Optional[LexiconCollection] = None, 
-                 lexicon_lemma_lookup: Optional[LexiconCollection] = None
+class RuleBasedTagger:
+
+    def __init__(self, nlp: Language, 
+                 lexicon_lookup: Optional[Dict[str, List[str]]] = None, 
+                 lexicon_lemma_lookup: Optional[Dict[str, List[str]]] = None,
+                 usas_tags_token_attr: str = 'usas_tags'
                  ) -> None:
         print(nlp.pipe_names)
-        self.lexicon_lookup = lexicon_lookup
-        self.lexicon_lemma_lookup = lexicon_lemma_lookup
-        if lexicon_lookup is None:
-            self.lexicon_lookup: LexiconCollection = LexiconCollection()
-        if lexicon_lemma_lookup is None:
-            self.lexicon_lemma_lookup: LexiconCollection = LexiconCollection()
-        Token.set_extension('usas_tags', default=None)
+        self.lexicon_lookup: Dict[str, List[str]] = dict()
+        self.lexicon_lemma_lookup: Dict[str, List[str]] = dict()
+        if lexicon_lookup is not None:
+            self.lexicon_lookup = lexicon_lookup
+        if lexicon_lemma_lookup is not None:
+            self.lexicon_lemma_lookup = lexicon_lemma_lookup
+
+        self.usas_tags_token_attr = usas_tags_token_attr
+        Token.set_extension(self.usas_tags_token_attr, default=None)
         
 
     @staticmethod
     def tag_token(text: str, lemma: str, pos: str, 
-                  lexicon_lookup: LexiconCollection,
-                  lemma_lexicon_lookup: LexiconCollection) -> List[str]:
+                  lexicon_lookup: Dict[str, List[str]],
+                  lemma_lexicon_lookup: Dict[str, List[str]]) -> List[str]:
         if pos == 'punc':
             return ["PUNCT"]
 
@@ -64,7 +69,7 @@ class SpacyRuleBasedTagger:
 
         return ['Z99']
 
-    def __call__(self, doc):
+    def __call__(self, doc: Doc) -> Doc:
         for token in doc:
             text = token.text
             lemma = token.lemma_
@@ -72,27 +77,33 @@ class SpacyRuleBasedTagger:
             semantic_tags = self.tag_token(text, lemma, pos, 
                                            self.lexicon_lookup, 
                                            self.lexicon_lemma_lookup)
-            token._.usas_tags = semantic_tags
+            setattr(token._, self.usas_tags_token_attr, semantic_tags)
         return doc
 
     def initialize(self, get_examples: Optional[Callable[[], Iterable[Example]]] = None, 
                    nlp: Optional[Language] = None,
-                   lexicon_lookup_data: Optional[LexiconCollection] = None,
-                   lexicon_lemma_lookup_data: Optional[LexiconCollection] = None
+                   lexicon_lookup_data: Optional[Dict[str, List[str]]] = None,
+                   lexicon_lemma_lookup_data: Optional[Dict[str, List[str]]] = None,
                    ) -> None:
+
+        def any_data(lexicon_data: List[Optional[Dict[str, List[str]]]]) -> bool:
+            return any(lexicon_data)
         
-        any_data = lambda: any([lexicon_lookup_data, lexicon_lemma_lookup_data])
-        if not any_data() and nlp is not None:
+        all_lexicon_data = [lexicon_lookup_data, lexicon_lemma_lookup_data]
+        if not any_data(all_lexicon_data) and nlp is not None:
             nlp_language = nlp.lang
             if nlp_language in LANG_LEXICON_RESOUCRE_MAPPER:
                 lang_lexicon_info = LANG_LEXICON_RESOUCRE_MAPPER[nlp_language]
                 lexicon_lookup_data = LexiconCollection.from_tsv(lang_lexicon_info['lexicon'], include_pos=True)
-                lexicon_lookup_data = LexiconCollection.from_tsv(lang_lexicon_info['lexicon_lemma'], include_pos=False)
+                lexicon_lemma_lookup_data = LexiconCollection.from_tsv(lang_lexicon_info['lexicon_lemma'], include_pos=False)
         
-        if any_data:
+        all_lexicon_data = [lexicon_lookup_data, lexicon_lemma_lookup_data]
+        if lexicon_lookup_data is not None:
             self.lexicon_lookup = lexicon_lookup_data
+        if lexicon_lemma_lookup_data is not None:
             self.lexicon_lemma_lookup = lexicon_lemma_lookup_data
-        else:
+        
+        if not any_data(all_lexicon_data):
             error_msg = ('Missing data for initialisation. No data has '
                          'been explicitly passed.')
             if nlp is not None:
@@ -104,5 +115,9 @@ class SpacyRuleBasedTagger:
 
 @Language.factory("usas_tagger")
 def create_spacy_rule_based_tagger_component(nlp: Language, name: str, 
-                                             lexicon_lookup: Optional[Dict[str, List[str]]] = None):
-    return SpacyRuleBasedTagger(nlp, lexicon_lookup, None)
+                                             lexicon_lookup: Optional[Dict[str, List[str]]] = None,
+                                             lexicon_lemma_lookup_data: Optional[Dict[str, List[str]]] = None,
+                                             usas_tags_token_attr: str = 'usas_tags'
+                                             ) -> RuleBasedTagger:
+    return RuleBasedTagger(nlp, lexicon_lookup, lexicon_lemma_lookup_data,
+                           usas_tags_token_attr)

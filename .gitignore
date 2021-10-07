@@ -3,6 +3,8 @@ __pycache__
 .DS_Store
 .coverage
 coverage.xml
+.mypy_cache
+.pytest_cache
 pymusas.egg-info
 dist
 resources/welsh/output

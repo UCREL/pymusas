@@ -37,7 +37,7 @@ def test_download_url_file() -> None:
                 expected_cached_file_path = file_utils.download_url_file(DOWNLOAD_URL)
                 assert cached_file_path == expected_cached_file_path
         
-        with cached_file_path.open('r') as cached_response:
+        with open(cached_file_path, 'r') as cached_response:
             expected_response_lines = EXPECTED_RESPONSE.split('\n')
             cached_lines = []
             for line in cached_response:

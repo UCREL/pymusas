@@ -143,7 +143,7 @@ def test_lexicon_collection_add_lexicon_entry() -> None:
     assert lexicon_collection['London'] == ['Z2']
     assert 2 == len(lexicon_collection)
 
-def test_lexicon_collection_to_dictionary():
+def test_lexicon_collection_to_dictionary() -> None:
     lexicon_collection = LexiconCollection()
     assert dict() == lexicon_collection.to_dictionary()
 
