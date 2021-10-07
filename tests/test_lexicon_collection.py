@@ -149,7 +149,6 @@ def test_lexicon_collection_to_dictionary() -> None:
 
     lexicon_collection.add_lexicon_entry(LEXICON_ENTRY)
     expected_dictionary = {'London|noun': ['Z2']}
-    assert type(expected_dictionary) != type(lexicon_collection)
     assert type(expected_dictionary) == type(lexicon_collection.to_dictionary())
     assert expected_dictionary == lexicon_collection.to_dictionary()
     assert isinstance(lexicon_collection.to_dictionary(), dict)
