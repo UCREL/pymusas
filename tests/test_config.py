@@ -5,6 +5,7 @@ import tempfile
 
 from pymusas import config
 
+
 def test_cache_home() -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         home_dir = str(Path.home())
