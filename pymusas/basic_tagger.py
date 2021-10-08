@@ -5,26 +5,27 @@ from typing import List, Tuple, Dict
 
 logger = logging.getLogger(__name__)
 
-def load_lexicon(lexicon_path: Path, has_headers: bool = True, 
+
+def load_lexicon(lexicon_path: Path, has_headers: bool = True,
                  include_pos: bool = True
                  ) -> Dict[str, List[str]]:
     '''
-    :param lexicon_path: File path to the lexicon data. This data should be in 
-                         TSV format with the following data in this column / field 
-                         order: 1. lemma, 2. Part Of Speech (POS) label / tag, 
+    :param lexicon_path: File path to the lexicon data. This data should be in
+                         TSV format with the following data in this column / field
+                         order: 1. lemma, 2. Part Of Speech (POS) label / tag,
                          3. USAS / Semantic label.
-    :param has_headers: This should be set to True if the lexicon file on it's 
-                        first line contains a header row e.g. the first line 
-                        contain no lexicon data. When this is set to True the 
+    :param has_headers: This should be set to True if the lexicon file on it's
+                        first line contains a header row e.g. the first line
+                        contain no lexicon data. When this is set to True the
                         first line of the lexicon file is ignored.
-    param include_pos: Whether or not the returned dictionary uses POS 
+    param include_pos: Whether or not the returned dictionary uses POS
                        within it's key.
-    :returns: A dictionary whereby the key is a tuple of 
-              (lemma, Part Of Speech label), the lexeme, and the value is a list of 
-              USAS / Semantic labels e.g. `{('Andrew', 'NN'): ['Z0', 'Z1']}`. The 
-              list of USAS labels represents all the likely USAS labels that the 
-              tuple could be, whereby the first label in the list (`Z0`) is the 
-              most likely USAS label, for more details on the USAS tagset see 
+    :returns: A dictionary whereby the key is a tuple of
+              (lemma, Part Of Speech label), the lexeme, and the value is a list of
+              USAS / Semantic labels e.g. `{('Andrew', 'NN'): ['Z0', 'Z1']}`. The
+              list of USAS labels represents all the likely USAS labels that the
+              tuple could be, whereby the first label in the list (`Z0`) is the
+              most likely USAS label, for more details on the USAS tagset see
               the USAS tagset documentation.
     '''
     lemma_pos_usas: Dict[str, List[str]] = {}
@@ -63,16 +64,17 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True,
     
     return lemma_pos_usas
 
+
 class RuleBasedTagger():
 
     def __init__(self, lexicon_path: Path, has_headers: bool) -> None:
         self.lexicon_lookup = load_lexicon(lexicon_path, has_headers)
-        self.lexicon_lemma_lookup = load_lexicon(lexicon_path, has_headers, 
+        self.lexicon_lemma_lookup = load_lexicon(lexicon_path, has_headers,
                                                  include_pos=False)
 
     def tag_data(self, tokens: List[Tuple[str, str, str]]) -> List[List[str]]:
         '''
-        :param tokens: Each tuple represents a token. The tuple must contain the 
+        :param tokens: Each tuple represents a token. The tuple must contain the
                        following lingustic information per token: 1. token text,
                        2. lemma, 3. Part Of Speech.
         '''
@@ -130,4 +132,3 @@ class RuleBasedTagger():
 
             sem_tags.append(['Z99'])
         return sem_tags
-            

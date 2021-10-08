@@ -2,17 +2,17 @@ from collections.abc import MutableMapping
 import csv
 from dataclasses import dataclass
 from os import PathLike
-from typing import Optional, Union
 from urllib.parse import urlparse
 import typing
-from typing import List, Dict, Generator, Optional, Set
+from typing import List, Dict, Generator, Optional, Set, Union
 
 from . import file_utils
+
 
 @dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=True)
 class LexiconEntry:
     '''
-    As frozen is true no values can be assigned after creation of an instance of 
+    As frozen is true no values can be assigned after creation of an instance of
     this class.
     '''
 
@@ -23,14 +23,14 @@ class LexiconEntry:
 
 class LexiconCollection(MutableMapping):
     '''
-    This is a dictionary object that will hold LexiconEntry data in a fast to 
-    access object. The keys of the dictionary are expected to be either just a 
+    This is a dictionary object that will hold LexiconEntry data in a fast to
+    access object. The keys of the dictionary are expected to be either just a
     lemma or a combination of lemma and pos in the following format:
     {lemma}|{pos}
 
-    The value to each key is the associated semantic tags, whereby the semantic 
-    tags are in rank order, the most likely tag is the first tag in the list. 
-    For example in the collection below, for the lemma London with a POS tag noun 
+    The value to each key is the associated semantic tags, whereby the semantic
+    tags are in rank order, the most likely tag is the first tag in the list.
+    For example in the collection below, for the lemma London with a POS tag noun
     the most likely semantic tag is Z3 and the least likely tag is A1:
 
     ```
@@ -80,16 +80,16 @@ class LexiconCollection(MutableMapping):
 
     def __repr__(self) -> str:
         '''
-        Machine readable string. When printed and run eval() over the string 
+        Machine readable string. When printed and run eval() over the string
         you should be able to recreate the object.
         '''
         return f'{self.__class__.__name__}(data={self.data})'
 
-    def add_lexicon_entry(self, value: LexiconEntry, 
+    def add_lexicon_entry(self, value: LexiconEntry,
                           include_pos: bool = True) -> None:
         '''
-        Will add the LexiconEntry to the collection, whereby the key is the 
-        combination of the lemma and pos and the value is the semantic tags. 
+        Will add the LexiconEntry to the collection, whereby the key is the
+        combination of the lemma and pos and the value is the semantic tags.
         
         The lemma and pos are combined as follows:
         {lemma}|{pos}
@@ -116,32 +116,32 @@ class LexiconCollection(MutableMapping):
     def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
                  ) -> Dict[str, List[str]]:
         '''
-        If `include_pos` is True and the TSV file does not contain a 
-        `pos` field heading then this will return a LexiconCollection that is 
-        identical to a collection that ran this method with `include_pos` equal 
+        If `include_pos` is True and the TSV file does not contain a
+        `pos` field heading then this will return a LexiconCollection that is
+        identical to a collection that ran this method with `include_pos` equal
         to False.
 
-        If the file path is a URL, the file will be downloaded and cached using 
+        If the file path is a URL, the file will be downloaded and cached using
         `file_utils.download_url_file` function.
 
-        Reference, the identification of a URL and the idea to do this has 
+        Reference, the identification of a URL and the idea to do this has
         come from the AllenNLP library:
         https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205
 
-        :param tsv_file_path: A path or URL to a TSV file that contains at least two 
-                              fields with the following headings: 1. `lemma`, 
-                              and 2. `semantic_tags`. With an optional field 
-                              `pos`. All other fields will be ignored. 
-                              Each row will be used to create a `LexiconEntry` 
-                              which will then be added to the returned 
+        :param tsv_file_path: A path or URL to a TSV file that contains at least two
+                              fields with the following headings: 1. `lemma`,
+                              and 2. `semantic_tags`. With an optional field
+                              `pos`. All other fields will be ignored.
+                              Each row will be used to create a `LexiconEntry`
+                              which will then be added to the returneds
                               `LexiconCollection`
-        :param include_pos: Whether to include the POS tag in the key when 
-                            adding the `LexiconEntry` into the returned 
-                            `LexiconCollection`. For more information on this 
+        :param include_pos: Whether to include the POS tag in the key when
+                            adding the `LexiconEntry` into the returned
+                            `LexiconCollection`. For more information on this
                             see the `add_lexicon_entry` method.
-        :returns: A dictionary object that can be used to create a 
+        :returns: A dictionary object that can be used to create a
                   `LexiconCollection`
-        :raises: ValueError if the minimum field headings, lemma and 
+        :raises: ValueError if the minimum field headings, lemma and
                  semantic_tags, do not exist in the given TSV file.
         '''
         minimum_field_names = {'lemma', 'semantic_tags'}
@@ -156,7 +156,6 @@ class LexiconCollection(MutableMapping):
         parsed = urlparse(tsv_file_path)
         if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
             tsv_file_path = file_utils.download_url_file(tsv_file_path)
-
 
         with open(tsv_file_path, 'r', newline='') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
@@ -183,7 +182,7 @@ class LexiconCollection(MutableMapping):
                         row_data[field_name] = row[field_name].split()
                     else:
                         row_data[field_name] = row[field_name]
-                collection_from_tsv.add_lexicon_entry(LexiconEntry(**row_data), 
+                collection_from_tsv.add_lexicon_entry(LexiconEntry(**row_data),
                                                       include_pos=include_pos)
         
         return collection_from_tsv.to_dictionary()

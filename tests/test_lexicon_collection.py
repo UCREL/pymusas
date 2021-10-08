@@ -8,7 +8,6 @@ from typing import List, Dict
 
 import pytest
 import responses
-from pymusas import lexicon_collection
 
 from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
 from pymusas import config
@@ -33,6 +32,7 @@ LEXICON_KEYS = ['London|noun', 'Laptop|noun', 'London']
 LEXICON_VALUES = [["Z2"], ["Z3", "Z0"], ["Z2"]]
 LEXICON_ITEMS = [(key, value) for key, value in zip(LEXICON_KEYS, LEXICON_VALUES)]
 
+
 def test_lexicon_entry() -> None:
         
     assert LEXICON_ENTRY.lemma == "London"
@@ -55,18 +55,21 @@ def test_lexicon_entry() -> None:
     assert str(NON_POS_ENTRY) == "LexiconEntry(lemma='London', semantic_tags=['Z2'], pos=None)"
     assert NON_POS_ENTRY == LexiconEntry('London', ['Z2'], None)
 
+
 def test_lexicon_collection_class_type() -> None:
     empty_collection = LexiconCollection()
     assert isinstance(empty_collection, LexiconCollection)
     assert isinstance(empty_collection, MutableMapping)
 
+
 def test_lexicon_collection_init() -> None:
 
     empty_collection = LexiconCollection()
-    assert not empty_collection.data 
+    assert not empty_collection.data
 
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert len(lexicon_collection.data) == 3
+
 
 def test_lexicon_collection_len() -> None:
 
@@ -76,10 +79,11 @@ def test_lexicon_collection_len() -> None:
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert len(lexicon_collection) == 3
 
+
 def test_lexicon_collection_set_get_del_item() -> None:
 
     empty_collection = LexiconCollection()
-    assert not empty_collection.data 
+    assert not empty_collection.data
 
     empty_collection['another'] = ['Z2']
     empty_collection['another'] = ['Z1']
@@ -90,25 +94,30 @@ def test_lexicon_collection_set_get_del_item() -> None:
     del empty_collection['another']
     assert len(empty_collection) == 1
 
+
 def test_lexicon_collection_iter() -> None:
 
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert LEXICON_KEYS == list(lexicon_collection)
+
 
 def test_lexicon_collection_keys() -> None:
 
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert LEXICON_KEYS == [key for key in lexicon_collection.keys()]
 
+
 def test_lexicon_collection_values() -> None:
 
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert LEXICON_VALUES == [value for value in lexicon_collection.values()]
 
+
 def test_lexicon_collection_items() -> None:
 
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert LEXICON_ITEMS == [item for item in lexicon_collection.items()]
+
 
 def test_lexicon_collection_repr() -> None:
 
@@ -122,6 +131,7 @@ def test_lexicon_collection_repr() -> None:
     assert lexicon_repr == lexicon_collection.__repr__()
     assert lexicon_collection == eval(lexicon_collection.__repr__())
 
+
 def test_lexicon_collection_str() -> None:
 
     empty_collection = LexiconCollection()
@@ -133,6 +143,7 @@ def test_lexicon_collection_str() -> None:
                     " (3 entires in the collection)")
     assert expected_str == str(lexicon_collection)
 
+
 def test_lexicon_collection_add_lexicon_entry() -> None:
 
     lexicon_collection = LexiconCollection()
@@ -143,13 +154,13 @@ def test_lexicon_collection_add_lexicon_entry() -> None:
     assert lexicon_collection['London'] == ['Z2']
     assert 2 == len(lexicon_collection)
 
+
 def test_lexicon_collection_to_dictionary() -> None:
     lexicon_collection = LexiconCollection()
     assert dict() == lexicon_collection.to_dictionary()
 
     lexicon_collection.add_lexicon_entry(LEXICON_ENTRY)
     expected_dictionary = {'London|noun': ['Z2']}
-    assert type(expected_dictionary) == type(lexicon_collection.to_dictionary())
     assert expected_dictionary == lexicon_collection.to_dictionary()
     assert isinstance(lexicon_collection.to_dictionary(), dict)
 
@@ -171,13 +182,13 @@ def test_lexicon_collection_from_tsv() -> None:
     assert minimum_lexicon_collection['Laptop'] == ['Z3', 'Z0']
     assert minimum_lexicon_collection != lexicon_collection
 
-    # Test that it raises a ValueError when the minimum fields names are not 
+    # Test that it raises a ValueError when the minimum fields names are not
     # present
     with pytest.raises(ValueError):
         LexiconCollection.from_tsv(ERROR_LEXICON_FILE_PATH)
     
     # Test `include_pos`
-    assert LexiconCollection.from_tsv(LEXICON_FILE_PATH, include_pos=False) ==  minimum_lexicon_collection
+    assert LexiconCollection.from_tsv(LEXICON_FILE_PATH, include_pos=False) == minimum_lexicon_collection
 
     # Test using a string rather than a Path like object
     lexicon_collection = LexiconCollection.from_tsv(str(LEXICON_FILE_PATH))
@@ -191,9 +202,8 @@ def test_lexicon_collection_from_tsv() -> None:
         with responses.RequestsMock() as rsps:
             expected_response = 'lemma\tsemantic_tags\nhello\tZ5 Z2\n'
             lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.usas'
-            rsps.add(responses.GET, lexicon_url, status=200, 
-                    body=expected_response, stream=True)
+            rsps.add(responses.GET, lexicon_url, status=200,
+                     body=expected_response, stream=True)
             url_lexicon_collection = LexiconCollection.from_tsv(lexicon_url)
             assert 1 == len(url_lexicon_collection)
             url_lexicon_collection['hello'] == ['Z5', 'Z2']
-

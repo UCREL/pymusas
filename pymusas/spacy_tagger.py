@@ -10,8 +10,8 @@ from .lexicon_collection import LexiconCollection
 
 class RuleBasedTagger:
 
-    def __init__(self, nlp: Language, 
-                 lexicon_lookup: Optional[Dict[str, List[str]]] = None, 
+    def __init__(self, nlp: Language,
+                 lexicon_lookup: Optional[Dict[str, List[str]]] = None,
                  lexicon_lemma_lookup: Optional[Dict[str, List[str]]] = None,
                  usas_tags_token_attr: str = 'usas_tags'
                  ) -> None:
@@ -25,10 +25,9 @@ class RuleBasedTagger:
 
         self.usas_tags_token_attr = usas_tags_token_attr
         Token.set_extension(self.usas_tags_token_attr, default=None)
-        
 
     @staticmethod
-    def tag_token(text: str, lemma: str, pos: str, 
+    def tag_token(text: str, lemma: str, pos: str,
                   lexicon_lookup: Dict[str, List[str]],
                   lemma_lexicon_lookup: Dict[str, List[str]]) -> List[str]:
         if pos == 'punc':
@@ -74,13 +73,13 @@ class RuleBasedTagger:
             text = token.text
             lemma = token.lemma_
             pos = token.pos_
-            semantic_tags = self.tag_token(text, lemma, pos, 
-                                           self.lexicon_lookup, 
+            semantic_tags = self.tag_token(text, lemma, pos,
+                                           self.lexicon_lookup,
                                            self.lexicon_lemma_lookup)
             setattr(token._, self.usas_tags_token_attr, semantic_tags)
         return doc
 
-    def initialize(self, get_examples: Optional[Callable[[], Iterable[Example]]] = None, 
+    def initialize(self, get_examples: Optional[Callable[[], Iterable[Example]]] = None,
                    nlp: Optional[Language] = None,
                    lexicon_lookup_data: Optional[Dict[str, List[str]]] = None,
                    lexicon_lemma_lookup_data: Optional[Dict[str, List[str]]] = None,
@@ -113,8 +112,9 @@ class RuleBasedTagger:
                               f'lexicons:\n{supported_languages}')
             raise ValueError(error_msg)
 
+
 @Language.factory("usas_tagger")
-def create_spacy_rule_based_tagger_component(nlp: Language, name: str, 
+def create_spacy_rule_based_tagger_component(nlp: Language, name: str,
                                              lexicon_lookup: Optional[Dict[str, List[str]]] = None,
                                              lexicon_lemma_lookup_data: Optional[Dict[str, List[str]]] = None,
                                              usas_tags_token_attr: str = 'usas_tags'

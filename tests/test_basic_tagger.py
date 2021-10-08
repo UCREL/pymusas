@@ -6,6 +6,7 @@ from pymusas.basic_tagger import RuleBasedTagger
 
 DATA_DIR = Path(__file__, '..', 'data').resolve()
 
+
 def test_tag_data() -> None:
     lexicon_path = Path(DATA_DIR, 'lexicon.tsv')
     test_data_path = Path(DATA_DIR, 'rule_based_input_output.json')
@@ -21,10 +22,9 @@ def test_tag_data() -> None:
 
     tagger = RuleBasedTagger(lexicon_path, True)
     output_usas_tags = tagger.tag_data(test_data)
-    
+
     assert len(expected_usas_tags) == len(output_usas_tags)
-    for expected, output, context in zip(expected_usas_tags, 
-                                         output_usas_tags, 
+    for expected, output, context in zip(expected_usas_tags,
+                                         output_usas_tags,
                                          test_data):
         assert expected == output, context
-

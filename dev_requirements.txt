@@ -3,3 +3,4 @@ pytest-cov
 responses
 mypy==0.910
 types-requests
+flake8>=3.8.0,<3.10.0
