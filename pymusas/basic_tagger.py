@@ -43,7 +43,7 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True,
             number_tags += 1
 
             lemma = row['lemma']
-            lemma_pos = f"{lemma}_{row['pos_label']}"
+            lemma_pos = f"{lemma}|{row['pos_label']}"
 
             if not include_pos:
                 lemma_pos = lemma
@@ -65,6 +65,48 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True,
     return lemma_pos_usas
 
 
+def tag_token(text: str, lemma: str, pos: str,
+              lexicon_lookup: Dict[str, List[str]],
+              lemma_lexicon_lookup: Dict[str, List[str]]) -> List[str]:
+    if pos == 'punc':
+        return ["PUNCT"]
+
+    text_pos = f"{text}|{pos}"
+    if text_pos in lexicon_lookup:
+        return lexicon_lookup[text_pos]
+
+    lemma_pos = f"{lemma}|{pos}"
+    if lemma_pos in lexicon_lookup:
+        return lexicon_lookup[lemma_pos]
+
+    text_lower = text.lower()
+    text_pos_lower = f"{text_lower}|{pos}"
+    if text_pos_lower in lexicon_lookup:
+        return lexicon_lookup[text_pos_lower]
+
+    lemma_lower = lemma.lower()
+    lemma_pos_lower = f"{lemma_lower}|{pos}"
+    if lemma_pos_lower in lexicon_lookup:
+        return lexicon_lookup[lemma_pos_lower]
+
+    if pos == 'num':
+        return ['N1']
+
+    if text in lemma_lexicon_lookup:
+        return lemma_lexicon_lookup[text]
+
+    if lemma in lemma_lexicon_lookup:
+        return lemma_lexicon_lookup[lemma]
+
+    if text_lower in lemma_lexicon_lookup:
+        return lemma_lexicon_lookup[text_lower]
+
+    if lemma_lower in lemma_lexicon_lookup:
+        return lemma_lexicon_lookup[lemma_lower]
+
+    return ['Z99']
+
+
 class RuleBasedTagger():
 
     def __init__(self, lexicon_path: Path, has_headers: bool) -> None:
@@ -84,51 +126,8 @@ class RuleBasedTagger():
             lemma = token[1]
             pos = token[2]
 
-            if pos == 'punc':
-                sem_tags.append(["PUNCT"])
-                continue
-
-            token_pos = f"{token_text}_{pos}"
-            if token_pos in self.lexicon_lookup:
-                sem_tags.append(self.lexicon_lookup[token_pos])
-                continue
-
-            lemma_pos = f"{lemma}_{pos}"
-            if lemma_pos in self.lexicon_lookup:
-                sem_tags.append(self.lexicon_lookup[lemma_pos])
-                continue
-
-            token_lower = token_text.lower()
-            token_pos_lower = f"{token_lower}_{pos}"
-            if token_pos_lower in self.lexicon_lookup:
-                sem_tags.append(self.lexicon_lookup[token_pos_lower])
-                continue
-
-            lemma_lower = lemma.lower()
-            lemma_pos_lower = f"{lemma_lower}_{pos}"
-            if lemma_pos_lower in self.lexicon_lookup:
-                sem_tags.append(self.lexicon_lookup[lemma_pos_lower])
-                continue
-
-            if pos == 'num':
-                sem_tags.append(['N1'])
-                continue
-
-            if token_text in self.lexicon_lemma_lookup:
-                sem_tags.append(self.lexicon_lemma_lookup[token_text])
-                continue
-
-            if lemma in self.lexicon_lemma_lookup:
-                sem_tags.append(self.lexicon_lemma_lookup[lemma])
-                continue
-
-            if token_lower in self.lexicon_lemma_lookup:
-                sem_tags.append(self.lexicon_lemma_lookup[token_lower])
-                continue
-
-            if lemma_lower in self.lexicon_lemma_lookup:
-                sem_tags.append(self.lexicon_lemma_lookup[lemma_lower])
-                continue
-
-            sem_tags.append(['Z99'])
+            token_sem_tags = tag_token(token_text, lemma, pos,
+                                       self.lexicon_lookup,
+                                       self.lexicon_lemma_lookup)
+            sem_tags.append(token_sem_tags)
         return sem_tags

@@ -6,6 +6,7 @@ from spacy.tokens import Token, Doc
 
 from .config import LANG_LEXICON_RESOUCRE_MAPPER
 from .lexicon_collection import LexiconCollection
+from .basic_tagger import tag_token
 
 
 class RuleBasedTagger:
@@ -15,7 +16,7 @@ class RuleBasedTagger:
                  lexicon_lemma_lookup: Optional[Dict[str, List[str]]] = None,
                  usas_tags_token_attr: str = 'usas_tags'
                  ) -> None:
-        print(nlp.pipe_names)
+
         self.lexicon_lookup: Dict[str, List[str]] = dict()
         self.lexicon_lemma_lookup: Dict[str, List[str]] = dict()
         if lexicon_lookup is not None:
@@ -26,56 +27,14 @@ class RuleBasedTagger:
         self.usas_tags_token_attr = usas_tags_token_attr
         Token.set_extension(self.usas_tags_token_attr, default=None)
 
-    @staticmethod
-    def tag_token(text: str, lemma: str, pos: str,
-                  lexicon_lookup: Dict[str, List[str]],
-                  lemma_lexicon_lookup: Dict[str, List[str]]) -> List[str]:
-        if pos == 'punc':
-            return ["PUNCT"]
-
-        text_pos = f"{text}|{pos}"
-        if text_pos in lexicon_lookup:
-            return lexicon_lookup[text_pos]
-
-        lemma_pos = f"{lemma}|{pos}"
-        if lemma_pos in lexicon_lookup:
-            return lexicon_lookup[lemma_pos]
-
-        text_lower = text.lower()
-        text_pos_lower = f"{text_lower}|{pos}"
-        if text_pos_lower in lexicon_lookup:
-            return lexicon_lookup[text_pos_lower]
-
-        lemma_lower = lemma.lower()
-        lemma_pos_lower = f"{lemma_lower}|{pos}"
-        if lemma_pos_lower in lexicon_lookup:
-            return lexicon_lookup[lemma_pos_lower]
-
-        if pos == 'num':
-            return ['N1']
-
-        if text in lemma_lexicon_lookup:
-            return lemma_lexicon_lookup[text]
-
-        if lemma in lemma_lexicon_lookup:
-            return lemma_lexicon_lookup[lemma]
-
-        if text_lower in lemma_lexicon_lookup:
-            return lemma_lexicon_lookup[text_lower]
-
-        if lemma_lower in lemma_lexicon_lookup:
-            return lemma_lexicon_lookup[lemma_lower]
-
-        return ['Z99']
-
     def __call__(self, doc: Doc) -> Doc:
         for token in doc:
             text = token.text
             lemma = token.lemma_
             pos = token.pos_
-            semantic_tags = self.tag_token(text, lemma, pos,
-                                           self.lexicon_lookup,
-                                           self.lexicon_lemma_lookup)
+            semantic_tags = tag_token(text, lemma, pos,
+                                      self.lexicon_lookup,
+                                      self.lexicon_lemma_lookup)
             setattr(token._, self.usas_tags_token_attr, semantic_tags)
         return doc
 
