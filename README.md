@@ -19,12 +19,6 @@ PYthon Multilingual Ucrel Semantic Analysis System
 pip install -r requirements.txt
 ```
 
-To test:
-
-``` bash
-python -m pytest --cov=pymusas --cov-report term-missing
-```
-
 ### Development
 
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
@@ -37,6 +31,21 @@ For a `zsh` shell, which is the default shell for the new Macs you will need to 
 
 ```zsh
 pip install -e .\[tests\]
+```
+
+#### Running linters and tests
+
+This code base uses flake8 and mypy to ensure that the format of the code is consistent and contain type hints. The flake8 settings can be found in [./setup.cfg](./setup.cfg) and the mypy settings within [./pyproject.toml](./pyproject.toml). To run these linters:
+
+``` bash
+flake8
+mypy
+```
+
+To run the tests with code coverage:
+
+``` bash
+python -m pytest --cov=pymusas --cov-report term-missing
 ```
 
 ## Benchmarking
