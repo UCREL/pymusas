@@ -4,6 +4,7 @@ from typing import List, Tuple
 
 from pymusas.basic_tagger import RuleBasedTagger
 
+
 DATA_DIR = Path(__file__, '..', 'data').resolve()
 
 
