@@ -2,6 +2,7 @@ from pathlib import Path
 
 from .basic_tagger import RuleBasedTagger
 
+
 resource_dir = Path(__file__, '..', 'resources', 'welsh').resolve()
 gold_path = Path(resource_dir, 'enhanced_gold_standard_data.txt')
 lexicon_path = Path(resource_dir, 'semantic_lexicon_cy.usas.txt')

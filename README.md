@@ -38,6 +38,7 @@ pip install -e .\[tests\]
 This code base uses flake8 and mypy to ensure that the format of the code is consistent and contain type hints. The flake8 settings can be found in [./setup.cfg](./setup.cfg) and the mypy settings within [./pyproject.toml](./pyproject.toml). To run these linters:
 
 ``` bash
+isort pymusas tests
 flake8
 mypy
 ```

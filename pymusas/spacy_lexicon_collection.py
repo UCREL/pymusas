@@ -1,5 +1,5 @@
 from os import PathLike
-from typing import Union, List, Dict
+from typing import Dict, List, Union
 
 import spacy
 

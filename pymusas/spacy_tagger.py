@@ -1,12 +1,12 @@
-from typing import Optional, List, Iterable, Callable, Dict
+from typing import Callable, Dict, Iterable, List, Optional
 
-from spacy.training import Example
 from spacy.language import Language
-from spacy.tokens import Token, Doc
+from spacy.tokens import Doc, Token
+from spacy.training import Example
 
+from .basic_tagger import tag_token
 from .config import LANG_LEXICON_RESOUCRE_MAPPER
 from .lexicon_collection import LexiconCollection
-from .basic_tagger import tag_token
 
 
 class RuleBasedTagger:

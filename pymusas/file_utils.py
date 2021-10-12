@@ -3,8 +3,8 @@ from pathlib import Path
 
 import requests
 from requests.adapters import HTTPAdapter
-from urllib3.util.retry import Retry
 from tqdm import tqdm
+from urllib3.util.retry import Retry
 
 from . import config
 

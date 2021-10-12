@@ -1,16 +1,17 @@
 from collections.abc import MutableMapping
 from dataclasses import FrozenInstanceError
+import importlib
+import os
 from pathlib import Path
 import tempfile
-import os
-import importlib
-from typing import List, Dict
+from typing import Dict, List
 
 import pytest
 import responses
 
-from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
 from pymusas import config
+from pymusas.lexicon_collection import LexiconCollection, LexiconEntry
+
 
 DATA_DIR = Path(__file__, '..', 'data').resolve()
 LEXICON_FILE_PATH = Path(DATA_DIR, 'lexicon.tsv')

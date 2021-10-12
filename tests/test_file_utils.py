@@ -2,12 +2,12 @@ import importlib
 import os
 import tempfile
 
-import responses
-import requests
 import pytest
+import requests
+import responses
 
-from pymusas import config
-from pymusas import file_utils
+from pymusas import config, file_utils
+
 
 DOWNLOAD_URL = 'https://ucrel-web.lancs.ac.uk/usas/semtags.txt'
 EXPECTED_RESPONSE = 'Hello World\nPymusas'

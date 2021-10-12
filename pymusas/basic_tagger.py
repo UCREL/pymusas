@@ -1,7 +1,8 @@
 import csv
 import logging
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import Dict, List, Tuple
+
 
 logger = logging.getLogger(__name__)
 

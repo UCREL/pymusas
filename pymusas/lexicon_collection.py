@@ -2,9 +2,9 @@ from collections.abc import MutableMapping
 import csv
 from dataclasses import dataclass
 from os import PathLike
-from urllib.parse import urlparse
 import typing
-from typing import List, Dict, Generator, Optional, Set, Union
+from typing import Dict, Generator, List, Optional, Set, Union
+from urllib.parse import urlparse
 
 from . import file_utils
 
