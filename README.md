@@ -177,4 +177,4 @@ By default all webpages are hosted locally at: [http://localhost:3000/pymusas/](
 * To run the docs locally in development mode: `make develop-docs`
 * To build the static documentation files and serve them locally: `make serve-built-docs`
 
-To automatically generate the API documentation: `pydoc-markdown`
+To automatically generate the API documentation: `make create-api-docs` (a lot of the code that went into auto generating the documentation came from the AllenNLP [script](https://github.com/allenai/allennlp/blob/main/scripts/py2md.py) and [makefile](https://github.com/allenai/allennlp/blob/main/Makefile))

@@ -69,6 +69,11 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True,
 def tag_token(text: str, lemma: str, pos: str,
               lexicon_lookup: Dict[str, List[str]],
               lemma_lexicon_lookup: Dict[str, List[str]]) -> List[str]:
+    '''
+    # Parameters
+
+    text : :class:`RuleBasedTagger`
+    '''
     if pos == 'punc':
         return ["PUNCT"]
 
@@ -109,6 +114,21 @@ def tag_token(text: str, lemma: str, pos: str,
 
 
 class RuleBasedTagger():
+    '''
+    # Parameters
+
+    lexicon_path : `Path`
+        File path to the USAS lexicon.
+
+    has_headers : `bool`
+        Whether the USAS lexicon contains any header information.
+
+    # Attributes
+
+    lexicon_lookup : `Dict[str, List[str]]`
+
+    lexicon_lemma_lookup : `Dict[str, List[str]]`
+    '''
 
     def __init__(self, lexicon_path: Path, has_headers: bool) -> None:
         self.lexicon_lookup = load_lexicon(lexicon_path, has_headers)
@@ -117,9 +137,18 @@ class RuleBasedTagger():
 
     def tag_data(self, tokens: List[Tuple[str, str, str]]) -> List[List[str]]:
         '''
-        :param tokens: Each tuple represents a token. The tuple must contain the
-                       following lingustic information per token: 1. token text,
-                       2. lemma, 3. Part Of Speech.
+        # Parameters
+
+        tokens : `List[Tuple[str, str, str]]`
+            Each tuple represents a token. The tuple must contain the
+            following lingustic information per token;
+            1. token text,
+            2. lemma,
+            3. Part Of Speech.
+        
+        # Returns
+
+        `List[List[str]]`
         '''
         sem_tags: List[List[str]] = []
         for token in tokens:
