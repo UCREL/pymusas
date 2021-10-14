@@ -4,45 +4,46 @@ Reference:
 https://github.com/allenai/allennlp/blob/main/scripts/py2md.py
 '''
 import argparse
-import os
 import logging
-from typing import Optional, Tuple, List, Dict
-from pathlib import Path
 from multiprocessing import Pool, cpu_count
-import sys
+import os
+from pathlib import Path
 import re
+import sys
+from typing import Dict, List, Optional, Tuple
 
 import docspec
 from pydoc_markdown import PydocMarkdown
 from pydoc_markdown.contrib.loaders.python import PythonLoader
-from pydoc_markdown.contrib.renderers.docusaurus import DocusaurusRenderer, CustomizedMarkdownRenderer
+from pydoc_markdown.contrib.processors.crossref import CrossrefProcessor
 from pydoc_markdown.contrib.processors.filter import FilterProcessor
 from pydoc_markdown.contrib.processors.smart import SmartProcessor
-from pydoc_markdown.contrib.processors.crossref import CrossrefProcessor
+from pydoc_markdown.contrib.renderers.docusaurus import CustomizedMarkdownRenderer, DocusaurusRenderer
 from pydoc_markdown.interfaces import Resolver
+
 
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+
+CROSS_REF_RE = re.compile("(:(class|func|mod):`~?([a-zA-Z0-9_.]+)`)")
+BASE_MODULE = 'pymusas'
+API_BASE_URL = '/pymusas/docs/API/'
 
 
 class DocstringError(Exception):
     pass
 
 
-class CustomResolver(Resolver):
-
-    def resolve_ref(self, scope: docspec.ApiObject, ref: str) -> Optional[str]:
-        print(f'scope: {scope.docstring}')
-        print(f'ref: {ref}')
-        return None
-
-
 class CustomCrossrefProcess(CrossrefProcessor):
 
     def process(self, modules: List[docspec.Module],
                 resolver: Optional[Resolver]) -> None:
-        resolver = CustomResolver()
-        super().process(modules, resolver)
+        if len(modules) > 0:
+            reverse = docspec.ReverseMap(modules)
+            unresolved: Dict[str, List[str]] = {}
+            resolver = None
+            docspec.visit(modules, lambda x: self._preprocess_refs(x, resolver, reverse, unresolved)) # type: ignore  # noqa
 
     def _preprocess_refs(self, node: docspec.ApiObject, resolver: Resolver,
                          reverse: docspec.ReverseMap,
@@ -51,33 +52,23 @@ class CustomCrossrefProcess(CrossrefProcessor):
         if not node.docstring:
             return None
 
-        def handler(match: re.Match) -> str:
-            ref = match.group('ref')
-            parens = match.group('parens') or ''
-            trailing = (match.group('trailing') or '').lstrip('#')
-            # Remove the dot from the ref if its trailing (it is probably just
-            # the end of the sentence).
-            has_trailing_dot = False
-            if trailing and trailing.endswith('.'):
-                trailing = trailing[:-1]
-                has_trailing_dot = True
-            elif not parens and ref.endswith('.'):
-                ref = ref[:-1]
-                has_trailing_dot = True
-            href = resolver.resolve_ref(node, ref)
-            if href:
-                result = '[`{}`]({})'.format(ref + parens + trailing, href)
+        doc_string = str(node.docstring)
+        for match, ty, name in CROSS_REF_RE.findall(doc_string):
+            if name.startswith(f"{BASE_MODULE}."):
+                path = name.split(".")
+                if ty == "mod":
+                    href = API_BASE_URL + "/".join(path[1:])
+                else:
+                    href = API_BASE_URL + "/".join(path[1:-1]) + "/#" + path[-1].lower()
+                cross_ref = f"[`{path[-1]}`]({href})"
+            elif "." not in name:
+                cross_ref = f"[`{name}`](#{name.lower()})"
             else:
-                uid = '.'.join(x.name for x in reverse.path(node))
-                unresolved.setdefault(uid, []).append(ref)
-                result = '`{}`'.format(ref + parens + trailing)
-            # Add back the dot.
-            if has_trailing_dot:
-                result += '.'
-            return result
-        print(type(node.docstring))
-        #docspec.Docstring(content="hello")
-        #node.docstring = Docstring(re.sub(r'\B#(?P<ref>[\w\d\._]+)(?P<parens>\(\))?(?P<trailing>#[\w\d\._]+)?', handler, node.docstring))
+                cross_ref = f"`{name}`"
+            doc_string = doc_string.replace(match, cross_ref)
+
+        node.docstring = docspec.Docstring(content=doc_string, location=None)
+
 
 def py2md(module: str, out: Optional[str] = None) -> bool:
     """

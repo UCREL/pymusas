@@ -42,7 +42,7 @@ jobs:
           pip install --upgrade --upgrade-strategy eager -r dev_requirements.txt
 
       - name: isort
-        run: isort --check-only pymusas tests
+        run: isort --check-only pymusas tests scripts
       
       - name: flake8
         run: flake8
