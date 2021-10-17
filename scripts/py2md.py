@@ -37,8 +37,8 @@ BASE_SOURCE_LINK = "https://github.com/allenai/allennlp/blob/main/allennlp/"
 
 class AllenNlpRenderer(MarkdownRenderer):
     '''
-    This is a custom version of the 
-    [AllenNLPRenderer](https://github.com/allenai/allennlp/blob/main/scripts/py2md.py#L317), 
+    This is a custom version of the
+    [AllenNLPRenderer](https://github.com/allenai/allennlp/blob/main/scripts/py2md.py#L317),
     vast majority of this code has come from the original AllenNLPRenderer.
     '''
     
