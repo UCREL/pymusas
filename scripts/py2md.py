@@ -32,7 +32,7 @@ logger = logging.getLogger(__name__)
 CROSS_REF_RE = re.compile("(:(class|func|mod):`~?([a-zA-Z0-9_.]+)`)")
 BASE_MODULE = 'pymusas'
 API_BASE_URL = '/pymusas/docs/API/'
-BASE_SOURCE_LINK = "https://github.com/allenai/allennlp/blob/main/allennlp/"
+BASE_SOURCE_LINK = "https://github.com/UCREL/pymusas/blob/main/pymusas/"
 
 
 class AllenNlpRenderer(MarkdownRenderer):
@@ -203,9 +203,9 @@ class AllenNlpRenderer(MarkdownRenderer):
         "/".join(submods[1:])
         source_link = BASE_SOURCE_LINK + "/".join(submods[1:]) + ".py"
         fp.write(
-            "<div>\n"
-            ' <p className="alignleft">' + "".join(breadcrumbs) + "</p>\n"
-            f' <p className="alignright"><a className="sourcelink" href="{source_link}">[SOURCE]</a></p>\n'
+            '<div className="source-div">\n'
+            ' <p>' + "".join(breadcrumbs) + "</p>\n"
+            f' <p><a className="sourcelink" href="{source_link}">[SOURCE]</a></p>\n'
             "</div>\n"
             '<div></div>\n\n---\n\n'
         )

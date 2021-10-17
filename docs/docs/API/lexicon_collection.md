@@ -1,6 +1,6 @@
-<div>
- <p className="alignleft"><i>pymusas</i><strong>.lexicon_collection</strong></p>
- <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/lexicon_collection.py">[SOURCE]</a></p>
+<div className="source-div">
+ <p><i>pymusas</i><strong>.lexicon_collection</strong></p>
+ <p><a className="sourcelink" href="https://github.com/UCREL/pymusas/blob/main/pymusas/lexicon_collection.py">[SOURCE]</a></p>
 </div>
 <div></div>
 
@@ -11,7 +11,7 @@
 ## LexiconEntry
 
 ```python
-@dataclass(init=True, repr=True, eq=True, order=False, 
+@dataclass(init=True, repr=True, eq=True, order=False,
            unsafe_hash=False, frozen=True)
 class LexiconEntry
 ```

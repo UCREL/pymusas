@@ -1,6 +1,6 @@
-<div>
- <p className="alignleft"><i>pymusas</i><strong>.file_utils</strong></p>
- <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/file_utils.py">[SOURCE]</a></p>
+<div className="source-div">
+ <p><i>pymusas</i><strong>.file_utils</strong></p>
+ <p><a className="sourcelink" href="https://github.com/UCREL/pymusas/blob/main/pymusas/file_utils.py">[SOURCE]</a></p>
 </div>
 <div></div>
 

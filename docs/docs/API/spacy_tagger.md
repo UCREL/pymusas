@@ -1,6 +1,6 @@
-<div>
- <p className="alignleft"><i>pymusas</i><strong>.spacy_tagger</strong></p>
- <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/spacy_tagger.py">[SOURCE]</a></p>
+<div className="source-div">
+ <p><i>pymusas</i><strong>.spacy_tagger</strong></p>
+ <p><a className="sourcelink" href="https://github.com/UCREL/pymusas/blob/main/pymusas/spacy_tagger.py">[SOURCE]</a></p>
 </div>
 <div></div>
 

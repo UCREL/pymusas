@@ -1,6 +1,6 @@
-<div>
- <p className="alignleft"><i>pymusas</i><strong>.basic_tagger</strong></p>
- <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/basic_tagger.py">[SOURCE]</a></p>
+<div className="source-div">
+ <p><i>pymusas</i><strong>.basic_tagger</strong></p>
+ <p><a className="sourcelink" href="https://github.com/UCREL/pymusas/blob/main/pymusas/basic_tagger.py">[SOURCE]</a></p>
 </div>
 <div></div>
 
@@ -49,17 +49,10 @@ def tag_token(
 ) -> List[str]
 ```
 
-A description
-
 __Parameters__
 
 
 - __text __: [`RuleBasedTagger`](#rulebasedtagger)
-
-__Returns__
-
-
-`List[str]`
 
 <a id="pymusas.basic_tagger.RuleBasedTagger"></a>
 
@@ -100,8 +93,6 @@ class RuleBasedTagger:
  | ) -> List[List[str]]
 ```
 
-Just a bit of a description
-
 __Parameters__
 
 
@@ -116,24 +107,4 @@ __Returns__
 
 
 `List[List[str]]`
-
-<a id="pymusas.basic_tagger.Anything"></a>
-
-## Anything
-
-```python
-class Anything
-```
-
-<a id="pymusas.basic_tagger.Anything.ArrayField"></a>
-
-#### ArrayField
-
-```python
-class Anything:
- | ...
- | ArrayField: Type[DocusaurusRenderer] = DocusaurusRenderer
-```
-
-For backwards compatibility, we keep the name `ArrayField`.
 
