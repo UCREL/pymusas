@@ -9,7 +9,8 @@ from urllib.parse import urlparse
 from . import file_utils
 
 
-@dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=True)
+@dataclass(init=True, repr=True, eq=True, order=False,
+           unsafe_hash=False, frozen=True)
 class LexiconEntry:
     '''
     As frozen is true no values can be assigned after creation of an instance of

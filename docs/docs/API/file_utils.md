@@ -1,9 +1,14 @@
----
-sidebar_label: file_utils
-title: file_utils
+<div>
+ <p className="alignleft"><i>pymusas</i><strong>.file_utils</strong></p>
+ <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/file_utils.py">[SOURCE]</a></p>
+</div>
+<div></div>
+
 ---
 
-#### download\_url\_file
+<a id="pymusas.file_utils.download_url_file"></a>
+
+### download\_url\_file
 
 ```python
 def download_url_file(url: str) -> str

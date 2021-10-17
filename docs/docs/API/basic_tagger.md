@@ -1,12 +1,21 @@
----
-sidebar_label: basic_tagger
-title: basic_tagger
+<div>
+ <p className="alignleft"><i>pymusas</i><strong>.basic_tagger</strong></p>
+ <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/basic_tagger.py">[SOURCE]</a></p>
+</div>
+<div></div>
+
 ---
 
-#### load\_lexicon
+<a id="pymusas.basic_tagger.load_lexicon"></a>
+
+### load\_lexicon
 
 ```python
-def load_lexicon(lexicon_path: Path, has_headers: bool = True, include_pos: bool = True) -> Dict[str, List[str]]
+def load_lexicon(
+    lexicon_path: Path,
+    has_headers: bool = True,
+    include_pos: bool = True
+) -> Dict[str, List[str]]
 ```
 
 **Arguments**:
@@ -18,29 +27,113 @@ def load_lexicon(lexicon_path: Path, has_headers: bool = True, include_pos: bool
                     contain no lexicon data. When this is set to True the
                     first line of the lexicon file is ignored.
 param include_pos: Whether or not the returned dictionary uses POS
-                   within it&#x27;s key.
+                   within it's key.
 - `lexicon_path`: File path to the lexicon data. This data should be in
-- `has_headers`: This should be set to True if the lexicon file on it&#x27;s
+- `has_headers`: This should be set to True if the lexicon file on it's
 
 **Returns**:
 
 A dictionary whereby the key is a tuple of
 
-## RuleBasedTagger Objects
+<a id="pymusas.basic_tagger.tag_token"></a>
+
+### tag\_token
 
 ```python
-class RuleBasedTagger()
+def tag_token(
+    text: str,
+    lemma: str,
+    pos: str,
+    lexicon_lookup: Dict[str, List[str]],
+    lemma_lexicon_lookup: Dict[str, List[str]]
+) -> List[str]
 ```
 
-#### tag\_data
+A description
+
+__Parameters__
+
+
+- __text __: [`RuleBasedTagger`](#rulebasedtagger)
+
+__Returns__
+
+
+`List[str]`
+
+<a id="pymusas.basic_tagger.RuleBasedTagger"></a>
+
+## RuleBasedTagger
 
 ```python
-def tag_data(tokens: List[Tuple[str, str, str]]) -> List[List[str]]
+class RuleBasedTagger:
+ | ...
+ | def __init__(lexicon_path: Path, has_headers: bool) -> None
 ```
 
-**Arguments**:
+__Parameters__
 
-               following lingustic information per token: 1. token text,
-               2. lemma, 3. Part Of Speech.
-- `tokens`: Each tuple represents a token. The tuple must contain the
+
+- __lexicon_path __: `Path`
+    File path to the USAS lexicon.
+
+- __has_headers __: `bool`
+    Whether the USAS lexicon contains any header information.
+
+__Attributes__
+
+
+- `lexicon_lookup `: `Dict[str, List[str]]`
+
+- `lexicon_lemma_lookup `: `Dict[str, List[str]]`
+
+<a id="pymusas.basic_tagger.RuleBasedTagger.tag_data"></a>
+
+### tag\_data
+
+```python
+class RuleBasedTagger:
+ | ...
+ | def tag_data(
+ |     self,
+ |     tokens: List[Tuple[str, str, str]]
+ | ) -> List[List[str]]
+```
+
+Just a bit of a description
+
+__Parameters__
+
+
+- __tokens __: `List[Tuple[str, str, str]]`
+    Each tuple represents a token. The tuple must contain the
+    following lingustic information per token;
+    1. token text,
+    2. lemma,
+    3. Part Of Speech.
+
+__Returns__
+
+
+`List[List[str]]`
+
+<a id="pymusas.basic_tagger.Anything"></a>
+
+## Anything
+
+```python
+class Anything
+```
+
+<a id="pymusas.basic_tagger.Anything.ArrayField"></a>
+
+#### ArrayField
+
+```python
+class Anything:
+ | ...
+ | ArrayField: Type[DocusaurusRenderer] = DocusaurusRenderer
+```
+
+For backwards compatibility, we keep the name `ArrayField`.
 

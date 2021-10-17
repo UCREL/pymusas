@@ -1,9 +1,0 @@
-{
-  "items": [
-    "API/basic_tagger",
-    "API/file_utils",
-    "API/lexicon_collection"
-  ],
-  "label": "Reference",
-  "type": "category"
-}

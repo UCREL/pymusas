@@ -1,22 +1,35 @@
----
-sidebar_label: lexicon_collection
-title: lexicon_collection
+<div>
+ <p className="alignleft"><i>pymusas</i><strong>.lexicon_collection</strong></p>
+ <p className="alignright"><a className="sourcelink" href="https://github.com/allenai/allennlp/blob/main/allennlp/lexicon_collection.py">[SOURCE]</a></p>
+</div>
+<div></div>
+
 ---
 
-## LexiconEntry Objects
+<a id="pymusas.lexicon_collection.LexiconEntry"></a>
+
+## LexiconEntry
 
 ```python
-@dataclass(init=True, repr=True, eq=True, order=False, unsafe_hash=False, frozen=True)
-class LexiconEntry()
+@dataclass(init=True, repr=True, eq=True, order=False, 
+           unsafe_hash=False, frozen=True)
+class LexiconEntry
 ```
 
 As frozen is true no values can be assigned after creation of an instance of
 this class.
 
-## LexiconCollection Objects
+<a id="pymusas.lexicon_collection.LexiconCollection"></a>
+
+## LexiconCollection
 
 ```python
-class LexiconCollection(MutableMapping)
+class LexiconCollection(MutableMapping):
+ | ...
+ | def __init__(
+ |     self,
+ |     data: Optional[Dict[str, List[str]]] = None
+ | ) -> None
 ```
 
 This is a dictionary object that will hold LexiconEntry data in a fast to
@@ -31,34 +44,50 @@ the most likely semantic tag is Z3 and the least likely tag is A1:
 
 ```
 from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
-lexicon_entry = LexiconEntry(&#x27;London&#x27;, [&#x27;Z3&#x27;, &#x27;Z1&#x27;, &#x27;A1&#x27;], &#x27;noun&#x27;)
+lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
 collection = LexiconCollection()
 collection.add_lexicon_entry(lexicon_entry)
-most_likely_tag = collection[&#x27;London|noun&#x27;][0]
-least_likely_tag = collection[&#x27;London|noun&#x27;][-1]
+most_likely_tag = collection['London|noun'][0]
+least_likely_tag = collection['London|noun'][-1]
 ```
 
-#### \_\_str\_\_
+<a id="pymusas.lexicon_collection.LexiconCollection.__str__"></a>
+
+### \_\_str\_\_
 
 ```python
-def __str__() -> str
+class LexiconCollection(MutableMapping):
+ | ...
+ | def __str__() -> str
 ```
 
 Human readable string.
 
-#### \_\_repr\_\_
+<a id="pymusas.lexicon_collection.LexiconCollection.__repr__"></a>
+
+### \_\_repr\_\_
 
 ```python
-def __repr__() -> str
+class LexiconCollection(MutableMapping):
+ | ...
+ | def __repr__() -> str
 ```
 
 Machine readable string. When printed and run eval() over the string
 you should be able to recreate the object.
 
-#### add\_lexicon\_entry
+<a id="pymusas.lexicon_collection.LexiconCollection.add_lexicon_entry"></a>
+
+### add\_lexicon\_entry
 
 ```python
-def add_lexicon_entry(value: LexiconEntry, include_pos: bool = True) -> None
+class LexiconCollection(MutableMapping):
+ | ...
+ | def add_lexicon_entry(
+ |     self,
+ |     value: LexiconEntry,
+ |     include_pos: bool = True
+ | ) -> None
 ```
 
 Will add the LexiconEntry to the collection, whereby the key is the
@@ -75,21 +104,32 @@ If the pos value is None then then only the lemma is used, e.g.:
 - `value`: A LexiconEntry.
 - `include_pos`: Whether to include the POS tag within the key.
 
-#### to\_dictionary
+<a id="pymusas.lexicon_collection.LexiconCollection.to_dictionary"></a>
+
+### to\_dictionary
 
 ```python
-def to_dictionary() -> Dict[str, List[str]]
+class LexiconCollection(MutableMapping):
+ | ...
+ | def to_dictionary() -> Dict[str, List[str]]
 ```
 
 **Returns**:
 
 The dictionary object that stores all of the data.
 
-#### from\_tsv
+<a id="pymusas.lexicon_collection.LexiconCollection.from_tsv"></a>
+
+### from\_tsv
 
 ```python
-@staticmethod
-def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True) -> Dict[str, List[str]]
+class LexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def from_tsv(
+ |     tsv_file_path: Union[PathLike, str],
+ |     include_pos: bool = True
+ | ) -> Dict[str, List[str]]
 ```
 
 If `include_pos` is True and the TSV file does not contain a
