@@ -163,18 +163,3 @@ The following table shows the 21 labels at the top level of the hierarchy.
         </tr>
     </tbody>
 </table>
-
-
-## Documentation (under development)
-
-The documentation is built with [docusaurus v2](https://docusaurus.io/), a static site generator that is based on the [Jamstack](https://jamstack.org/) with pages generated through markup and can be enhanced using Javascript e.g. React components.
-
-### Commands
-
-By default all webpages are hosted locally at: [http://localhost:3000/pymusas/](http://localhost:3000/pymusas/)
-
-* To create the documentation from scratch (this should never be needed but just in case it does): `make create-docs`
-* To run the docs locally in development mode: `make develop-docs`
-* To build the static documentation files and serve them locally: `make serve-built-docs`
-
-To automatically generate the API documentation: `make create-api-docs` (a lot of the code that went into auto generating the documentation came from the AllenNLP [script](https://github.com/allenai/allennlp/blob/main/scripts/py2md.py) and [makefile](https://github.com/allenai/allennlp/blob/main/Makefile))
