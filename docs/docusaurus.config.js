@@ -28,13 +28,14 @@ const config = {
           editUrl: 'https://github.com/ucrel/pymusas/edit/main/docs/',
           showLastUpdateTime: true,
           showLastUpdateAuthor: true,
+          routeBasePath: '/',
         },
-        blog: {
+        /*blog: {
           showReadingTime: true,
           // Please change this to your repo.
           editUrl:
             'https://github.com/facebook/docusaurus/edit/main/website/blog/',
-        },
+        },*/
         theme: {
           customCss: require.resolve('./src/css/custom.css'),
         },
@@ -58,8 +59,8 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
-          {to: '/docs/api/basic_tagger', label: 'API', position: 'left'},
-          {to: '/blog', label: 'Blog', position: 'left'},
+          {to: '/api/basic_tagger', label: 'API', position: 'left'},
+          //{to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/ucrel/pymusas',
             label: 'GitHub',
@@ -75,7 +76,11 @@ const config = {
             items: [
               {
                 label: 'Documentation',
-                to: '/docs/intro',
+                to: '/',
+              },
+              {
+                label: 'API',
+                to: '/api/basic_tagger',
               },
             ],
           },
@@ -84,17 +89,17 @@ const config = {
             items: [
               {
                 label: 'Twitter',
-                href: 'https://twitter.com/docusaurus',
+                href: 'https://twitter.com/ucrelcrs',
               },
             ],
           },
           {
             title: 'More',
             items: [
-              {
+              /*{
                 label: 'Blog',
                 to: '/blog',
-              },
+              },*/
               {
                 label: 'GitHub',
                 href: 'https://github.com/ucrel/pymusas',
