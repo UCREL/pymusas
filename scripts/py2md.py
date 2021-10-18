@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 CROSS_REF_RE = re.compile("(:(class|func|mod):`~?([a-zA-Z0-9_.]+)`)")
 BASE_MODULE = 'pymusas'
-API_BASE_URL = '/pymusas/docs/API/'
+API_BASE_URL = '/pymusas/api/'
 BASE_SOURCE_LINK = "https://github.com/UCREL/pymusas/blob/main/pymusas/"
 
 
