@@ -16,19 +16,19 @@ create-docs: build-docker-docs
 	@docker rm -f docusaurus
 
 develop-docs: install-package-for-docs
-	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "yarn start -h 0.0.0.0"
+	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME} -c "cd docs && yarn start -h 0.0.0.0"
 
 build-docs: install-package-for-docs
-	@docker run --rm -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "yarn build"
+	@docker run --rm -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME} -c "cd docs && yarn build"
 
 serve-built-docs: build-docs
-	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "yarn serve -h 0.0.0.0"
+	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME} -c " cd docs && yarn serve -h 0.0.0.0"
 
 install-package-for-docs: build-docker-docs
-	@docker run --rm -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "yarn install"
+	@docker run --rm -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "cd docs && yarn install"
 
 interactive: build-docker-docs
-	@docker run -it --rm --name docusaurus -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME}
+	@docker run -it --rm --name docusaurus -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME}
 
 build-docker-docs:
 	@docker build -t ${CONTAINER_NAME} -f Docs_Docker.dockerfile .
