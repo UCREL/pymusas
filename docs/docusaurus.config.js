@@ -49,8 +49,8 @@ const config = {
       navbar: {
         title: 'PyMUSAS',
         logo: {
-          alt: 'My Site Logo',
-          src: 'img/logo.svg',
+          alt: 'UCREL logo',
+          src: 'img/ucrel_logo.svg',
         },
         items: [
           {
