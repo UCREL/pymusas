@@ -6,7 +6,7 @@ SRC = pymusas
 WORKING_DIR = /home/node/website
 CONTAINER_NAME = pymusas-docs:latest
 
-DOCS_API_DIR = ./docs/docs/API/${SRC}
+DOCS_API_DIR = ./docs/docs/api/${SRC}
 DOCS_SRC_TMP = $(filter-out $(SRC)/__main__.py %/__init__.py ,$(shell find $(SRC) -type f -name '*.py'))
 DOCS_SRC = $(subst .py,,$(subst /,.,${DOCS_SRC_TMP}))
 
@@ -21,7 +21,7 @@ develop-docs: install-package-for-docs
 build-docs: install-package-for-docs
 	@docker run --rm -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "yarn build"
 
-serve-built-docs: install-package-for-docs
+serve-built-docs: build-docs
 	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "yarn serve -h 0.0.0.0"
 
 install-package-for-docs: build-docker-docs
