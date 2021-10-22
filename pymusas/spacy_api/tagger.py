@@ -4,9 +4,9 @@ from spacy.language import Language
 from spacy.tokens import Doc, Token
 from spacy.training import Example
 
-from ..taggers.rule_based import _tag_token
 from ..config import LANG_LEXICON_RESOUCRE_MAPPER
 from ..lexicon_collection import LexiconCollection
+from ..taggers.rule_based import _tag_token
 
 
 class RuleBasedTagger:
