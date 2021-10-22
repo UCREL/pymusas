@@ -22,7 +22,5 @@ based on a cached file within the `config.PYMUSAS_CACHE_HOME` directory.
 If it does then the cached file path will be returned else the the content
 will be downloaded and cached.
 
-**Returns**:
-
-A path to the contents download from the `url`.
+:returns: A path to the contents download from the `url`.
 

@@ -99,10 +99,8 @@ The lemma and pos are combined as follows:
 If the pos value is None then then only the lemma is used, e.g.:
 {lemma}
 
-**Arguments**:
-
-- `value`: A LexiconEntry.
-- `include_pos`: Whether to include the POS tag within the key.
+:param value: A LexiconEntry.
+:param include_pos: Whether to include the POS tag within the key.
 
 <a id="pymusas.lexicon_collection.LexiconCollection.to_dictionary"></a>
 
@@ -114,9 +112,7 @@ class LexiconCollection(MutableMapping):
  | def to_dictionary() -> Dict[str, List[str]]
 ```
 
-**Returns**:
-
-The dictionary object that stores all of the data.
+:returns: The dictionary object that stores all of the data.
 
 <a id="pymusas.lexicon_collection.LexiconCollection.from_tsv"></a>
 
@@ -144,21 +140,19 @@ Reference, the identification of a URL and the idea to do this has
 come from the AllenNLP library:
 https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205
 
-**Arguments**:
-
+:param tsv_file_path: A path or URL to a TSV file that contains at least two
                       fields with the following headings: 1. `lemma`,
                       and 2. `semantic_tags`. With an optional field
                       `pos`. All other fields will be ignored.
                       Each row will be used to create a `LexiconEntry`
                       which will then be added to the returneds
                       `LexiconCollection`
+:param include_pos: Whether to include the POS tag in the key when
                     adding the `LexiconEntry` into the returned
                     `LexiconCollection`. For more information on this
                     see the `add_lexicon_entry` method.
-- `tsv_file_path`: A path or URL to a TSV file that contains at least two
-- `include_pos`: Whether to include the POS tag in the key when
-
-**Returns**:
-
-A dictionary object that can be used to create a
+:returns: A dictionary object that can be used to create a
+          `LexiconCollection`
+:raises: ValueError if the minimum field headings, lemma and
+         semantic_tags, do not exist in the given TSV file.
 

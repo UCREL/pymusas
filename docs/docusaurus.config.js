@@ -59,7 +59,7 @@ const config = {
             position: 'left',
             label: 'Documentation',
           },
-          {to: '/api/basic_tagger', label: 'API', position: 'left'},
+          {to: '/api/file_utils', label: 'API', position: 'left'},
           //{to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/ucrel/pymusas',
@@ -80,7 +80,7 @@ const config = {
               },
               {
                 label: 'API',
-                to: '/api/basic_tagger',
+                to: '/api/file_utils',
               },
             ],
           },

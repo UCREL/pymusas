@@ -4,7 +4,9 @@ Reference:
 https://github.com/allenai/allennlp/blob/main/scripts/py2md.py
 '''
 import argparse
+from collections import OrderedDict
 import dataclasses
+from enum import Enum
 import logging
 from multiprocessing import Pool, cpu_count
 import os
@@ -18,7 +20,6 @@ import docspec
 from pydoc_markdown import PydocMarkdown
 from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.processors.crossref import CrossrefProcessor
-from pydoc_markdown.contrib.processors.smart import SmartProcessor
 from pydoc_markdown.contrib.renderers.docusaurus import CustomizedMarkdownRenderer, MarkdownRenderer
 from pydoc_markdown.interfaces import Processor, Renderer, Resolver
 from pydoc_markdown.util.docspec import format_function_signature, is_method
@@ -33,6 +34,219 @@ CROSS_REF_RE = re.compile("(:(class|func|mod):`~?([a-zA-Z0-9_.]+)`)")
 BASE_MODULE = 'pymusas'
 API_BASE_URL = '/pymusas/api/'
 BASE_SOURCE_LINK = "https://github.com/UCREL/pymusas/blob/main/pymusas/"
+
+
+class DocstringError(Exception):
+    pass
+
+
+def emphasize(s: str) -> str:
+    # Need to escape underscores.
+    s = s.replace("_", "\\_")
+    return f"__{s}__"
+
+
+class Section(Enum):
+    ARGUMENTS = "ARGUMENTS"
+    PARAMETERS = "PARAMETERS"
+    ATTRIBUTES = "ATTRIBUTES"
+    MEMBERS = "MEMBERS"
+    RETURNS = "RETURNS"
+    RAISES = "RAISES"
+    EXAMPLES = "EXAMPLES"
+    OTHER = "OTHER"
+
+    @classmethod
+    def from_str(cls, section: str) -> "Section":
+        section = section.upper()
+        for member in cls:
+            if section == member.value:
+                return member
+        return cls.OTHER
+
+
+REQUIRED_PARAM_RE = re.compile(r"^`([^`]+)`(, required\.?)?$")
+
+OPTIONAL_PARAM_RE = re.compile(
+    r"^`([^`]+)`,?\s+(optional,?\s)?\(\s?(optional,\s)?default\s?=\s?`([^`]+)`\s?\)\.?$"
+)
+
+OPTIONAL_PARAM_NO_DEFAULT_RE = re.compile(r"^`([^`]+)`,?\s+optional\.?$")
+
+
+@dataclasses.dataclass
+class Param:
+    ident: str
+    ty: Optional[str] = None
+    required: bool = False
+    default: Optional[str] = None
+
+    @classmethod
+    def from_line(cls, line: str) -> Optional["Param"]:
+        if ":" not in line:
+            return None
+
+        ident, description = line.split(":", 1)
+        ident = ident.strip()
+        description = description.strip()
+
+        if " " in ident:
+            return None
+
+        maybe_match = REQUIRED_PARAM_RE.match(description)
+        if maybe_match:
+            ty = maybe_match.group(1)
+            return cls(ident=ident, ty=ty, required=True)
+
+        maybe_match = OPTIONAL_PARAM_RE.match(description)
+        if maybe_match:
+            ty = maybe_match.group(1)
+            default = maybe_match.group(4)
+            return cls(ident=ident, ty=ty, required=False, default=default)
+
+        maybe_match = OPTIONAL_PARAM_NO_DEFAULT_RE.match(description)
+        if maybe_match:
+            ty = maybe_match.group(1)
+            return cls(ident=ident, ty=ty, required=False)
+
+        raise DocstringError(
+            f"Invalid parameter / attribute description: '{line}'\n"
+            "Make sure types are enclosed in backticks.\n"
+            "Required parameters should be documented like: '{ident} : `{type}`'\n"
+            "Optional parameters should be documented like: '{ident} : `{type}`, optional (default = `{expr}`)'\n"
+        )
+
+    def to_line(self) -> str:
+        line: str = f"- {emphasize(self.ident)} :"
+        if self.ty:
+            line += f" `{self.ty}`"
+            if not self.required:
+                line += ", optional"
+                if self.default:
+                    line += f" (default = `{self.default}`)"
+        line += " <br/>"
+        return line
+
+
+# For now we handle attributes / members in the same way as parameters / arguments.
+Attrib = Param
+
+
+@dataclasses.dataclass
+class RetVal:
+    description: Optional[str] = None
+    ident: Optional[str] = None
+    ty: Optional[str] = None
+
+    @classmethod
+    def from_line(cls, line: str) -> "RetVal":
+        if ": " not in line:
+            return cls(description=line)
+        ident, ty = line.split(":", 1)
+        ident = ident.strip()
+        ty = ty.strip()
+        if ty and not ty.startswith("`"):
+            raise DocstringError(f"Type should be enclosed in backticks: '{line}'")
+        return cls(ident=ident, ty=ty)
+
+    def to_line(self) -> str:
+        if self.description:
+            line = f"- {self.description} <br/>"
+        elif self.ident:
+            line = f"- {emphasize(self.ident)}"
+            if self.ty:
+                line += f" : {self.ty} <br/>"
+            else:
+                line += " <br/>"
+        else:
+            raise DocstringError("RetVal must have either description or ident")
+        return line
+
+
+@dataclasses.dataclass
+class ProcessorState:
+    parameters: "OrderedDict[str, Param]"
+    current_section: Optional[Section] = None
+    codeblock_opened: bool = False
+    consecutive_blank_line_count: int = 0
+
+
+@dataclasses.dataclass
+class AllenNlpDocstringProcessor(Processor):
+    """
+    Use to turn our docstrings into Markdown.
+    """
+
+    CROSS_REF_RE = re.compile("(:(class|func|mod):`~?([a-zA-Z0-9_.]+)`)")
+    UNDERSCORE_HEADER_RE = re.compile(r"(.*)\n-{3,}\n")
+    MULTI_LINE_LINK_RE = re.compile(r"(\[[^\]]+\])\n\s*(\([^\)]+\))")
+
+    def process(self, modules: List[docspec.Module], resolver: Optional[Resolver]) -> None:
+        docspec.visit(modules, self._process) # type: ignore  # noqa
+
+    def _process(self, node: docspec.ApiObject) -> None:
+        if not getattr(node, "docstring", None):
+            return
+        lines: List[str] = []
+        state: ProcessorState = ProcessorState(parameters=OrderedDict())
+
+        _docstring = ''
+        if node.docstring is not None:
+            _docstring = node.docstring.content
+
+        # Standardize header syntax to use '#' instead of underscores.
+        _docstring = self.UNDERSCORE_HEADER_RE.sub(r"# \g<1>", _docstring)
+
+        # It's common to break up markdown links into multiple lines in docstrings, but
+        # they won't render as links in the doc HTML unless they are all on one line.
+        _docstring = self.MULTI_LINE_LINK_RE.sub(r"\g<1>\g<2>", _docstring)
+
+        for line in _docstring.split("\n"):
+            # Check if we're starting or ending a codeblock.
+            if line.startswith("```"):
+                state.codeblock_opened = not state.codeblock_opened
+
+            if not state.codeblock_opened:
+                # If we're not in a codeblock, we'll do some pre-processing.
+                if not line.strip():
+                    state.consecutive_blank_line_count += 1
+                    if state.consecutive_blank_line_count >= 2:
+                        state.current_section = None
+                else:
+                    state.consecutive_blank_line_count = 0
+                line = self._preprocess_line(node, line, state)
+
+            lines.append(line)
+
+        # Now set the docstring to our preprocessed version of it.
+        node.docstring = docspec.Docstring(content="\n".join(lines), location=None)
+
+    def _preprocess_line(self, node: docspec.ApiObject, line: str,
+                         state: ProcessorState) -> str:
+        match = re.match(r"#+ (.*)$", line)
+        if match:
+            state.current_section = Section.from_str(match.group(1).strip())
+            name = match.group(1).strip()
+            slug = (node.name + "." + match.group(1).strip()).lower().replace(" ", "_")
+            line = f'<h4 id="{slug}">{name}<a className="headerlink" href="#{slug}" title="Permanent link">&para;</a></h4>\n'  # noqa: E501
+        else:
+            if line and not line.startswith(" ") and not line.startswith("!!! "):
+                if state.current_section in (
+                    Section.ARGUMENTS,
+                    Section.PARAMETERS,
+                ):
+                    param = Param.from_line(line)
+                    if param:
+                        line = param.to_line()
+                elif state.current_section in (Section.ATTRIBUTES, Section.MEMBERS):
+                    attrib = Attrib.from_line(line)
+                    if attrib:
+                        line = attrib.to_line()
+                elif state.current_section in (Section.RETURNS, Section.RAISES):
+                    retval = RetVal.from_line(line)
+                    line = retval.to_line()
+
+        return line
 
 
 class AllenNlpRenderer(MarkdownRenderer):
@@ -277,10 +491,6 @@ class CustomDocusaurusRenderer(Renderer):
                 self.markdown.render_to_stream([module], fp)
 
 
-class DocstringError(Exception):
-    pass
-
-
 class CustomCrossrefProcess(CrossrefProcessor):
     '''
     Combination of the [cross ref processor](https://github.com/
@@ -312,7 +522,7 @@ class CustomCrossrefProcess(CrossrefProcessor):
                     href = API_BASE_URL + "/".join(path[1:])
                 else:
                     href = API_BASE_URL + "/".join(path[1:-1]) + "/#" + path[-1].lower()
-                cross_ref = f"[`{path[-1]}`]({href})"
+                cross_ref = f"[`{name}`]({href})"
             elif "." not in name:
                 cross_ref = f"[`{name}`](#{name.lower()})"
             else:
@@ -400,7 +610,8 @@ def py2md(module: str, out: Optional[str] = None) -> bool:
                                                 render_module_header=False,
                                                 descriptive_class_title=False,)
     filter_instance = CustomFilterProcessor(skip_empty_modules=True, documented_only=True)
-    pydocmd_processors = [filter_instance, SmartProcessor(), CustomCrossrefProcess()]
+    markdown_processor = AllenNlpDocstringProcessor()
+    pydocmd_processors = [filter_instance, markdown_processor, CustomCrossrefProcess()]
     pydocmd_renderer = CustomDocusaurusRenderer(custom_markdown_renderer,
                                                 docs_base_path='docs/docs',
                                                 relative_output_path='api',)

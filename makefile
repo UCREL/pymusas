@@ -6,7 +6,7 @@ SRC = pymusas
 WORKING_DIR = /home/node/website
 CONTAINER_NAME = pymusas-docs:latest
 
-DOCS_API_DIR = ./docs/docs/api/${SRC}
+DOCS_API_DIR = ./docs/docs/api
 DOCS_SRC_TMP = $(filter-out $(SRC)/__main__.py %/__init__.py ,$(shell find $(SRC) -type f -name '*.py'))
 DOCS_SRC = $(subst .py,,$(subst /,.,${DOCS_SRC_TMP}))
 
