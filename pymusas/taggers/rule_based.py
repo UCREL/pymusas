@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, Generator, Iterable, List, Optional, Tuple
+from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 
 
 logger = logging.getLogger(__name__)
@@ -167,7 +167,7 @@ class USASRuleBasedTagger():
                           self.lemma_lexicon_lookup)
 
     def tag_tokens(self, tokens: Iterable[Tuple[str, str, str]]
-                   ) -> Generator[List[str], None, None]:
+                   ) -> Iterator[List[str]]:
         '''
         Given a list/iterable of tokens with the relevant lingustic
         information it returns for each token a list of possible USAS semantic
@@ -186,7 +186,7 @@ class USASRuleBasedTagger():
         
         # Returns
 
-        `Generator[List[str]]`
+        `Iterator[List[str]]`
         '''
         
         for token in tokens:
