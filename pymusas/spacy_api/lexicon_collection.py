@@ -3,7 +3,7 @@ from typing import Dict, List, Union
 
 import spacy
 
-from .lexicon_collection import LexiconCollection
+from ..lexicon_collection import LexiconCollection
 
 
 @spacy.util.registry.misc('lexicon_collection_from_tsv')

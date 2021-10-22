@@ -4,9 +4,9 @@ from spacy.language import Language
 from spacy.tokens import Doc, Token
 from spacy.training import Example
 
-from .basic_tagger import tag_token
-from .config import LANG_LEXICON_RESOUCRE_MAPPER
-from .lexicon_collection import LexiconCollection
+from ..taggers.rule_based import _tag_token
+from ..config import LANG_LEXICON_RESOUCRE_MAPPER
+from ..lexicon_collection import LexiconCollection
 
 
 class RuleBasedTagger:
@@ -32,9 +32,9 @@ class RuleBasedTagger:
             text = token.text
             lemma = token.lemma_
             pos = token.pos_
-            semantic_tags = tag_token(text, lemma, pos,
-                                      self.lexicon_lookup,
-                                      self.lexicon_lemma_lookup)
+            semantic_tags = _tag_token(text, lemma, pos,
+                                       self.lexicon_lookup,
+                                       self.lexicon_lemma_lookup)
             setattr(token._, self.usas_tags_token_attr, semantic_tags)
         return doc
 
