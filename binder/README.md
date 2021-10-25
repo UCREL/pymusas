@@ -1,0 +1,3 @@
+# Binder
+
+This directory contains a [Conda environment file](./environment.yml) that is used by [Binder](https://mybinder.readthedocs.io/en/latest/index.html), through [jupyter-repo2docker](https://repo2docker.readthedocs.io/en/latest/index.html), to create a binder environment. If any of the [requirements](../requirements.txt) or [dev_requirements](../dev_requirements.txt) are updated then these changes need to be reflected in this [environment file](./environment.yml).
