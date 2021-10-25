@@ -25,9 +25,9 @@ The USAS Rule Based Tagger is based around the
 The Tagger expects two Lexicon like data structure, both in the format of
 `Dict[str, List[str]]`, this structure maps a lemma (with or without it's
 Part Of Speech (POS)) to a `List` of USAS semantic tags. The easiest way
-of producing such a data structure is through the
+of producing such a data structure is through
 [`pymusas.lexicon_collection.from_tsv`](/pymusas/api/lexicon_collection/#from_tsv)
-whereby the File Path would be to a USAS Semantic Lexicon.
+whereby the TSV file path would be to a USAS Semantic Lexicon.
 
 The class requires two Lexicon data structure the first, `lexicon_lookup`,
 requires both the lemma and POS, whereas the second, `lemma_lexicon_lookup`,
@@ -72,6 +72,17 @@ lemmatised, and POS tagged:
     The given `lemma_lexicon_lookup` data, if that was `None` then this
     becomes an empty dictionary e.g. `{}`
 
+<h4 id="usasrulebasedtagger.examples">Examples<a className="headerlink" href="#usasrulebasedtagger.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+>>> from pymusas.lexicon_collection import LexiconCollection
+>>> from pymusas.taggers.rule_base import USASRuleBasedTagger
+>>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+>>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+>>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
+>>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
+```
+
 <a id="pymusas.taggers.rule_based.USASRuleBasedTagger.tag_token"></a>
 
 ### tag\_token
@@ -112,7 +123,7 @@ class USASRuleBasedTagger:
  | def tag_tokens(
  |     self,
  |     tokens: Iterable[Tuple[str, str, str]]
- | ) -> Generator[List[str], None, None]
+ | ) -> Iterator[List[str]]
 ```
 
 Given a list/iterable of tokens with the relevant lingustic
@@ -134,5 +145,5 @@ most likely tag.
 <h4 id="tag_tokens.returns">Returns<a className="headerlink" href="#tag_tokens.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Generator[List[str]]` <br/>
+- `Iterator[List[str]]` <br/>
 
