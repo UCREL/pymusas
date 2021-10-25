@@ -1,5 +1,5 @@
 name: Binder
-on: [push]
+on: [push, pull_request]
 
 jobs:
   Create-MyBinderOrg-Cache:
