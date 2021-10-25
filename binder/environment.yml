@@ -8,3 +8,11 @@ dependencies:
     - "spacy>=3.0"
     - "tqdm>=4.50.0,<5.0.0"
     - "requests>=2.13.0,<3.0.0"
+    - "pytest>=5.2.0"
+    - pytest-cov
+    - responses
+    - mypy==0.910
+    - types-requests
+    - "flake8>=3.8.0,<3.10.0"
+    - "pydoc-markdown>=4.0.0,<5.0.0"
+    - "isort>=5.5.4"
