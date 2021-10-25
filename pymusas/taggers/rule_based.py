@@ -124,6 +124,16 @@ class USASRuleBasedTagger():
     lemma_lexicon_lookup : `Dict[str, List[str]]`
         The given `lemma_lexicon_lookup` data, if that was `None` then this
         becomes an empty dictionary e.g. `{}`
+
+    # Examples
+    ``` python
+    >>> from pymusas.lexicon_collection import LexiconCollection
+    >>> from pymusas.taggers.rule_base import USASRuleBasedTagger
+    >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+    >>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+    >>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
+    >>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
+    ```
     '''
 
     def __init__(self, lexicon_lookup: Optional[Dict[str, List[str]]] = None,
