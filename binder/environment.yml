@@ -3,6 +3,7 @@ channels:
   - defaults
 dependencies:
   - python=3.9
+  - pip
   - pip:
     - "spacy>=3.0"
     - "tqdm>=4.50.0,<5.0.0"
