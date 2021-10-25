@@ -59,3 +59,20 @@ jobs:
           files: ./coverage.xml
           env_vars: OS,PYTHON
           fail_ci_if_error: false 
+  update-binder-requirements:
+    name: update-binder-requirements
+    needs: checks
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Update environment file
+        run: |
+          git checkout binder-main
+          git checkout main binder/environment.yml
+          git config --global user.email "andrew.p.moore94@gmail.com"
+          git config --global user.name "Andrew Moore"
+          if [ $(git diff-index binder-main | wc -l) -gt 0 ]; then git commit -m "update"; git push origin binder-main; fi
