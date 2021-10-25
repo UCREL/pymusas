@@ -21,7 +21,7 @@ jobs:
           if [ $(git diff-index binder-main | wc -l) -gt 0 ]; \ 
           then \
           git status; \
-          git --help; \
+          echo "hello"; \
           git commit -m "update"; \
           git status; \ 
           git push origin binder-main; \
