@@ -11,6 +11,10 @@ PYthon Multilingual Ucrel Semantic Analysis System
     <a href="https://codecov.io/gh/UCREL/pymusas">
         <img alt="Code coverage" src="https://codecov.io/gh/UCREL/pymusas/branch/main/graph/badge.svg" />
     </a>
+    <a href="https://mybinder.org/v2/gh/UCREL/pymusas/binder-main?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCREL%252Fpymusas%26urlpath%3Dlab%252Ftree%252Fpymusas%252F%26branch%3Dmain">
+        <img alt="Launch Binder" src="https://static.mybinder.org/badge_logo.svg">
+    </a>
+
 </p>
 
 ## Requirements
