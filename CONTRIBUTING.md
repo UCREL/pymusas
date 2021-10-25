@@ -30,7 +30,7 @@ If you are changing the Python requirements, this needs to be done in a few diff
     * [./binder/environment.yml](./binder/environment.yml)
     * [The `install_requires` section of ./setup.cfg](./setup.cfg)
 
-In all cases you may need to add this requirement to the `tools.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml) 
+In all cases you may need to add this requirement to the `tool.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml) 
 
 ### Writing docstrings
 [A lot of this has been copied from the AllenNLP CONTRIBUTING guidelines, which I think are really great!](https://github.com/allenai/allennlp/blob/main/CONTRIBUTING.md)
