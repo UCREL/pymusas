@@ -17,7 +17,20 @@ make develop-docs
 
 If the error message is not clear, feel free to comment on this in your pull request.
 
+### Changing / Updating Python requirements
 
+If you are changing the Python requirements, this needs to be done in a few different places:
+
+1. If it is a development only requirement, not required to run the core code base within [../pymusas](../pymusas), then update:
+    * [../dev_requirements.txt](../dev_requirements.txt)
+    * [../binder/environment.yml](../binder/environment.yml)
+    * [The `tests` section of ../setup.cfg](../setup.cfg)
+2. If it is a requirement that is needed to run the core code base within [../pymusas](../pymusas), then update:
+    * [../requirements.txt](../requirements.txt)
+    * [../binder/environment.yml](../binder/environment.yml)
+    * [The `install_requires` section of ../setup.cfg](../setup.cfg)
+
+In all cases you may need to add this requirement to the `tools.isort` section `known_third_party` list of the [../pyproject.toml file.](../pyproject.toml) 
 
 ### Writing docstrings
 [A lot of this has been copied from the AllenNLP CONTRIBUTING guidelines, which I think are really great!](https://github.com/allenai/allennlp/blob/main/CONTRIBUTING.md)
