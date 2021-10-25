@@ -14,6 +14,7 @@ jobs:
         run: |
           git checkout binder-main
           git checkout main binder/environment.yml
+          if [ git diff-index binder-main | wc -l -gt 0 ]; then echo "a is greater than b"; else echo "b is greater than a"; fi;
           
       - name: Cache packages
         uses: actions/cache@v2
