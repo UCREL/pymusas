@@ -1,0 +1,60 @@
+name: Binder-Main-Update
+
+on:
+  push:
+  pull_request:
+  
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: Update environment file
+        run: |
+          git checkout binder-main
+          git checkout main binder/environment.yml
+          
+      - name: Cache packages
+        uses: actions/cache@v2
+        with:
+          path: ./docs/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./docs/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-
+      - name: Test Build
+        run: |
+          cd ./docs
+          yarn install
+          yarn build
+  gh-release:
+    needs: checks
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.GH_PAGES_DEPLOY }}
+      - name: Node JS
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Cache packages
+        uses: actions/cache@v2
+        with:
+          path: ./docs/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('./docs/yarn.lock') }}
+          restore-keys: ${{ runner.os }}-
+      - name: Release to GitHub Pages
+        env:
+          USE_SSH: true
+          GIT_USER: git
+          DEPLOYMENT_BRANCH: gh-pages
+          CURRENT_BRANCH: main
+        run: |
+          git config --global user.email "andrew.p.moore94@gmail.com"
+          git config --global user.name "Andrew Moore"
+          cd ./docs
+          yarn install
+          yarn deploy
