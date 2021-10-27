@@ -48,6 +48,14 @@ jobs:
           path: ./docs/node_modules
           key: ${{ runner.os }}-${{ hashFiles('./docs/yarn.lock') }}
           restore-keys: ${{ runner.os }}-
+      - name: Import GPG key
+        id: import_gpg
+        uses: crazy-max/ghaction-import-gpg@v4
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.GPG_PASSPHRASE }}
+          git_user_signingkey: true
+          git_commit_gpgsign: true
       - name: Release to GitHub Pages
         env:
           USE_SSH: true

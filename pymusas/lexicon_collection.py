@@ -36,7 +36,7 @@ class LexiconCollection(MutableMapping):
 
     ```
     >>> from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
-    lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
+    >>> lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
     collection = LexiconCollection()
     collection.add_lexicon_entry(lexicon_entry)
     most_likely_tag = collection['London|noun'][0]
