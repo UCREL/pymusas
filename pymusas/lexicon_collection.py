@@ -35,7 +35,7 @@ class LexiconCollection(MutableMapping):
     the most likely semantic tag is Z3 and the least likely tag is A1:
 
     ```
-    from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
+    >>> from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
     lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
     collection = LexiconCollection()
     collection.add_lexicon_entry(lexicon_entry)
