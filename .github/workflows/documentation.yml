@@ -62,9 +62,11 @@ jobs:
           GIT_USER: git
           DEPLOYMENT_BRANCH: gh-pages
           CURRENT_BRANCH: main
+          GIT_PASS: ${{ secrets.PAT }}
         run: |
           git config --global user.email "andrew.p.moore94@gmail.com"
           git config --global user.name "Andrew Moore"
+          git config --global --list
           cd ./docs
           yarn install
           yarn deploy
