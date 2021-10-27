@@ -35,9 +35,7 @@ jobs:
         with:
           token: ${{ secrets.PAT }}
           persist-credentials: true
-      #- uses: webfactory/ssh-agent@v0.5.3
-      #  with:
-      #    ssh-private-key: ${{ secrets.GH_PAGES_DEPLOY }}
+          fetch-depth: 0
       - name: Node JS
         uses: actions/setup-node@v2
         with:
