@@ -59,14 +59,14 @@ jobs:
       - name: Release to GitHub Pages
         env:
           USE_SSH: true
-          GIT_USER: git
+          GIT_USER: apmoore1
           DEPLOYMENT_BRANCH: gh-pages
           CURRENT_BRANCH: main
           GIT_PASS: ${{ secrets.PAT }}
         run: |
           git config --global user.email "andrew.p.moore94@gmail.com"
           git config --global user.name "Andrew Moore"
-          git config --global --list
+          git config --local --list
           cd ./docs
           yarn install
           yarn deploy
