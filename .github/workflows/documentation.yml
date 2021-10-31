@@ -32,7 +32,7 @@ jobs:
       - name: Check if documentation has been generated
         run: |
           make create-api-docs
-          if [ $(git status -s | wc -l) -gt 0 ]; then echo "Need to run `make create-api-docs` to generate the new API documentation and commit the documentation to the repository."; exit 1; fi
+          if [ $(git status -s | wc -l) -gt 0 ]; then echo "Need to run 'make create-api-docs' to generate the new API documentation and commit the documentation to the repository."; exit 1; fi
 
   doc-build-check:
     name: Check documentation can build
