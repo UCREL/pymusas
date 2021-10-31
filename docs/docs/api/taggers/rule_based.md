@@ -75,12 +75,12 @@ lemmatised, and POS tagged:
 <h4 id="usasrulebasedtagger.examples">Examples<a className="headerlink" href="#usasrulebasedtagger.examples" title="Permanent link">&para;</a></h4>
 
 ``` python
->>> from pymusas.lexicon_collection import LexiconCollection
->>> from pymusas.taggers.rule_base import USASRuleBasedTagger
->>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
->>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
->>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
->>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
+ from pymusas.lexicon_collection import LexiconCollection
+ from pymusas.taggers.rule_base import USASRuleBasedTagger
+ welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+ lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+ lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
+ tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
 ```
 
 <a id="pymusas.taggers.rule_based.USASRuleBasedTagger.tag_token"></a>

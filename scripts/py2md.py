@@ -205,6 +205,9 @@ class AllenNlpDocstringProcessor(Processor):
             # Check if we're starting or ending a codeblock.
             if line.startswith("```"):
                 state.codeblock_opened = not state.codeblock_opened
+            
+            if state.codeblock_opened:
+                line = re.sub(r'^>>>\w*', '', line)
 
             if not state.codeblock_opened:
                 # If we're not in a codeblock, we'll do some pre-processing.
