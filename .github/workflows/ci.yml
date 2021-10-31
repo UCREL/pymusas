@@ -50,7 +50,7 @@ jobs:
       - name: Cache mypy
         uses: actions/cache@v2
         with:
-          path: ./mypy_cache
+          path: ./.mypy_cache
           key: ${{ runner.os }}-${{ env.pythonLocation }}
 
       - name: mypy
