@@ -5,8 +5,38 @@ on:
   pull_request:
   
 jobs:
-  checks:
+  doc-generated-check:
+    name: Check documentation has been generated
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.pythonLocation }}
+          key: ${{ runner.os }}-${{ env.pythonLocation }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/dev_requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade --upgrade-strategy eager -r requirements.txt
+          pip install --upgrade --upgrade-strategy eager -r dev_requirements.txt
+      
+      - name: Check if documentation has been generated
+        run: |
+          make create-api-docs
+          if [ $(git status -s | wc -l) -gt 0 ]; then echo "Need to run `make create-api-docs` to generate the new API documentation and commit the documentation to the repository."; exit 1; fi
+
+  doc-build-check:
+    name: Check documentation can build
+    runs-on: ubuntu-latest
+    needs: doc-generated-check
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
@@ -25,8 +55,9 @@ jobs:
           cd ./docs
           yarn install
           yarn build
+  
   gh-release:
-    needs: checks
+    needs: doc-build-check
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
