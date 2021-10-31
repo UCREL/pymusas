@@ -127,7 +127,7 @@ class USASRuleBasedTagger():
 
     # Examples
     ``` python
-    >>> from pymusas.lexicon_collection import LexiconCollection
+    >>> from pymusas.lexicon_collection import LexiconCollections
     >>> from pymusas.taggers.rule_base import USASRuleBasedTagger
     >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
     >>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
