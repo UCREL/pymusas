@@ -208,6 +208,8 @@ class AllenNlpDocstringProcessor(Processor):
             
             if state.codeblock_opened:
                 line = re.sub(r'^>>>\w*', '', line)
+                if line.strip() == '':
+                    continue
 
             if not state.codeblock_opened:
                 # If we're not in a codeblock, we'll do some pre-processing.
