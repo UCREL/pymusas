@@ -1,4 +1,4 @@
-from pathlib import Path
+'''from pathlib import Path
 
 from .lexicon_collection import LexiconCollection
 from .taggers.rule_based import USASRuleBasedTagger
@@ -35,4 +35,4 @@ with gold_path.open('r') as gold_data:
         total_can_be_tagged += len([token for token in predicted_sem_tokens if token != ['Z99']])
 print(f'Coverage {(total_can_be_tagged / total_tokens) * 100:.2f}')
 print(f'Accuracy {(correct / total_tokens) * 100}')
-print(f'Line count: {line_count}')
+print(f'Line count: {line_count}')'''

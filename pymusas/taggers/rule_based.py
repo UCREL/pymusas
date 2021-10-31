@@ -128,11 +128,12 @@ class USASRuleBasedTagger():
     # Examples
     ``` python
     >>> from pymusas.lexicon_collection import LexiconCollection
-    >>> from pymusas.taggers.rule_base import USASRuleBasedTagger
+    >>> from pymusas.taggers.rule_based import USASRuleBasedTagger
     >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
     >>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
     >>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
     >>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
+
     ```
     '''
 
@@ -202,3 +203,8 @@ class USASRuleBasedTagger():
         for token in tokens:
             token_sem_tags = self.tag_token(token)
             yield token_sem_tags
+
+
+if __name__ == '__main__':
+    import doctest
+    doctest.testmod()

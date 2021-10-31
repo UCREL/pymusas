@@ -61,7 +61,7 @@ section when the return value is not obvious. Other valid sections are
 - `# Attributes`, for listing class attributes. These should be formatted in the same
     way as parameters.
 - `# Raises`, for listing any errors that the function or method might intentionally raise.
-- `# Examples`, where you can include code snippets.
+- `# Examples`, where you can include code snippets -- these code snippets will be tested using [doctest with pytest](https://docs.pytest.org/en/6.2.x/doctest.html), these tests ensure that the example code snippet will run as expected, if the example is not expected to output anything leave a blank like between the last `>>>` line and ``` as shown in the [example below](#example-docstring). For more information on doctest see the [doctest documentation](https://docs.python.org/3/library/doctest.html)
 
 To create hyper links to within project modules, classes, and functions write:
 
@@ -78,9 +78,71 @@ If the within project reference is within the same file you do not have to inclu
 
 Here is an example of what the docstrings should look like in a class:
 
-EXAMPLE TO BE GIVEN.
+#### Example docstrings
 
+##### Class
+```
+The USAS Rule Based Tagger is based around the
+[USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
+The Tagger expects two Lexicon like data structure, both in the format of
+`Dict[str, List[str]]`, this structure maps a lemma (with or without it's
+Part Of Speech (POS)) to a `List` of USAS semantic tags. The easiest way
+of producing such a data structure is through
+:func:`pymusas.lexicon_collection.from_tsv`
+whereby the TSV file path would be to a USAS Semantic Lexicon.
 
+The class requires two Lexicon data structure the first, `lexicon_lookup`,
+requires both the lemma and POS, whereas the second, `lemma_lexicon_lookup`,
+only requires the lemma.
+
+Using these lexicon lookups the following rules are applied to assign a
+`List` of USAS semantic tags from the lexicon lookups to the given tokens
+in the given text. The text given is assumed to have been tokenised,
+lemmatised, and POS tagged:
+
+**Rules:**
+
+1. If `POS==punc` label as `PUNCT`
+2. Lookup token and POS tag
+3. Lookup lemma and POS tag
+4. Lookup lower case token and POS tag
+5. Lookup lower case lemma and POS tag
+6. if `POS==num` label as `N1`
+7. Lookup token with any POS tag and choose first entry in lexicon.
+8. Lookup lemma with any POS tag and choose first entry in lexicon.
+9. Lookup lower case token with any POS tag and choose first entry in lexicon.
+10. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
+11. Label as `Z99`, this is the unmatched semantic tag.
+
+# Parameters
+
+lexicon_lookup : `Optional[List[str]]`, optional (default = `None`)
+    The lexicon data structure with both lemma and POS information mapped to
+    a `List` of USAS semantic tags e.g. `{'car_noun': ['Z2', 'Z1']}`
+lemma_lexicon_lookup : `Optional[List[str]]`, optional (default = `None`)
+    The lexicon data structure with only lemma information mapped to
+    a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
+
+# Attributes
+
+lexicon_lookup : `Dict[str, List[str]]`
+    The given `lexicon_lookup` data, if that was `None` then this becomes
+    an empty dictionary e.g. `{}`
+lemma_lexicon_lookup : `Dict[str, List[str]]`
+    The given `lemma_lexicon_lookup` data, if that was `None` then this
+    becomes an empty dictionary e.g. `{}`
+
+# Examples
+``` python
+>>> from pymusas.lexicon_collection import LexiconCollection
+>>> from pymusas.taggers.rule_based import USASRuleBasedTagger
+>>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+>>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+>>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
+>>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
+
+\`\`\` 
+```
 ## Website
 
 The documentation is built with [docusaurus v2](https://docusaurus.io/), a static site generator that is based on the [Jamstack](https://jamstack.org/) with pages generated through markup and can be enhanced using Javascript e.g. React components.
