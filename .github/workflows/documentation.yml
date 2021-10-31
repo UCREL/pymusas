@@ -27,6 +27,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade --upgrade-strategy eager -r requirements.txt
           pip install --upgrade --upgrade-strategy eager -r dev_requirements.txt
+          pip install .[tests]
       
       - name: Check if documentation has been generated
         run: |
