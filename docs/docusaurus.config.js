@@ -17,6 +17,17 @@ const config = {
   projectName: 'pymusas', // Usually your repo name.
   trailingSlash: false,
 
+  /*plugins: [
+    function myPlugin(context, options) {
+        return {
+          name: 'my-plugin',
+          configureWebpack(config, isServer, utils) {
+            return {resolve: {fallback: {crypto: false}}};
+          },
+        };
+    },
+  ],*/
+
   presets: [
     [
       '@docusaurus/preset-classic',
@@ -112,6 +123,7 @@ const config = {
       prism: {
         theme: lightCodeTheme,
         darkTheme: darkCodeTheme,
+        additionalLanguages: ['python'],
       },
     }),
 };
