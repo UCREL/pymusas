@@ -13,8 +13,11 @@ DOWNLOAD_URL = 'https://ucrel-web.lancs.ac.uk/usas/semtags.txt'
 EXPECTED_RESPONSE = 'Hello World\nPymusas'
 
 
-def test_download_url_file() -> None:
+@pytest.mark.parametrize('dir_exists', [True, False])
+def test_download_url_file(dir_exists: bool) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
+        if not dir_exists:
+            temp_dir = os.path.join(temp_dir, 'temp_dir')
         os.environ['PYMUSAS_HOME'] = temp_dir
         importlib.reload(config)
         

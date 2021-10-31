@@ -1,5 +1,6 @@
 from hashlib import sha256
 from pathlib import Path
+import os
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -56,6 +57,7 @@ def download_url_file(url: str) -> str:
     :returns: A path to the contents download from the `url`.
     '''
     cache_dir = config.PYMUSAS_CACHE_HOME
+    os.makedirs(cache_dir, exist_ok=True)
     filename = _resource_to_filename(url)
     download_file_path = Path(cache_dir, filename)
     if download_file_path.exists():
