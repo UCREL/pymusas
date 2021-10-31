@@ -1,6 +1,6 @@
 from hashlib import sha256
-from pathlib import Path
 import os
+from pathlib import Path
 
 import requests
 from requests.adapters import HTTPAdapter
