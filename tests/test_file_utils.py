@@ -28,8 +28,10 @@ def test_download_url_file(dir_exists: bool) -> None:
         
         cached_file_path = ''
         with responses.RequestsMock() as rsps:
+            req_kwargs = {"stream": True}
             rsps.add(responses.GET, DOWNLOAD_URL, status=200,
-                     body=EXPECTED_RESPONSE, stream=True)
+                     body=EXPECTED_RESPONSE,
+                     match=[responses.matchers.request_kwargs_matcher(req_kwargs)])
             cached_file_path = file_utils.download_url_file(DOWNLOAD_URL)
         assert cached_file_path != ''
 
