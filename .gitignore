@@ -2,7 +2,7 @@ __pycache__
 .vscode
 .DS_Store
 .coverage
-coverage.xml
+coverage.json
 .mypy_cache
 .pytest_cache
 pymusas.egg-info

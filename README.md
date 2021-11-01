@@ -47,10 +47,18 @@ flake8
 mypy
 ```
 
-To run the tests with code coverage:
+To run the tests with code coverage (**NOTE** these are the code coverage tests that the Continuos Integration (CI) reports at the top of this README, the doc tests are not part of this report):
 
 ``` bash
-python -m pytest --cov=pymusas --cov-report term-missing
+coverage run # Runs the tests (uses pytest)
+coverage report # Produces a report on the test coverage
+```
+
+To run the [doc tests](https://docs.python.org/3/library/doctest.html), these are tests to ensure that examples within the documentation run as expected:
+
+``` bash
+coverage run -m pytest --doctest-modules pymusas/ # Runs the doc tests
+coverage report # Produces a report on the doc tests coverage
 ```
 
 ## Benchmarking

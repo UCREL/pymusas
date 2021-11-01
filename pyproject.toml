@@ -53,3 +53,16 @@ minversion = "6.0"
 testpaths = [
     "tests"
 ]
+
+[tool.coverage.run]
+branch = true
+source = [
+    "pymusas"
+]
+command_line = "-m pytest"
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.coverage.json]
+output = "coverage.json"

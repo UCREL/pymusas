@@ -1,5 +1,5 @@
-pytest>=5.2.0
-pytest-cov
+pytest>=6.0.0
+coverage[toml]>=6.0.0
 responses
 mypy==0.910
 types-requests

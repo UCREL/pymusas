@@ -57,12 +57,20 @@ jobs:
         run: mypy
 
       - name: Pytest and code coverage
-        run: python -m pytest --cov=pymusas --cov-report term-missing --cov-report xml
+        run: |
+          coverage run
+          coverage report
+          coverage json
+
+      - name: Cache doc test downloads
+        run: |
+          python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
+          echo "$HOME"
 
       - name: CodeCov
         uses: codecov/codecov-action@v2
         with:
-          files: ./coverage.xml
+          files: ./coverage.json
           env_vars: OS,PYTHON
           fail_ci_if_error: false 
   
