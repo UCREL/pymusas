@@ -55,8 +55,7 @@ name : Optional[`type`], optional (default = `default_value`)
 
 Sometimes you can omit the description if the parameter is self-explanatory.
 
-Method and function docstrings are similar, but should also include a `# Returns`
-section when the return value is not obvious. Other valid sections are
+Method and function docstrings are similar, but should also include a `# Returns` section when the return value is not obvious. Other valid sections are
 
 - `# Attributes`, for listing class attributes. These should be formatted in the same
     way as parameters.
@@ -74,9 +73,6 @@ If the within project reference is within the same file you do not have to inclu
 - :class:`RuleBasedTagger`
 - :mod:`basic_tagger`
 - :func:`download_url_file`
- 
-
-Here is an example of what the docstrings should look like in a class:
 
 #### Example docstrings
 
