@@ -6,7 +6,7 @@ dependencies:
   - pip
   - pip:
     - nbgitpuller # This is a special Binder requirement
-    - "spacy>=3.0"
+    - "spacy>=3.1.4"
     - "tqdm>=4.50.0,<5.0.0"
     - "requests>=2.13.0,<3.0.0"
     - "pytest>=6.0.0"
