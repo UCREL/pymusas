@@ -66,16 +66,19 @@ jobs:
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         env:
           PYMUSAS_HOME: $HOME/.cache/doc_test_pymusas
+        run: |
+          python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
+          echo "$HOME"
       
       - name: Set pymusas cache for windows
         if: ${{ runner.os == 'Windows' }}
         env:
           PYMUSAS_HOME: $HOME\.cache\doc_test_pymusas
-      
-      - name: Testing PYMUSAS_HOME
         run: |
           python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
           echo "$HOME"
+      
+        
 
       - name: Cache Doc Test download files
         uses: actions/cache@v2
