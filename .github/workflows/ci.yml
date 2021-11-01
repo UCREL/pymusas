@@ -69,6 +69,13 @@ jobs:
           coverage report
           coverage json
 
+      - name: CodeCov
+        uses: codecov/codecov-action@v2
+        with:
+          files: ./coverage.json
+          env_vars: OS,PYTHON
+          fail_ci_if_error: false 
+
       - name: Set pymusas cache home directory for ubuntu and mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
@@ -89,13 +96,6 @@ jobs:
         run: |
           coverage run -m pytest --doctest-modules pymusas/
           coverage report
-
-      - name: CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          files: ./coverage.json
-          env_vars: OS,PYTHON
-          fail_ci_if_error: false 
   
   update-binder-requirements:
     name: update-binder-requirements
