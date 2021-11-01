@@ -62,7 +62,17 @@ jobs:
           coverage report
           coverage json
 
-      - name: Cache doc test downloads
+      - name: Set pymusas cache for ubuntu and mac
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        run: |
+          echo "DEFAULT_PYMUSAS_CACHE_HOME=${{ HOME/.cache/doc_test_cache }}" >> $GITHUB_ENV
+      
+      - name: Set pymusas cache for windows
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          echo "DEFAULT_PYMUSAS_CACHE_HOME=${{ HOME\.cache\doc_test_cache }}" >> $GITHUB_ENV
+      
+      - name: Testing DEFAULT_PYMUSAS_CACHE_HOME
         run: |
           python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
           echo "$HOME"
