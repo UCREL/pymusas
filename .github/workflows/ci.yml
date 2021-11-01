@@ -64,18 +64,29 @@ jobs:
 
       - name: Set pymusas cache for ubuntu and mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
-        run: |
-          echo "DEFAULT_PYMUSAS_CACHE_HOME=$HOME/.cache/doc_test_cache" >> $GITHUB_ENV
+        env:
+          PYMUSAS_HOME: $HOME/.cache/doc_test_pymusas
       
       - name: Set pymusas cache for windows
         if: ${{ runner.os == 'Windows' }}
-        run: |
-          echo "DEFAULT_PYMUSAS_CACHE_HOME=$HOME\.cache\doc_test_cache" >> $GITHUB_ENV
+        env:
+          PYMUSAS_HOME: $HOME\.cache\doc_test_pymusas
       
-      - name: Testing DEFAULT_PYMUSAS_CACHE_HOME
+      - name: Testing PYMUSAS_HOME
         run: |
           python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
           echo "$HOME"
+
+      - name: Cache Doc Test download files
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.PYMUSAS_HOME }}
+          key: ${{ runner.os }}-${{ env.PYMUSAS_HOME }}
+
+      - name: Doc Tests
+        run: |
+          coverage run -m pytest --doctest-modules pymusas/
+          coverage report
 
       - name: CodeCov
         uses: codecov/codecov-action@v2
