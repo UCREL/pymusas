@@ -65,7 +65,7 @@ jobs:
       - name: Set pymusas cache for ubuntu and mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         env:
-          PYMUSAS_HOME: ${{ env.HOME }}/.cache/doc_test_pymusas
+          PYMUSAS_HOME: ${{ env.HOME"/.cache/doc_test_pymusas"}}
         run: |
           python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
           echo "$HOME"
@@ -73,7 +73,7 @@ jobs:
       - name: Set pymusas cache for windows
         if: ${{ runner.os == 'Windows' }}
         env:
-          PYMUSAS_HOME: ${{ env.HOME }}\.cache\doc_test_pymusas
+          PYMUSAS_HOME: ${{ env.HOME"\.cache\doc_test_pymusas"}
         run: |
           python -c "from pymusas import config; print(config.PYMUSAS_CACHE_HOME)"
           echo "$HOME"
