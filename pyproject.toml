@@ -66,3 +66,6 @@ show_missing = true
 
 [tool.coverage.json]
 output = "coverage.json"
+
+[tool.coverage.xml]
+output = "coverage.xml"

@@ -67,7 +67,7 @@ jobs:
         run: |
           coverage run
           coverage report
-          coverage json
+          coverage xml
 
       - name: CodeCov
         uses: codecov/codecov-action@v2
