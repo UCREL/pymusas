@@ -64,15 +64,11 @@ jobs:
 
       - name: Set pymusas cache directory for ubuntu and mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
-        env:
-          PYMUSAS_HOME: ${{ format('{0}/.cache/doc_test_pymusas', HOME)}}
         run: |
           echo "PYMUSAS_CACHE_HOME=$HOME/.cache/doc_test_pymusas" >> $GITHUB_ENV
       
       - name: Set pymusas cache directory for windows
         if: ${{ runner.os == 'Windows' }}
-        env:
-          PYMUSAS_HOME: ${{ format('{0}\.cache\doc_test_pymusas', HOME)}}
         run: |
           echo "PYMUSAS_CACHE_HOME=$HOME\.cache\doc_test_pymusas" | Out-File -FilePath $GITHUB_ENV -Encoding utf-8 -Append
 
