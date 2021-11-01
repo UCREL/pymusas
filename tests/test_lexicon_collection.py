@@ -206,7 +206,7 @@ def test_lexicon_collection_from_tsv() -> None:
             lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.usas'
             rsps.add(responses.GET, lexicon_url, status=200,
                      body=expected_response,
-                     match=[responses.matchers.request_kwargs_matcher(req_kwargs)])
+                     match=[responses.matchers.request_kwargs_matcher(req_kwargs)])  # type: ignore
             url_lexicon_collection = LexiconCollection.from_tsv(lexicon_url)
             assert 1 == len(url_lexicon_collection)
             url_lexicon_collection['hello'] == ['Z5', 'Z2']
