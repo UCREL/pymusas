@@ -203,8 +203,3 @@ class USASRuleBasedTagger():
         for token in tokens:
             token_sem_tags = self.tag_token(token)
             yield token_sem_tags
-
-
-if __name__ == '__main__':
-    import doctest
-    doctest.testmod()
