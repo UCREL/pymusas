@@ -65,7 +65,7 @@ Optional parameters can also be written like this:
 ``` markdown
 # Parameters
 
-name : Optional[`type`], optional (default = `default_value`)
+name : `type`, optional (default = `default_value`)
     Description of the parameter, indented by four spaces.
 ```
 
