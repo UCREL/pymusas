@@ -13,8 +13,24 @@ from . import file_utils
            unsafe_hash=False, frozen=True)
 class LexiconEntry:
     '''
-    As frozen is true no values can be assigned after creation of an instance of
-    this class.
+    A LexiconEntry contains the `semantic_tags` that are associated with a
+    `lemma` and optionally the lemma's `POS`.
+
+    As frozen is true, the attributes cannot be assigned another value.
+
+    **Note** the parameters to the `__init__` are the same as the Instance
+    Attributes.
+
+    # Instance Attributes
+
+    lemma: `str`
+        The lemma of a token or the token itself.
+    semantic_tags: `List[str]`
+        The semantic tags associated with the `lemma` and optional `POS`.
+        The semantic tags are in rank order, the most likely tag associated
+        tag is the first tag in the list.
+    pos: `str`, optional (default = `None`)
+        The Part Of Speech (POS) to be associated with the `lemma`.
     '''
 
     lemma: str
@@ -24,24 +40,41 @@ class LexiconEntry:
 
 class LexiconCollection(MutableMapping):
     '''
-    This is a dictionary object that will hold LexiconEntry data in a fast to
+    This is a dictionary object that will hold :class:`LexiconEntry` data in a fast to
     access object. The keys of the dictionary are expected to be either just a
     lemma or a combination of lemma and pos in the following format:
-    {lemma}|{pos}
+    `{lemma}|{pos}` e.g. `Car|Noun`.
 
     The value to each key is the associated semantic tags, whereby the semantic
     tags are in rank order, the most likely tag is the first tag in the list.
-    For example in the collection below, for the lemma London with a POS tag noun
-    the most likely semantic tag is Z3 and the least likely tag is A1:
+    
+    **Note** that the `lemma` can be the token
+    itself rather than just it's base form, e.g. can be `Cars` rather than `Car`.
+
+    # Parameters
+
+    data: `Dict[str, List[str]]`, optional (default = `None`)
+
+    # Instance Attributes
+
+    data: `Dict[str, List[str]]`
+        Dictionary where the keys are `{lemma}|{pos}` and the values are
+        a list of associated semantic tags. If the `data` parameter given was
+        `None` then the value of this attribute will be an empty dictionary.
+
+    # Examples
+    ``` python
+    >>> from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
+    >>> lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
+    >>> collection = LexiconCollection()
+    >>> collection.add_lexicon_entry(lexicon_entry)
+    >>> most_likely_tag = collection['London|noun'][0]
+    >>> assert most_likely_tag == 'Z3'
+    >>> least_likely_tag = collection['London|noun'][-1]
+    >>> assert least_likely_tag == 'A1'
 
     ```
-    from pymusas.lexicon_collection import LexiconEntry, LexiconCollection
-    lexicon_entry = LexiconEntry('London', ['Z3', 'Z1', 'A1'], 'noun')
-    collection = LexiconCollection()
-    collection.add_lexicon_entry(lexicon_entry)
-    most_likely_tag = collection['London|noun'][0]
-    least_likely_tag = collection['London|noun'][-1]
-    ```
+
     '''
     
     def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
@@ -50,56 +83,24 @@ class LexiconCollection(MutableMapping):
         if data is not None:
             self.data = data
 
-    def __setitem__(self, key: str, value: List[str]) -> None:
-        self.data[key] = value
-
-    def __getitem__(self, key: str) -> List[str]:
-        return self.data[key]
-
-    def __delitem__(self, key: str) -> None:
-        del self.data[key]
-
-    def __len__(self) -> int:
-        return len(self.data)
-
-    def __iter__(self) -> Generator[str, None, None]:
-        for key in self.data:
-            yield key
-
-    def __str__(self) -> str:
-        '''
-        Human readable string.
-        '''
-        object_str = 'LexiconCollection('
-        for index, item in enumerate(self.items()):
-            object_str += f"('{item[0]}': {item[1]}), "
-            if index == 1:
-                object_str += '... '
-                break
-        object_str += f') ({len(self)} entires in the collection)'
-        return object_str
-
-    def __repr__(self) -> str:
-        '''
-        Machine readable string. When printed and run eval() over the string
-        you should be able to recreate the object.
-        '''
-        return f'{self.__class__.__name__}(data={self.data})'
-
     def add_lexicon_entry(self, value: LexiconEntry,
                           include_pos: bool = True) -> None:
         '''
-        Will add the LexiconEntry to the collection, whereby the key is the
-        combination of the lemma and pos and the value is the semantic tags.
+        Will add the :class:`LexiconEntry` to the collection, whereby the key is the
+        combination of the lemma and pos and the value are the semantic tags.
         
-        The lemma and pos are combined as follows:
-        {lemma}|{pos}
+        The lemma and pos are combined as follows: `{lemma}|{pos}`, e.g.
+        `Car|Noun`
 
-        If the pos value is None then then only the lemma is used, e.g.:
-        {lemma}
+        If the pos value is None then then only the lemma is used: `{lemma}`,
+        e.g. `Car`
 
-        :param value: A LexiconEntry.
-        :param include_pos: Whether to include the POS tag within the key.
+        # Parameters
+
+        value: `LexiconEntry`
+            Lexicon Entry to add to the collection.
+        include_pos: `bool`, optional (default = `True`)
+            Whether to include the POS tag within the key.
         '''
         lemma = value.lemma
         if value.pos is not None and include_pos:
@@ -108,7 +109,11 @@ class LexiconCollection(MutableMapping):
 
     def to_dictionary(self) -> Dict[str, List[str]]:
         '''
-        :returns: The dictionary object that stores all of the data.
+        Returns the `data` instance attribute.
+
+        # Returns
+
+        `Dict[str, List[str]]`
         '''
 
         return self.data
@@ -117,33 +122,73 @@ class LexiconCollection(MutableMapping):
     def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
                  ) -> Dict[str, List[str]]:
         '''
+        Given a `tsv_file_path` it will return a dictionary object that can
+        be used to create a :class:`LexiconCollection`.
+
+        Each line in the TSV file will be read in as a :class:`LexiconEntry`
+        and added to a temporary :class:`LexiconCollection`, once all lines
+        in the TSV have been parsed the return value is the `data` attribute of
+        the temporary :class:`LexiconCollection`.
+
+        If the file path is a URL, the file will be downloaded and cached using
+        :func:`pymusas.file_utils.download_url_file`.
+        
         If `include_pos` is True and the TSV file does not contain a
         `pos` field heading then this will return a LexiconCollection that is
         identical to a collection that ran this method with `include_pos` equal
         to False.
 
-        If the file path is a URL, the file will be downloaded and cached using
-        `file_utils.download_url_file` function.
+        Code reference, the identification of a URL and the idea to do this has
+        come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205)
 
-        Reference, the identification of a URL and the idea to do this has
-        come from the AllenNLP library:
-        https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205
+        # Parameters
 
-        :param tsv_file_path: A path or URL to a TSV file that contains at least two
-                              fields with the following headings: 1. `lemma`,
-                              and 2. `semantic_tags`. With an optional field
-                              `pos`. All other fields will be ignored.
-                              Each row will be used to create a `LexiconEntry`
-                              which will then be added to the returneds
-                              `LexiconCollection`
-        :param include_pos: Whether to include the POS tag in the key when
-                            adding the `LexiconEntry` into the returned
-                            `LexiconCollection`. For more information on this
-                            see the `add_lexicon_entry` method.
-        :returns: A dictionary object that can be used to create a
-                  `LexiconCollection`
-        :raises: ValueError if the minimum field headings, lemma and
-                 semantic_tags, do not exist in the given TSV file.
+        tsv_file_path: `Union[PathLike, str]`
+            A file path or URL to a TSV file that contains at least two
+            fields, with an optional third, with the following headings:
+            
+            1. `lemma`,
+            2. `semantic_tags`
+            3. `pos` (Optional)
+            
+            All other fields will be ignored.
+        include_pos: `bool`, optional (default = `True`)
+            Whether to include the POS information, if the information is avaliable,
+            or not. See :func:`add_lexicon_entry` for more information on this
+            parameter.
+
+        # Returns
+        
+        `Dict[str, List[str]]`
+        
+        # Raises
+        
+        `ValueError`
+            If the minimum field headings, `lemma` and `semantic_tags`, do not
+            exist in the given TSV file.
+
+        # Examples
+
+        `include_pos` = `True`
+        ``` python
+        >>> from pymusas.lexicon_collection import LexiconCollection
+        >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+        >>> welsh_lexicon_dict = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+        >>> welsh_lexicon_collection = LexiconCollection(welsh_lexicon_dict)
+        >>> assert welsh_lexicon_dict['ceir|noun'][0] == 'M3fn'
+        >>> assert welsh_lexicon_dict['ceir|verb'][0] == 'A9+'
+
+        ```
+
+        `include_pos` = `False`
+        ``` python
+        >>> from pymusas.lexicon_collection import LexiconCollection
+        >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+        >>> welsh_lexicon_dict = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
+        >>> welsh_lexicon_collection = LexiconCollection(welsh_lexicon_dict)
+        >>> assert welsh_lexicon_dict['ceir'][0] == 'M3fn'
+
+        ```
         '''
         minimum_field_names = {'lemma', 'semantic_tags'}
         extra_field_names = ['pos']
@@ -187,3 +232,39 @@ class LexiconCollection(MutableMapping):
                                                       include_pos=include_pos)
         
         return collection_from_tsv.to_dictionary()
+
+    def __setitem__(self, key: str, value: List[str]) -> None:
+        self.data[key] = value
+
+    def __getitem__(self, key: str) -> List[str]:
+        return self.data[key]
+
+    def __delitem__(self, key: str) -> None:
+        del self.data[key]
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> Generator[str, None, None]:
+        for key in self.data:
+            yield key
+
+    def __str__(self) -> str:
+        '''
+        Human readable string.
+        '''
+        object_str = 'LexiconCollection('
+        for index, item in enumerate(self.items()):
+            object_str += f"('{item[0]}': {item[1]}), "
+            if index == 1:
+                object_str += '... '
+                break
+        object_str += f') ({len(self)} entires in the collection)'
+        return object_str
+
+    def __repr__(self) -> str:
+        '''
+        Machine readable string. When printed and run `eval()` over the string
+        you should be able to recreate the object.
+        '''
+        return f'{self.__class__.__name__}(data={self.data})'
