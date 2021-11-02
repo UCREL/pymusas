@@ -210,6 +210,7 @@ class AllenNlpDocstringProcessor(Processor):
             
             if state.codeblock_opened:
                 line = re.sub(r'^>>>\w*', '', line)
+                line = line.lstrip(' ')
                 if line.strip() == '':
                     continue
 
