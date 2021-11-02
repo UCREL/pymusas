@@ -30,7 +30,7 @@ logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
-CROSS_REF_RE = re.compile("(:(class|func|mod):`~?([a-zA-Z0-9_.]+)`)")
+CROSS_REF_RE = re.compile("(:(class|func|mod|var):`~?([a-zA-Z0-9_.]+)`)")
 BASE_MODULE = 'pymusas'
 API_BASE_URL = '/pymusas/api/'
 BASE_SOURCE_LINK = "https://github.com/UCREL/pymusas/blob/main/pymusas/"
@@ -59,6 +59,8 @@ class Section(Enum):
     @classmethod
     def from_str(cls, section: str) -> "Section":
         section = section.upper()
+        if section == 'CLASS ATTRIBUTES' or section == 'INSTANCE ATTRIBUTES':
+            return cls.ATTRIBUTES
         for member in cls:
             if section == member.value:
                 return member
@@ -580,6 +582,12 @@ class CustomFilterProcessor(Processor):
                 return True
             if members:
                 return True
+            if isinstance(obj, docspec.Indirection):
+                return False
+            if isinstance(obj, docspec.Module) and obj.docstring:
+                return True
+            if isinstance(obj, docspec.Data):
+                return True
             if self.skip_empty_modules and isinstance(obj, docspec.Module) and not members:
                 return False
             if self.do_not_filter_modules and isinstance(obj, docspec.Module):
@@ -591,7 +599,6 @@ class CustomFilterProcessor(Processor):
             if self.exclude_special and obj.name in self.SPECIAL_MEMBERS:
                 return False
             return True
-
         if self.expression:
             scope = {'name': obj.name, 'obj': obj, 'default': _check}
             return bool(eval(self.expression, scope))  # pylint: disable=eval-used

@@ -116,7 +116,7 @@ class USASRuleBasedTagger():
         The lexicon data structure with only lemma information mapped to
         a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
 
-    # Attributes
+    # Instance Attributes
 
     lexicon_lookup : `Dict[str, List[str]]`
         The given `lexicon_lookup` data, if that was `None` then this becomes

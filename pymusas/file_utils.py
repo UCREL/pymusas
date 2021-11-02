@@ -12,14 +12,16 @@ from . import config
 
 def _session_with_backoff() -> requests.Session:
     """
-    Reference AllenNLP:
-    https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L510
-
     We ran into an issue where http requests to s3 were timing out,
     possibly because we were making too many requests too quickly.
     This helper function returns a requests session that has retry-with-backoff
-    built in. See
-    <https://stackoverflow.com/questions/23267409/how-to-implement-retry-mechanism-into-python-requests-library>.
+    built in. See this [Stack Overflow post.](https://stackoverflow.com/questions/23267409/how-to-implement-retry-mechanism-into-python-requests-library>.)
+    
+    Code reference [AllenNLP](https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L510)
+
+    # Returns
+
+    `requests.Session`
     """
     session = requests.Session()
     retries = Retry(total=5, backoff_factor=1, status_forcelist=[502, 503, 504])
@@ -31,11 +33,18 @@ def _session_with_backoff() -> requests.Session:
 
 def _resource_to_filename(resource: str) -> str:
     """
-    Reference AllenNLP:
-    https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L121
+    Converts a `resource` into a hashed filename in a repeatable way.
 
-    Convert a `resource` into a hashed filename in a repeatable way.
-    :returns: The sha256 hash of the `resource` string.
+    Code reference [AllenNLP](https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L121)
+    
+    # Parameters
+
+    resource: `str`
+        The filename to be hashed.
+
+    # Returns
+
+    `str`
     """
     resource_bytes = resource.encode("utf-8")
     resource_hash = sha256(resource_bytes)
@@ -46,15 +55,23 @@ def _resource_to_filename(resource: str) -> str:
 
 def download_url_file(url: str) -> str:
     '''
-    Reference AllenNLP:
-    https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L536
+    Returns a path to the contents download from the `url`.
 
     This function will first check if the downloaded content already exists
-    based on a cached file within the `config.PYMUSAS_CACHE_HOME` directory.
+    based on a cached file within the :var:`pymusas.config.PYMUSAS_CACHE_HOME` directory.
     If it does then the cached file path will be returned else the the content
     will be downloaded and cached.
 
-    :returns: A path to the contents download from the `url`.
+    Code reference [AllenNLP](https://github.com/allenai/allennlp/blob/e5d332a592a8624e1f4ee7a9a7d30a90991db83c/allennlp/common/file_utils.py#L536)
+
+    # Parameters
+
+    url: `str`
+        The URL address to the file to be downloaded.
+ 
+    # Returns
+
+    `str`
     '''
     cache_dir = config.PYMUSAS_CACHE_HOME
     os.makedirs(cache_dir, exist_ok=True)

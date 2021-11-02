@@ -19,6 +19,36 @@ class LexiconEntry
 As frozen is true no values can be assigned after creation of an instance of
 this class.
 
+<a id="pymusas.lexicon_collection.LexiconEntry.lemma"></a>
+
+#### lemma
+
+```python
+class LexiconEntry:
+ | ...
+ | lemma: str = None
+```
+
+<a id="pymusas.lexicon_collection.LexiconEntry.semantic_tags"></a>
+
+#### semantic\_tags
+
+```python
+class LexiconEntry:
+ | ...
+ | semantic_tags: List[str] = None
+```
+
+<a id="pymusas.lexicon_collection.LexiconEntry.pos"></a>
+
+#### pos
+
+```python
+class LexiconEntry:
+ | ...
+ | pos: Optional[str] = None
+```
+
 <a id="pymusas.lexicon_collection.LexiconCollection"></a>
 
 ## LexiconCollection

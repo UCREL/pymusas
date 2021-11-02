@@ -6,6 +6,14 @@
 
 ---
 
+<a id="pymusas.taggers.rule_based.logger"></a>
+
+#### logger
+
+```python
+logger = logging.getLogger(__name__)
+```
+
 <a id="pymusas.taggers.rule_based.USASRuleBasedTagger"></a>
 
 ## USASRuleBasedTagger
@@ -62,7 +70,7 @@ lemmatised, and POS tagged:
     The lexicon data structure with only lemma information mapped to
     a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
 
-<h4 id="usasrulebasedtagger.attributes">Attributes<a className="headerlink" href="#usasrulebasedtagger.attributes" title="Permanent link">&para;</a></h4>
+<h4 id="usasrulebasedtagger.instance_attributes">Instance Attributes<a className="headerlink" href="#usasrulebasedtagger.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
 - __lexicon\_lookup__ : `Dict[str, List[str]]` <br/>

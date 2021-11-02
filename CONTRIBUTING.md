@@ -35,100 +35,50 @@ In all cases you may need to add this requirement to the `tool.isort` section `k
 ### Writing docstrings
 [A lot of this has been copied from the AllenNLP CONTRIBUTING guidelines, which I think are really great!](https://github.com/allenai/allennlp/blob/main/CONTRIBUTING.md)
 
-Our docstrings are written in a syntax that is essentially just Markdown with additional special syntax for writing parameter descriptions and linking to within project modules, classes, and functions.
+Our docstrings are written in a syntax that is essentially just Markdown with additional special syntax for writing parameter descriptions and linking to within project modules, classes, functions, and attributes.
 
-Class docstrings should start with a description of the class, followed by a `# Parameters` section that lists the names, types, and purpose of all parameters to the class's `__init__()` method.
+#### Class docstrings
 
-Parameter descriptions should look like:
+Class docstrings should start with a description of the class, followed by a `# Parameters` section that lists the names, types, and purpose of all parameters to the class's `__init__()` method. In addition the class docstring should list both the class and instance level attributes using the `# Class Attributes` and `# Instance Attributes` sections, if any such attributes exists.
 
-```
+#### Module docstrings
+
+Module docstrings can start with a description of the module, within that description in can include an `# Attributes` section that lists the (global) variables that can be accessed through the module. In some case the `# Attributes` you list do not have to be a complete list, but rather a list of the attributes that need explaining.
+
+#### Method and Function docstrings
+
+Method and function docstrings should on their first sentence/paragraph describe what it does and what the return value is (if it returns anything).
+
+#### Valid docstring sections
+
+1. `# Parameters`, should like:
+
+``` markdown
+# Parameters
+
 name : `type`
     Description of the parameter, indented by four spaces.
 ```
 
 Optional parameters can also be written like this:
 
-```
+``` markdown
+# Parameters
+
 name : Optional[`type`], optional (default = `default_value`)
     Description of the parameter, indented by four spaces.
 ```
 
 Sometimes you can omit the description if the parameter is self-explanatory.
 
-Method and function docstrings are similar, but should also include a `# Returns` section when the return value is not obvious. Other valid sections are
+2. `# Attributes`, for listing attributes within a **module** docstring. These should be formatted in the same way as parameters.
+3. `# Class Attributes` and `# Instance Attributes`, for listing class and instance attributes within a **class** docstring. These should be formatted in the same way as parameters.
+4. `# Raises`, for listing any errors that the function or method might intentionally raise.
+5. `# Examples`, where you can include code snippets -- these code snippets will be tested using [doctest with pytest](https://docs.pytest.org/en/6.2.x/doctest.html), these tests ensure that the example code snippet will run as expected, if the example is not expected to output anything leave a blank like between the last `>>>` line and ``` as shown in the. Examples of `# Examples`
 
-- `# Attributes`, for listing class attributes. These should be formatted in the same
-    way as parameters.
-- `# Raises`, for listing any errors that the function or method might intentionally raise.
-- `# Examples`, where you can include code snippets -- these code snippets will be tested using [doctest with pytest](https://docs.pytest.org/en/6.2.x/doctest.html), these tests ensure that the example code snippet will run as expected, if the example is not expected to output anything leave a blank like between the last `>>>` line and ``` as shown in the [example below](#example-docstring). For more information on doctest see the [doctest documentation](https://docs.python.org/3/library/doctest.html)
-
-To create hyper links to within project modules, classes, and functions write:
-
-- :class:`pymusas.basic_tagger.RuleBasedTagger`
-- :mod:`pymusas.basic_tagger`
-- :func:`pymusas.file_utils.download_url_file`
-
-If the within project reference is within the same file you do not have to include the project or modules names, for example the above could be re-written like so:
-
-- :class:`RuleBasedTagger`
-- :mod:`basic_tagger`
-- :func:`download_url_file`
-
-#### Example docstrings
-
-##### Class
-```
-The USAS Rule Based Tagger is based around the
-[USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
-The Tagger expects two Lexicon like data structure, both in the format of
-`Dict[str, List[str]]`, this structure maps a lemma (with or without it's
-Part Of Speech (POS)) to a `List` of USAS semantic tags. The easiest way
-of producing such a data structure is through
-:func:`pymusas.lexicon_collection.from_tsv`
-whereby the TSV file path would be to a USAS Semantic Lexicon.
-
-The class requires two Lexicon data structure the first, `lexicon_lookup`,
-requires both the lemma and POS, whereas the second, `lemma_lexicon_lookup`,
-only requires the lemma.
-
-Using these lexicon lookups the following rules are applied to assign a
-`List` of USAS semantic tags from the lexicon lookups to the given tokens
-in the given text. The text given is assumed to have been tokenised,
-lemmatised, and POS tagged:
-
-**Rules:**
-
-1. If `POS==punc` label as `PUNCT`
-2. Lookup token and POS tag
-3. Lookup lemma and POS tag
-4. Lookup lower case token and POS tag
-5. Lookup lower case lemma and POS tag
-6. if `POS==num` label as `N1`
-7. Lookup token with any POS tag and choose first entry in lexicon.
-8. Lookup lemma with any POS tag and choose first entry in lexicon.
-9. Lookup lower case token with any POS tag and choose first entry in lexicon.
-10. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
-11. Label as `Z99`, this is the unmatched semantic tag.
-
-# Parameters
-
-lexicon_lookup : `Optional[List[str]]`, optional (default = `None`)
-    The lexicon data structure with both lemma and POS information mapped to
-    a `List` of USAS semantic tags e.g. `{'car_noun': ['Z2', 'Z1']}`
-lemma_lexicon_lookup : `Optional[List[str]]`, optional (default = `None`)
-    The lexicon data structure with only lemma information mapped to
-    a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
-
-# Attributes
-
-lexicon_lookup : `Dict[str, List[str]]`
-    The given `lexicon_lookup` data, if that was `None` then this becomes
-    an empty dictionary e.g. `{}`
-lemma_lexicon_lookup : `Dict[str, List[str]]`
-    The given `lemma_lexicon_lookup` data, if that was `None` then this
-    becomes an empty dictionary e.g. `{}`
-
+```` markdown
 # Examples
+
 ``` python
 >>> from pymusas.lexicon_collection import LexiconCollection
 >>> from pymusas.taggers.rule_based import USASRuleBasedTagger
@@ -137,8 +87,48 @@ lemma_lexicon_lookup : `Dict[str, List[str]]`
 >>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
 >>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
 
-\`\`\` 
-```
+``` 
+````
+
+The above expects no output as there is a blank line between `>>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)` and ```.
+
+However the example below expects the output of the last line to be `'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'`
+
+```` markdown
+# Examples
+
+``` python
+>>> from pymusas.lexicon_collection import LexiconCollection
+>>> from pymusas.taggers.rule_based import USASRuleBasedTagger
+>>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+>>> welsh_lexicon_url
+'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+``` 
+````
+
+For more information on doctest see the [doctest documentation](https://docs.python.org/3/library/doctest.html)
+
+
+#### Within project class, module, function, and attribute linking
+
+To create hyper links to within project modules, classes, functions, and variables write:
+
+- :class:`pymusas.basic_tagger.RuleBasedTagger`
+- :mod:`pymusas.basic_tagger`
+- :func:`pymusas.file_utils.download_url_file`
+- :var:`pymusas.config.PYMUSAS_CACHE_HOME`
+
+If the within project reference is within the same file you do not have to include the project or modules names, for example the above could be re-written like so:
+
+- :class:`RuleBasedTagger`
+- :mod:`basic_tagger`
+- :func:`download_url_file`
+- :var:`PYMUSAS_CACHE_HOME`
+
+#### Example docstrings
+
+TO DO.
+
 ## Website
 
 The documentation is built with [docusaurus v2](https://docusaurus.io/), a static site generator that is based on the [Jamstack](https://jamstack.org/) with pages generated through markup and can be enhanced using Javascript e.g. React components.
