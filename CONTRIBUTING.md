@@ -41,6 +41,14 @@ Our docstrings are written in a syntax that is essentially just Markdown with ad
 
 Class docstrings should start with a description of the class, followed by a `# Parameters` section that lists the names, types, and purpose of all parameters to the class's `__init__()` method. In addition the class docstring should list both the class and instance level attributes using the `# Class Attributes` and `# Instance Attributes` sections, if any such attributes exists.
 
+When the class is created using a [dataclass decorator](https://docs.python.org/3/library/dataclasses.html#dataclasses.dataclass) and the `# Parameters` to the `__init__` are the same as the `# Instance Attributes`, only write the `# Instance Attributes` section and leave a note just before the section stating they are the same, for example.
+
+``` markdown
+**Note** the parameters to the __init__ are the same as the Instance Attributes.
+
+# Instance Attributes
+```
+
 #### Module docstrings
 
 Module docstrings can start with a description of the module, within that description in can include an `# Attributes` section that lists the (global) variables that can be accessed through the module. In some case the `# Attributes` you list do not have to be a complete list, but rather a list of the attributes that need explaining.
