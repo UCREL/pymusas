@@ -100,7 +100,7 @@ Sometimes you can omit the description if the parameter is self-explanatory.
 
 The above expects no output as there is a blank line between `>>> tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)` and ```.
 
-However the example below expects the output of the last line to be `'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'`
+However the example below expects the output of the last line to be `'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'` **Note** that there is a new line between the expected output and ```.
 
 ```` markdown
 # Examples
@@ -111,6 +111,7 @@ However the example below expects the output of the last line to be `'https://ra
 >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
 >>> welsh_lexicon_url
 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+
 ``` 
 ````
 
