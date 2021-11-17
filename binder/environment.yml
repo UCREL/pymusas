@@ -11,7 +11,7 @@ dependencies:
     - "requests>=2.13.0,<3.0.0"
     - "pytest>=6.0.0"
     - "coverage[toml]>=6.0.0"
-    - "responses>=0.15.0"
+    - "responses>=0.16.0"
     - mypy==0.910
     - types-requests
     - "flake8>=3.8.0,<3.10.0"
