@@ -36,3 +36,12 @@ build-docker-docs:
 create-api-docs:
 	@rm -rf ${DOCS_API_DIR}
 	@python ./scripts/py2md.py ${DOCS_SRC}
+
+build-python-package:
+	@pip install --upgrade build twine
+	@python -m build
+
+test-release-to-pypi: build-python-packag
+	@python -m twine upload --repository pypi dist/*
+
+	
