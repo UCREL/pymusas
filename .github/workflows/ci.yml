@@ -123,3 +123,35 @@ jobs:
           git config --global user.email "andrew.p.moore94@gmail.com"
           git config --global user.name "Andrew Moore"
           if [ $(git diff-index binder-main | wc -l) -gt 0 ]; then git commit -m "update"; git push origin binder-main; fi
+
+  publish:
+    name: Publish to PyPI
+    needs: checks
+    runs-on: ubuntu-latest
+    if: ${{ github.repository }} == 'UCREL/pymusas' && ${{ github.event_name }} == 'push' && ${{ startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -- upgrade build twine
+      
+      - name: Build package
+        run: |
+          python -m build
+
+      - name: Twine check
+        run: python -m twine check
+      
+      - name: Upload to twine
+        run: |
+          python -m twine upload --repository pypi dist/*
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
