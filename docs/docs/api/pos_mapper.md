@@ -6,6 +6,12 @@
 
 ---
 
+<h4 id="pymusas.pos_mapper.attributes">Attributes<a className="headerlink" href="#pymusas.pos_mapper.attributes" title="Permanent link">&para;</a></h4>
+
+
+- __UD\_TO\_USAS\_CORE__ : `Dict[str, List[str]]` <br/>
+    A mapping from the Universal Dependencies (UD) tagset to the USAS core tagset.
+
 <a id="pymusas.pos_mapper.UD_TO_USAS_CORE"></a>
 
 #### UD\_TO\_USAS\_CORE

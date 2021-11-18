@@ -1,3 +1,9 @@
+'''
+# Attributes
+
+UD_TO_USAS_CORE: `Dict[str, List[str]]`
+    A mapping from the Universal Dependencies (UD) tagset to the USAS core tagset.
+'''
 from typing import Dict, List
 
 
