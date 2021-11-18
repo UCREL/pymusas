@@ -206,7 +206,7 @@ class LexiconCollection(MutableMapping):
         with open(tsv_file_path, 'r', newline='') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
             file_field_names: Set[str] = set()
-            if csv_reader.fieldnames is not None:
+            if csv_reader.fieldnames:
                 file_field_names = set(csv_reader.fieldnames)
             if minimum_field_names.issubset(file_field_names):
                 field_names_to_extract.extend(list(minimum_field_names))

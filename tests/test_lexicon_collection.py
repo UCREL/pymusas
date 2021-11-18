@@ -18,6 +18,7 @@ LEXICON_FILE_PATH = Path(DATA_DIR, 'lexicon.tsv')
 EXTRA_FIELDS_LEXICON_FILE_PATH = Path(DATA_DIR, 'extra_fields_lexicon.tsv')
 MINIMUM_LEXICON_FILE_PATH = Path(DATA_DIR, 'minimum_lexicon.tsv')
 ERROR_LEXICON_FILE_PATH = Path(DATA_DIR, 'error_lexicon.tsv')
+NO_HEADER_LEXICON_FILE_PATH = Path(DATA_DIR, 'no_header_lexicon.tsv')
 
 LEXICON_ENTRY = LexiconEntry('London', ['Z2'], 'noun')
 LEXICON_ENTRY_MULTI_SEM = LexiconEntry('Laptop', ['Z3', 'Z0'], 'noun')
@@ -187,6 +188,9 @@ def test_lexicon_collection_from_tsv() -> None:
     # present
     with pytest.raises(ValueError):
         LexiconCollection.from_tsv(ERROR_LEXICON_FILE_PATH)
+    # Test that it raises a ValueError when no fields names exist
+    with pytest.raises(ValueError):
+        LexiconCollection.from_tsv(NO_HEADER_LEXICON_FILE_PATH)
     
     # Test `include_pos`
     assert LexiconCollection.from_tsv(LEXICON_FILE_PATH, include_pos=False) == minimum_lexicon_collection
