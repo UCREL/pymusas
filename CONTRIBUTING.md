@@ -122,17 +122,17 @@ For more information on doctest see the [doctest documentation](https://docs.pyt
 
 To create hyper links to within project modules, classes, functions, and variables write:
 
-- :class:`pymusas.basic_tagger.RuleBasedTagger`
-- :mod:`pymusas.basic_tagger`
-- :func:`pymusas.file_utils.download_url_file`
-- :var:`pymusas.config.PYMUSAS_CACHE_HOME`
+- :class:\`pymusas.basic_tagger.RuleBasedTagger\`
+- :mod:\`pymusas.basic_tagger\`
+- :func:\`pymusas.file_utils.download_url_file\`
+- :var:\`pymusas.config.PYMUSAS_CACHE_HOME\`
 
 If the within project reference is within the same file you do not have to include the project or modules names, for example the above could be re-written like so:
 
-- :class:`RuleBasedTagger`
-- :mod:`basic_tagger`
-- :func:`download_url_file`
-- :var:`PYMUSAS_CACHE_HOME`
+- :class:\`RuleBasedTagger\`
+- :mod:\`basic_tagger\`
+- :func:\`download_url_file\`
+- :var:\`PYMUSAS_CACHE_HOME\`
 
 #### Example docstrings
 
