@@ -128,7 +128,7 @@ jobs:
     name: Publish to PyPI
     needs: checks
     runs-on: ubuntu-latest
-    if: ${{ github.repository }} == 'UCREL/pymusas' && ${{ github.event_name }} == 'push' && ${{ startsWith(github.ref, 'refs/tags/v') }}
+    if: github.repository == 'UCREL/pymusas' && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
     steps:
       - uses: actions/checkout@v2
 
@@ -147,7 +147,7 @@ jobs:
           python -m build
 
       - name: Twine check
-        run: python -m twine check
+        run: python -m twine check --strict dist/*
       
       - name: Upload to twine
         run: |
