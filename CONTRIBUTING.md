@@ -51,7 +51,7 @@ When the class is created using a [dataclass decorator](https://docs.python.org/
 
 #### Module docstrings
 
-Module docstrings can start with a description of the module, within that description in can include an `# Attributes` section that lists the (global) variables that can be accessed through the module. In some case the `# Attributes` you list do not have to be a complete list, but rather a list of the attributes that need explaining.
+Module docstrings can start with a description of the module, within that description it can include an `# Attributes` section that lists the (global) variables that can be accessed through the module. In some case the `# Attributes` you list do not have to be a complete list, but rather a list of the attributes that need explaining.
 
 #### Method and Function docstrings
 
