@@ -38,10 +38,11 @@ create-api-docs:
 	@python ./scripts/py2md.py ${DOCS_SRC}
 
 build-python-package:
+	@python -m pip install --upgrade pip
 	@pip install --upgrade build twine
 	@python -m build
 
-test-release-to-pypi: build-python-packag
-	@python -m twine upload --repository pypi dist/*
+check-twine: build-python-packag
+	@python -m twine check --strict dist/*
 
 	
