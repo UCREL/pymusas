@@ -61,6 +61,14 @@ coverage run -m pytest --doctest-modules pymusas/ # Runs the doc tests
 coverage report # Produces a report on the doc tests coverage
 ```
 
+#### Creating a build and checking it before release
+
+If you would like to build this project and check it with [twine](https://twine.readthedocs.io/en/latest/#twine-check) before release there is a make command that can do this, this command will install `build`, `twine`, and the latest version of `pip`:
+
+``` bash
+make check-twine
+```
+
 ## Benchmarking
 
 **NOTE** all of the benchmarking code requires a Linux based operating system due to the requirement to access the amount of memory used, using the [resource `getrusage` method.](https://docs.python.org/3/library/resource.html#resource.getrusage)
