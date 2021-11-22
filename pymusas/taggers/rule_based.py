@@ -1,11 +1,7 @@
-import logging
 from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 
 
-logger = logging.getLogger(__name__)
-
-
-def _tag_token(text: str, lemma: str, pos: str,
+def _tag_token(text: str, lemma: str, pos: List[str],
                lexicon_lookup: Dict[str, List[str]],
                lemma_lexicon_lookup: Dict[str, List[str]]
                ) -> List[str]:
@@ -21,8 +17,11 @@ def _tag_token(text: str, lemma: str, pos: str,
         The token's full text form e.g. `cars`
     lemma : `str`
         The token's lemma/base form e.g. `car`
-    pos : `str`
-        The token's Part Of Speech e.g. `Noun`
+    pos : `List[str]`
+        A list of the token's Part Of Speech e.g. `[Noun]`. Normally the list
+        should be of length 1, if it is larger than 1 then we assume these are
+        POS from a `pos_mapper`, therefore we follow the rules for the
+        `pos_mapper` as stated in the :class:`USASRuleBasedTagger` class doc string.
     lexicon_lookup : `Dict[str, List[str]]`
         The lexicon data structure with both lemma and POS information mapped to
         a `List` of USAS semantic tags e.g. `{'cars_noun': ['Z2', 'Z1']}`
@@ -34,29 +33,34 @@ def _tag_token(text: str, lemma: str, pos: str,
     
     `List[str]`
     '''
-    if pos == 'punc':
-        return ["PUNCT"]
+    if not isinstance(pos, list):
+        raise TypeError(f'The Part Of Speech (pos) should be of type `List`, not {type(pos)},'
+                        ' even if the List contains only 1 POS, which is expected'
+                        f' in most cases. Value of the erroneous pos: {pos}')
+    for pos_ in pos:
+        if pos_ == 'punc':
+            return ["PUNCT"]
 
-    text_pos = f"{text}|{pos}"
-    if text_pos in lexicon_lookup:
-        return lexicon_lookup[text_pos]
+        text_pos = f"{text}|{pos_}"
+        if text_pos in lexicon_lookup:
+            return lexicon_lookup[text_pos]
 
-    lemma_pos = f"{lemma}|{pos}"
-    if lemma_pos in lexicon_lookup:
-        return lexicon_lookup[lemma_pos]
+        lemma_pos = f"{lemma}|{pos_}"
+        if lemma_pos in lexicon_lookup:
+            return lexicon_lookup[lemma_pos]
 
-    text_lower = text.lower()
-    text_pos_lower = f"{text_lower}|{pos}"
-    if text_pos_lower in lexicon_lookup:
-        return lexicon_lookup[text_pos_lower]
+        text_lower = text.lower()
+        text_pos_lower = f"{text_lower}|{pos_}"
+        if text_pos_lower in lexicon_lookup:
+            return lexicon_lookup[text_pos_lower]
 
-    lemma_lower = lemma.lower()
-    lemma_pos_lower = f"{lemma_lower}|{pos}"
-    if lemma_pos_lower in lexicon_lookup:
-        return lexicon_lookup[lemma_pos_lower]
+        lemma_lower = lemma.lower()
+        lemma_pos_lower = f"{lemma_lower}|{pos_}"
+        if lemma_pos_lower in lexicon_lookup:
+            return lexicon_lookup[lemma_pos_lower]
 
-    if pos == 'num':
-        return ['N1']
+        if pos_ == 'num':
+            return ['N1']
 
     if text in lemma_lexicon_lookup:
         return lemma_lexicon_lookup[text]
@@ -77,16 +81,29 @@ class USASRuleBasedTagger():
     '''
     The USAS Rule Based Tagger is based around the
     [USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
-    The Tagger expects two Lexicon like data structure, both in the format of
+    The Tagger uses two Lexicon like data structure, both in the format of
     `Dict[str, List[str]]`, this structure maps a lemma (with or without it's
-    Part Of Speech (POS)) to a `List` of USAS semantic tags. The easiest way
-    of producing such a data structure is through
+    Part Of Speech (POS)) to a `List` of USAS semantic tags.
+    The first semantic tag in the `List` of tags is the most likely tag.
+    
+    The easiest way of producing the Lexicon like data structures is through
     :func:`pymusas.lexicon_collection.from_tsv`
     whereby the TSV file path would be to a USAS Semantic Lexicon.
     
-    The class requires two Lexicon data structure the first, `lexicon_lookup`,
-    requires both the lemma and POS, whereas the second, `lemma_lexicon_lookup`,
-    only requires the lemma.
+    The optional POS mapper is used in this tagger when the POS tagset within
+    the lexicon files does not match the tagset used by the POS model that has
+    been applied to the text. For instance a lot of the
+    [USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
+    use the USAS core tagset which does not align with the Universal Dependency
+    (UD) tagset that a lot of the [spaCy POS models](https://spacy.io/usage/linguistic-features#pos-tagging)
+    have in common (these are called the UPOS tags in the spaCy documentation). Therefore, when
+    using the UD tags from the spaCy POS model for tagging text using a USAS
+    Semantic lexicon with this tagger a POS mapper is required to map UD to
+    USAS core tags. The POS mapper is expected to map from the tagset of the POS model
+    to the tagset of the lexicon files, whereby the mapping is a `List`
+    of tags, the first tag in the list is assumed to be the most relevant
+    and the last to be the least. Some pre-compiled Dictionaries can be found in
+    the :mod:`pymusas.pos_mapper`, e.g. the UD to USAS core :var:`pymusas.pos_mapper.UD_TO_USAS_CORE`
 
     Using these lexicon lookups the following rules are applied to assign a
     `List` of USAS semantic tags from the lexicon lookups to the given tokens
@@ -95,26 +112,42 @@ class USASRuleBasedTagger():
 
     **Rules:**
 
-    1. If `POS==punc` label as `PUNCT`
-    2. Lookup token and POS tag
-    3. Lookup lemma and POS tag
-    4. Lookup lower case token and POS tag
-    5. Lookup lower case lemma and POS tag
-    6. if `POS==num` label as `N1`
-    7. Lookup token with any POS tag and choose first entry in lexicon.
-    8. Lookup lemma with any POS tag and choose first entry in lexicon.
-    9. Lookup lower case token with any POS tag and choose first entry in lexicon.
-    10. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
-    11. Label as `Z99`, this is the unmatched semantic tag.
+    1. **If `pos_mapper` is not `None`**, map the POS, from the POS model,
+    to the first POS value in the `List` from the `pos_mapper`s `Dict`. **If** the
+    `pos_mapper` cannot map the POS, from the POS model, go to step 9.
+    2. If `POS==punc` label as `PUNCT`
+    3. Lookup token and POS tag
+    4. Lookup lemma and POS tag
+    5. Lookup lower case token and POS tag
+    6. Lookup lower case lemma and POS tag
+    7. if `POS==num` label as `N1`
+    8. **If there is another POS value in the `pos_mapper`** go back to step 2
+    with this new POS value else carry on to step 9.
+    9. Lookup token with any POS tag and choose first entry in lexicon.
+    10. Lookup lemma with any POS tag and choose first entry in lexicon.
+    11. Lookup lower case token with any POS tag and choose first entry in lexicon.
+    12. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
+    13. Label as `Z99`, this is the unmatched semantic tag.
+
+    **NOTE** this tagger has been designed to be flexible with the amount of
+    resources avaliable, if you do not have a POS tagger then assign
+    the POS tag an empty string e.g. `''`. If you do not have a lexicon file with
+    POS information then `lexicon_lookup` can be `None`. However, the fewer
+    resources avaliable, less rules, stated above, will be applied making the
+    tagger less effective.
 
     # Parameters
 
-    lexicon_lookup : `Optional[List[str]]`, optional (default = `None`)
+    lexicon_lookup : `Dict[str, List[str]]`, optional (default = `None`)
         The lexicon data structure with both lemma and POS information mapped to
         a `List` of USAS semantic tags e.g. `{'car_noun': ['Z2', 'Z1']}`
-    lemma_lexicon_lookup : `Optional[List[str]]`, optional (default = `None`)
+    lemma_lexicon_lookup : `Dict[str, List[str]]`, optional (default = `None`)
         The lexicon data structure with only lemma information mapped to
         a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
+    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+        If not None, maps from the POS model tagset to the lexicon data
+        POS tagset, whereby the mapping is a `List` of tags, the first tag in
+        the list is assumed to be the most relevant and the last to be the least.
 
     # Instance Attributes
 
@@ -124,6 +157,8 @@ class USASRuleBasedTagger():
     lemma_lexicon_lookup : `Dict[str, List[str]]`
         The given `lemma_lexicon_lookup` data, if that was `None` then this
         becomes an empty dictionary e.g. `{}`
+    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+        The given `pos_mapper`.
 
     # Examples
     ``` python
@@ -138,7 +173,8 @@ class USASRuleBasedTagger():
     '''
 
     def __init__(self, lexicon_lookup: Optional[Dict[str, List[str]]] = None,
-                 lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = None
+                 lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = None,
+                 pos_mapper: Optional[Dict[str, List[str]]] = None
                  ) -> None:
 
         self.lexicon_lookup: Dict[str, List[str]] = {}
@@ -148,13 +184,15 @@ class USASRuleBasedTagger():
         self.lemma_lexicon_lookup: Dict[str, List[str]] = {}
         if lemma_lexicon_lookup is not None:
             self.lemma_lexicon_lookup = lemma_lexicon_lookup
+        
+        self.pos_mapper = pos_mapper
 
     def tag_token(self, token: Tuple[str, str, str]) -> List[str]:
         '''
         Given a tokens with the relevant lingustic information it returns
-        a list of possible USAS semantic tags, tagged according
-        to the tagger's rules (see class doc string for tagger's rules). The
-        first semantic tag in the `List` of tags is the most likely tag.
+        a list of USAS semantic tags, tagged according
+        to the tagger's rules (see the class's doc string for tagger's rules).
+        The first semantic tag in the `List` of tags is the most likely tag.
         
         # Parameters
 
@@ -172,7 +210,10 @@ class USASRuleBasedTagger():
 
         token_text = token[0]
         lemma = token[1]
-        pos = token[2]
+        initial_pos = token[2]
+        pos = [initial_pos]
+        if self.pos_mapper is not None:
+            pos = self.pos_mapper[initial_pos]
 
         return _tag_token(token_text, lemma, pos, self.lexicon_lookup,
                           self.lemma_lexicon_lookup)
@@ -181,8 +222,8 @@ class USASRuleBasedTagger():
                    ) -> Iterator[List[str]]:
         '''
         Given a list/iterable of tokens with the relevant lingustic
-        information it returns for each token a list of possible USAS semantic
-        tags, tagged according to the tagger's rules (see class doc string for
+        information it returns for each token a list of USAS semantic
+        tags, tagged according to the tagger's rules (see the class's doc string for
         tagger's rules). The first semantic tag in the `List` of tags is the
         most likely tag.
         

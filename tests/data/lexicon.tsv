@@ -1,6 +1,9 @@
 lemma	pos	semantic_tags
 London	noun	Z2
 has	det	A1
+has	art	A2
+it	art	A3
+i	noun	A4
 East	noun	Z1
 east	noun	Z2
 ano	det	A3

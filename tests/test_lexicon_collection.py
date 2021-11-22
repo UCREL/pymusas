@@ -171,7 +171,7 @@ def test_lexicon_collection_from_tsv() -> None:
 
     lexicon_collection = LexiconCollection.from_tsv(LEXICON_FILE_PATH)
     assert isinstance(lexicon_collection, dict)
-    assert 16 == len(lexicon_collection)
+    assert 19 == len(lexicon_collection)
     assert lexicon_collection['Laptop|noun'] == ['Z3', 'Z0']
 
     # Testing that additional fields are ignored.
@@ -179,8 +179,8 @@ def test_lexicon_collection_from_tsv() -> None:
 
     # Test file that contains only the minimum fields
     minimum_lexicon_collection = LexiconCollection.from_tsv(MINIMUM_LEXICON_FILE_PATH)
-    # 15 and not 16 as one of the entries is repeated in the TSV file
-    assert 15 == len(minimum_lexicon_collection)
+    # 17 and not 19 as one of the entries is repeated in the TSV file
+    assert 17 == len(minimum_lexicon_collection)
     assert minimum_lexicon_collection['Laptop'] == ['Z3', 'Z0']
     assert minimum_lexicon_collection != lexicon_collection
 
@@ -197,7 +197,7 @@ def test_lexicon_collection_from_tsv() -> None:
 
     # Test using a string rather than a Path like object
     lexicon_collection = LexiconCollection.from_tsv(str(LEXICON_FILE_PATH))
-    assert 16 == len(lexicon_collection)
+    assert 19 == len(lexicon_collection)
     assert lexicon_collection['Laptop|noun'] == ['Z3', 'Z0']
     
     # Test using a URL
