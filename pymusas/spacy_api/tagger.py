@@ -31,7 +31,7 @@ class RuleBasedTagger:
         for token in doc:
             text = token.text
             lemma = token.lemma_
-            pos = token.pos_
+            pos = [token.pos_]
             semantic_tags = _tag_token(text, lemma, pos,
                                        self.lexicon_lookup,
                                        self.lexicon_lemma_lookup)
