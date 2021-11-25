@@ -1,14 +1,14 @@
 import json
 from pathlib import Path
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pytest
-from spacy.tokens import Token, Doc
 from spacy.language import Language
+from spacy.tokens import Doc
 from spacy.vocab import Vocab
 
 from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger, make_usas_rule_based_tagger
+from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
 
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
@@ -163,6 +163,7 @@ def test_call() -> None:
     usas_tagger(test_doc)
     predicted_usas_tags = [token._.usas_tags for token in test_doc]
     assert expected_usas_tags == predicted_usas_tags
+
 
 '''
 def test__tag_token() -> None:
