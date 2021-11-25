@@ -46,7 +46,7 @@ def generate_tag_test_data(test_data_file: Path, lexicon_file: Path
     
     # Returns
 
-    `Tuple[List[Tuple[str, str, str]], Path, List[List[str]]]`
+    `Tuple[List[Tuple[str, str, str]], Dict[str, List[str]], Dict[str, List[str]], List[List[str]]]`
     '''
     test_data: List[Tuple[str, str, str]] = []
     
