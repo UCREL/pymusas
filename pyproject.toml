@@ -26,7 +26,8 @@ strict_equality = true
 module = [
     'urllib3.*', 
     'tqdm.*',
-    'pydoc_markdown.*'
+    'pydoc_markdown.*',
+    'spacy.vocab'
 ]
 ignore_missing_imports = true
 
