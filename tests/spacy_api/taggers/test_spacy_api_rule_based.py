@@ -159,7 +159,6 @@ def test_call() -> None:
                           'lemma_lexicon_lookup': lemma_lexicon_lookup}
     nlp = Language(Vocab(), meta={"name": "example"})
     usas_tagger = nlp.add_pipe('usas_tagger', 'semantic tagger', config=usas_tagger_config)
-    assert isinstance(usas_tagger, USASRuleBasedTagger)
     usas_tagger(test_doc)
     predicted_usas_tags = [token._.usas_tags for token in test_doc]
     assert expected_usas_tags == predicted_usas_tags
