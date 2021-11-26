@@ -163,6 +163,17 @@ def test_call() -> None:
     predicted_usas_tags = [token._.usas_tags for token in test_doc]
     assert expected_usas_tags == predicted_usas_tags
 
+    # Tets that it works with a POS mapper
+    pos_map_test_data_file = Path(DATA_DIR, 'rule_based_input_output_pos_mapped.json')
+    (test_doc, lexicon_lookup,
+     lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
+    nlp = Language(Vocab(), meta={"name": "example"})
+    usas_tagger_config['pos_mapper'] = POS_MAPPER
+    usas_tagger = nlp.add_pipe('usas_tagger', 'semantic tagger', config=usas_tagger_config)
+    usas_tagger(test_doc)
+    predicted_usas_tags = [token._.usas_tags for token in test_doc]
+    assert expected_usas_tags == predicted_usas_tags
+
 
 '''
 def test__tag_token() -> None:
