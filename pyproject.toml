@@ -27,7 +27,8 @@ module = [
     'urllib3.*', 
     'tqdm.*',
     'pydoc_markdown.*',
-    'spacy.vocab'
+    'spacy.vocab',
+    'srsly.*'
 ]
 ignore_missing_imports = true
 

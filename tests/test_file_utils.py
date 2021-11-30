@@ -1,5 +1,6 @@
 import importlib
 import os
+from pathlib import Path
 import tempfile
 
 import pytest
@@ -11,6 +12,14 @@ from pymusas import config, file_utils
 
 DOWNLOAD_URL = 'https://ucrel-web.lancs.ac.uk/usas/semtags.txt'
 EXPECTED_RESPONSE = 'Hello World\nPymusas'
+
+
+def test_ensure_path() -> None:
+    # Test Path type as input
+    test_path = Path(__file__)
+    assert test_path == file_utils.ensure_path(test_path)
+    # Test str type as input
+    assert Path(__file__) == file_utils.ensure_path(__file__)
 
 
 @pytest.mark.parametrize('dir_exists', [True, False])

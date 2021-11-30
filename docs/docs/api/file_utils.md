@@ -6,6 +6,29 @@
 
 ---
 
+<a id="pymusas.file_utils.ensure_path"></a>
+
+### ensure\_path
+
+```python
+def ensure_path(path: Union[str, Path]) -> Path
+```
+
+Ensure string is converted to a Path.
+
+This is a more restrictive version of spaCy's [ensure_path](https://github.com/explosion/spaCy/blob/ac05de2c6c708e33ebad6c901e674e1e8bdc0688/spacy/util.py#L358)
+
+<h4 id="ensure_path.parameters">Parameters<a className="headerlink" href="#ensure_path.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __path__ : `Union[str, Path]` <br/>
+    If string, it's converted to Path.
+
+<h4 id="ensure_path.returns">Returns<a className="headerlink" href="#ensure_path.returns" title="Permanent link">&para;</a></h4>
+
+
+- `Path` <br/>
+
 <a id="pymusas.file_utils.download_url_file"></a>
 
 ### download\_url\_file

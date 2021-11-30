@@ -1,6 +1,7 @@
 from hashlib import sha256
 import os
 from pathlib import Path
+from typing import Union
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -8,6 +9,26 @@ from tqdm import tqdm
 from urllib3.util.retry import Retry
 
 from . import config
+
+
+def ensure_path(path: Union[str, Path]) -> Path:
+    """
+    Ensure string is converted to a Path.
+    
+    This is a more restrictive version of spaCy's [ensure_path](https://github.com/explosion/spaCy/blob/ac05de2c6c708e33ebad6c901e674e1e8bdc0688/spacy/util.py#L358)
+    
+    # Parameters
+
+    path : `Union[str, Path]`
+        If string, it's converted to Path.
+    
+    # Returns
+
+    `Path`
+    """
+    if isinstance(path, str):
+        return Path(path)
+    return path
 
 
 def _session_with_backoff() -> requests.Session:
