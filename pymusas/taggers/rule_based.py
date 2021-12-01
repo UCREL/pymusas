@@ -213,7 +213,7 @@ class USASRuleBasedTagger():
         initial_pos = token[2]
         pos = [initial_pos]
         if self.pos_mapper is not None:
-            pos = self.pos_mapper[initial_pos]
+            pos = self.pos_mapper.get(initial_pos, [])
 
         return _tag_token(token_text, lemma, pos, self.lexicon_lookup,
                           self.lemma_lexicon_lookup)

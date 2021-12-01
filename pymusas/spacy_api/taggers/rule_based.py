@@ -119,7 +119,7 @@ class USASRuleBasedTagger:
             initital_pos = getattr(token, self.pos_attribute)
             pos = [initital_pos]
             if self.pos_mapper is not None:
-                pos = self.pos_mapper[initital_pos]
+                pos = self.pos_mapper.get(initital_pos, [])
             semantic_tags = _tag_token(text, lemma, pos,
                                        self.lexicon_lookup,
                                        self.lemma_lexicon_lookup)
