@@ -4,5 +4,5 @@
     {"token": "it", "lemma": "i", "pos": "DET", "usas": "A3"},
     {"token": "it", "lemma": "i", "pos": "NOUN", "usas": "A4"},
     {"token": "another", "lemma": "has", "pos": "obj", "usas": "A2"},
-    {"token": "eastt", "lemma": "eastt", "pos": "OOV", "usas": "C1"}
+    {"token": "HASNT", "lemma": "HAS", "pos": "OOV", "usas": "A2"}
 ]

@@ -37,6 +37,9 @@ def _tag_token(text: str, lemma: str, pos: List[str],
         raise TypeError(f'The Part Of Speech (pos) should be of type `List`, not {type(pos)},'
                         ' even if the List contains only 1 POS, which is expected'
                         f' in most cases. Value of the erroneous pos: {pos}')
+    text_lower = text.lower()
+    lemma_lower = lemma.lower()
+    
     for pos_ in pos:
         if pos_ == 'punc':
             return ["PUNCT"]
@@ -49,12 +52,10 @@ def _tag_token(text: str, lemma: str, pos: List[str],
         if lemma_pos in lexicon_lookup:
             return lexicon_lookup[lemma_pos]
 
-        text_lower = text.lower()
         text_pos_lower = f"{text_lower}|{pos_}"
         if text_pos_lower in lexicon_lookup:
             return lexicon_lookup[text_pos_lower]
 
-        lemma_lower = lemma.lower()
         lemma_pos_lower = f"{lemma_lower}|{pos_}"
         if lemma_pos_lower in lexicon_lookup:
             return lexicon_lookup[lemma_pos_lower]
