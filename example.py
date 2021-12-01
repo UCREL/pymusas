@@ -1,6 +1,6 @@
 import spacy
 
-from pymusas.spacy_api.taggers.rule_based import make_usas_rule_based_tagger
+from pymusas.spacy_api.taggers.rule_based import make_usas_rule_based_tagger # noqa
 from pymusas.lexicon_collection import LexiconCollection
 from pymusas.pos_mapper import UD_TO_USAS_CORE
 
