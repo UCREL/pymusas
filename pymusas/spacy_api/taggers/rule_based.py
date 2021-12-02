@@ -140,6 +140,39 @@ class USASRuleBasedTagger:
     def from_bytes(self, bytes_data: bytes, *,
                    exclude: Iterable[str] = SimpleFrozenList()
                    ) -> "USASRuleBasedTagger":
+        '''
+        This modifies the USASRuleBasedTagger in place and returns it. It loads
+        in the data from the given bytestring.
+
+        The easiest way to generate a bytestring to load from is through the
+        :func:`to_bytes` method.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+
+        exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
+            This currently does not do anything, please ignore it.
+
+        # Returns
+
+        :class:`USASRuleBasedTagger`
+
+        # Examples
+
+        ```python
+        >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+        >>> custom_lexicon = {'example|noun': ['A1']}
+        >>> tagger = USASRuleBasedTagger()
+        >>> tagger.lexicon_lookup = custom_lexicon
+        >>> tagger_bytes = tagger.to_bytes()
+        >>> new_tagger = USASRuleBasedTagger()
+        >>> _ = new_tagger.from_bytes(tagger_bytes)
+        >>> assert new_tagger.lexicon_lookup == tagger.lexicon_lookup
+
+        ```
+        '''
         serialise_data = srsly.msgpack_loads(bytes_data)
         self.lexicon_lookup = srsly.msgpack_loads(serialise_data['lexicon_lookup'])
         self.lemma_lexicon_lookup = srsly.msgpack_loads(serialise_data['lemma_lexicon_lookup'])
@@ -147,6 +180,27 @@ class USASRuleBasedTagger:
         return self
 
     def to_bytes(self, *, exclude: Iterable[str] = SimpleFrozenList()) -> bytes:
+        '''
+        Serialises the USAS tagger's lexicon lookups and POS mapper to a bytestring.
+
+        # Parameters
+
+        exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
+            This currently does not do anything, please ignore it.
+        
+        # Returns
+
+        `bytes`
+
+        # Examples
+
+        ```python
+        >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+        >>> tagger = USASRuleBasedTagger()
+        >>> tagger_bytes = tagger.to_bytes()
+
+        ```
+        '''
         serialise = {}
         serialise["lexicon_lookup"] = srsly.msgpack_dumps(self.lexicon_lookup)
         serialise["lemma_lexicon_lookup"] = srsly.msgpack_dumps(self.lemma_lexicon_lookup)
@@ -156,6 +210,46 @@ class USASRuleBasedTagger:
     def from_disk(self, path: Union[str, Path], *,
                   exclude: Iterable[str] = SimpleFrozenList()
                   ) -> "USASRuleBasedTagger":
+        '''
+        Loads the following information in place and returns the USASRuleBasedTagger
+        from the given `path`, we assume the `path` is an existing directory.
+        None of the following information is required to exist and no error or
+        debug information will be raised or outputted if it does not exist.
+
+        * `lexicon_lookup` -- loads from the following path `path/lexicon_lookup.json`
+        * `lemma_lexicon_lookup` --  loads from the following path `path/lemma_lexicon_lookup.json`
+        * `pos_mapper` -- loads from the following path `path/pos_mapper.json`
+
+        # Parameters
+
+        path : `Union[str, Path]`
+            Path to an existing direcotry. Path may be either strings or `Path`-like objects.
+        
+        exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
+            This currently does not do anything, please ignore it.
+
+        # Returns
+
+        :class:`USASRuleBasedTagger`
+
+        # Examples
+
+        ```python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
+        >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+        >>> tagger = USASRuleBasedTagger()
+        >>> tagger.lexicon_lookup = {'example|noun': ['A1']}
+        >>> new_tagger = USASRuleBasedTagger()
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     tagger.to_disk(temp_dir)
+        ...     _ = new_tagger.from_disk(temp_dir)
+        >>> assert new_tagger.lexicon_lookup == tagger.lexicon_lookup
+        >>> assert new_tagger.pos_mapper is None
+
+        ```
+
+        '''
         component_folder = ensure_path(path)
         lexicon_file = Path(component_folder, 'lexicon_lookup.json')
         if lexicon_file.exists():
@@ -174,6 +268,42 @@ class USASRuleBasedTagger:
     def to_disk(self, path: Union[str, Path], *,
                 exclude: Iterable[str] = SimpleFrozenList()
                 ) -> None:
+        '''
+        Saves the follwing information, if it exists, to the given `path`, we assume the `path`
+        is an existing directory.
+
+        * `lexicon_lookup` -- as a JSON file at the following path `path/lexicon_lookup.json`
+        * `lemma_lexicon_lookup` -- as a JSON file at the following path `path/lemma_lexicon_lookup.json`
+        * `pos_mapper` -- as a JSON file at the following path `path/pos_mapper.json`
+
+        # Parameters
+
+        path : `Union[str, Path]`
+            Path to an existing direcotry. Path may be either strings or `Path`-like objects.
+        
+        exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
+            This currently does not do anything, please ignore it.
+
+        # Returns
+
+        `None`
+
+        # Examples
+
+        ```python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
+        >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+        >>> tagger = USASRuleBasedTagger()
+        >>> tagger.lexicon_lookup = {'example|noun': ['A1']}
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     tagger.to_disk(temp_dir)
+        ...     assert Path(temp_dir, 'lexicon_lookup.json').exists()
+        ...     assert not Path(temp_dir, 'lemma_lexicon_lookup.json').exists()
+        ...     assert not Path(temp_dir, 'pos_mapper.json').exists()
+
+        ```
+        '''
         component_folder = ensure_path(path)
         component_folder.mkdir(exist_ok=True)
         if self.lexicon_lookup:
