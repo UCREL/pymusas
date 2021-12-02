@@ -208,6 +208,7 @@ new_tagger = USASRuleBasedTagger()
 with TemporaryDirectory() as temp_dir:
     tagger.to_disk(temp_dir)
     _ = new_tagger.from_disk(temp_dir)
+
 assert new_tagger.lexicon_lookup == tagger.lexicon_lookup
 assert new_tagger.pos_mapper is None
 ```

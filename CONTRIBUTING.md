@@ -82,7 +82,7 @@ Sometimes you can omit the description if the parameter is self-explanatory.
 2. `# Attributes`, for listing attributes within a **module** docstring. These should be formatted in the same way as parameters.
 3. `# Class Attributes` and `# Instance Attributes`, for listing class and instance attributes within a **class** docstring. These should be formatted in the same way as parameters.
 4. `# Raises`, for listing any errors that the function or method might intentionally raise.
-5. `# Examples`, where you can include code snippets -- these code snippets will be tested using [doctest with pytest](https://docs.pytest.org/en/6.2.x/doctest.html), these tests ensure that the example code snippet will run as expected, if the example is not expected to output anything leave a blank like between the last `>>>` line and ``` as shown in the. Examples of `# Examples`
+5. `# Examples`, where you can include code snippets -- these code snippets will be tested using [doctest with pytest](https://docs.pytest.org/en/6.2.x/doctest.html), these tests ensure that the example code snippet will run as expected, if the example is not expected to output anything leave a blank like between the last `>>>` line and ``` as shown in the following example for `# Examples`
 
 ```` markdown
 # Examples
@@ -114,6 +114,28 @@ However the example below expects the output of the last line to be `'https://ra
 
 ``` 
 ````
+
+We also have a custom way of including a blank line, this is achieved by using an ellipsis, `...`, without any whitespace after it, as shown in the example below after the following line `_ = new_tagger.from_disk(temp_dir)`:
+
+```` markdown
+# Examples
+
+```python
+>>> from tempfile import TemporaryDirectory
+>>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+>>> tagger = USASRuleBasedTagger()
+>>> tagger.lexicon_lookup = {'example|noun': ['A1']}
+>>> new_tagger = USASRuleBasedTagger()
+>>> with TemporaryDirectory() as temp_dir:
+...     tagger.to_disk(temp_dir)
+...     _ = new_tagger.from_disk(temp_dir)
+...
+>>> assert new_tagger.lexicon_lookup == tagger.lexicon_lookup
+>>> assert new_tagger.pos_mapper is None
+
+```
+````
+The blank line is required after an identation block so that if a user copies and pastes this example block of code into a Python interpreter/REPL it will run smoothly without syntax error.
 
 For more information on doctest see the [doctest documentation](https://docs.python.org/3/library/doctest.html)
 

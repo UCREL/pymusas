@@ -215,7 +215,9 @@ class AllenNlpDocstringProcessor(Processor):
                 if re.match(r'^\.\.\. ', line):
                     line = re.sub(r'^\.\.\. ', '', line)
                 
-                if line.strip() == '':
+                if re.match(r'^\.\.\.', line):
+                    line = re.sub(r'^\.\.\.', '', line)
+                elif line.strip() == '':
                     continue
 
             if not state.codeblock_opened:
