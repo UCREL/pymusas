@@ -209,8 +209,12 @@ class AllenNlpDocstringProcessor(Processor):
                 state.codeblock_opened = not state.codeblock_opened
             
             if state.codeblock_opened:
-                line = re.sub(r'^>>>\w*', '', line)
-                line = line.lstrip(' ')
+                if re.match(r'^>>>\w*', line):
+                    line = re.sub(r'^>>>\w*', '', line)
+                    line = line.lstrip(' ')
+                if re.match(r'^\.\.\. ', line):
+                    line = re.sub(r'^\.\.\. ', '', line)
+                
                 if line.strip() == '':
                     continue
 
