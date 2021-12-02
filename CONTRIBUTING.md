@@ -135,7 +135,7 @@ We also have a custom way of including a blank line, this is achieved by using a
 
 ```
 ````
-The blank line is required after an identation block so that if a user copies and pastes this example block of code into a Python interpreter/REPL it will run smoothly without syntax error.
+The blank line is required after an indentation block so that if a user copies and pastes this example block of code, from the [API documentation website](https://ucrel.github.io/pymusas/api/file_utils), into a Python interpreter/REPL it will run smoothly without syntax error.
 
 For more information on doctest see the [doctest documentation](https://docs.python.org/3/library/doctest.html)
 
