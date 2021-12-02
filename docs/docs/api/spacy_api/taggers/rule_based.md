@@ -6,14 +6,6 @@
 
 ---
 
-<a id="pymusas.spacy_api.taggers.rule_based.logger"></a>
-
-#### logger
-
-```python
-logger = logging.getLogger(__name__)
-```
-
 <a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger"></a>
 
 ## USASRuleBasedTagger

@@ -567,7 +567,7 @@ class CustomFilterProcessor(Processor):
     #: Skip modules with no content. Default: `false`.
     skip_empty_modules: bool = False
 
-    SPECIAL_MEMBERS = ('__path__', '__annotations__', '__name__', '__all__')
+    SPECIAL_MEMBERS = ('__path__', '__annotations__', '__name__', '__all__', 'logger')
     INCLUDED_MEMBERS = ('__init__')
 
     def process(self, modules: List[docspec.Module], resolver: Optional[Resolver]) -> None:
@@ -579,6 +579,8 @@ class CustomFilterProcessor(Processor):
         members = getattr(obj, 'members', [])
 
         def _check() -> bool:
+            if self.exclude_special and obj.name in self.SPECIAL_MEMBERS:
+                return False
             if obj.name in self.INCLUDED_MEMBERS:
                 return True
             if members:
@@ -596,8 +598,6 @@ class CustomFilterProcessor(Processor):
             if self.documented_only and not obj.docstring:
                 return False
             if self.exclude_private and obj.name.startswith('_') and not obj.name.endswith('_'):
-                return False
-            if self.exclude_special and obj.name in self.SPECIAL_MEMBERS:
                 return False
             return True
         if self.expression:
