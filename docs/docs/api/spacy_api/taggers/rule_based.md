@@ -21,6 +21,42 @@ class USASRuleBasedTagger:
  | ) -> None
 ```
 
+<a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class USASRuleBasedTagger:
+ | ...
+ | def to_bytes(
+ |     self,
+ |     *,
+ |     exclude: Iterable[str] = SimpleFrozenList()
+ | ) -> bytes
+```
+
+Serialises the USAS tagger's lexicon lookups and POS mapper to a bytestring.
+
+<h4 id="to_bytes.parameters">Parameters<a className="headerlink" href="#to_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __exclude__ : `Iterable[str]`, optional (default = `SimpleFrozenList()`) <br/>
+    This currently does not do anything, please ignore it.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<h4 id="to_bytes.examples">Examples<a className="headerlink" href="#to_bytes.examples" title="Permanent link">&para;</a></h4>
+
+
+```python
+from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+tagger = USASRuleBasedTagger()
+tagger_bytes = tagger.to_bytes()
+```
+
 <a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger.from_bytes"></a>
 
 ### from\_bytes
@@ -70,40 +106,56 @@ _ = new_tagger.from_bytes(tagger_bytes)
 assert new_tagger.lexicon_lookup == tagger.lexicon_lookup
 ```
 
-<a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger.to_bytes"></a>
+<a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger.to_disk"></a>
 
-### to\_bytes
+### to\_disk
 
 ```python
 class USASRuleBasedTagger:
  | ...
- | def to_bytes(
+ | def to_disk(
  |     self,
+ |     path: Union[str, Path],
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
- | ) -> bytes
+ | ) -> None
 ```
 
-Serialises the USAS tagger's lexicon lookups and POS mapper to a bytestring.
+Saves the follwing information, if it exists, to the given `path`, we assume the `path`
+is an existing directory.
 
-<h4 id="to_bytes.parameters">Parameters<a className="headerlink" href="#to_bytes.parameters" title="Permanent link">&para;</a></h4>
+* `lexicon_lookup` -- as a JSON file at the following path `path/lexicon_lookup.json`
+* `lemma_lexicon_lookup` -- as a JSON file at the following path `path/lemma_lexicon_lookup.json`
+* `pos_mapper` -- as a JSON file at the following path `path/pos_mapper.json`
 
+<h4 id="to_disk.parameters">Parameters<a className="headerlink" href="#to_disk.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __path__ : `Union[str, Path]` <br/>
+    Path to an existing direcotry. Path may be either strings or `Path`-like objects.
 
 - __exclude__ : `Iterable[str]`, optional (default = `SimpleFrozenList()`) <br/>
     This currently does not do anything, please ignore it.
 
-<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+<h4 id="to_disk.returns">Returns<a className="headerlink" href="#to_disk.returns" title="Permanent link">&para;</a></h4>
 
 
-- `bytes` <br/>
+- `None` <br/>
 
-<h4 id="to_bytes.examples">Examples<a className="headerlink" href="#to_bytes.examples" title="Permanent link">&para;</a></h4>
+<h4 id="to_disk.examples">Examples<a className="headerlink" href="#to_disk.examples" title="Permanent link">&para;</a></h4>
 
 
 ```python
+from pathlib import Path
+from tempfile import TemporaryDirectory
 from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
 tagger = USASRuleBasedTagger()
-tagger_bytes = tagger.to_bytes()
+tagger.lexicon_lookup = {'example|noun': ['A1']}
+with TemporaryDirectory() as temp_dir:
+    tagger.to_disk(temp_dir)
+    assert Path(temp_dir, 'lexicon_lookup.json').exists()
+    assert not Path(temp_dir, 'lemma_lexicon_lookup.json').exists()
+    assert not Path(temp_dir, 'pos_mapper.json').exists()
 ```
 
 <a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger.from_disk"></a>
@@ -159,57 +211,5 @@ with TemporaryDirectory() as temp_dir:
     _ = new_tagger.from_disk(temp_dir)
 assert new_tagger.lexicon_lookup == tagger.lexicon_lookup
 assert new_tagger.pos_mapper is None
-```
-
-<a id="pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger.to_disk"></a>
-
-### to\_disk
-
-```python
-class USASRuleBasedTagger:
- | ...
- | def to_disk(
- |     self,
- |     path: Union[str, Path],
- |     *,
- |     exclude: Iterable[str] = SimpleFrozenList()
- | ) -> None
-```
-
-Saves the follwing information, if it exists, to the given `path`, we assume the `path`
-is an existing directory.
-
-* `lexicon_lookup` -- as a JSON file at the following path `path/lexicon_lookup.json`
-* `lemma_lexicon_lookup` -- as a JSON file at the following path `path/lemma_lexicon_lookup.json`
-* `pos_mapper` -- as a JSON file at the following path `path/pos_mapper.json`
-
-<h4 id="to_disk.parameters">Parameters<a className="headerlink" href="#to_disk.parameters" title="Permanent link">&para;</a></h4>
-
-
-- __path__ : `Union[str, Path]` <br/>
-    Path to an existing direcotry. Path may be either strings or `Path`-like objects.
-
-- __exclude__ : `Iterable[str]`, optional (default = `SimpleFrozenList()`) <br/>
-    This currently does not do anything, please ignore it.
-
-<h4 id="to_disk.returns">Returns<a className="headerlink" href="#to_disk.returns" title="Permanent link">&para;</a></h4>
-
-
-- `None` <br/>
-
-<h4 id="to_disk.examples">Examples<a className="headerlink" href="#to_disk.examples" title="Permanent link">&para;</a></h4>
-
-
-```python
-from pathlib import Path
-from tempfile import TemporaryDirectory
-from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
-tagger = USASRuleBasedTagger()
-tagger.lexicon_lookup = {'example|noun': ['A1']}
-with TemporaryDirectory() as temp_dir:
-    tagger.to_disk(temp_dir)
-    assert Path(temp_dir, 'lexicon_lookup.json').exists()
-    assert not Path(temp_dir, 'lemma_lexicon_lookup.json').exists()
-    assert not Path(temp_dir, 'pos_mapper.json').exists()
 ```
 

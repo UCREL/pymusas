@@ -136,6 +136,34 @@ class USASRuleBasedTagger:
         self.usas_tags_token_attr = usas_tags_token_attr
         self.pos_attribute = pos_attribute
         self.lemma_attribute = lemma_attribute
+    
+    def to_bytes(self, *, exclude: Iterable[str] = SimpleFrozenList()) -> bytes:
+        '''
+        Serialises the USAS tagger's lexicon lookups and POS mapper to a bytestring.
+
+        # Parameters
+
+        exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
+            This currently does not do anything, please ignore it.
+        
+        # Returns
+
+        `bytes`
+
+        # Examples
+
+        ```python
+        >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
+        >>> tagger = USASRuleBasedTagger()
+        >>> tagger_bytes = tagger.to_bytes()
+
+        ```
+        '''
+        serialise = {}
+        serialise["lexicon_lookup"] = srsly.msgpack_dumps(self.lexicon_lookup)
+        serialise["lemma_lexicon_lookup"] = srsly.msgpack_dumps(self.lemma_lexicon_lookup)
+        serialise["pos_mapper"] = srsly.msgpack_dumps(self.pos_mapper)
+        return cast(bytes, srsly.msgpack_dumps(serialise))
 
     def from_bytes(self, bytes_data: bytes, *,
                    exclude: Iterable[str] = SimpleFrozenList()
@@ -178,35 +206,58 @@ class USASRuleBasedTagger:
         self.lemma_lexicon_lookup = srsly.msgpack_loads(serialise_data['lemma_lexicon_lookup'])
         self.pos_mapper = srsly.msgpack_loads(serialise_data['pos_mapper'])
         return self
-
-    def to_bytes(self, *, exclude: Iterable[str] = SimpleFrozenList()) -> bytes:
+    
+    def to_disk(self, path: Union[str, Path], *,
+                exclude: Iterable[str] = SimpleFrozenList()
+                ) -> None:
         '''
-        Serialises the USAS tagger's lexicon lookups and POS mapper to a bytestring.
+        Saves the follwing information, if it exists, to the given `path`, we assume the `path`
+        is an existing directory.
+
+        * `lexicon_lookup` -- as a JSON file at the following path `path/lexicon_lookup.json`
+        * `lemma_lexicon_lookup` -- as a JSON file at the following path `path/lemma_lexicon_lookup.json`
+        * `pos_mapper` -- as a JSON file at the following path `path/pos_mapper.json`
 
         # Parameters
 
+        path : `Union[str, Path]`
+            Path to an existing direcotry. Path may be either strings or `Path`-like objects.
+        
         exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
             This currently does not do anything, please ignore it.
-        
+
         # Returns
 
-        `bytes`
+        `None`
 
         # Examples
 
         ```python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
         >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
         >>> tagger = USASRuleBasedTagger()
-        >>> tagger_bytes = tagger.to_bytes()
+        >>> tagger.lexicon_lookup = {'example|noun': ['A1']}
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     tagger.to_disk(temp_dir)
+        ...     assert Path(temp_dir, 'lexicon_lookup.json').exists()
+        ...     assert not Path(temp_dir, 'lemma_lexicon_lookup.json').exists()
+        ...     assert not Path(temp_dir, 'pos_mapper.json').exists()
 
         ```
         '''
-        serialise = {}
-        serialise["lexicon_lookup"] = srsly.msgpack_dumps(self.lexicon_lookup)
-        serialise["lemma_lexicon_lookup"] = srsly.msgpack_dumps(self.lemma_lexicon_lookup)
-        serialise["pos_mapper"] = srsly.msgpack_dumps(self.pos_mapper)
-        return cast(bytes, srsly.msgpack_dumps(serialise))
-    
+        component_folder = ensure_path(path)
+        component_folder.mkdir(exist_ok=True)
+        if self.lexicon_lookup:
+            with Path(component_folder, 'lexicon_lookup.json').open('w', encoding='utf-8') as lexicon_file:
+                lexicon_file.write(srsly.json_dumps(self.lexicon_lookup))
+        if self.lemma_lexicon_lookup:
+            with Path(component_folder, 'lemma_lexicon_lookup.json').open('w', encoding='utf-8') as lexicon_file:
+                lexicon_file.write(srsly.json_dumps(self.lemma_lexicon_lookup))
+        if self.pos_mapper is not None:
+            with Path(component_folder, 'pos_mapper.json').open('w', encoding='utf-8') as pos_mapper_file:
+                pos_mapper_file.write(srsly.json_dumps(self.pos_mapper))
+
     def from_disk(self, path: Union[str, Path], *,
                   exclude: Iterable[str] = SimpleFrozenList()
                   ) -> "USASRuleBasedTagger":
@@ -264,57 +315,6 @@ class USASRuleBasedTagger:
             with pos_mapper_file.open('r', encoding='utf-8') as pos_mapper_data:
                 self.pos_mapper = srsly.json_loads(pos_mapper_data.read())
         return self
-
-    def to_disk(self, path: Union[str, Path], *,
-                exclude: Iterable[str] = SimpleFrozenList()
-                ) -> None:
-        '''
-        Saves the follwing information, if it exists, to the given `path`, we assume the `path`
-        is an existing directory.
-
-        * `lexicon_lookup` -- as a JSON file at the following path `path/lexicon_lookup.json`
-        * `lemma_lexicon_lookup` -- as a JSON file at the following path `path/lemma_lexicon_lookup.json`
-        * `pos_mapper` -- as a JSON file at the following path `path/pos_mapper.json`
-
-        # Parameters
-
-        path : `Union[str, Path]`
-            Path to an existing direcotry. Path may be either strings or `Path`-like objects.
-        
-        exclude : `Iterable[str]`, optional (default = `SimpleFrozenList()`)
-            This currently does not do anything, please ignore it.
-
-        # Returns
-
-        `None`
-
-        # Examples
-
-        ```python
-        >>> from pathlib import Path
-        >>> from tempfile import TemporaryDirectory
-        >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
-        >>> tagger = USASRuleBasedTagger()
-        >>> tagger.lexicon_lookup = {'example|noun': ['A1']}
-        >>> with TemporaryDirectory() as temp_dir:
-        ...     tagger.to_disk(temp_dir)
-        ...     assert Path(temp_dir, 'lexicon_lookup.json').exists()
-        ...     assert not Path(temp_dir, 'lemma_lexicon_lookup.json').exists()
-        ...     assert not Path(temp_dir, 'pos_mapper.json').exists()
-
-        ```
-        '''
-        component_folder = ensure_path(path)
-        component_folder.mkdir(exist_ok=True)
-        if self.lexicon_lookup:
-            with Path(component_folder, 'lexicon_lookup.json').open('w', encoding='utf-8') as lexicon_file:
-                lexicon_file.write(srsly.json_dumps(self.lexicon_lookup))
-        if self.lemma_lexicon_lookup:
-            with Path(component_folder, 'lemma_lexicon_lookup.json').open('w', encoding='utf-8') as lexicon_file:
-                lexicon_file.write(srsly.json_dumps(self.lemma_lexicon_lookup))
-        if self.pos_mapper is not None:
-            with Path(component_folder, 'pos_mapper.json').open('w', encoding='utf-8') as pos_mapper_file:
-                pos_mapper_file.write(srsly.json_dumps(self.pos_mapper))
         
     @classmethod
     def _update_factory_attributes(cls, new_attribute_name: str, old_attribute_name: str) -> None:
