@@ -20,22 +20,14 @@ logger = logging.getLogger(__name__)
 class USASRuleBasedTagger:
 
     def __init__(self,
-                 lexicon_lookup: Optional[Dict[str, List[str]]] = None,
-                 lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = None,
-                 pos_mapper: Optional[Dict[str, List[str]]] = None,
                  usas_tags_token_attr: str = 'usas_tags',
                  pos_attribute: str = 'pos_',
                  lemma_attribute: str = 'lemma_'
                  ) -> None:
         self.lexicon_lookup: Dict[str, List[str]] = {}
-        if lexicon_lookup is not None:
-            self.lexicon_lookup = lexicon_lookup
-        
         self.lemma_lexicon_lookup: Dict[str, List[str]] = {}
-        if lemma_lexicon_lookup is not None:
-            self.lemma_lexicon_lookup = lemma_lexicon_lookup
-
-        self.pos_mapper = pos_mapper
+        self.pos_mapper: Union[Dict[str, List[str]], None] = None
+        
         self._usas_tags_token_attr = usas_tags_token_attr
         self._pos_attribute = pos_attribute
         self._lemma_attribute = lemma_attribute
@@ -152,9 +144,6 @@ class USASRuleBasedTagger:
         self.lexicon_lookup = srsly.msgpack_loads(serialise_data['lexicon_lookup'])
         self.lemma_lexicon_lookup = srsly.msgpack_loads(serialise_data['lemma_lexicon_lookup'])
         self.pos_mapper = srsly.msgpack_loads(serialise_data['pos_mapper'])
-        self.usas_tags_token_attr = srsly.msgpack_loads(serialise_data['usas_tags_token_attr'])
-        self.pos_attribute = srsly.msgpack_loads(serialise_data['pos_attribute'])
-        self.lemma_attribute = srsly.msgpack_loads(serialise_data['lemma_attribute'])
         return self
 
     def to_bytes(self, *, exclude: Iterable[str] = SimpleFrozenList()) -> bytes:
@@ -162,9 +151,6 @@ class USASRuleBasedTagger:
         serialise["lexicon_lookup"] = srsly.msgpack_dumps(self.lexicon_lookup)
         serialise["lemma_lexicon_lookup"] = srsly.msgpack_dumps(self.lemma_lexicon_lookup)
         serialise["pos_mapper"] = srsly.msgpack_dumps(self.pos_mapper)
-        serialise["usas_tags_token_attr"] = srsly.msgpack_dumps(self.usas_tags_token_attr)
-        serialise["pos_attribute"] = srsly.msgpack_dumps(self.pos_attribute)
-        serialise["lemma_attribute"] = srsly.msgpack_dumps(self.lemma_attribute)
         return cast(bytes, srsly.msgpack_dumps(serialise))
     
     def from_disk(self, path: Union[str, Path], *,
@@ -183,11 +169,6 @@ class USASRuleBasedTagger:
         if pos_mapper_file.exists():
             with pos_mapper_file.open('r', encoding='utf-8') as pos_mapper_data:
                 self.pos_mapper = srsly.json_loads(pos_mapper_data.read())
-        with Path(component_folder, 'attribute_data.json').open('r', encoding='utf-8') as attribute_file:
-            attribute_data = srsly.json_loads(attribute_file.read())
-            self.usas_tags_token_attr = attribute_data['usas_tags_token_attr']
-            self.pos_attribute = attribute_data['pos_attribute']
-            self.lemma_attribute = attribute_data['lemma_attribute']
         return self
 
     def to_disk(self, path: Union[str, Path], *,
@@ -204,11 +185,6 @@ class USASRuleBasedTagger:
         if self.pos_mapper is not None:
             with Path(component_folder, 'pos_mapper.json').open('w', encoding='utf-8') as pos_mapper_file:
                 pos_mapper_file.write(srsly.json_dumps(self.pos_mapper))
-        attribute_data = {'usas_tags_token_attr': self.usas_tags_token_attr,
-                          'pos_attribute': self.pos_attribute,
-                          'lemma_attribute': self.lemma_attribute}
-        with Path(component_folder, 'attribute_data.json').open('w', encoding='utf-8') as attribute_data_file:
-            attribute_data_file.write(srsly.json_dumps(attribute_data))
         
     @classmethod
     def _update_factory_attributes(cls, new_attribute_name: str, old_attribute_name: str) -> None:
@@ -223,13 +199,9 @@ class USASRuleBasedTagger:
 
 @Language.factory("usas_tagger")
 def make_usas_rule_based_tagger(nlp: Language, name: str,
-                                lexicon_lookup: Optional[Dict[str, List[str]]] = None,
-                                lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = None,
-                                pos_mapper: Optional[Dict[str, List[str]]] = None,
                                 usas_tags_token_attr: str = 'usas_tags',
                                 pos_attribute: str = 'pos_',
                                 lemma_attribute: str = 'lemma_'
                                 ) -> USASRuleBasedTagger:
-    return USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup,
-                               pos_mapper, usas_tags_token_attr,
+    return USASRuleBasedTagger(usas_tags_token_attr,
                                pos_attribute, lemma_attribute)

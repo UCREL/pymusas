@@ -146,12 +146,9 @@ def create_USASRuleBasedTagger(empty_lexicon_lookup: bool,
                                           Union[Dict[str, List[str]], None],
                                           str, str, str]:
     lexicon_path = Path(DATA_DIR, 'lexicon.tsv')
-    lexicon_lookup: Optional[Dict[str, List[str]]] = LexiconCollection.from_tsv(lexicon_path, include_pos=True)
-    if empty_lexicon_lookup:
-        lexicon_lookup = None
-    lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = LexiconCollection.from_tsv(lexicon_path, include_pos=False)
-    if empty_lemma_lexicon_lookup:
-        lemma_lexicon_lookup = None
+    lexicon_lookup: Dict[str, List[str]] = LexiconCollection.from_tsv(lexicon_path, include_pos=True)
+    lemma_lexicon_lookup: Dict[str, List[str]] = LexiconCollection.from_tsv(lexicon_path, include_pos=False)
+    
     pos_mapper: Optional[Dict[str, List[str]]] = POS_MAPPER
     if empty_pos_mapper:
         pos_mapper = None
@@ -170,19 +167,32 @@ def create_USASRuleBasedTagger(empty_lexicon_lookup: bool,
 
     tagger = USASRuleBasedTagger()
     if use_initialize:
-        tagger.initialize(None, None, lexicon_lookup, lemma_lexicon_lookup,
+        initialise_lexicon_lookup: Optional[Dict[str, List[str]]] = lexicon_lookup
+        initialise_lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = lemma_lexicon_lookup
+        if empty_lexicon_lookup:
+            initialise_lexicon_lookup = None
+            lexicon_lookup = {}
+        if empty_lemma_lexicon_lookup:
+            initialise_lemma_lexicon_lookup = None
+            lemma_lexicon_lookup = {}
+        tagger.initialize(None, None, initialise_lexicon_lookup,
+                          initialise_lemma_lexicon_lookup,
                           pos_mapper, usas_tags_token_attr,
                           pos_attribute, lemma_attribute)
+        return (tagger, lexicon_lookup, lemma_lexicon_lookup, pos_mapper,
+                usas_tags_token_attr, pos_attribute, lemma_attribute)
     else:
-        tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup,
-                                     pos_mapper, usas_tags_token_attr,
+        tagger = USASRuleBasedTagger(usas_tags_token_attr,
                                      pos_attribute, lemma_attribute)
-    if lexicon_lookup is None:
-        lexicon_lookup = {}
-    if lemma_lexicon_lookup is None:
-        lemma_lexicon_lookup = {}
-    return (tagger, lexicon_lookup, lemma_lexicon_lookup, pos_mapper,
-            usas_tags_token_attr, pos_attribute, lemma_attribute)
+        if empty_lexicon_lookup:
+            lexicon_lookup = {}
+        if empty_lemma_lexicon_lookup:
+            lemma_lexicon_lookup = {}
+        tagger.lexicon_lookup = lexicon_lookup
+        tagger.lemma_lexicon_lookup = lemma_lexicon_lookup
+        tagger.pos_mapper = pos_mapper
+        return (tagger, lexicon_lookup, lemma_lexicon_lookup, pos_mapper,
+                usas_tags_token_attr, pos_attribute, lemma_attribute)
     
 
 @pytest.mark.parametrize('empty_lexicon_lookup', [True, False])
@@ -278,10 +288,12 @@ def test_call() -> None:
     (test_doc, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
     
-    usas_tagger_config = {'pos_attribute': 'tag_', 'lexicon_lookup': lexicon_lookup,
-                          'lemma_lexicon_lookup': lemma_lexicon_lookup}
+    usas_tagger_config = {'pos_attribute': 'tag_'}
     nlp = Language(Vocab(), meta={"name": "example"})
-    usas_tagger = nlp.add_pipe('usas_tagger', 'semantic tagger', config=usas_tagger_config)
+    usas_tagger_pipe = nlp.add_pipe('usas_tagger', 'semantic tagger', config=usas_tagger_config)
+    usas_tagger = cast(USASRuleBasedTagger, usas_tagger_pipe)
+    usas_tagger.lexicon_lookup = lexicon_lookup
+    usas_tagger.lemma_lexicon_lookup = lemma_lexicon_lookup
     usas_tagger(test_doc)
     predicted_usas_tags = [token._.usas_tags for token in test_doc]
     assert expected_usas_tags == predicted_usas_tags
@@ -291,8 +303,11 @@ def test_call() -> None:
     (test_doc, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
     nlp = Language(Vocab(), meta={"name": "example"})
-    usas_tagger_config['pos_mapper'] = POS_MAPPER
-    usas_tagger = nlp.add_pipe('usas_tagger', 'semantic tagger', config=usas_tagger_config)
+    usas_tagger_pipe = nlp.add_pipe('usas_tagger', 'semantic tagger', config=usas_tagger_config)
+    usas_tagger = cast(USASRuleBasedTagger, usas_tagger_pipe)
+    usas_tagger.lexicon_lookup = lexicon_lookup
+    usas_tagger.lemma_lexicon_lookup = lemma_lexicon_lookup
+    usas_tagger.pos_mapper = POS_MAPPER
     usas_tagger(test_doc)
     predicted_usas_tags = [token._.usas_tags for token in test_doc]
     assert expected_usas_tags == predicted_usas_tags
@@ -318,15 +333,16 @@ def test_load_and_save_bytes(empty_lexicon_lookup: bool,
                                                    empty_pos_mapper, custom_usas_tags_token_attr,
                                                    custom_pos_attribute, custom_lemma_attribute,
                                                    use_initialize)
-    usas_config = {'lexicon_lookup': lexicon_lookup,
-                   'lemma_lexicon_lookup': lemma_lexicon_lookup,
-                   'pos_mapper': pos_mapper,
-                   'usas_tags_token_attr': usas_tags_token_attr,
+    usas_config = {'usas_tags_token_attr': usas_tags_token_attr,
                    'pos_attribute': pos_attribute,
                    'lemma_attribute': lemma_attribute}
     # Default settings
     nlp = spacy.blank("en")
-    nlp.add_pipe('usas_tagger', config=usas_config)
+    usas_tagger_pipe = nlp.add_pipe('usas_tagger', config=usas_config)
+    usas_tagger = cast(USASRuleBasedTagger, usas_tagger_pipe)
+    usas_tagger.lexicon_lookup = lexicon_lookup
+    usas_tagger.lemma_lexicon_lookup = lemma_lexicon_lookup
+    usas_tagger.pos_mapper = pos_mapper
     data = nlp.to_bytes()
     config = nlp.config
     del nlp
@@ -363,15 +379,16 @@ def test_load_and_save_json(empty_lexicon_lookup: bool,
                                                    empty_pos_mapper, custom_usas_tags_token_attr,
                                                    custom_pos_attribute, custom_lemma_attribute,
                                                    use_initialize)
-    usas_config = {'lexicon_lookup': lexicon_lookup,
-                   'lemma_lexicon_lookup': lemma_lexicon_lookup,
-                   'pos_mapper': pos_mapper,
-                   'usas_tags_token_attr': usas_tags_token_attr,
+    usas_config = {'usas_tags_token_attr': usas_tags_token_attr,
                    'pos_attribute': pos_attribute,
                    'lemma_attribute': lemma_attribute}
     # Default settings
     nlp = spacy.blank("en")
-    nlp.add_pipe('usas_tagger', config=usas_config)
+    usas_tagger_pipe = nlp.add_pipe('usas_tagger', config=usas_config)
+    usas_tagger = cast(USASRuleBasedTagger, usas_tagger_pipe)
+    usas_tagger.lexicon_lookup = lexicon_lookup
+    usas_tagger.lemma_lexicon_lookup = lemma_lexicon_lookup
+    usas_tagger.pos_mapper = pos_mapper
     with tempfile.TemporaryDirectory() as temp_dir:
         nlp.to_disk(temp_dir)
         del nlp

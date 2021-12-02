@@ -23,9 +23,6 @@ class USASRuleBasedTagger:
  | ...
  | def __init__(
  |     self,
- |     lexicon_lookup: Optional[Dict[str, List[str]]] = None,
- |     lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = None,
- |     pos_mapper: Optional[Dict[str, List[str]]] = None,
  |     usas_tags_token_attr: str = 'usas_tags',
  |     pos_attribute: str = 'pos_',
  |     lemma_attribute: str = 'lemma_'
