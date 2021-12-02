@@ -286,7 +286,6 @@ class USASRuleBasedTagger:
         # Examples
 
         ```python
-        >>> from pathlib import Path
         >>> from tempfile import TemporaryDirectory
         >>> from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
         >>> tagger = USASRuleBasedTagger()
