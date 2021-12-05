@@ -82,9 +82,9 @@ class USASRuleBasedTagger():
     '''
     The USAS Rule Based Tagger is based around the
     [USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
-    The Tagger uses two Lexicon like data structure, both in the format of
+    The Tagger uses two Lexicon like data structures, both in the format of
     `Dict[str, List[str]]`, this structure maps a lemma (with or without it's
-    Part Of Speech (POS)) to a `List` of USAS semantic tags.
+    Part Of Speech (POS) ) to a `List` of USAS semantic tags.
     The first semantic tag in the `List` of tags is the most likely tag.
     
     The easiest way of producing the Lexicon like data structures is through
@@ -92,19 +92,18 @@ class USASRuleBasedTagger():
     whereby the TSV file path would be to a USAS Semantic Lexicon.
     
     The optional POS mapper is used in this tagger when the POS tagset within
-    the lexicon files does not match the tagset used by the POS model that has
+    the lexicons does not match the tagset used by the POS model that has
     been applied to the text. For instance a lot of the
     [USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
-    use the USAS core tagset which does not align with the Universal Dependency
-    (UD) tagset that a lot of the [spaCy POS models](https://spacy.io/usage/linguistic-features#pos-tagging)
-    have in common (these are called the UPOS tags in the spaCy documentation). Therefore, when
-    using the UD tags from the spaCy POS model for tagging text using a USAS
-    Semantic lexicon with this tagger a POS mapper is required to map UD to
+    use the USAS core tagset which does not align with the Universal Part of Speech (UPOS)
+    tagset that a lot of the [spaCy POS models](https://spacy.io/usage/linguistic-features#pos-tagging)
+    have in common. Therefore, when using the UPOS tags from the spaCy POS model for tagging text using a USAS
+    Semantic lexicon with this tagger a POS mapper is required to map UPOS to
     USAS core tags. The POS mapper is expected to map from the tagset of the POS model
-    to the tagset of the lexicon files, whereby the mapping is a `List`
+    to the tagset of the lexicons, whereby the mapping is a `List`
     of tags, the first tag in the list is assumed to be the most relevant
     and the last to be the least. Some pre-compiled Dictionaries can be found in
-    the :mod:`pymusas.pos_mapper`, e.g. the UD to USAS core :var:`pymusas.pos_mapper.UD_TO_USAS_CORE`
+    the :mod:`pymusas.pos_mapper` module, e.g. the UPOS to USAS core :var:`pymusas.pos_mapper.UPOS_TO_USAS_CORE`
 
     Using these lexicon lookups the following rules are applied to assign a
     `List` of USAS semantic tags from the lexicon lookups to the given tokens
@@ -132,7 +131,7 @@ class USASRuleBasedTagger():
 
     **NOTE** this tagger has been designed to be flexible with the amount of
     resources avaliable, if you do not have a POS tagger then assign
-    the POS tag an empty string e.g. `''`. If you do not have a lexicon file with
+    the POS tag an empty string e.g. `''`. If you do not have a lexicon with
     POS information then `lexicon_lookup` can be `None`. However, the fewer
     resources avaliable, less rules, stated above, will be applied making the
     tagger less effective.
