@@ -145,7 +145,7 @@ class USASRuleBasedTagger():
         The lexicon data structure with only lemma information mapped to
         a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
     pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
-        If not None, maps from the POS model tagset to the lexicon data
+        If not `None`, maps from the POS model tagset to the lexicon data
         POS tagset, whereby the mapping is a `List` of tags, the first tag in
         the list is assumed to be the most relevant and the last to be the least.
 

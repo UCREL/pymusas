@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Tuple, Union, cast
 import pytest
 import spacy
 from spacy.language import Language
-from spacy.tokens import Doc
+from spacy.tokens import Doc, Token
 from spacy.vocab import Vocab
 
 from pymusas.lexicon_collection import LexiconCollection
@@ -159,11 +159,11 @@ def create_USASRuleBasedTagger(empty_lexicon_lookup: bool,
     
     pos_attribute = 'pos_'
     if custom_pos_attribute:
-        pos_attribute = 'custom_pos'
+        pos_attribute = '_.custom_pos'
 
     lemma_attribute = 'lemma_'
     if custom_lemma_attribute:
-        lemma_attribute = 'custom_lemma'
+        lemma_attribute = '_.custom_lemma'
 
     tagger = USASRuleBasedTagger()
     if use_initialize:
@@ -226,9 +226,11 @@ def test_USASRuleBasedTagger(empty_lexicon_lookup: bool,
 def test_usas_tags_token_attr() -> None:
     default_usas_tags_token_attr = 'usas_tags'
     tagger = USASRuleBasedTagger()
+    assert Token.has_extension('usas_tags')
     tagger_meta_tests(default_usas_tags_token_attr, 'pos_', 'lemma_')
 
     tagger.usas_tags_token_attr = 'semantic_tags'
+    assert Token.has_extension('semantic_tags')
     tagger_meta_tests('semantic_tags', 'pos_', 'lemma_')
 
     tagger.usas_tags_token_attr = 'semantic_tags'
@@ -246,13 +248,13 @@ def test_pos_attribute() -> None:
     tagger_meta_tests('usas_tags', default_pos_attribute, 'lemma_')
     assert tagger.pos_attribute == default_pos_attribute
 
-    tagger.pos_attribute = 'test'
-    tagger_meta_tests('usas_tags', 'test', 'lemma_')
-    assert tagger.pos_attribute == 'test'
+    tagger.pos_attribute = '_.test'
+    tagger_meta_tests('usas_tags', '_.test', 'lemma_')
+    assert tagger.pos_attribute == '_.test'
 
-    tagger.pos_attribute = 'test'
-    tagger_meta_tests('usas_tags', 'test', 'lemma_')
-    assert tagger.pos_attribute == 'test'
+    tagger.pos_attribute = '_.test'
+    tagger_meta_tests('usas_tags', '_.test', 'lemma_')
+    assert tagger.pos_attribute == '_.test'
 
     tagger.pos_attribute = 'pos_'
     tagger_meta_tests('usas_tags', 'pos_', 'lemma_')
@@ -262,6 +264,10 @@ def test_pos_attribute() -> None:
     tagger_meta_tests('usas_tags', 'tag_', 'lemma_')
     assert tagger.pos_attribute == 'tag_'
 
+    # Test when an attribute does not exist as a Token extension
+    with pytest.raises(ValueError):
+        tagger.pos_attribute = 'custom_pos'
+
 
 def test_lemma_attribute() -> None:
     default_lemma_attribute = 'lemma_'
@@ -269,17 +275,21 @@ def test_lemma_attribute() -> None:
     tagger_meta_tests('usas_tags', 'pos_', default_lemma_attribute)
     assert tagger.lemma_attribute == default_lemma_attribute
 
-    tagger.lemma_attribute = 'test'
-    tagger_meta_tests('usas_tags', 'pos_', 'test')
-    assert tagger.lemma_attribute == 'test'
+    tagger.lemma_attribute = '_.test'
+    tagger_meta_tests('usas_tags', 'pos_', '_.test')
+    assert tagger.lemma_attribute == '_.test'
 
-    tagger.lemma_attribute = 'test'
-    tagger_meta_tests('usas_tags', 'pos_', 'test')
-    assert tagger.lemma_attribute == 'test'
+    tagger.lemma_attribute = '_.test'
+    tagger_meta_tests('usas_tags', 'pos_', '_.test')
+    assert tagger.lemma_attribute == '_.test'
 
     tagger.lemma_attribute = 'lemma_'
     tagger_meta_tests('usas_tags', 'pos_', 'lemma_')
     assert tagger.lemma_attribute == 'lemma_'
+
+    # Test when an attribute does not exist as a Token extension
+    with pytest.raises(ValueError):
+        tagger.lemma_attribute = 'custom_lemma'
 
 
 def test_call() -> None:
