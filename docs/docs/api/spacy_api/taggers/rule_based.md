@@ -149,7 +149,8 @@ import spacy
 from pymusas.spacy_api.taggers import rule_based
 # Construction via spaCy pipeline
 nlp = spacy.blank('en')
-tagger = nlp.add_pipe('usas_tagger') # Using default config
+# Using default config
+tagger = nlp.add_pipe('usas_tagger')
 tagger.lemma_lexicon_lookup = {'car': ['Z1']}
 token = nlp('car')
 assert token[0]._.usas_tags == ['Z1']
