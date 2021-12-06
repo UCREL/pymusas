@@ -66,11 +66,11 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'documentation/intro',
+            docId: 'documentation/getting_started/intro',
             position: 'left',
             label: 'Documentation',
           },
-          {to: '/api/file_utils', label: 'API', position: 'left'},
+          {to: '/api/spacy_api/taggers/rule_based', label: 'API', position: 'left'},
           //{to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/ucrel/pymusas',
@@ -91,7 +91,7 @@ const config = {
               },
               {
                 label: 'API',
-                to: '/api/file_utils',
+                to: '/api/spacy_api/taggers/rule_based',
               },
             ],
           },
