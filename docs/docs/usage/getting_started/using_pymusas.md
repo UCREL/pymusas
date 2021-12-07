@@ -19,7 +19,7 @@ The example use case will be tagging the the first sentence of a Portuguese Wiki
 
 ## Background information on the tagger
 
-The UCREL tagger is a rule based token level semantic tagger, it has been specifically developed for the [USAS tagset](https://ucrel.lancs.ac.uk/usas/), but has been created so that it can be used with any other semantic tagset. For more information on the UCREL tagger see the [USASRuleBasedTagger class documentation](/api/spacy_api/taggers/rule_based#usasrulebasedtagger) which includes the list of rules the tagger applies. The rest of this guide can be read without any of this background knowledge.
+The UCREL tagger is a rule based token level semantic tagger, it has been specifically developed for the [USAS tagset](https://ucrel.lancs.ac.uk/usas/), but has been created so that it can be used with any other semantic tagset. For more information on the UCREL tagger see the [USASRuleBasedTagger class docstring in the API pages](/api/spacy_api/taggers/rule_based#usasrulebasedtagger) which includes the list of rules the tagger applies. The rest of this guide can be read without any of this background knowledge.
 
 ## Adding the tagger to an existing spaCy pipeline
 

@@ -66,9 +66,9 @@ const config = {
         items: [
           {
             type: 'doc',
-            docId: 'documentation/getting_started/intro',
+            docId: 'usage/getting_started/intro',
             position: 'left',
-            label: 'Documentation',
+            label: 'Usage',
           },
           {to: '/api/spacy_api/taggers/rule_based', label: 'API', position: 'left'},
           //{to: '/blog', label: 'Blog', position: 'left'},
@@ -83,10 +83,10 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Documentation',
             items: [
               {
-                label: 'Documentation',
+                label: 'Usage',
                 to: '/',
               },
               {
