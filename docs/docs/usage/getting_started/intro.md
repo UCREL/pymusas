@@ -12,7 +12,7 @@ sidebar_position: 1
 
 How the documentation website is split between the Usage and API pages:
 
-* [Usage](/) - The usage pages contain both tutorials and how-to-guides.
+* [Usage](/) - The usage pages contain tutorials, how-to-guides, and explanations.
 * [API](/api/spacy_api/taggers/rule_based) - Are the docstrings of the PyMUSAS library, best pages to look at if you want to know exactly what a class / function / attribute does in more technical detail. These do contain examples, but the examples are more like minimum working examples rather than real world examples.
 
 

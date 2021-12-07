@@ -1,6 +1,6 @@
 # PymUSAS 
 
-PYthon Multilingual Ucrel Semantic Analysis System
+**Py**thon **M**ultilingual **U**crel **S**emantic **A**nalysis **S**ystem, it currently is a rule based token level semantic tagger which can be added to any spaCy pipeline. The current tagger system is flexible enough to support any semantic tagset, however the tagset we have concentrated on and give examples for throughout the documentation is the [Ucrel Semantic Analysis System (USAS)](https://ucrel.lancs.ac.uk/usas/).
 
 <hr/>
 
@@ -17,10 +17,104 @@ PYthon Multilingual Ucrel Semantic Analysis System
 
 </p>
 
-## Requirements
+## Documentation
+
+* :books: [Usage Guides](https://ucrel.github.io/pymusas/) - What the package is, tutorials, how to guides, and explanations.
+* :mag_right: [API Reference](https://ucrel.github.io/pymusas/api/spacy_api/taggers/rule_based) - The docstrings of the library, with minimum working examples.
+
+## Install PyMUSAS
+
+Can be installed on all operating systems and supports Python version >= `3.7`, to install run:
 
 ```
-pip install -r requirements.txt
+pip install pymusas
+```
+
+## Quick example
+
+Here is a quick example of what PyMUSAS can do using the [USASRuleBasedTagger](http://0.0.0.0:3000/pymusas/api/spacy_api/taggers/rule_based), from now on called the USAS tagger, for a full tutorial, which explains all of the steps in this example, see the [Using PyMUSAS tutorial in the documentation](http://0.0.0.0:3000/pymusas/using).
+
+This example will semantically tag, at the token level, some Portuguese text. We do first need to download a [spaCy Portuguese model](https://spacy.io/models/pt) (any version will do, but we choose the small version)
+
+``` bash
+python -m spacy download pt_core_news_sm
+```
+
+Then we load the Portuguese spaCy tagger, add the USAS tagger, and apply it to the Portuguese text:
+
+``` python
+import spacy
+
+from pymusas.file_utils import download_url_file
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.spacy_api.taggers import rule_based
+from pymusas.pos_mapper import UPOS_TO_USAS_CORE
+
+# We exclude ['parser', 'ner'] as these components are typically not needed
+# for the USAS tagger
+nlp = spacy.load('pt_core_news_sm', exclude=['parser', 'ner'])
+# Adds the tagger to the pipeline and returns the tagger 
+usas_tagger = nlp.add_pipe('usas_tagger')
+
+portuguese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv'
+portuguese_usas_lexicon_file = download_url_file(portuguese_usas_lexicon_url)
+# Includes the POS information
+portuguese_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_file)
+# excludes the POS information
+portuguese_lemma_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_file, 
+                                                             include_pos=False)
+# Add the lexicon information to the USAS tagger within the pipeline
+usas_tagger.lexicon_lookup = portuguese_lexicon_lookup
+usas_tagger.lemma_lexicon_lookup = portuguese_lemma_lexicon_lookup
+# Maps from the POS model tagset to the lexicon POS tagset
+usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+
+text = "O Parque Nacional da Peneda-Gerês é uma área protegida de Portugal, com autonomia administrativa, financeira e capacidade jurídica, criada no ano de 1971, no meio ambiente da Peneda-Gerês."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+```
+
+This will output the following, whereby the USAS tags are a list of the most likely semantic tags, the first tag in the list is the most likely semantic tag. For more information on the USAS tagset see the [USAS website](https://ucrel-web.lancs.ac.uk/usas/).
+
+``` tsv
+Text    Lemma   POS     USAS Tags
+O       O       DET     ['Z5']
+Parque  Parque  PROPN   ['M2']
+Nacional        Nacional        PROPN   ['M7/S2mf']
+da      da      ADP     ['Z5']
+Peneda-Gerês    Peneda-Gerês    PROPN   ['Z99']
+é       ser     AUX     ['A3+', 'Z5']
+uma     umar    DET     ['Z99']
+área    área    NOUN    ['H2/S5+c', 'X2.2', 'M7', 'A4.1', 'N3.6']
+protegida       protegido       ADJ     ['O4.5/A2.1', 'S1.2.5+']
+de      de      ADP     ['Z5']
+Portugal        Portugal        PROPN   ['Z2', 'Z3c']
+,       ,       PUNCT   ['PUNCT']
+com     com     ADP     ['Z5']
+autonomia       autonomia       NOUN    ['A1.7-', 'G1.1/S7.1+', 'X6+/S5-', 'S5-']
+administrativa  administrativo  ADJ     ['S7.1+']
+,       ,       PUNCT   ['PUNCT']
+financeira      financeiro      ADJ     ['I1', 'I1/G1.1']
+e       e       CCONJ   ['Z5']
+capacidade      capacidade      NOUN    ['N3.2', 'N3.4', 'N5.1+', 'X9.1+', 'I3.1', 'X9.1']
+jurídica        jurídico        ADJ     ['G2.1']
+,       ,       PUNCT   ['PUNCT']
+criada  criar   VERB    ['I3.1/B4/S2.1f', 'S2.1f%', 'S7.1-/S2mf']
+no      o       ADP     ['Z5']
+ano     ano     NOUN    ['T1.3', 'P1c']
+de      de      ADP     ['Z5']
+1971    1971    NUM     ['N1']
+,       ,       PUNCT   ['PUNCT']
+no      o       ADP     ['Z5']
+meio    mear    ADJ     ['M6', 'N5', 'N4', 'T1.2', 'N2', 'X4.2', 'I1.1', 'M3/H3', 'N3.3', 'A4.1', 'A1.1.1', 'T1.3']
+ambiente        ambientar       NOUN    ['W5', 'W3', 'E1', 'Y2', 'O4.1']
+da      da      ADP     ['Z5']
+Peneda-Gerês    Peneda-Gerês    PROPN   ['Z99']
+.       .       PUNCT   ['PUNCT']
 ```
 
 ### Development
@@ -68,118 +162,3 @@ If you would like to build this project and check it with [twine](https://twine.
 ``` bash
 make check-twine
 ```
-
-## Benchmarking
-
-**NOTE** all of the benchmarking code requires a Linux based operating system due to the requirement to access the amount of memory used, using the [resource `getrusage` method.](https://docs.python.org/3/library/resource.html#resource.getrusage)
-
-In this section we benchmark the taggers (currently only the one tagger), based on resource utilisation (memory and speed) and performance. The performance uses two metrics, both are percentages:
-
-1. Accuracy
-2. Coverage -- the number of tokens that have been tagged, that are not tagged with the unmatched tag (the `Z99` tag).
-
-### Rule based tagger
-
-Code to benchmark the rule based tagger:
-
-``` bash
-python benchmarks/rule_based_tagger.py --markdown
-```
-
-Output, this is based on the [Welsh gold standard dataset](https://github.com/CorCenCC/welsh_pos_sem_tagger/blob/master/data/cy_both_tagged.data), from the paper [Leveraging Pre-Trained Embeddings for Welsh Taggers.](https://aclanthology.org/W19-4332.pdf):
-
-| Memory (MB) | Tokens Per Second | Accuracy (%) | Coverage (%) |
-|-------------|-------------------|--------------|--------------|
-| 112.78  | 20,046  | 68.94 | 91.97 |
-
-**Note** that between different computers these figures are going to be different. On the Apple MacBook Air 2021 (M1) this uses a lot more memory, but is quicker than the Ubuntu desktop. The figures above are generated from my AMD Ryzen 5 1600 Six-Core Processor with 16GB of RAM on the Ubuntu operating system.
-
-
-## Rule based tagging process
-
-1. If `pos==punc` label as `PUNCT`
-2. Lookup token and pos tag
-3. Lookup lemma and pos tag
-4. Lookup lower case token and pos tag
-5. Lookup lower case lemma and pos tag
-6. if `pos==num` label as `N1`
-7. Lookup token with any POS tag and choose first entry in lexicon.
-8. Lookup lemma with any POS tag and choose first entry in lexicon.
-9. Lookup lower case token with any POS tag and choose first entry in lexicon.
-10. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
-11. Label as `Z99`, this is the unmatched semantic tag.
-
-## Resources
-
-1. [Multilingual USAS lexicons](https://github.com/UCREL/Multilingual-USAS)
-2. [Welsh Semantic Tagger, Java version.](https://github.com/CorCenCC/CySemTagger)
-3. [Welsh gold standard dataset](https://github.com/CorCenCC/welsh_pos_sem_tagger/blob/master/data/cy_both_tagged.data), this dataset uses the basic POS tags, see appendix A1 of this [paper](https://aclanthology.org/W19-4332.pdf), from the [CyTag](https://github.com/CorCenCC/CyTag) POS tagger.
-4. [Mapping basic CyTag POS tags to core POS tags used by the USAS lexicon.](./resources/basic_cy_tags_to_core_tags.json)
-5. [Detailed paper on the USAS tagset](https://e-space.mmu.ac.uk/619652/1/C%3A%5CUsers%5C55119166%5CDesktop%5CComparing%20USAS%20with%20lexicographical%20taxonomies.pdf)
-
-## Semantic Resources
-
-### USAS tagset
-
-The text from this sub-section has been copied from the TAGSET section of the [USAS guide](https://ucrel-web.lancs.ac.uk/usas/usas_guide.pdf).
-
-The semantic tags are composed of:
-
-1. an upper case letter indicating general discourse field.
-2. a digit indicating a first subdivision of the field.
-3. (optionally) a decimal point followed by a further digit to indicate a finer subdivision.
-4. (optionally) one or more ‘pluses’ or ‘minuses’ to indicate a positive or negative position on a semantic scale.
-5. (optionally) a slash followed by a second tag to indicate clear double membership of categories.
-6. (optionally) a left square bracket followed by ‘i’ to indicate a semantic template (multi-word unit). 
-
-Other symbols utilised:
-
-* % = rarity marker (1)
-* @ = rarity marker (2)
-* f = female
-* m = male
-* c = potential antecedents of conceptual anaphors (neutral for number)
-* n = neuter
-* i = indicates a semantic idiom
-
-Antonymity of conceptual classifications is indicated by +/- markers on tags Comparatives and superlatives receive double and triple +/- markers respectively. Certain words and collocational units show a clear double (and in some instances, triple) membership of categories. Such cases are dealt with using slash tags, that is, all tags are indicated and separated by a slash (e.g. anti-royal = E2-/S7.1+, accountant = I2.1/S2mf, bunker = G3/H1 K5.1/W3, Admiral = G3/M4/S2mf S7 1+/S2mf, dowry = S4/I1/A9-). The initial tagset was loosely based on Tom McArthur's Longman Lexicon of Contemporary English (McArthur, 1981) as this appeared to offer the most appropriate thesaurus type classification of word senses for this kind of analysis. We have since considerably revised the tagset in the light of practical tagging problems met in the course of the research. The revised tagset is arranged in a hierarchy with 21 major discourse fields expanding into 232 category labels. 
-
-The following table shows the 21 labels at the top level of the hierarchy.
-
-<table style="text-align:center;">
-    <tbody>
-        <tr>
-            <td><strong>A</strong></br>general and abstract terms</td>
-            <td><strong>B</strong></br>the body and the individual</td>
-            <td><strong>C</strong></br>arts and crafts</td>
-            <td><strong>E</strong></br>emotion</td>
-        </tr>
-        <tr>
-            <td><strong>F</strong></br>food and farming</td>
-            <td><strong>G</strong></br>government and public</td>
-            <td><strong>H</strong></br>architecture, housing and the home</td>
-            <td><strong>I</strong></br>money and commerce in industry</td>
-        </tr>
-        <tr>
-            <td><strong>K</strong></br>entertainment, sports and games</td>
-            <td><strong>L</strong></br>life and living things</td>
-            <td><strong>M</strong></br>movement, location, travel and transport</td>
-            <td><strong>N</strong></br>numbers and measurement</td>
-        </tr>
-        <tr>
-            <td><strong>O</strong></br>substances, materials, objects and equipment</td>
-            <td><strong>P</strong></br>education</td>
-            <td><strong>Q</strong></br>language and communication</td>
-            <td><strong>S</strong></br>social actions, states and processes</td>
-        </tr>
-        <tr>
-            <td><strong>T</strong></br>time</td>
-            <td><strong>W</strong></br>world and environment</td>
-            <td><strong>X</strong></br>psychological actions, states and processes</td>
-            <td><strong>Y</strong></br>science and technology</td>
-        </tr>
-        <tr>
-            <td><strong>Z</strong></br>names and grammar</td>
-        </tr>
-    </tbody>
-</table>
