@@ -163,3 +163,7 @@ If you would like to build this project and check it with [twine](https://twine.
 ``` bash
 make check-twine
 ```
+
+## Team
+
+PyMUSAS is an open-source project that has been created and funded by the [University Centre for Computer Corpus Research on Language](https://ucrel.lancs.ac.uk/) (UCREL) at [Lancaster University](https://www.lancaster.ac.uk/). For more information on who has contributed to this code base see the [contributions page.](https://github.com/UCREL/pymusas/graphs/contributors) 
