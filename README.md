@@ -32,7 +32,7 @@ pip install pymusas
 
 ## Quick example
 
-Here is a quick example of what PyMUSAS can do using the [USASRuleBasedTagger](http://0.0.0.0:3000/pymusas/api/spacy_api/taggers/rule_based), from now on called the USAS tagger, for a full tutorial, which explains all of the steps in this example, see the [Using PyMUSAS tutorial in the documentation](http://0.0.0.0:3000/pymusas/using).
+Here is a quick example of what PyMUSAS can do using the [USASRuleBasedTagger](https://ucrel.github.io/pymusas/api/spacy_api/taggers/rule_based), from now on called the USAS tagger, for a full tutorial, which explains all of the steps in this example, see the [Using PyMUSAS tutorial in the documentation](https://ucrel.github.io/pymusas/using).
 
 This example will semantically tag, at the token level, some Portuguese text. We do first need to download a [spaCy Portuguese model](https://spacy.io/models/pt) (any version will do, but we choose the small version)
 
