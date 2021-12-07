@@ -56,6 +56,7 @@ nlp = spacy.load('pt_core_news_sm', exclude=['parser', 'ner'])
 # Adds the tagger to the pipeline and returns the tagger 
 usas_tagger = nlp.add_pipe('usas_tagger')
 
+# Rule based tagger requires a lexicon
 portuguese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv'
 portuguese_usas_lexicon_file = download_url_file(portuguese_usas_lexicon_url)
 # Includes the POS information
