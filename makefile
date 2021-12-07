@@ -42,7 +42,7 @@ build-python-package:
 	@pip install --upgrade build twine
 	@python -m build
 
-check-twine: build-python-packag
+check-twine: build-python-package
 	@python -m twine check --strict dist/*
 
 	
