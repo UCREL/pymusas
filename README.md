@@ -8,19 +8,28 @@
     <a href="https://github.com/UCREL/pymusas/actions/workflows/ci.yml">
         <img alt="CI" src="https://github.com/UCREL/pymusas/actions/workflows/ci.yml/badge.svg?branch=main&event=push"/>
     </a>
+    <a href="https://github.com/UCREL/pymusas/blob/main/LICENSE">
+        <img alt="License" src="https://img.shields.io/pypi/l/pymusas"/>
+    </a>
     <a href="https://codecov.io/gh/UCREL/pymusas">
         <img alt="Code coverage" src="https://codecov.io/gh/UCREL/pymusas/branch/main/graph/badge.svg" />
     </a>
+
+</p>
+<p align="center">
+    <a href="https://pypi.org/project/pymusas/">
+        <img alt="PyPI Version" src="https://img.shields.io/pypi/v/pymusas"/>
+    </a>
+    <img alt="Supported Python Versions" src="https://img.shields.io/pypi/pyversions/pymusas" />
     <a href="https://mybinder.org/v2/gh/UCREL/pymusas/binder-main?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCREL%252Fpymusas%26urlpath%3Dlab%252Ftree%252Fpymusas%252F%26branch%3Dmain">
         <img alt="Launch Binder" src="https://static.mybinder.org/badge_logo.svg">
     </a>
-
 </p>
 
 ## Documentation
 
-* :books: [Usage Guides](https://ucrel.github.io/pymusas/) - What the package is, tutorials, how to guides, and explanations.
-* :mag_right: [API Reference](https://ucrel.github.io/pymusas/api/spacy_api/taggers/rule_based) - The docstrings of the library, with minimum working examples.
+* 📚 [Usage Guides](https://ucrel.github.io/pymusas/) - What the package is, tutorials, how to guides, and explanations.
+* 🔎 [API Reference](https://ucrel.github.io/pymusas/api/spacy_api/taggers/rule_based) - The docstrings of the library, with minimum working examples.
 
 ## Install PyMUSAS
 
