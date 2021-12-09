@@ -9,6 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Validate CITATION.cff
 
+    env:
+      RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
+
     steps:
       - uses: actions/checkout@v2
 
