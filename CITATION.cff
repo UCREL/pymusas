@@ -1,0 +1,27 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  PyMUSAS: Python Multilingual Ucrel Semantic
+  Analysis System
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Andrew
+    family-names: Moore
+    email: a.moore@lancaster.ac.uk
+    affiliation: Lancaster University
+    orcid: 'https://orcid.org/0000-0002-3395-0841'
+  - given-names: Paul
+    family-names: Rayson
+    orcid: 'https://orcid.org/0000-0002-1257-2191'
+    email: p.rayson@lancaster.ac.uk
+    affiliation: Lancaster University
+repository-code: 'https://github.com/ucrel/pymusas'
+url: 'https://ucrel.github.io/pymusas/'
+license: Apache-2.0
+version: 0.1.0
+date-released: '2021-12-07'
