@@ -357,6 +357,87 @@ rimborso	rimborso	NOUN	['I1.1', 'I1.1+/A9-', 'I1.2-', 'S1.1.2+', 'S8-']
 ```
 </details>
 
+## Portuguese
+
+<details>
+<summary>Expand</summary>
+
+First download the relevant spaCy pipeline, through the command line, link to [Portuguese spaCy models](https://spacy.io/models/pt):
+
+``` bash
+python -m spacy download pt_core_news_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.spacy_api.taggers import rule_based
+from pymusas.pos_mapper import UPOS_TO_USAS_CORE
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load('pt_core_news_sm', exclude=['parser', 'ner'])
+# Adds the tagger to the pipeline and returns the tagger 
+usas_tagger = nlp.add_pipe('usas_tagger')
+
+# Rule based tagger requires a USAS lexicon
+portuguese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv'
+# Includes the POS information
+portuguese_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_url)
+# excludes the POS information
+portuguese_lemma_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_url, 
+                                                             include_pos=False)
+# Add the lexicon information to the USAS tagger within the pipeline
+usas_tagger.lexicon_lookup = portuguese_lexicon_lookup
+usas_tagger.lemma_lexicon_lookup = portuguese_lemma_lexicon_lookup
+# Maps from the POS model tagset to the lexicon POS tagset
+usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Portuguese Wikipedia page on the topic of [`Bank` as a financial institution.](https://pt.wikipedia.org/wiki/Banco):
+
+``` python
+text = "Banco (do germânico banki, através do latim vulgar) é uma instituição financeira intermediária entre agentes superavitários e agentes deficitários."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+```
+
+Output:
+
+``` tsv
+Text	Lemma	POS	USAS Tags
+Banco	Banco	PROPN	['H5', 'B1%', 'I1/H1', 'I1.1/I2.1c', 'W3/M4', 'A9+/H1', 'O2', 'M6', 'G2.1c']
+(	(	PUNCT	['PUNCT']
+do	do	ADP	['Z5']
+germânico	germânico	ADJ	['Z2', 'Z2/Q3']
+banki	banki	ADJ	['Z99']
+,	,	PUNCT	['PUNCT']
+através	através	ADV	['M6', 'Z5']
+do	do	ADP	['Z5']
+latim	latim	NOUN	['Z2/Q3', 'Z2/S2mf']
+vulgar	vulgar	VERB	['A6.2+', 'A5.1', 'N2', 'N5++', 'S5+', 'O4.2-', 'M7', 'S1.2.4-']
+)	)	PUNCT	['PUNCT']
+é	ser	AUX	['A3+', 'Z5']
+uma	umar	DET	['Z99']
+instituição	instituição	NOUN	['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
+financeira	financeiro	ADJ	['I1', 'I1/G1.1']
+intermediária	intermediário	ADJ	['N5', 'N4', 'S8+/S2mf']
+entre	entrar	ADP	['M1', 'S5+', 'T2+', 'A1.8+', 'Y2']
+agentes	agente	NOUN	['I2.1/S2mf', 'G1.1/X2.2+/S2mf', 'K4/S2mf', 'I2.2/S2.2m', 'S8+/S2.2m']
+superavitários	superavitários	ADJ	['Z99']
+e	e	CCONJ	['Z5']
+agentes	agente	NOUN	['I2.1/S2mf', 'G1.1/X2.2+/S2mf', 'K4/S2mf', 'I2.2/S2.2m', 'S8+/S2.2m']
+deficitários	deficitário	ADJ	['Z99']
+.	.	PUNCT	['PUNCT']
+```
+</details>
+
 ## Spanish
 
 <details>
@@ -460,87 +541,6 @@ financieros	financiero	ADJ	['I1', 'S2mf', 'S7']
 ,	,	PUNCT	['PUNCT']
 como	como	SCONJ	['Z5']
 créditos	crédito	NOUN	['I2.1']
-.	.	PUNCT	['PUNCT']
-```
-</details>
-
-## Portuguese
-
-<details>
-<summary>Expand</summary>
-
-First download the relevant spaCy pipeline, through the command line, link to [Portuguese spaCy models](https://spacy.io/models/pt):
-
-``` bash
-python -m spacy download pt_core_news_sm
-```
-
-Then create the tagger, in a Python script:
-
-``` python
-import spacy
-
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
-# We exclude the following components as we do not need them. 
-nlp = spacy.load('pt_core_news_sm', exclude=['parser', 'ner'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-portuguese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv'
-# Includes the POS information
-portuguese_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_url)
-# excludes the POS information
-portuguese_lemma_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_url, 
-                                                             include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = portuguese_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = portuguese_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
-```
-
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Portuguese Wikipedia page on the topic of [`Bank` as a financial institution.](https://pt.wikipedia.org/wiki/Banco):
-
-``` python
-text = "Banco (do germânico banki, através do latim vulgar) é uma instituição financeira intermediária entre agentes superavitários e agentes deficitários."
-
-output_doc = nlp(text)
-
-print(f'Text\tLemma\tPOS\tUSAS Tags')
-for token in output_doc:
-    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
-```
-
-Output:
-
-``` tsv
-Text	Lemma	POS	USAS Tags
-Banco	Banco	PROPN	['H5', 'B1%', 'I1/H1', 'I1.1/I2.1c', 'W3/M4', 'A9+/H1', 'O2', 'M6', 'G2.1c']
-(	(	PUNCT	['PUNCT']
-do	do	ADP	['Z5']
-germânico	germânico	ADJ	['Z2', 'Z2/Q3']
-banki	banki	ADJ	['Z99']
-,	,	PUNCT	['PUNCT']
-através	através	ADV	['M6', 'Z5']
-do	do	ADP	['Z5']
-latim	latim	NOUN	['Z2/Q3', 'Z2/S2mf']
-vulgar	vulgar	VERB	['A6.2+', 'A5.1', 'N2', 'N5++', 'S5+', 'O4.2-', 'M7', 'S1.2.4-']
-)	)	PUNCT	['PUNCT']
-é	ser	AUX	['A3+', 'Z5']
-uma	umar	DET	['Z99']
-instituição	instituição	NOUN	['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
-financeira	financeiro	ADJ	['I1', 'I1/G1.1']
-intermediária	intermediário	ADJ	['N5', 'N4', 'S8+/S2mf']
-entre	entrar	ADP	['M1', 'S5+', 'T2+', 'A1.8+', 'Y2']
-agentes	agente	NOUN	['I2.1/S2mf', 'G1.1/X2.2+/S2mf', 'K4/S2mf', 'I2.2/S2.2m', 'S8+/S2.2m']
-superavitários	superavitários	ADJ	['Z99']
-e	e	CCONJ	['Z5']
-agentes	agente	NOUN	['I2.1/S2mf', 'G1.1/X2.2+/S2mf', 'K4/S2mf', 'I2.2/S2.2m', 'S8+/S2.2m']
-deficitários	deficitário	ADJ	['Z99']
 .	.	PUNCT	['PUNCT']
 ```
 </details>
