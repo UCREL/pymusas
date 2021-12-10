@@ -34,13 +34,11 @@ usas_tagger = nlp.add_pipe('usas_tagger')
 
 # Rule based tagger requires a USAS lexicon
 chinese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Chinese/semantic_lexicon_chi.tsv'
-# Includes the POS information
-chinese_lexicon_lookup = LexiconCollection.from_tsv(chinese_usas_lexicon_url)
-# excludes the POS information
+# As we are not using the POS information we exclude it from the lexicon
+# NOTE: in this context lemma here means token.
 chinese_lemma_lexicon_lookup = LexiconCollection.from_tsv(chinese_usas_lexicon_url, 
                                                           include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = chinese_lexicon_lookup
+# Add the lemma lexicon information to the USAS tagger within the pipeline
 usas_tagger.lemma_lexicon_lookup = chinese_lemma_lexicon_lookup
 ```
 
@@ -77,5 +75,86 @@ Text	USAS Tags
 金融	['I1']
 機構	['Z99']
 。	['Z99']
+```
+</details>
+
+## Dutch
+
+<details>
+<summary>Expand</summary>
+
+First download the relevant spaCy pipeline, through the command line, link to [Dutch spaCy models](https://spacy.io/models/nl):
+
+``` bash
+python -m spacy download nl_core_news_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.spacy_api.taggers import rule_based
+from pymusas.pos_mapper import UPOS_TO_USAS_CORE
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load('nl_core_news_sm', exclude=['parser', 'ner', 'tagger'])
+# Adds the tagger to the pipeline and returns the tagger 
+usas_tagger = nlp.add_pipe('usas_tagger')
+
+# Rule based tagger requires a USAS lexicon
+dutch_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Dutch/semantic_lexicon_dut.tsv'
+# Includes the POS information
+dutch_lexicon_lookup = LexiconCollection.from_tsv(dutch_usas_lexicon_url)
+# excludes the POS information
+dutch_lemma_lexicon_lookup = LexiconCollection.from_tsv(dutch_usas_lexicon_url, 
+                                                        include_pos=False)
+# Add the lexicon information to the USAS tagger within the pipeline
+usas_tagger.lexicon_lookup = dutch_lexicon_lookup
+usas_tagger.lemma_lexicon_lookup = dutch_lemma_lexicon_lookup
+# Maps from the POS model tagset to the lexicon POS tagset
+usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on topic the of [`Bank` as a financial institution.](https://nl.wikipedia.org/wiki/Bank_(financi%C3%ABle_instelling)):
+
+``` python
+text = "Een bank of een kredietinstelling is een financieel instituut dat bewaring van geld, leningen, betaalverkeer en diverse andere diensten aanbiedt."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+```
+
+Output:
+
+``` tsv
+Text	Lemma	POS	USAS Tags
+Een	een	DET	['Z5']
+bank	bank	NOUN	['Z99']
+of	of	CCONJ	['Z5']
+een	een	DET	['Z5']
+kredietinstelling	kredietinstelling	NOUN	['Z99']
+is	is	AUX	['Z99']
+een	een	DET	['Z5']
+financieel	financieel	ADJ	['I1']
+instituut	instituut	NOUN	['P1/S5+c', 'X2.4/S5+c', 'S5+c', 'T2+']
+dat	dat	SCONJ	['A13.3', 'A6.1+', 'Z5', 'Z8']
+bewaring	bewaring	NOUN	['Z99']
+van	van	ADP	['Z5']
+geld	geld	NOUN	['I1']
+,	,	PUNCT	['PUNCT']
+leningen	lening	NOUN	['A9-', 'I1.2']
+,	,	PUNCT	['PUNCT']
+betaalverkeer	betaalverkeer	PROPN	['Z99']
+en	en	CCONJ	['Z5']
+diverse	divers	ADJ	['A6.3+']
+andere	ander	ADJ	['A6.1-', 'A6.1-/Z8']
+diensten	dienst	NOUN	['A1.1.1', 'S8+', 'S7.1-', 'I2.2', 'S9', 'I3.1', 'F1', 'G3@', 'G1.1@', 'G2.1@']
+aanbiedt	aanbieden	VERB	['A9-', 'Q2.2']
+.	.	PUNCT	['PUNCT']
 ```
 </details>
