@@ -71,7 +71,9 @@ As we can see the [USAS tagger](/api/spacy_api/taggers/rule_based) has been adde
 
 Before using the added tagger we need to add the single word Portuguese USAS lexicon to the tagger, to do this we first need to download the lexicon form the [Multilingual USAS repository](https://github.com/UCREL/Multilingual-USAS) and then add the lexicon with and without the POS information (the code example below carries on from the previous).
 
-**NOTE** when it downloads the lexicon it will be saved within the [PYMUSAS_CACHE_HOME](/api/config) directory for caching, which by default is set to `~/.cache/pymusas`, this can be changed either by setting `pymusas.config.PYMUSAS_CACHE_HOME` within the code you are writing or by setting the `PYMUSAS_HOME` environment variable.
+:::note
+When it downloads the lexicon it will be saved within the [PYMUSAS_CACHE_HOME](/api/config) directory for caching, which by default is set to `~/.cache/pymusas`, this can be changed either by setting `pymusas.config.PYMUSAS_CACHE_HOME` within the code you are writing or by setting the `PYMUSAS_HOME` environment variable.
+:::
 
 ``` python
 from pymusas.file_utils import download_url_file
