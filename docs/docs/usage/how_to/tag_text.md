@@ -158,3 +158,83 @@ aanbiedt	aanbieden	VERB	['A9-', 'Q2.2']
 .	.	PUNCT	['PUNCT']
 ```
 </details>
+
+## French
+
+<details>
+<summary>Expand</summary>
+
+First download the relevant spaCy pipeline, through the command line, link to [French spaCy models](https://spacy.io/models/fr):
+
+``` bash
+python -m spacy download fr_core_news_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.spacy_api.taggers import rule_based
+from pymusas.pos_mapper import UPOS_TO_USAS_CORE
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load('fr_core_news_sm', exclude=['parser', 'ner'])
+# Adds the tagger to the pipeline and returns the tagger 
+usas_tagger = nlp.add_pipe('usas_tagger')
+
+# Rule based tagger requires a USAS lexicon
+french_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.tsv'
+# Includes the POS information
+french_lexicon_lookup = LexiconCollection.from_tsv(french_usas_lexicon_url)
+# excludes the POS information
+french_lemma_lexicon_lookup = LexiconCollection.from_tsv(french_usas_lexicon_url, 
+                                                         include_pos=False)
+# Add the lexicon information to the USAS tagger within the pipeline
+usas_tagger.lexicon_lookup = french_lexicon_lookup
+usas_tagger.lemma_lexicon_lookup = french_lemma_lexicon_lookup
+# Maps from the POS model tagset to the lexicon POS tagset
+usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on topic the of [`Bank` as a financial institution.](https://fr.wikipedia.org/wiki/Banque):
+
+``` python
+text = "Une banque est une institution financière qui fournit des services bancaires, soit notamment de dépôt, de crédit et paiement."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+```
+
+Output:
+
+``` tsv
+Text	Lemma	POS	USAS Tags
+Une	un	DET	['Z5']
+banque	banque	NOUN	['I1.1', 'X2.6+', 'M1', 'I1/H1', 'I1.1/I2.1c', 'W3/M4', 'A9+/H1', 'O2', 'M6']
+est	être	AUX	['M6']
+une	un	DET	['Z5']
+institution	institution	NOUN	['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
+financière	financier	ADJ	['Z99']
+qui	qui	PRON	['Z8']
+fournit	fournir	VERB	['Z99']
+des	de	ADP	['Z5']
+services	service	NOUN	['A1.1.1', 'S8+', 'S7.1-', 'I2.2', 'S9', 'I3.1', 'F1', 'G3@', 'G1.1@', 'G2.1@']
+bancaires	bancaire	NOUN	['I1.1', 'X2.6+', 'M1', 'H1']
+,	,	PUNCT	['PUNCT']
+soit	soit	CCONJ	['Z99']
+notamment	notamment	ADV	['A14', 'A13.3']
+de	de	ADP	['Z5']
+dépôt	dépôt	NOUN	['Z99']
+,	,	PUNCT	['PUNCT']
+de	de	ADP	['Z5']
+crédit	crédit	NOUN	['I1.1', 'A5.1+', 'X2.1', 'P1']
+et	et	CCONJ	['Z5']
+paiement	paiement	NOUN	['I1.1']
+.	.	PUNCT	['PUNCT']
+```
+</details>
