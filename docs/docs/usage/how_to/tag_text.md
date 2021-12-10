@@ -238,3 +238,121 @@ paiement	paiement	NOUN	['I1.1']
 .	.	PUNCT	['PUNCT']
 ```
 </details>
+
+## Italian
+
+<details>
+<summary>Expand</summary>
+
+First download the relevant spaCy pipeline, through the command line, link to [Italian spaCy models](https://spacy.io/models/it):
+
+``` bash
+python -m spacy download it_core_news_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.spacy_api.taggers import rule_based
+from pymusas.pos_mapper import UPOS_TO_USAS_CORE
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load('it_core_news_sm', exclude=['parser', 'ner', 'tagger'])
+# Adds the tagger to the pipeline and returns the tagger 
+usas_tagger = nlp.add_pipe('usas_tagger')
+
+# Rule based tagger requires a USAS lexicon
+italian_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Italian/semantic_lexicon_ita.tsv'
+# Includes the POS information
+italian_lexicon_lookup = LexiconCollection.from_tsv(italian_usas_lexicon_url)
+# excludes the POS information
+italian_lemma_lexicon_lookup = LexiconCollection.from_tsv(italian_usas_lexicon_url, 
+                                                          include_pos=False)
+# Add the lexicon information to the USAS tagger within the pipeline
+usas_tagger.lexicon_lookup = italian_lexicon_lookup
+usas_tagger.lemma_lexicon_lookup = italian_lemma_lexicon_lookup
+# Maps from the POS model tagset to the lexicon POS tagset
+usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on topic the of [`Bank` as a financial institution.](https://it.wikipedia.org/wiki/Banca):
+
+``` python
+text = "Una banca (detta anche istituto di credito) è un istituto pubblico o privato che esercita congiuntamente l'attività di raccolta del risparmio tra il pubblico e di esercizio del credito (attività bancaria) verso i propri clienti (imprese e privati cittadini); costituisce raccolta del risparmio l'acquisizione di fondi con obbligo di rimborso."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+```
+
+Output:
+
+``` tsv
+Text	Lemma	POS	USAS Tags
+Una	uno	DET	['N1']
+banca	banca	NOUN	['I2.1']
+(	(	PUNCT	['PUNCT']
+detta	dire	VERB	['Q2.2']
+anche	anche	ADV	['Z5']
+istituto	istituto	NOUN	['P1/S5+c', 'X2.4/S5+c']
+di	di	ADP	['Z5']
+credito	credito	NOUN	['I1.1', 'A5.1+', 'X2.1', 'P1', 'Q1.2', 'X3.2', 'T1.3', 'L2']
+)	)	PUNCT	['PUNCT']
+è	essere	AUX	['A5.1', 'S7.1++', 'X3.2', 'Q2.2', 'A8', 'N3.1%']
+un	uno	DET	['Z5']
+istituto	istituto	NOUN	['P1/S5+c', 'X2.4/S5+c']
+pubblico	pubblico	ADJ	['A10+']
+o	o	CCONJ	['Z5']
+privato	privato	ADJ	['S1.2.1+', 'A1.7-']
+che	che	PRON	['Z8']
+esercita	esercitare	VERB	['A1.1.1', 'S7.1+', 'X8+', 'X2.4', 'M1', 'A9-', 'K5.1', 'A1.5.1']
+congiuntamente	congiuntamente	ADV	['Z99']
+l'	il	DET	['Z5']
+attività	attività	NOUN	['A1.1.1', 'X8+', 'X2.4', 'M1']
+di	di	ADP	['Z5']
+raccolta	raccolta	NOUN	['F4', 'N4', 'Q4.3%', 'S9%', 'N5+', 'A9+']
+del	del	ADP	['Z5']
+risparmio	risparmio	NOUN	['I2.1', 'I1.3-', 'A1.5.1/A1.3+', 'A1.9']
+tra	tra	ADP	['Z5']
+il	il	DET	['Z5']
+pubblico	pubblico	NOUN	['S1.1.3+', 'S5+']
+e	e	CCONJ	['Z5']
+di	di	ADP	['Z5']
+esercizio	esercizio	NOUN	['K5.1', 'P1', 'A1.1.1', 'G3@', 'O2', 'G3', 'B5']
+del	del	ADP	['Z5']
+credito	credito	NOUN	['I1.1', 'A5.1+', 'X2.1', 'P1', 'Q1.2', 'X3.2', 'T1.3', 'L2']
+(	(	PUNCT	['PUNCT']
+attività	attività	NOUN	['A1.1.1', 'X8+', 'X2.4', 'M1']
+bancaria	bancario	ADJ	['M1', 'M2', 'I1.2']
+)	)	PUNCT	['PUNCT']
+verso	verso	ADP	['Z5', 'M6']
+i	il	DET	['Z5']
+propri	proprio	DET	['Z5']
+clienti	cliente	NOUN	['I2.2/S2mf']
+(	(	PUNCT	['PUNCT']
+imprese	impresa	NOUN	['A12-']
+e	e	CCONJ	['Z5']
+privati	privato	NOUN	['S1.2.1+', 'A1.7-']
+cittadini	cittadino	NOUN	['M7/S2mf']
+)	)	PUNCT	['PUNCT']
+;	;	PUNCT	['PUNCT']
+costituisce	costituire	VERB	['A1.1.1', 'A9+', 'A2.2', 'S6+', 'A3+', 'A9-', 'X9.2+', 'X6+']
+raccolta	raccolta	NOUN	['F4', 'N4', 'Q4.3%', 'S9%', 'N5+', 'A9+']
+del	del	ADP	['Z5']
+risparmio	risparmio	NOUN	['I2.1', 'I1.3-', 'A1.5.1/A1.3+', 'A1.9']
+l'	il	DET	['Z5']
+acquisizione	acquisizione	NOUN	['Z99']
+di	di	ADP	['Z5']
+fondi	fondo	NOUN	['M6']
+con	con	ADP	['Z5']
+obbligo	obbligo	NOUN	['S6+']
+di	di	ADP	['Z5']
+rimborso	rimborso	NOUN	['I1.1', 'I1.1+/A9-', 'I1.2-', 'S1.1.2+', 'S8-']
+.	.	PUNCT	['PUNCT']
+```
+</details>
