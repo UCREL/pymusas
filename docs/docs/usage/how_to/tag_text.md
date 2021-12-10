@@ -42,7 +42,7 @@ chinese_lemma_lexicon_lookup = LexiconCollection.from_tsv(chinese_usas_lexicon_u
 usas_tagger.lemma_lexicon_lookup = chinese_lemma_lexicon_lookup
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Chinese Wikipedia page on topic the of [`Bank` as a financial institution.](https://zh.wikipedia.org/wiki/%E9%8A%80%E8%A1%8C):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Chinese Wikipedia page on the topic of [`Bank` as a financial institution.](https://zh.wikipedia.org/wiki/%E9%8A%80%E8%A1%8C):
 
 ``` python
 text = "銀行是吸收公众存款、发放貸款、办理结算等業務的金融機構。"
@@ -117,7 +117,7 @@ usas_tagger.lemma_lexicon_lookup = dutch_lemma_lexicon_lookup
 usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on topic the of [`Bank` as a financial institution.](https://nl.wikipedia.org/wiki/Bank_(financi%C3%ABle_instelling)):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on the topic of [`Bank` as a financial institution.](https://nl.wikipedia.org/wiki/Bank_(financi%C3%ABle_instelling)):
 
 ``` python
 text = "Een bank of een kredietinstelling is een financieel instituut dat bewaring van geld, leningen, betaalverkeer en diverse andere diensten aanbiedt."
@@ -198,7 +198,7 @@ usas_tagger.lemma_lexicon_lookup = french_lemma_lexicon_lookup
 usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on topic the of [`Bank` as a financial institution.](https://fr.wikipedia.org/wiki/Banque):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on the topic of [`Bank` as a financial institution.](https://fr.wikipedia.org/wiki/Banque):
 
 ``` python
 text = "Une banque est une institution financière qui fournit des services bancaires, soit notamment de dépôt, de crédit et paiement."
@@ -278,7 +278,7 @@ usas_tagger.lemma_lexicon_lookup = italian_lemma_lexicon_lookup
 usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on topic the of [`Bank` as a financial institution.](https://it.wikipedia.org/wiki/Banca):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on the topic of [`Bank` as a financial institution.](https://it.wikipedia.org/wiki/Banca):
 
 ``` python
 text = "Una banca (detta anche istituto di credito) è un istituto pubblico o privato che esercita congiuntamente l'attività di raccolta del risparmio tra il pubblico e di esercizio del credito (attività bancaria) verso i propri clienti (imprese e privati cittadini); costituisce raccolta del risparmio l'acquisizione di fondi con obbligo di rimborso."
