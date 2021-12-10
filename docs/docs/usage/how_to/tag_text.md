@@ -356,3 +356,110 @@ rimborso	rimborso	NOUN	['I1.1', 'I1.1+/A9-', 'I1.2-', 'S1.1.2+', 'S8-']
 .	.	PUNCT	['PUNCT']
 ```
 </details>
+
+## Spanish
+
+<details>
+<summary>Expand</summary>
+
+First download the relevant spaCy pipeline, through the command line, link to [Spanish spaCy models](https://spacy.io/models/es):
+
+``` bash
+python -m spacy download es_core_news_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.spacy_api.taggers import rule_based
+from pymusas.pos_mapper import UPOS_TO_USAS_CORE
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load('es_core_news_sm', exclude=['parser', 'ner'])
+# Adds the tagger to the pipeline and returns the tagger 
+usas_tagger = nlp.add_pipe('usas_tagger')
+
+# Rule based tagger requires a USAS lexicon
+spanish_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Spanish/semantic_lexicon_es.tsv'
+# Includes the POS information
+spanish_lexicon_lookup = LexiconCollection.from_tsv(spanish_usas_lexicon_url)
+# excludes the POS information
+spanish_lemma_lexicon_lookup = LexiconCollection.from_tsv(spanish_usas_lexicon_url, 
+                                                          include_pos=False)
+# Add the lexicon information to the USAS tagger within the pipeline
+usas_tagger.lexicon_lookup = spanish_lexicon_lookup
+usas_tagger.lemma_lexicon_lookup = spanish_lemma_lexicon_lookup
+# Maps from the POS model tagset to the lexicon POS tagset
+usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Spanish Wikipedia page on the topic of [`Bank` as a financial institution.](https://es.wikipedia.org/wiki/Banco):
+
+``` python
+text = "Un banco, también conocido como entidad de crédito o entidad de depósito es una empresa financiera que acepta depósitos del público y crea depósitos a la vista, lo que coloquialmente se denominan cuentas bancarias; así mismo proveen otro tipo de servicios financieros, como créditos."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+```
+
+Output:
+
+``` tsv
+Text	Lemma	POS	USAS Tags
+Un	uno	DET	['Z5', 'N1']
+banco	banco	NOUN	['I2', 'M7']
+,	,	PUNCT	['PUNCT']
+también	también	ADV	['N5++', 'Z5']
+conocido	conocido	ADJ	['Z99']
+como	como	SCONJ	['Z5']
+entidad	entidad	NOUN	['I2.1.3', 'G1', 'A3', 'S7.2+', 'S5+']
+de	de	ADP	['Z5']
+crédito	crédito	NOUN	['I2.1']
+o	o	CCONJ	['Z5', 'A1.8-']
+entidad	entidad	NOUN	['I2.1.3', 'G1', 'A3', 'S7.2+', 'S5+']
+de	de	ADP	['Z5']
+depósito	depósito	NOUN	['Z99']
+es	ser	AUX	['Z5', 'A3+']
+una	uno	DET	['Z5', 'Z8', 'N1']
+empresa	empresa	NOUN	['I1.2.1.3', 'X6/X7']
+financiera	financiero	ADJ	['I1', 'S2mf', 'S7']
+que	que	PRON	['Z5', 'Z8']
+acepta	aceptar	VERB	['A9+', 'X2.5+', 'S7.4+', 'S9@']
+depósitos	depósito	NOUN	['Z99']
+del	del	ADP	['Z5']
+público	público	NOUN	['K1/S2mfc', 'S2mfc', 'S1.1.3+', 'S5+c', 'A10+']
+y	y	CCONJ	['Z5', 'A1.8+']
+crea	crea	VERB	['Z99']
+depósitos	depósito	NOUN	['Z99']
+a	a	ADP	['Z5']
+la	el	DET	['Z5']
+vista	vista	NOUN	['X3.4', 'M5', 'B2', 'G2.1']
+,	,	PUNCT	['PUNCT']
+lo	él	PRON	['Z5', 'Z8']
+que	que	PRON	['Z5', 'Z8']
+coloquialmente	coloquialmentar	VERB	['Z99']
+se	él	PRON	['Z5', 'Z8', 'S1.1']
+denominan	denominar	VERB	['Z99']
+cuentas	cuenta	NOUN	['I1.1/N2/Y2', 'N5', 'N5.1+', 'I1.3.1', 'O2']
+bancarias	bancario	ADJ	['Z99']
+;	;	PUNCT	['PUNCT']
+así	así	ADV	['Z5', 'A8', 'N3']
+mismo	mismo	PRON	['A6']
+proveen	proveer	VERB	['A9+', 'S6+']
+otro	otro	DET	['Z8', 'A6.1-m', 'N5++']
+tipo	tipo	NOUN	['A4.1', 'A6.1', 'S2.2m', 'Y2', 'I1.2', 'I1.3']
+de	de	ADP	['Z5']
+servicios	servicio	NOUN	['I1', 'S8+', 'G1']
+financieros	financiero	ADJ	['I1', 'S2mf', 'S7']
+,	,	PUNCT	['PUNCT']
+como	como	SCONJ	['Z5']
+créditos	crédito	NOUN	['I2.1']
+.	.	PUNCT	['PUNCT']
+```
+</details>
