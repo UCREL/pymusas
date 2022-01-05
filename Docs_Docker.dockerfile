@@ -1,8 +1,10 @@
-FROM node:16.13.0-alpine3.14
+FROM node:16.13-alpine3.15
 
 RUN apk add --no-cache git
 
 USER node
+
+RUN mkdir /home/node/website
 
 WORKDIR /home/node/website
 
