@@ -2,7 +2,7 @@
 
 ## Making a pull request
 
-* If your pull requests involves contributing to the docstrings, see the guidance below on [writing docstrings](#writing-docstrings), then you need to test if the documentation can build without error (all of the make commands apart from `create-api-docs` require **docker**, for more information on these make commands see the [website section below](#website)):
+* If your pull requests involves contributing to the docstrings, see the guidance below on [writing docstrings](#writing-docstrings), then you need to test if the documentation can build without error (all of the make commands apart from `create-api-docs` require [docker](https://docs.docker.com/), for more information on these make commands see the [website section below](#website)):
 
 ```bash
 make create-api-docs # This command automatically generates the API documentation that the website serves
@@ -16,6 +16,8 @@ make develop-docs
 ```
 
 If the error message is not clear, feel free to comment on this in your pull request.
+
+The last part of any pull request is to update the [CHANGELOG](./CHANGELOG.md) with notes of your contribution in the "Unreleased" section at the top of the markdown file.
 
 ### Changing / Updating Python requirements
 
@@ -166,7 +168,7 @@ The documentation is built with [docusaurus v2](https://docusaurus.io/), a stati
 
 The only part of the website that is automatically generated are the API pages, this is done through the: `make create-api-docs` command. These API pages are stored in the [./docs/docs/api folder](./docs/docs/api)
 
-The pages that can be added too are the documentation pages of which these should be something like a guide or usage example page to help the user's better understand and get started using the code base. These can be written using markdown with or without React components (for more details on how to write a documentation [page](https://docusaurus.io/docs/create-doc), more [advance guide](https://docusaurus.io/docs/markdown-features)). The documentation pages should be stored in the [./docs/docs/documentation folder](./docs/docs/documentation).
+The pages that can be added too are the documentation pages of which these should be something like a guide or usage example page to help the user's better understand and get started using the code base. These can be written using markdown with or without React components (for more details on how to write a documentation [page](https://docusaurus.io/docs/create-doc), a link to a more [advance guide](https://docusaurus.io/docs/markdown-features)). The documentation pages should be stored in the [./docs/docs/documentation folder](./docs/docs/documentation).
 
 ### Commands
 
