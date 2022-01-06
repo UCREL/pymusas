@@ -1,4 +1,4 @@
-# PymUSAS 
+# PyMUSAS 
 
 **Py**thon **M**ultilingual **U**crel **S**emantic **A**nalysis **S**ystem, it currently is a rule based token level semantic tagger which can be added to any spaCy pipeline. The current tagger system is flexible enough to support any semantic tagset, however the tagset we have concentrated on and give examples for throughout the documentation is the [Ucrel Semantic Analysis System (USAS)](https://ucrel.lancs.ac.uk/usas/).
 
@@ -21,6 +21,10 @@
         <img alt="PyPI Version" src="https://img.shields.io/pypi/v/pymusas"/>
     </a>
     <img alt="Supported Python Versions" src="https://img.shields.io/pypi/pyversions/pymusas" />
+</p>
+<p align="center">
+    <img alt="Number of PyMUSAS PyPI downloads for the last month" 
+         src="https://img.shields.io/pypi/dm/pymusas" />
     <a href="https://mybinder.org/v2/gh/UCREL/pymusas/binder-main?urlpath=git-pull%3Frepo%3Dhttps%253A%252F%252Fgithub.com%252FUCREL%252Fpymusas%26urlpath%3Dlab%252Ftree%252Fpymusas%252F%26branch%3Dmain">
         <img alt="Launch Binder" src="https://static.mybinder.org/badge_logo.svg">
     </a>
