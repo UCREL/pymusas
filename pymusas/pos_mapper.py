@@ -6,6 +6,12 @@ UPOS_TO_USAS_CORE: `Dict[str, List[str]]`
     to the USAS core tagset. UPOS is used by the
     [Universal Dependencies Tree Bank.](https://universaldependencies.org/u/pos/)
 
+CHINESE_PENN_TREEBANK_TO_USAS_CORE: `Dict[str, List[str]]`
+    A mapping from the [Chinese Penn Treebank tagset](https://verbs.colorado.edu/chinese/posguide.3rd.ch.pdf)
+    to the USAS core tagset. The Chinese Penn Treebank tagset here is slightly different to the original
+    as it contains three extra tags, `X`, `URL`, and `INF`, that are appear to be unique to
+    the [spaCy Chinese models](https://spacy.io/models/zh). For more information on how this mapping was
+    created, see the following [GitHub issue](https://github.com/UCREL/pymusas/issues/19).
 '''
 from typing import Dict, List
 
@@ -28,6 +34,45 @@ UPOS_TO_USAS_CORE: Dict[str, List[str]] = {
     'SYM': ['code'],
     'VERB': ['verb'],
     'X': ['fw', 'xx']
+}
+
+CHINESE_PENN_TREEBANK_TO_USAS_CORE: Dict[str, List[str]] = {
+    'AS': ['part'],
+    'DEC': ['part'],
+    'DEG': ['part'],
+    'DER': ['part'],
+    'DEV': ['part'],
+    'ETC': ['part'],
+    'LC': ['part'],
+    'MSP': ['part'],
+    'SP': ['part'],
+    'BA': ['fw', 'xx'],
+    'FW': ['fw', 'xx'],
+    'IJ': ['intj'],
+    'LB': ['fw', 'xx'],
+    'ON': ['fw', 'xx'],
+    'SB': ['fw', 'xx'],
+    'X': ['fw', 'xx'],
+    'URL': ['fw', 'xx'],
+    'INF': ['fw', 'xx'],
+    'NN': ['noun'],
+    'NR': ['pnoun'],
+    'NT': ['noun'],
+    'VA': ['verb'],
+    'VC': ['verb'],
+    'VE': ['verb'],
+    'VV': ['verb'],
+    'CD': ['num'],
+    'M': ['num'],
+    'OD': ['num'],
+    'DT': ['det', 'art'],
+    'CC': ['conj'],
+    'CS': ['conj'],
+    'AD': ['adv'],
+    'JJ': ['adj'],
+    'P': ['prep'],
+    'PN': ['pron'],
+    'PU': ['punc']
 }
 
 
