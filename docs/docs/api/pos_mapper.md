@@ -14,10 +14,10 @@
     to the USAS core tagset. UPOS is used by the
     [Universal Dependencies Tree Bank.](https://universaldependencies.org/u/pos/)
 
-- __CHINESE\_PENN\_TREEBANK\_TO\_USAS\_CORE__ : `Dict[str, List[str]]` <br/>
-    A mapping from the [Chinese Penn Treebank tagset](https://verbs.colorado.edu/chinese/posguide.3rd.ch.pdf)
-    to the USAS core tagset. The Chinese Penn Treebank tagset here is slightly different to the original
-    as it contains three extra tags, `X`, `URL`, and `INF`, that are appear to be unique to
+- __PENN\_CHINESE\_TREEBANK\_TO\_USAS\_CORE__ : `Dict[str, List[str]]` <br/>
+    A mapping from the [Penn Chinese Treebank tagset](https://verbs.colorado.edu/chinese/posguide.3rd.ch.pdf)
+    to the USAS core tagset. The Penn Chinese Treebank tagset here is slightly different to the original
+    as it contains three extra tags, `X`, `URL`, and `INF`, that appear to be unique to
     the [spaCy Chinese models](https://spacy.io/models/zh). For more information on how this mapping was
     created, see the following [GitHub issue](https://github.com/UCREL/pymusas/issues/19).
 
@@ -34,12 +34,12 @@ UPOS_TO_USAS_CORE: Dict[str, List[str]] = {
     'CCONJ': ['c ...
 ```
 
-<a id="pymusas.pos_mapper.CHINESE_PENN_TREEBANK_TO_USAS_CORE"></a>
+<a id="pymusas.pos_mapper.PENN_CHINESE_TREEBANK_TO_USAS_CORE"></a>
 
-#### CHINESE\_PENN\_TREEBANK\_TO\_USAS\_CORE
+#### PENN\_CHINESE\_TREEBANK\_TO\_USAS\_CORE
 
 ```python
-CHINESE_PENN_TREEBANK_TO_USAS_CORE: Dict[str, List[str]] = {
+PENN_CHINESE_TREEBANK_TO_USAS_CORE: Dict[str, List[str]] = {
     'AS': ['part'],
     'DEC': ['part'],
     'DEG': ['part'],

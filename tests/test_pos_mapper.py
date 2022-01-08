@@ -1,4 +1,4 @@
-from pymusas.pos_mapper import CHINESE_PENN_TREEBANK_TO_USAS_CORE, upos_to_usas_core
+from pymusas.pos_mapper import PENN_CHINESE_TREEBANK_TO_USAS_CORE, upos_to_usas_core
 
 
 def test_upos_to_usas_core() -> None:
@@ -16,9 +16,9 @@ def test_upos_to_usas_core() -> None:
             assert usas_tag.lower() == usas_tag
 
 
-def test_chinese_penn_to_usas_core() -> None:
-    assert len(CHINESE_PENN_TREEBANK_TO_USAS_CORE) == 36
-    chinese_penn_treebank_mapping = {'VA': ['verb'],
+def test_penn_chinese_to_usas_core() -> None:
+    assert len(PENN_CHINESE_TREEBANK_TO_USAS_CORE) == 36
+    penn_chinese_treebank_mapping = {'VA': ['verb'],
                                      'VC': ['verb'],
                                      'VE': ['verb'],
                                      'VV': ['verb'],
@@ -54,7 +54,7 @@ def test_chinese_penn_to_usas_core() -> None:
                                      'INF': ['fw', 'xx'],
                                      'URL': ['fw', 'xx'],
                                      'X': ['fw', 'xx']}
-    assert 36 == len(chinese_penn_treebank_mapping)
+    assert 36 == len(penn_chinese_treebank_mapping)
 
-    for chinese_penn_tag, usas_core_tag in CHINESE_PENN_TREEBANK_TO_USAS_CORE.items():
-        assert chinese_penn_treebank_mapping[chinese_penn_tag] == usas_core_tag
+    for chinese_penn_tag, usas_core_tag in PENN_CHINESE_TREEBANK_TO_USAS_CORE.items():
+        assert penn_chinese_treebank_mapping[chinese_penn_tag] == usas_core_tag
