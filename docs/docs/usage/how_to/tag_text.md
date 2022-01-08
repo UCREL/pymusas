@@ -18,7 +18,7 @@ python -m spacy download zh_core_web_sm
 Then create the tagger, in a Python script:
 
 :::note
-Currently there is not lemmatisation component in the spaCy pipeline for Chinese.
+Currently there is no lemmatisation component in the spaCy pipeline for Chinese.
 :::
 
 ``` python
