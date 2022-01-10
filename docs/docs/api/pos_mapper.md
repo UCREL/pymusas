@@ -10,9 +10,18 @@
 
 
 - __UPOS\_TO\_USAS\_CORE__ : `Dict[str, List[str]]` <br/>
-    A mapping from the [Universal Part Of Speech (UPOS) tagset](http://www.lrec-conf.org/proceedings/lrec2012/pdf/274_Paper.pdf)
-    to the USAS core tagset. UPOS is used by the
-    [Universal Dependencies Tree Bank.](https://universaldependencies.org/u/pos/)
+    A mapping from the Universal Part Of Speech (UPOS) tagset to the USAS core tagset. The UPOS tagset used
+    here is the same as that used by the [Universal Dependencies Treebank project](https://universaldependencies.org/u/pos/).
+    This is slightly different to the original presented in the
+    [paper by Petrov et al. 2012](http://www.lrec-conf.org/proceedings/lrec2012/pdf/274_Paper.pdf),
+    for this original tagset see the following [GitHub repository](https://github.com/slavpetrov/universal-pos-tags).
+
+- __PENN\_CHINESE\_TREEBANK\_TO\_USAS\_CORE__ : `Dict[str, List[str]]` <br/>
+    A mapping from the [Penn Chinese Treebank tagset](https://verbs.colorado.edu/chinese/posguide.3rd.ch.pdf)
+    to the USAS core tagset. The Penn Chinese Treebank tagset here is slightly different to the original
+    as it contains three extra tags, `X`, `URL`, and `INF`, that appear to be unique to
+    the [spaCy Chinese models](https://spacy.io/models/zh). For more information on how this mapping was
+    created, see the following [GitHub issue](https://github.com/UCREL/pymusas/issues/19).
 
 <a id="pymusas.pos_mapper.UPOS_TO_USAS_CORE"></a>
 
@@ -25,6 +34,19 @@ UPOS_TO_USAS_CORE: Dict[str, List[str]] = {
     'ADV': ['adv'],
     'AUX': ['verb'],
     'CCONJ': ['c ...
+```
+
+<a id="pymusas.pos_mapper.PENN_CHINESE_TREEBANK_TO_USAS_CORE"></a>
+
+#### PENN\_CHINESE\_TREEBANK\_TO\_USAS\_CORE
+
+```python
+PENN_CHINESE_TREEBANK_TO_USAS_CORE: Dict[str, List[str]] = {
+    'AS': ['part'],
+    'DEC': ['part'],
+    'DEG': ['part'],
+    'DER': ['part'],
+    'DEV': ['pa ...
 ```
 
 <a id="pymusas.pos_mapper.upos_to_usas_core"></a>
