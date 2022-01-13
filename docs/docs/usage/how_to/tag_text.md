@@ -549,3 +549,210 @@ créditos	crédito	NOUN	['I2.1']
 .	.	PUNCT	['PUNCT']
 ```
 </details>
+
+
+## Welsh
+<details>
+<summary>Expand</summary>
+
+In this example we will not be using spaCy for tokenisation, lemmatisation, and POS tagging, as we will be using the [CyTag toolkit](https://github.com/UCREL/CyTag) that has been wrapped in a docker container. Therefore, first you will need to [install docker](https://docs.docker.com/get-docker/).
+
+We assume that you would like to tag the following text, of which this text is stored in the file named `welsh_text_example.txt`. The example text is taken from the Welsh Wikipedia page on the topic of [`Bank` as a financial institution.](https://cy.wikipedia.org/wiki/Banc)
+
+``` txt title="welsh_text_example.txt"
+Sefydliad cyllidol yw bancwr neu fanc sy'n actio fel asiant talu ar gyfer cwsmeriaid, ac yn rhoi benthyg ac yn benthyg arian. Yn rhai gwledydd, megis yr Almaen a Siapan, mae banciau'n brif berchenogion corfforaethau diwydiannol, tra mewn gwledydd eraill, megis yr Unol Daleithiau, mae banciau'n cael eu gwahardd rhag bod yn berchen ar gwmniau sydd ddim yn rhai cyllidol.
+```
+
+First we will need to run the CyTag toolkit, more specifically we will run version 1 of the toolkit as we have a mapping from the POS tags produced in version 1 (the [basic CorCencC POS tagset](https://cytag.corcencc.org/tagset?lang=en)) to the POS tags that the USAS lexicon uses (the USAS core POS tagset)
+
+``` bash
+cat welsh_text_example.txt | docker run -i --rm ghcr.io/ucrel/cytag:1.0.4 > welsh_text_example.tsv
+```
+
+We now have a `tsv` version of the file that has been tokenised, lemmatised, and POS tagged. The `welsh_text_example.tsv` file should contain the following (I have added column headers here to explain what each column represents, these headers should not be in your file, also note that the "Mutation" column is optional):
+
+``` tsv title="welsh_text_example.tsv"
+Line Number       Token       Sentence Index, Token Index     Lemma       Basic POS       Enriched POS       Mutation
+1       Sefydliad       1,1     sefydliad       E       Egu
+2       cyllidol        1,2     cyllidol        Ans     Anscadu
+3       yw      1,3     bod     B       Bpres3u
+4       bancwr  1,4     bancwr  E       Egu
+5       neu     1,5     neu     Cys     Cyscyd
+6       fanc    1,6     banc    E       Egu     +sm
+7       sy      1,7     bod     B       Bpres3perth
+8       'n      1,8     yn      U       Uberf
+9       actio   1,9     actio   B       Be
+10      fel     1,10    fel     Cys     Cyscyd
+11      asiant  1,11    asiant | asio   E | B   Egu | Bpres3ll
+12      talu    1,12    talu    B       Be
+13      ar      1,13    ar      Ar      Arsym
+14      gyfer   1,14    cyfer   E       Egu     +sm
+15      cwsmeriaid      1,15    cwsmer  E       Egll
+16      ,       1,16    ,       Atd     Atdcan
+17      ac      1,17    a       Cys     Cyscyd
+18      yn      1,18    yn      U       Uberf
+19      rhoi    1,19    rhoi    B       Be
+20      benthyg 1,20    benthyg E       Egu
+21      ac      1,21    a       Cys     Cyscyd
+22      yn      1,22    yn      U       Uberf
+23      benthyg 1,23    benthyg B       Be
+24      arian   1,24    arian   E       Egu
+25      .       1,25    .       Atd     Atdt
+26      Yn      2,1     yn      Ar      Arsym
+27      rhai    2,2     rhai    unk     unk
+28      gwledydd        2,3     gwlad   E       Ebll
+29      ,       2,4     ,       Atd     Atdcan
+30      megis   2,5     megis   Cys     Cyscyd
+31      yr      2,6     y       YFB     YFB
+32      Almaen  2,7     Almaen  E       Epb
+33      a       2,8     a       Cys     Cyscyd
+34      Siapan  2,9     Siapan  E       Epb
+35      ,       2,10    ,       Atd     Atdcan
+36      mae     2,11    bod     B       Bpres3u
+37      banciau 2,12    banc    E       Egll
+38      'n      2,13    yn      U       Utra
+39      brif    2,14    brif    unk     unk
+40      berchenogion    2,15    berchenogion    unk     unk
+41      corfforaethau   2,16    corfforaeth     E       Ebll
+42      diwydiannol     2,17    diwydiannol     Ans     Anscadu
+43      ,       2,18    ,       Atd     Atdcan
+44      tra     2,19    tra     Cys     Cyscyd
+45      mewn    2,20    mewn    Ar      Arsym
+46      gwledydd        2,21    gwlad   E       Ebll
+47      eraill  2,22    arall   Ans     Anscadu
+48      ,       2,23    ,       Atd     Atdcan
+49      megis   2,24    megis   Cys     Cyscyd
+50      yr      2,25    y       YFB     YFB
+51      Unol    2,26    unol    Ans     Anscadu
+52      Daleithiau      2,27    Daleithiau      E       Ep
+53      ,       2,28    ,       Atd     Atdcan
+54      mae     2,29    bod     B       Bpres3u
+55      banciau 2,30    banc    E       Egll
+56      'n      2,31    yn      U       Uberf
+57      cael    2,32    cael    B       Be
+58      eu      2,33    eu      Rha     Rhadib3ll
+59      gwahardd        2,34    gwahardd        B       Be
+60      rhag    2,35    rhag    Ar      Arsym
+61      bod     2,36    bod     B       Be
+62      yn      2,37    yn      U       Utra
+63      berchen 2,38    perchen E       Egu     +sm
+64      ar      2,39    ar      Ar      Arsym
+65      gwmniau 2,40    gwmniau unk     unk
+66      sydd    2,41    bod     B       Bpres3perth
+67      ddim    2,42    dim     E       Egu     +sm
+68      yn      2,43    yn      U       Utra
+69      rhai    2,44    rhai    unk     unk
+70      cyllidol        2,45    cyllidol        Ans     Anscadu
+71      .       2,46    .       Atd     Atdt
+```
+
+Now we have the token, lemma, and POS tag information we can now create a [USASRuleBasedTagger](https://ucrel.github.io/pymusas/api/taggers/rule_based#usasrulebasedtagger) and run the tagger over this `tsv` data using the following Python script:
+
+``` python
+from pathlib import Path
+import csv
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.taggers.rule_based import USASRuleBasedTagger
+
+# Rule based tagger requires a USAS lexicon
+welsh_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+# Includes the POS information
+welsh_lexicon_lookup = LexiconCollection.from_tsv(welsh_usas_lexicon_url)
+# excludes the POS information
+welsh_lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_usas_lexicon_url, 
+                                                        include_pos=False)
+usas_tagger = USASRuleBasedTagger(welsh_lexicon_lookup, welsh_lemma_lexicon_lookup)
+
+welsh_tagged_file = Path(Path.cwd(), 'welsh_text_example.tsv').resolve()
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+with welsh_tagged_file.open('r', encoding='utf-8') as welsh_tagged_data:
+    for line in welsh_tagged_data:
+        line = line.strip()
+        if line:
+            line_tags = line.split('\t')
+            token = line_tags[1]
+            lemma = line_tags[3]
+            basic_pos = line_tags[4]
+            usas_tags = usas_tagger.tag_token((token, lemma, basic_pos))
+            print(f'{token}\t{lemma}\t{basic_pos}\t{usas_tags}')
+```
+
+Output:
+
+``` tsv
+Text       Lemma       POS       USAS Tags
+Sefydliad       sefydliad       E       ['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
+cyllidol        cyllidol        Ans     ['I1']
+yw      bod     B       ['A3+', 'Z5']
+bancwr  bancwr  E       ['Z99']
+neu     neu     Cys     ['Z5']
+fanc    banc    E       ['I1.1', 'X2.6+', 'M1']
+sy      bod     B       ['A3+', 'Z5']
+'n      yn      U       ['Z5']
+actio   actio   B       ['A1.1.1', 'T1.1.2', 'A8', 'K4']
+fel     fel     Cys     ['Z5']
+asiant  asiant | asio   E | B   ['I2.1/S2mf', 'G3/S2mf', 'K4/S2mf']
+talu    talu    B       ['I1.2', 'A9-', 'I1.1/I3.1']
+ar      ar      Ar      ['Z5']
+gyfer   cyfer   E       ['M6', 'Q2.2', 'Q2.2', 'S7.1+', 'X4.2', 'K4']
+cwsmeriaid      cwsmer  E       ['I2.2/S2mf']
+,       ,       Atd     ['Z99']
+ac      a       Cys     ['Z5']
+yn      yn      U       ['Z5']
+rhoi    rhoi    B       ['A9-', 'A1.1.1']
+benthyg benthyg E       ['A9-']
+ac      a       Cys     ['Z5']
+yn      yn      U       ['Z5']
+benthyg benthyg B       ['A9-']
+arian   arian   E       ['I1']
+.       .       Atd     ['Z99']
+Yn      yn      Ar      ['Z5']
+rhai    rhai    unk     ['A13.5']
+gwledydd        gwlad   E       ['M7']
+,       ,       Atd     ['Z99']
+megis   megis   Cys     ['Z5']
+yr      y       YFB     ['Z5']
+Almaen  Almaen  E       ['Z2']
+a       a       Cys     ['Z5']
+Siapan  Siapan  E       ['Z2']
+,       ,       Atd     ['Z99']
+mae     bod     B       ['A3+', 'Z5']
+banciau banc    E       ['I1.1', 'X2.6+', 'M1']
+'n      yn      U       ['Z5']
+brif    brif    unk     ['Z99']
+berchenogion    berchenogion    unk     ['Z99']
+corfforaethau   corfforaeth     E       ['I2.1/S5c', 'G1.1c']
+diwydiannol     diwydiannol     Ans     ['I4']
+,       ,       Atd     ['Z99']
+tra     tra     Cys     ['Z5']
+mewn    mewn    Ar      ['Z5']
+gwledydd        gwlad   E       ['M7']
+eraill  arall   Ans     ['A6.1-/Z8']
+,       ,       Atd     ['Z99']
+megis   megis   Cys     ['Z5']
+yr      y       YFB     ['Z5']
+Unol    unol    Ans     ['S5+', 'A1.1.1']
+Daleithiau      Daleithiau      E       ['Z99']
+,       ,       Atd     ['Z99']
+mae     bod     B       ['A3+', 'Z5']
+banciau banc    E       ['I1.1', 'X2.6+', 'M1']
+'n      yn      U       ['Z5']
+cael    cael    B       ['A9+', 'Z5', 'X9.2+', 'A2.1+', 'A2.2', 'M1', 'M2', 'X2.5+', 'E4.1-']
+eu      eu      Rha     ['Z8']
+gwahardd        gwahardd        B       ['S7.4-']
+rhag    rhag    Ar      ['Z5']
+bod     bod     B       ['A3+', 'Z5']
+yn      yn      U       ['Z5']
+berchen perchen E       ['A9+/S2mf']
+ar      ar      Ar      ['Z5']
+gwmniau gwmniau unk     ['Z99']
+sydd    bod     B       ['A3+', 'Z5']
+ddim    dim     E       ['Z6/Z8']
+yn      yn      U       ['Z5']
+rhai    rhai    unk     ['A13.5']
+cyllidol        cyllidol        Ans     ['I1']
+.       .       Atd     ['Z99']
+```
+</details>
