@@ -1,4 +1,4 @@
-from pymusas.pos_mapper import PENN_CHINESE_TREEBANK_TO_USAS_CORE, upos_to_usas_core
+from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE, PENN_CHINESE_TREEBANK_TO_USAS_CORE, upos_to_usas_core
 
 
 def test_upos_to_usas_core() -> None:
@@ -58,3 +58,24 @@ def test_penn_chinese_to_usas_core() -> None:
 
     for chinese_penn_tag, usas_core_tag in PENN_CHINESE_TREEBANK_TO_USAS_CORE.items():
         assert penn_chinese_treebank_mapping[chinese_penn_tag] == usas_core_tag
+
+
+def test_basic_corcencc_to_usas_core() -> None:
+    assert 13 == len(BASIC_CORCENCC_TO_USAS_CORE)
+    basic_corcencc_mapping = {'E': ['noun'],
+                              'YFB': ['art'],
+                              'Ar': ['prep'],
+                              'Cys': ['conj'],
+                              'Rhi': ['num'],
+                              'Ans': ['adj'],
+                              'Adf': ['adv'],
+                              'B': ['verb'],
+                              'Rha': ['pron'],
+                              'U': ['part'],
+                              'Ebych': ['intj'],
+                              'Gw': ['xx'],
+                              'Atd': ['punc']}
+    assert 13 == len(basic_corcencc_mapping)
+
+    for basic_corcencc_tag, usas_core_tag in BASIC_CORCENCC_TO_USAS_CORE.items():
+        assert basic_corcencc_mapping[basic_corcencc_tag] == usas_core_tag
