@@ -33,3 +33,15 @@ html[data-theme='dark'] .docusaurus-highlight-code-line {
   justify-content: space-between;
   align-items: baseline;
 }
+
+/*
+This ensures that code blocks that contain text wrap the text, rather than
+creating a horizontal scroll bar. Reference:
+https://peterdaugaardrasmussen.com/2020/09/12/how-to-make-prism-js-word-wrap-code-snippets/
+
+This original also contained the following property and value:
+word-break: break-word;
+*/
+pre.language-txt span .token.plain {
+  white-space: normal;
+}
