@@ -53,13 +53,13 @@ For more information about CITATION.cff files see the [Citation File Format webs
     git tag -s $TAG && git push origin main --tags
     ```
 
-8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click edit, then copy over the output of:
+8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click the "..." to the right of the "Verified" badge, and then click "Create release". Set the title of the release to "v{VERSION}" and copy the output from the following script into the markdown text box:
 
     ```
     python scripts/release_notes.py
     ```
 
-9. Click "Publish Release". GitHub Actions will then handle the rest, including publishing the package to PyPI.
+9. Click "Publish release". GitHub Actions will then handle the rest, including publishing the package to PyPI.
 
 
 ## Fixing a failed release
