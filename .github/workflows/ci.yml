@@ -3,6 +3,8 @@ name: CI
 on:
   push:
   pull_request:
+  release:
+    types: [published]
   
 jobs:
   Validate-CITATION-cff:
