@@ -44,13 +44,13 @@ For more information about CITATION.cff files see the [Citation File Format webs
 6. Add these changes using Git manually (`git add`), then commit and push these changes with:
 
     ```
-    git commit -m "Prepare for release $TAG" && git push
+    git commit -m "Prepare for release $TAG" && git push origin main
     ```
     
 7. Then add the tag in git to mark the release:
 
     ```
-    git tag $TAG -m "Release $TAG" && git push --tags
+    git tag $TAG -m "Release $TAG" && git push origin main --tags
     ```
 
 8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click edit, then copy over the output of:
