@@ -7,8 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [v0.2.0](https://github.com/UCREL/pymusas/releases/tag/v0.2.0) - 2022-01-18
+
 ### Added
 
+- Release process guide adapted from the [AllenNLP release process guide](https://github.com/allenai/allennlp/blob/2cdb8742c8c8c3c38ace4bdfadbdc750a1aa2475/RELEASE_PROCESS.md), many thanks to the AllenNLP team for creating the original guide.
 - A mapping from the [basic CorCenCC POS tagset](https://cytag.corcencc.org/tagset?lang=en) to USAS core POS tagset.
 - The usage documentation, for the "How-to Tag Text", has been updated so that it includes a Welsh example which does not use spaCy instead uses the [CyTag toolkit](https://github.com/UCREL/CyTag).
 - A mapping from the [Penn Chinese Treebank POS tagset](https://verbs.colorado.edu/chinese/posguide.3rd.ch.pdf) to USAS core POS tagset.

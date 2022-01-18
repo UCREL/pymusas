@@ -38,6 +38,7 @@ create-api-docs:
 	@python ./scripts/py2md.py ${DOCS_SRC}
 
 build-python-package:
+	@rm -rf ./dist ./pymusas.egg-info
 	@python -m pip install --upgrade pip
 	@pip install --upgrade build twine
 	@python -m build
