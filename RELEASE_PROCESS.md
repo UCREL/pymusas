@@ -50,7 +50,7 @@ For more information about CITATION.cff files see the [Citation File Format webs
 7. Then add the tag in git to mark the release:
 
     ```
-    git tag $TAG -m "Release $TAG" && git push origin main --tags
+    git tag $TAG -sm "Release $TAG" && git push origin main --tags
     ```
 
 8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click edit, then copy over the output of:
