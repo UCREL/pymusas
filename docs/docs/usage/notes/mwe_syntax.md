@@ -14,7 +14,7 @@ The MWE syntax is best described as a simplified pattern matching syntax/code, l
 Structure of this documentation page:
 
 1. [General syntax structure](#general-syntax-structure) - explains the general MWE syntax structure.
-2. [Syntax symbol definitions](syntax-symbol-definitions) - will define special syntax symbols that allow the MWE syntax to capture more complicated MWE, e.g. inflection variants and discontinuous MWE.
+2. [Syntax symbol definitions](#syntax-symbol-definitions) - will define special syntax symbols that allow the MWE syntax to capture more complicated MWE, e.g. inflection variants and discontinuous MWE.
 
 ## General syntax structure
 
