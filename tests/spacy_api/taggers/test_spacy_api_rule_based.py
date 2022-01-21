@@ -14,6 +14,7 @@ from pymusas.spacy_api.taggers.rule_based import USASRuleBasedTagger
 
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
+TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers')
 POS_MAPPER = {'DET': ['det', 'art'], 'NOUN': ['noun'], 'SCONJ': ['conj'],
               'PUNCT': ['PUNCT'], 'obj': ['obj']}
 
@@ -293,7 +294,7 @@ def test_lemma_attribute() -> None:
 
 
 def test_call() -> None:
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output.json')
     lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
     (test_doc, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
@@ -309,7 +310,7 @@ def test_call() -> None:
     assert expected_usas_tags == predicted_usas_tags
 
     # Tets that it works with a POS mapper
-    pos_map_test_data_file = Path(DATA_DIR, 'rule_based_input_output_pos_mapped.json')
+    pos_map_test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output_pos_mapped.json')
     (test_doc, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
     nlp = Language(Vocab(), meta={"name": "example"})

@@ -9,6 +9,7 @@ from pymusas.taggers.rule_based import USASRuleBasedTagger, _tag_token
 
 
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
+TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers')
 POS_MAPPER = {'DET': ['det', 'art'], 'NOUN': ['noun'], 'SCONJ': ['conj'],
               'PUNCT': ['PUNCT'], 'obj': ['obj']}
 
@@ -67,7 +68,7 @@ def generate_tag_test_data(test_data_file: Path, lexicon_file: Path
 
 def test__tag_token() -> None:
 
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output.json')
     lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
     (test_data, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
@@ -77,7 +78,7 @@ def test__tag_token() -> None:
         assert predicted_tags == expected_tags
 
     # Test that it works with a POS mapper
-    pos_map_test_data_file = Path(DATA_DIR, 'rule_based_input_output_pos_mapped.json')
+    pos_map_test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output_pos_mapped.json')
     (test_data, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
     for data, expected_tags in zip(test_data, expected_usas_tags):
@@ -127,7 +128,7 @@ def test_USASRuleBasedTagger(empty_lexicon_lookup: bool,
 
 
 def test_tag_token() -> None:
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output.json')
     lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
     (test_data, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
@@ -137,7 +138,7 @@ def test_tag_token() -> None:
         assert predicted_tags == expected_tags
 
     # Test that it works with a POS mapper
-    pos_map_test_data_file = Path(DATA_DIR, 'rule_based_input_output_pos_mapped.json')
+    pos_map_test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output_pos_mapped.json')
     (test_data, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
     tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup, POS_MAPPER)
@@ -147,7 +148,7 @@ def test_tag_token() -> None:
 
 
 def test_tag_tokens() -> None:
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_input_output.json')
     lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
     (test_data, lexicon_lookup,
      lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)

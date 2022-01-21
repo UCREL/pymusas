@@ -15,10 +15,11 @@ from pymusas.lexicon_collection import LexiconCollection, LexiconEntry
 
 DATA_DIR = Path(__file__, '..', 'data').resolve()
 LEXICON_FILE_PATH = Path(DATA_DIR, 'lexicon.tsv')
-EXTRA_FIELDS_LEXICON_FILE_PATH = Path(DATA_DIR, 'extra_fields_lexicon.tsv')
-MINIMUM_LEXICON_FILE_PATH = Path(DATA_DIR, 'minimum_lexicon.tsv')
-ERROR_LEXICON_FILE_PATH = Path(DATA_DIR, 'error_lexicon.tsv')
-NO_HEADER_LEXICON_FILE_PATH = Path(DATA_DIR, 'no_header_lexicon.tsv')
+LEXICON_DATA_DIR = Path(DATA_DIR, 'lexicon_collection')
+EXTRA_FIELDS_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'extra_fields_lexicon.tsv')
+MINIMUM_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'minimum_lexicon.tsv')
+ERROR_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'error_lexicon.tsv')
+NO_HEADER_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'no_header_lexicon.tsv')
 
 LEXICON_ENTRY = LexiconEntry('London', ['Z2'], 'noun')
 LEXICON_ENTRY_MULTI_SEM = LexiconEntry('Laptop', ['Z3', 'Z0'], 'noun')
