@@ -7,16 +7,19 @@ import argparse
 from collections import OrderedDict
 import dataclasses
 from enum import Enum
+from lib2to3.pytree import Leaf, Node
 import logging
 from multiprocessing import Pool, cpu_count
 import os
 from pathlib import Path
 import re
 import sys
-from typing import Dict, List, Optional, TextIO, Tuple
+import textwrap
+from typing import Dict, List, Optional, TextIO, Tuple, Union
 
 import databind.core.annotations as A
 import docspec
+from docspec_python.parser import Parser
 from pydoc_markdown import PydocMarkdown
 from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.processors.crossref import CrossrefProcessor
@@ -26,6 +29,39 @@ from pydoc_markdown.util.docspec import format_function_signature, is_method
 import typing_extensions as te
 
 
+class EnhancedParser(Parser):
+    def prepare_docstring(self: Union['EnhancedParser', Parser],
+                          s: str, node_for_location: Union[Node, Leaf]
+                          ) -> Optional[docspec.Docstring]:
+        def dedent_docstring(s: str) -> str:
+            lines = s.split('\n')
+            lines[0] = lines[0].strip()
+            lines[1:] = textwrap.dedent('\n'.join(lines[1:])).split('\n')
+            return '\n'.join(lines).strip()
+        
+        location = self.location_from(node_for_location)
+        s = s.strip()
+        if s.startswith('#'):
+            location.lineno -= s.count('\n') + 2
+            lines = []
+            for line in s.split('\n'):
+                line = line.strip()
+                if line.startswith('#:'):
+                    line = line[2:]
+                else:
+                    line = line[1:]
+                lines.append(line.lstrip())
+            return docspec.Docstring('\n'.join(lines).strip(), location)
+        if s.startswith('"""') or s.startswith("'''"):
+            return docspec.Docstring(dedent_docstring(s[3:-3]).strip(), location)
+        if s.startswith('r"""') or s.startswith("r'''"):
+            return docspec.Docstring(dedent_docstring(s[4:-3]).strip(), location)
+        if s.startswith('"') or s.startswith("'"):
+            return docspec.Docstring(dedent_docstring(s[1:-1]).strip(), location)
+        return None
+
+
+Parser.prepare_docstring = EnhancedParser.prepare_docstring  # type:ignore
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
@@ -573,7 +609,8 @@ class CustomFilterProcessor(Processor):
     #: Skip modules with no content. Default: `false`.
     skip_empty_modules: bool = False
 
-    SPECIAL_MEMBERS = ('__path__', '__annotations__', '__name__', '__all__', 'logger')
+    SPECIAL_MEMBERS = ('__path__', '__annotations__', '__name__', '__all__',
+                       'logger')
     INCLUDED_MEMBERS = ('__init__')
 
     def process(self, modules: List[docspec.Module], resolver: Optional[Resolver]) -> None:
