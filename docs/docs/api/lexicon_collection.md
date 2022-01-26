@@ -273,3 +273,181 @@ class LexiconCollection(MutableMapping):
 Machine readable string. When printed and run `eval()` over the string
 you should be able to recreate the object.
 
+<a id="pymusas.lexicon_collection.MWELexiconCollection"></a>
+
+## MWELexiconCollection
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def __init__(
+ |     self,
+ |     data: Optional[Dict[str, List[str]]] = None
+ | ) -> None
+```
+
+This is a dictionary object that will hold MWE templates in a fast to access
+object. The keys of the dictionary are expected to be a MWE template
+following the format specified in the MWE syntax notes, e.g. `*_noun boot*_noun`
+
+The value to each key is the associated semantic tags, whereby the semantic
+tags are in rank order, the most likely tag is the first tag in the list.
+
+<h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+
+<h4 id="mwelexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#mwelexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
+
+
+- __data__ : `Dict[str, List[str]]` <br/>
+    Dictionary where the keys are MWE templates and the values are
+    a list of associated semantic tags. If the `data` parameter given was
+    `None` then the value of this attribute will be an empty dictionary.
+
+<h4 id="mwelexiconcollection.examples">Examples<a className="headerlink" href="#mwelexiconcollection.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import MWELexiconCollection
+mwe_collection = MWELexiconCollection()
+mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
+most_likely_tag = mwe_collection['*_noun boot*_noun'][0]
+assert most_likely_tag == 'Z0'
+least_likely_tag = mwe_collection['*_noun boot*_noun'][-1]
+assert least_likely_tag == 'Z3'
+```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.to_ordered_dictionary"></a>
+
+### to\_ordered\_dictionary
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def to_ordered_dictionary() -> OrderedDict[str, List[str]]
+```
+
+Returns the `data` instance attribute, as a `collections.OrderedDict`
+object, whereby the MWE templates, which are the keys, are ordered based
+on their n-gram length in decending order, e.g. the largest n-gram is
+first in the dictionary.
+
+To determine the n-gram length the MWE template is split on whitespace
+using the following regex `\s+` as specified in the
+[Python regex library](https://docs.python.org/3/library/re.html).
+
+<h4 id="to_ordered_dictionary.returns">Returns<a className="headerlink" href="#to_ordered_dictionary.returns" title="Permanent link">&para;</a></h4>
+
+
+- `collections.OrderedDict[str, List[str]]` <br/>
+
+<h4 id="to_ordered_dictionary.examples">Examples<a className="headerlink" href="#to_ordered_dictionary.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+import collections
+from pymusas.lexicon_collection import MWELexiconCollection
+mwe_collection = MWELexiconCollection()
+mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
+mwe_collection['*_noun boot*_noun hire_noun'] = ['Z0']
+assert ({'*_noun boot*_noun': ['Z0', 'Z3'], '*_noun boot*_noun hire_noun': ['Z0']}
+== mwe_collection.data)
+assert (collections.OrderedDict([('*_noun boot*_noun hire_noun', ['Z0']), ('*_noun boot*_noun', ['Z0', 'Z3'])])
+== mwe_collection.to_ordered_dictionary())
+```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.from_tsv"></a>
+
+### from\_tsv
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def from_tsv(
+ |     tsv_file_path: Union[PathLike, str]
+ | ) -> OrderedDict[str, List[str]]
+```
+
+Given a `tsv_file_path` it will return an ordered dictionary object
+that can be used to create a [`MWELexiconCollection`](#mwelexiconcollection). The ordering
+of the dictionary is determined by the MWE templates, which are the keys,
+based on their n-gram length in decending order, e.g. the largest n-gram is
+first in the dictionary. This is the same ordering as the
+`MWELexiconCollection.to_ordered_dictionary`.
+
+Each line in the TSV file will be read in and added to a temporary
+[`MWELexiconCollection`](#mwelexiconcollection), once all lines
+in the TSV have been parsed, the return value comes from performing
+the [`to_ordered_dictionary`](#to_ordered_dictionary) function from the
+temporary [`MWELexiconCollection`](#mwelexiconcollection).
+
+If the file path is a URL, the file will be downloaded and cached using
+[`pymusas.file_utils.download_url_file`](/pymusas/api/file_utils/#download_url_file).
+
+Code reference, the identification of a URL and the idea to do this has
+come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205)
+
+<h4 id="from_tsv.parameters">Parameters<a className="headerlink" href="#from_tsv.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+    A file path or URL to a TSV file that contains at least these two
+    fields:
+
+    1. `mwe_template`,
+    2. `semantic_tags`
+
+    All other fields will be ignored.
+
+<h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
+
+
+- `collections.OrderedDict[str, List[str]]` <br/>
+
+<h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the minimum field headings, `mwe_template` and `semantic_tags`,
+    do not exist in the given TSV file.
+
+<h4 id="from_tsv.examples">Examples<a className="headerlink" href="#from_tsv.examples" title="Permanent link">&para;</a></h4>
+
+
+``` python
+import collections
+from pymusas.lexicon_collection import MWELexiconCollection
+portuguese_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv'
+mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
+mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
+assert isinstance(mwe_lexicon_dict, collections.OrderedDict)
+assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
+assert mwe_lexicon_dict['arco_noun e_conj flecha_noun'][0] == 'K5.1'
+```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.__str__"></a>
+
+### \_\_str\_\_
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def __str__() -> str
+```
+
+Human readable string.
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.__repr__"></a>
+
+### \_\_repr\_\_
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def __repr__() -> str
+```
+
+Machine readable string. When printed and run `eval()` over the string
+you should be able to recreate the object.
+

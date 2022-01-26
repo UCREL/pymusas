@@ -1,9 +1,11 @@
+import collections
 from collections.abc import MutableMapping
 import csv
 from dataclasses import dataclass
 from os import PathLike
+import re
 import typing
-from typing import Dict, Generator, List, Optional, Set, Union
+from typing import Dict, Generator, List, Optional, OrderedDict, Set, Union
 from urllib.parse import urlparse
 
 from . import file_utils
@@ -267,4 +269,214 @@ class LexiconCollection(MutableMapping):
         Machine readable string. When printed and run `eval()` over the string
         you should be able to recreate the object.
         '''
+        return f'{self.__class__.__name__}(data={self.data})'
+
+
+class MWELexiconCollection(MutableMapping):
+    '''
+    This is a dictionary object that will hold MWE templates in a fast to access
+    object. The keys of the dictionary are expected to be a MWE template
+    following the format specified in the MWE syntax notes, e.g. `*_noun boot*_noun`
+
+    The value to each key is the associated semantic tags, whereby the semantic
+    tags are in rank order, the most likely tag is the first tag in the list.
+
+    # Parameters
+
+    data: `Dict[str, List[str]]`, optional (default = `None`)
+
+    # Instance Attributes
+
+    data: `Dict[str, List[str]]`
+        Dictionary where the keys are MWE templates and the values are
+        a list of associated semantic tags. If the `data` parameter given was
+        `None` then the value of this attribute will be an empty dictionary.
+
+    # Examples
+    ``` python
+    >>> from pymusas.lexicon_collection import MWELexiconCollection
+    >>> mwe_collection = MWELexiconCollection()
+    >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
+    >>> most_likely_tag = mwe_collection['*_noun boot*_noun'][0]
+    >>> assert most_likely_tag == 'Z0'
+    >>> least_likely_tag = mwe_collection['*_noun boot*_noun'][-1]
+    >>> assert least_likely_tag == 'Z3'
+
+    ```
+
+    '''
+    
+    def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
+
+        self.data: Dict[str, List[str]] = {}
+        if data is not None:
+            self.data = data
+
+    def to_ordered_dictionary(self) -> OrderedDict[str, List[str]]:
+        r"""
+        Returns the `data` instance attribute, as a `collections.OrderedDict`
+        object, whereby the MWE templates, which are the keys, are ordered based
+        on their n-gram length in decending order, e.g. the largest n-gram is
+        first in the dictionary.
+
+        To determine the n-gram length the MWE template is split on whitespace
+        using the following regex `\s+` as specified in the
+        [Python regex library](https://docs.python.org/3/library/re.html).
+
+        # Returns
+
+        `collections.OrderedDict[str, List[str]]`
+
+        # Examples
+        ``` python
+        >>> import collections
+        >>> from pymusas.lexicon_collection import MWELexiconCollection
+        >>> mwe_collection = MWELexiconCollection()
+        >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
+        >>> mwe_collection['*_noun boot*_noun hire_noun'] = ['Z0']
+        >>> assert ({'*_noun boot*_noun': ['Z0', 'Z3'], '*_noun boot*_noun hire_noun': ['Z0']}
+        ... == mwe_collection.data)
+        >>> assert (collections.OrderedDict([('*_noun boot*_noun hire_noun', ['Z0']), ('*_noun boot*_noun', ['Z0', 'Z3'])])
+        ... == mwe_collection.to_ordered_dictionary())
+
+        ```
+
+        """
+        
+        ordered_by_template_length = sorted(self.data.items(),
+                                            key=lambda x: len(re.split(r'\s+', x[0])),
+                                            reverse=True)
+        return collections.OrderedDict(ordered_by_template_length)
+
+    @staticmethod
+    def from_tsv(tsv_file_path: Union[PathLike, str]
+                 ) -> OrderedDict[str, List[str]]:
+        '''
+        Given a `tsv_file_path` it will return an ordered dictionary object
+        that can be used to create a :class:`MWELexiconCollection`. The ordering
+        of the dictionary is determined by the MWE templates, which are the keys,
+        based on their n-gram length in decending order, e.g. the largest n-gram is
+        first in the dictionary. This is the same ordering as the
+        :func:`MWELexiconCollection.to_ordered_dictionary`.
+
+        Each line in the TSV file will be read in and added to a temporary
+        :class:`MWELexiconCollection`, once all lines
+        in the TSV have been parsed, the return value comes from performing
+        the :func:`to_ordered_dictionary` function from the
+        temporary :class:`MWELexiconCollection`.
+
+        If the file path is a URL, the file will be downloaded and cached using
+        :func:`pymusas.file_utils.download_url_file`.
+
+        Code reference, the identification of a URL and the idea to do this has
+        come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/allennlp/common/file_utils.py#L205)
+
+        # Parameters
+
+        tsv_file_path: `Union[PathLike, str]`
+            A file path or URL to a TSV file that contains at least these two
+            fields:
+            
+            1. `mwe_template`,
+            2. `semantic_tags`
+            
+            All other fields will be ignored.
+
+        # Returns
+        
+        `collections.OrderedDict[str, List[str]]`
+        
+        # Raises
+        
+        `ValueError`
+            If the minimum field headings, `mwe_template` and `semantic_tags`,
+            do not exist in the given TSV file.
+
+        # Examples
+
+        ``` python
+        >>> import collections
+        >>> from pymusas.lexicon_collection import MWELexiconCollection
+        >>> portuguese_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv'
+        >>> mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
+        >>> mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
+        >>> assert isinstance(mwe_lexicon_dict, collections.OrderedDict)
+        >>> assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
+        >>> assert mwe_lexicon_dict['arco_noun e_conj flecha_noun'][0] == 'K5.1'
+
+        ```
+
+        '''
+        minimum_field_names = {'mwe_template', 'semantic_tags'}
+
+        collection_from_tsv = MWELexiconCollection()
+
+        if not isinstance(tsv_file_path, str):
+            tsv_file_path = str(tsv_file_path)
+
+        parsed = urlparse(tsv_file_path)
+        if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
+            tsv_file_path = file_utils.download_url_file(tsv_file_path)
+
+        with open(tsv_file_path, 'r', newline='') as fp:
+            csv_reader = csv.DictReader(fp, delimiter='\t')
+            file_field_names: Set[str] = set()
+            if csv_reader.fieldnames:
+                file_field_names = set(csv_reader.fieldnames)
+            if not minimum_field_names.issubset(file_field_names):
+                error_msg = (f"The TSV file, {tsv_file_path}, given should "
+                             "contain a header that"
+                             " has at minimum the following fields "
+                             f"{minimum_field_names}. The field names found "
+                             f"were {file_field_names}")
+                raise ValueError(error_msg)
+            
+            for row in csv_reader:
+                mwe_template = ''
+                semantic_tags: List[str] = []
+                for field_name in minimum_field_names:
+                    if field_name == 'semantic_tags':
+                        semantic_tags = row[field_name].split()
+                    elif field_name == 'mwe_template':
+                        mwe_template = row[field_name]
+                collection_from_tsv[mwe_template] = semantic_tags
+        
+        return collection_from_tsv.to_ordered_dictionary()
+    
+    def __setitem__(self, key: str, value: List[str]) -> None:
+        self.data[key] = value
+
+    def __getitem__(self, key: str) -> List[str]:
+        return self.data[key]
+
+    def __delitem__(self, key: str) -> None:
+        del self.data[key]
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> Generator[str, None, None]:
+        for key in self.data:
+            yield key
+
+    def __str__(self) -> str:
+        '''
+        Human readable string.
+        '''
+
+        object_str = f'{self.__class__.__name__}('
+        for index, item in enumerate(self.items()):
+            object_str += f"('{item[0]}': {item[1]}), "
+            if index == 1:
+                object_str += '... '
+                break
+        object_str += f') ({len(self)} entires in the collection)'
+        return object_str
+
+    def __repr__(self) -> str:
+        '''
+        Machine readable string. When printed and run `eval()` over the string
+        you should be able to recreate the object.
+        '''
+
         return f'{self.__class__.__name__}(data={self.data})'

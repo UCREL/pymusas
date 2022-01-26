@@ -1,0 +1,10 @@
+mwe_template	semantic_tags
+East_noun London_noun	Z2
+east_noun london_noun	Z4
+south_noun london_noun	Z3
+west_noun london_noun	Z5
+east_noun lancaster_noun	Z1
+North_noun East_noun London_noun	Z1
+All_adv well_adj	A1
+all_adv well_adj	A4
+aall_adv well_adj	A2
