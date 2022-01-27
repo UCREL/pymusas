@@ -1,4 +1,225 @@
-from typing import Dict, Iterable, Iterator, List, Optional, Tuple
+import re
+from typing import Dict, Iterable, Iterator, List, Optional, OrderedDict, Tuple
+
+
+def _tag_mwe(tokens: List[str], lemmas: List[str], pos_tags: List[str],
+             mwe_lexicon_lookup: OrderedDict[str, List[str]]
+             ) -> Tuple[List[List[str]], List[int]]:
+    '''
+    Given the tokens, lemmas, and POS tags for each word in a text along with a
+    Multi Word Expression lexicon lookup, it will return a `Tuple` of length 2
+    containing:
+    
+    1. `List` of USAS semantic tags for each token, whereby the most likely tag is the first tag
+    in the `List`. The `List` of tags returned are based on the MWE rules below.
+    2. `List` of ids, each id defines which MWE a token belongs too, an id of `0`
+    represents a token that is not part of an MWE.
+
+    # MWE Rules
+    
+    The MWE lexicon lookup contains a MWE template as it's key and a
+    `List` of semantic tags as it's value. Given this:
+
+    Starting with the longest n-gram templates assign semantic tags to tokens
+    in the following order:
+    
+    For each template of length *n*:
+        1. Match on tokens and POS tags.
+        2. Match on lemma and POS tags.
+        3. Match on lower cased tokens and POS tags.
+        4. Match on lower cased lemmas and POS tags.
+    
+    Then repeat this process for `n = n-1`. Stop when `n==2`, e.g. a
+    MWE has to have at last 2 tokens.
+
+    **Note** that the MWE rules may not cover all tokens, therefore for any
+    token not covered it will return the `Z99` semantic tag. For example
+    if the semantic tags returned from this function are:
+    `[[A1], [A1], [Z2, Z3], [Z2, Z3], [Z99]]` then the last token was not
+    covered by any of the MWE rules, hence why it returned `[Z99]`.
+    
+    # Parameters
+
+    tokens : `List[str]`
+        The tokens that are within the text.
+    lemmas : `List[str]`
+        The lemmas of the tokens.
+    pos_tags : `List[str]`
+        The Part Of Speech tags of the tokens.
+    mwe_lexicon_lookup : `OrderedDict[str, List[str]]`
+        A MWE lexicon lookup that contains MWE templates as keys and a `List` of
+        semantic tags as values. The Dictionary should be ordered based on the
+        n-gram of the templates, whereby the order should be largest value of
+        *n* first and smallest last. For example:
+        `collections.OrderedDict([('United_noun States_noun of_noun America_noun', 'Z2'),
+                                  ('United_noun States_noun','Z2')])`
+    
+    # Returns
+
+    `Tuple[List[List[str]], List[int]]`
+    '''
+
+    def create_mwe_template(text_iterable_1: Iterable[str],
+                            text_iterable_2: Iterable[str]) -> str:
+        '''
+        Given two iterables of Strings, will return a String
+        in the same format as the MWE templates:
+        
+        `{1_1}_{2_1} {1_2}_{2_2} {1_3}_{2_3}`
+        
+        Where `1_1` represents the first string in `text_iterable_1` and `2_1`
+        represents the first string in `text_iterable_2`. In this example we
+        assume the iterables are of length `3`.
+
+        # Parameters
+
+        text_iterable_1 : `Iterable[str]`
+            An iterable of Strings, typically this would be either tokens or
+            lemmas.
+        text_iterable_2 : `Iterable[str]`
+            An iterable of Strings, typically this would be the POS tags
+            associated to `text_iterable_1`.
+        
+        # Returns
+
+        `str`
+        '''
+        mwe_template_parts: List[str] = []
+        for text_1, text_2 in zip(text_iterable_1, text_iterable_2):
+            mwe_template_parts.append(f'{text_1}_{text_2}')
+        return ' '.join(mwe_template_parts)
+
+    def char_to_token_index(mwe_template: str,
+                            token_delimenter: str
+                            ) -> Dict[int, int]:
+        '''
+        Given an mwe template, will return dictionary of character index to
+        token index. **Note** we assume that the token delimenter is always a
+        single whitespace.
+
+        # Parameters
+
+        mwe_template : `str`
+            A MWE template.
+        token_delimenter : `str`
+            A string that determines a token within the `mwe_template`. At the
+            moment this has to be a single whitespace, e.g. ` `.
+
+        # Returns
+
+        `Dict[int, int]`
+        '''
+        char_to_token_mapping: Dict[int, int] = dict()
+        token_index = 0
+        for char_index, char in enumerate(mwe_template):
+            char_to_token_mapping[char_index] = token_index
+            if char == token_delimenter:
+                token_index += 1
+        return char_to_token_mapping
+
+    def find_and_tag_template(mwe_template: str, semantic_tags: List[str],
+                              text_in_mwe_template_format: str,
+                              text_mwe_semantic_tags: List[List[str]],
+                              char_to_token_mapping: Dict[int, int],
+                              mwe_ids: List[int],
+                              current_mwe_id: int) -> int:
+        '''
+        It searches for all occurrences
+        of the `mwe_template` in `text_in_mwe_template_format`, for each
+        occurrence it looks up the token index(s) through `char_to_token_mapping`
+        and updates the `text_mwe_semantic_tags` with the `semantic_tags` at the
+        given index(s). The `mwe_ids` are also updated in a similar manner based
+        off the `current_mwe_id`. If the `mwe_ids` for any of the token
+        index(s) contain an id greater than 0 then neither the
+        `text_mwe_semantic_tags` or `mwe_ids` will be modified as we assume
+        the semantic tags for that token have already been tagged correctly.
+
+        Returns the next avaliable MWE id.
+
+        **Note** this functions modifies `text_mwe_semantic_tags` and `mwe_ids`
+
+        # Parameters
+
+        mwe_template : `str`
+            A MWE template that has come from a MWE Lexicon
+        semantic_tags : `List[str]`
+            The semantic tags that are associated with the `mwe_template`
+        text_in_mwe_template_format : `str`
+            The tokens or lemmas, form the text to be tagged, that have been
+            combined with their associated POS tags to become an MWE template.
+            This allows the MWE template, `mwe_template`, from the MWE lexicon
+            to be searched within text.
+        text_mwe_semantic_tags : `List[List[str]]`
+            The semantic tags associated to each token in the text that is to be
+            tagged.
+        char_to_token_mapping : `Dict[int, int]`
+            character index to token index for the `text_in_mwe_template_format`
+        mwe_ids : `List[int]`
+            Each id defines which MWE a token belongs too, an id of `0`
+            represents a token that is not part of an MWE.
+        current_mwe_id : `int`
+            MWE id to tag the next token(s) with.
+
+        # Returns
+
+        `int`
+        '''
+        for match in re.finditer(mwe_template, text_in_mwe_template_format):
+            token_start = char_to_token_mapping[match.start()]
+            # match end is one index value beyond the find, hence the (- 1)
+            token_end = char_to_token_mapping[match.end() - 1]
+            if any(mwe_ids[token_start:token_end]):
+                continue
+            for token_index in range(token_start, token_end + 1):
+                mwe_ids[token_index] = current_mwe_id
+                text_mwe_semantic_tags[token_index] = semantic_tags
+            current_mwe_id += 1
+        return current_mwe_id
+                
+    token_delimenter = ' '
+    
+    token_pos = create_mwe_template(tokens, pos_tags)
+    token_pos_lower = token_pos.lower()
+    token_pos_index_mapping = char_to_token_index(token_pos, token_delimenter)
+
+    lemma_pos = create_mwe_template(lemmas, pos_tags)
+    lemma_pos_lower = lemma_pos.lower()
+    lemma_pos_index_mapping = char_to_token_index(lemma_pos, token_delimenter)
+    
+    number_tokens = len(token_pos.split(token_delimenter))
+    mwe_semantic_tags = [['Z99'] for _ in range(number_tokens)]
+    mwe_ids = [0 for _ in range(number_tokens)]
+    current_mwe_id = 1
+    for mwe_template, semantic_tags in mwe_lexicon_lookup.items():
+        
+        if mwe_template in token_pos:
+            current_mwe_id = find_and_tag_template(mwe_template, semantic_tags,
+                                                   token_pos,
+                                                   mwe_semantic_tags,
+                                                   token_pos_index_mapping,
+                                                   mwe_ids, current_mwe_id)
+        
+        if mwe_template in lemma_pos:
+            current_mwe_id = find_and_tag_template(mwe_template, semantic_tags,
+                                                   lemma_pos,
+                                                   mwe_semantic_tags,
+                                                   lemma_pos_index_mapping,
+                                                   mwe_ids, current_mwe_id)
+        
+        if mwe_template in token_pos_lower:
+            current_mwe_id = find_and_tag_template(mwe_template, semantic_tags,
+                                                   token_pos_lower,
+                                                   mwe_semantic_tags,
+                                                   token_pos_index_mapping,
+                                                   mwe_ids, current_mwe_id)
+        
+        if mwe_template in lemma_pos_lower:
+            current_mwe_id = find_and_tag_template(mwe_template, semantic_tags,
+                                                   lemma_pos_lower,
+                                                   mwe_semantic_tags,
+                                                   lemma_pos_index_mapping,
+                                                   mwe_ids, current_mwe_id)
+    return mwe_semantic_tags, mwe_ids
 
 
 def _tag_token(text: str, lemma: str, pos: List[str],
