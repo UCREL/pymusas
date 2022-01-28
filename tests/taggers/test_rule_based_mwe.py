@@ -1,7 +1,7 @@
+import collections
 import json
 from pathlib import Path
 from typing import List, OrderedDict, Tuple
-import collections
 
 from pymusas.lexicon_collection import MWELexiconCollection
 from pymusas.taggers.rule_based import _tag_mwe
