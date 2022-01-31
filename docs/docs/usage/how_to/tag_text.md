@@ -767,3 +767,132 @@ cyllidol	cyllidol	Ans	['I1']
 </details>
 
 </details>
+
+## Indonesian
+<details>
+<summary>Expand</summary>
+
+In this example we will not be using spaCy for tokenisation, lemmatisation, and POS tagging, as we will be using the [Indonesian TreeTagger](https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build) that has been wrapped in a docker container. Therefore, first you will need to [install docker](https://docs.docker.com/get-docker/). After installing docker you will need to build the Indonesian TreeTagger docker container locally, of which by doing this you agree to the [TreeTagger license](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/Tagger-Licence) (this license stops you from re-distributing the TreeTagger code, therefore please do not upload your built docker container to a registry like [Docker Hub](https://hub.docker.com/)), like so (docker container size roughly 139MB):
+
+``` bash
+docker build -t indonesian-treetagger:1.0.0 https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build.git#main
+```
+
+We assume that you would like to tag the following text, of which this text is stored in the file named `indonesian_text_example.txt`. The example text is taken from the Indonesian Wikipedia page on the topic of [`Bank` as a financial institution.](https://id.wikipedia.org/wiki/Bank)
+
+``` txt title="indonesian_text_example.txt"
+Bank adalah sebuah lembaga keuangan intermediasi yang umumnya didirikan dengan kewenangan untuk menerima simpanan uang, meminjamkan uang, dan menerbitkan surat sanggup bayar.
+```
+
+First we will need to run the Indonesian TreeTagger:
+
+``` bash
+cat indonesian_text_example.txt | docker run -i --rm indonesian-treetagger:1.0.0 > indonesian_text_example.tsv
+```
+
+We now have a `tsv` version of the file that has been tokenised, lemmatised, and POS tagged. The `indonesian_text_example.tsv` file should contain the following (I have added column headers here to explain what each column represents, these headers should not be in your file):
+
+:::note
+The POS tagset for Indonesian is not the USAS core or [UPOS](https://universaldependencies.org/u/pos/) tagset, but rather the [UI tagset](https://drive.google.com/file/d/1Pnhj2vVEEP5eIc655Af-WPDXxthyZdwb/view).
+:::
+
+<details>
+<summary>indonesian_text_example.tsv:</summary>
+
+``` tsv title="indonesian_text_example.tsv"
+Token	POS	Lemma
+Bank	NNP	bank
+adalah	VB	adalah
+sebuah	NND	sebuah
+lembaga keuangan	NN	lembaga
+intermediasi	NN	intermediasi
+yang	SC	yang
+umumnya	NN	umumnya
+didirikan	VB	diri
+dengan	IN	dengan
+kewenangan	NN	wenang
+untuk	SC	untuk
+menerima	VB	terima
+simpanan	NN	simpan
+uang	NN	uang
+,	Z	,
+meminjamkan	VB	pinjam
+uang	NN	uang
+,	Z	,
+dan	CC	dan
+menerbitkan	VB	terbit
+surat	NN	surat
+sanggup	VB	sanggup
+bayar	VB	bayar
+.	Z	.
+```
+
+</details>
+
+Now we have the token, lemma, and POS tag information we can now create a [USASRuleBasedTagger](https://ucrel.github.io/pymusas/api/taggers/rule_based#usasrulebasedtagger) and run the tagger over this `tsv` data using the following Python script:
+
+``` python
+from pathlib import Path
+
+from pymusas.lexicon_collection import LexiconCollection
+from pymusas.taggers.rule_based import USASRuleBasedTagger
+
+# Rule based tagger requires a USAS lexicon
+indonesian_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Indonesian/semantic_lexicon_id.tsv'
+# Includes the POS information
+indonesian_lexicon_lookup = LexiconCollection.from_tsv(indonesian_usas_lexicon_url)
+# excludes the POS information
+indonesian_lemma_lexicon_lookup = LexiconCollection.from_tsv(indonesian_usas_lexicon_url,
+                                                             include_pos=False)
+usas_tagger = USASRuleBasedTagger(indonesian_lexicon_lookup,
+                                  indonesian_lemma_lexicon_lookup)
+
+indonesian_tagged_file = Path(Path.cwd(), 'indonesian_text_example.tsv').resolve()
+
+print('Text\tLemma\tPOS\tUSAS Tags')
+with indonesian_tagged_file.open('r', encoding='utf-8') as indonesian_tagged_data:
+    for line in indonesian_tagged_data:
+        line = line.strip()
+        if line:
+            line_tags = line.split('\t')
+            token = line_tags[0]
+            pos = line_tags[1]
+            lemma = line_tags[2]
+            usas_tags = usas_tagger.tag_token((token, lemma, pos))
+            print(f'{token}\t{lemma}\t{pos}\t{usas_tags}')
+```
+
+<details>
+<summary>Output:</summary>
+
+``` tsv
+Text	Lemma	POS	USAS Tags
+Bank	bank	NNP	['Z99']
+adalah	adalah	VB	['Z99']
+sebuah	sebuah	NND	['Z99']
+lembaga keuangan	lembaga	NN	['Z99']
+intermediasi	intermediasi	NN	['Z99']
+yang	yang	SC	['Z5']
+umumnya	umumnya	NN	['Z99']
+didirikan	diri	VB	['Z99']
+dengan	dengan	IN	['Z5']
+kewenangan	wenang	NN	['Z99']
+untuk	untuk	SC	['Z5']
+menerima	terima	VB	['Z99']
+simpanan	simpan	NN	['Z99']
+uang	uang	NN	['Z99']
+,	,	Z	['Z99']
+meminjamkan	pinjam	VB	['Z99']
+uang	uang	NN	['Z99']
+,	,	Z	['Z99']
+dan	dan	CC	['Z5']
+menerbitkan	terbit	VB	['Z99']
+surat	surat	NN	['Z99']
+sanggup	sanggup	VB	['Z99']
+bayar	bayar	VB	['Z99']
+.	.	Z	['Z99']
+```
+
+</details>
+
+</details>
