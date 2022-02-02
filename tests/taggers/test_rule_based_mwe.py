@@ -11,7 +11,7 @@ DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
 TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers')
 
 BASIC_LEXICON = Path(TAGGER_DATA_DIR, 'mwe_basic_lexicon.tsv')
-BASIC_DATA = Path(TAGGER_DATA_DIR, 'rule_based_mwe_input_output.json')
+BASIC_DATA = Path(TAGGER_DATA_DIR, 'rule_based_mwe_basic_input_output.json')
 
 
 def generate_tag_test_data(test_data_file: Path, mwe_lexicon_file: Path

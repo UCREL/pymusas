@@ -164,7 +164,11 @@ def _tag_mwe(tokens: List[str], lemmas: List[str], pos_tags: List[str],
 
         `int`
         '''
-        for match in re.finditer(mwe_template, text_in_mwe_template_format):
+
+        escaped_mwe_template = re.escape(mwe_template)
+        for match in re.finditer(escaped_mwe_template,
+                                 text_in_mwe_template_format):
+            
             token_start = char_to_token_mapping[match.start()]
             # match end is one index value beyond the find, hence the (- 1)
             token_end = char_to_token_mapping[match.end() - 1]
