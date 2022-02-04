@@ -1,10 +1,11 @@
-import collections
 import json
 from pathlib import Path
-from typing import List, OrderedDict, Tuple
+from typing import List, Dict, Tuple
+
+import pytest
 
 from pymusas.lexicon_collection import MWELexiconCollection
-from pymusas.taggers.rule_based import _tag_mwe
+from pymusas.taggers.rule_based_mwe import n_grams, n_gram_indexes, _tag_mwe
 
 
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
@@ -18,7 +19,7 @@ def generate_tag_test_data(test_data_file: Path, mwe_lexicon_file: Path
                            ) -> Tuple[List[str],
                                       List[str],
                                       List[str],
-                                      OrderedDict[str, List[str]],
+                                      Dict[str, List[str]],
                                       List[List[str]],
                                       List[int]]:
     '''
@@ -96,8 +97,8 @@ def test_tag_mwe_tokens__basic_rules() -> None:
      expected_usas, expected_mwe_ids) = generate_tag_test_data(BASIC_DATA, BASIC_LEXICON)
     
     # Test that it returns all Z99 when we have no MWE rules
-    empty_mwe_lexicon: OrderedDict = collections.OrderedDict()
-    usas_tags, mwe_ids = _tag_mwe(tokens, lemmas, pos_tags, empty_mwe_lexicon)
+    empty_mwe_lexicon: Dict[str, List[str]] = {}
+    usas_tags, mwe_ids = _tag_mwe(tokens, lemmas, pos_tags, empty_mwe_lexicon, 3)
     all_z99_tags = [['Z99'] for _ in tokens]
     all_0_ids = [0 for _ in tokens]
     assert all_z99_tags == usas_tags
@@ -105,10 +106,53 @@ def test_tag_mwe_tokens__basic_rules() -> None:
 
     # Test that it covers all of the non special syntax cases, e.g. all of the
     # cases that do not contain a wildcard or curly braces.
-    usas_tags, mwe_ids = _tag_mwe(tokens, lemmas, pos_tags, mwe_lexicon)
+    usas_tags, mwe_ids = _tag_mwe(tokens, lemmas, pos_tags, mwe_lexicon, 3)
     assert expected_usas == usas_tags
     assert expected_mwe_ids == mwe_ids
 
 
+def test_n_grams() -> None:
+    test_tokens: List[str] = []
+    empty_n_grams = n_grams(test_tokens, 1, 3)
+    assert [] == list(empty_n_grams)
+
+    test_tokens.extend(['hello', 'how', 'are', 'you', ','])
+    expected_n_grams = [['hello'], ['how'], ['are'], ['you'], [',']]
+    assert expected_n_grams == list(n_grams(test_tokens, 1, 1))
+
+    expected_n_grams = [['hello', 'how', 'are'], ['how', 'are', 'you'], ['are', 'you', ','],
+                        ['hello', 'how'], ['how', 'are'], ['are', 'you'], ['you', ',']]
+    assert expected_n_grams == list(n_grams(test_tokens, 2, 3))
+
+    assert [['hello', 'how', 'are', 'you', ',']] == list(n_grams(test_tokens, 5, 8))
     
+    assert [] == list(n_grams(test_tokens, 6, 8))
+
+    with pytest.raises(ValueError):
+        list(n_grams(test_tokens, 0, 1))
+
+    with pytest.raises(ValueError):
+        list(n_grams(test_tokens, 2, 1))
+
+
+def test_n_gram_indexes() -> None:
+    test_tokens: List[str] = []
+    empty_n_grams = n_gram_indexes(test_tokens, 1, 3)
+    assert [] == list(empty_n_grams)
+
+    test_tokens.extend(['hello', 'how', 'are', 'you', ','])
+    expected_n_gram_indexes = [(0, 1), (1, 2), (2, 3), (3, 4), (4, 5)]
+    assert expected_n_gram_indexes == list(n_gram_indexes(test_tokens, 1, 1))
+
+    expected_n_gram_indexes = [(0, 3), (1, 4), (2, 5), (0, 2), (1, 3), (2, 4), (3, 5)]
+    assert expected_n_gram_indexes == list(n_gram_indexes(test_tokens, 2, 3))
+
+    assert [(0, 5)] == list(n_gram_indexes(test_tokens, 5, 8))
     
+    assert [] == list(n_gram_indexes(test_tokens, 6, 8))
+
+    with pytest.raises(ValueError):
+        list(n_gram_indexes(test_tokens, 0, 1))
+
+    with pytest.raises(ValueError):
+        list(n_gram_indexes(test_tokens, 2, 1))

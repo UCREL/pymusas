@@ -1,4 +1,3 @@
-import collections
 from collections.abc import MutableMapping
 import importlib
 import os
@@ -18,13 +17,6 @@ MWE_TEMPLATES = {
     'A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': ['Z2'],
     'a_prep carta_noun cabal_adj': ['A4', 'A5.1']
 }
-Ordered_MWE_TEMPLATES = collections.OrderedDict(
-    [
-        ('A_pnoun Pobra_pnoun de_pnoun Trives_pnoun', ['Z2']),
-        ('a_prep carta_noun cabal_adj', ['A4', 'A5.1']),
-        ('A_pnoun Arnoia_pnoun', ['Z2'])
-    ]
-)
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
 LEXICON_DATA_DIR = Path(DATA_DIR, 'lexicon_collection', 'MWELexiconCollection')
 MWE_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'mwe_lexicon.tsv')
@@ -126,29 +118,21 @@ def test_mwe_lexicon_collection_str() -> None:
     assert expected_str == str(mwe_lexicon_collection)
 
 
-def test_to_ordered_dictionary() -> None:
+def test_to_dictionary() -> None:
 
     empty_collection = MWELexiconCollection()
-    assert collections.OrderedDict() == empty_collection.to_ordered_dictionary()
-    assert isinstance(empty_collection.to_ordered_dictionary(),
-                      collections.OrderedDict)
+    assert dict() == empty_collection.to_dictionary()
 
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES)
-    assert Ordered_MWE_TEMPLATES == mwe_lexicon_collection.to_ordered_dictionary()
+    assert MWE_TEMPLATES == mwe_lexicon_collection.to_dictionary()
 
 
 def test_mwe_lexicon_collection_from_tsv() -> None:
 
     mwe_lexicon_collection = MWELexiconCollection.from_tsv(MWE_LEXICON_FILE_PATH)
-    assert isinstance(mwe_lexicon_collection, collections.OrderedDict)
+    assert isinstance(mwe_lexicon_collection, dict)
     assert 9 == len(mwe_lexicon_collection)
     assert mwe_lexicon_collection['East_noun London_noun'] == ['Z2']
-    # Test that it orders them according to decending n-gram length order.
-    largest_n_gram_length = 100
-    for n_gram in mwe_lexicon_collection:
-        n_gram_length = len(re.split(r'\s+', n_gram))
-        assert n_gram_length <= largest_n_gram_length
-        largest_n_gram_length = n_gram_length
     
     # Testing that additional fields are ignored.
     assert mwe_lexicon_collection == MWELexiconCollection.from_tsv(EXTRA_FIELDS_MWE_LEXICON_FILE_PATH)

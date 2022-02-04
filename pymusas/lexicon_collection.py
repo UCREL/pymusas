@@ -312,58 +312,28 @@ class MWELexiconCollection(MutableMapping):
         if data is not None:
             self.data = data
 
-    def to_ordered_dictionary(self) -> OrderedDict[str, List[str]]:
-        r"""
-        Returns the `data` instance attribute, as a `collections.OrderedDict`
-        object, whereby the MWE templates, which are the keys, are ordered based
-        on their n-gram length in decending order, e.g. the largest n-gram is
-        first in the dictionary.
-
-        To determine the n-gram length the MWE template is split on whitespace
-        using the following regex `\s+` as specified in the
-        [Python regex library](https://docs.python.org/3/library/re.html).
+    def to_dictionary(self) -> Dict[str, List[str]]:
+        '''
+        Returns the `data` instance attribute.
 
         # Returns
 
-        `collections.OrderedDict[str, List[str]]`
-
-        # Examples
-        ``` python
-        >>> import collections
-        >>> from pymusas.lexicon_collection import MWELexiconCollection
-        >>> mwe_collection = MWELexiconCollection()
-        >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
-        >>> mwe_collection['*_noun boot*_noun hire_noun'] = ['Z0']
-        >>> assert ({'*_noun boot*_noun': ['Z0', 'Z3'], '*_noun boot*_noun hire_noun': ['Z0']}
-        ... == mwe_collection.data)
-        >>> assert (collections.OrderedDict([('*_noun boot*_noun hire_noun', ['Z0']), ('*_noun boot*_noun', ['Z0', 'Z3'])])
-        ... == mwe_collection.to_ordered_dictionary())
-
-        ```
-
-        """
+        `Dict[str, List[str]]`
+        '''
         
-        ordered_by_template_length = sorted(self.data.items(),
-                                            key=lambda x: len(re.split(r'\s+', x[0])),
-                                            reverse=True)
-        return collections.OrderedDict(ordered_by_template_length)
+        return self.data
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str]
-                 ) -> OrderedDict[str, List[str]]:
+                 ) -> Dict[str, List[str]]:
         '''
-        Given a `tsv_file_path` it will return an ordered dictionary object
-        that can be used to create a :class:`MWELexiconCollection`. The ordering
-        of the dictionary is determined by the MWE templates, which are the keys,
-        based on their n-gram length in decending order, e.g. the largest n-gram is
-        first in the dictionary. This is the same ordering as the
-        :func:`MWELexiconCollection.to_ordered_dictionary`.
+        Given a `tsv_file_path` it will return a dictionary object
+        that can be used to create a :class:`MWELexiconCollection`.
 
         Each line in the TSV file will be read in and added to a temporary
         :class:`MWELexiconCollection`, once all lines
-        in the TSV have been parsed, the return value comes from performing
-        the :func:`to_ordered_dictionary` function from the
-        temporary :class:`MWELexiconCollection`.
+        in the TSV have been parsed, the return value is the `data` attribute of
+        the temporary :class:`MWELexiconCollection`.
 
         If the file path is a URL, the file will be downloaded and cached using
         :func:`pymusas.file_utils.download_url_file`.
@@ -384,7 +354,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
         
-        `collections.OrderedDict[str, List[str]]`
+        `Dict[str, List[str]]`
         
         # Raises
         
@@ -395,12 +365,10 @@ class MWELexiconCollection(MutableMapping):
         # Examples
 
         ``` python
-        >>> import collections
         >>> from pymusas.lexicon_collection import MWELexiconCollection
         >>> portuguese_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv'
         >>> mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
         >>> mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
-        >>> assert isinstance(mwe_lexicon_dict, collections.OrderedDict)
         >>> assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
         >>> assert mwe_lexicon_dict['arco_noun e_conj flecha_noun'][0] == 'K5.1'
 
@@ -441,7 +409,7 @@ class MWELexiconCollection(MutableMapping):
                         mwe_template = row[field_name]
                 collection_from_tsv[mwe_template] = semantic_tags
         
-        return collection_from_tsv.to_ordered_dictionary()
+        return collection_from_tsv.to_dictionary()
     
     def __setitem__(self, key: str, value: List[str]) -> None:
         self.data[key] = value
