@@ -1,11 +1,11 @@
 import json
 from pathlib import Path
-from typing import List, Dict, Tuple
+from typing import Dict, List, Tuple
 
 import pytest
 
 from pymusas.lexicon_collection import MWELexiconCollection
-from pymusas.taggers.rule_based_mwe import n_grams, n_gram_indexes, _tag_mwe
+from pymusas.taggers.rule_based_mwe import _tag_mwe, n_gram_indexes, n_grams
 
 
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()

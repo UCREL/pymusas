@@ -1,4 +1,4 @@
-from typing import Dict, Iterator, List, Tuple, Any, Sequence
+from typing import Any, Dict, Iterator, List, Sequence, Tuple
 
 
 def n_gram_indexes(sequence: Sequence[Any], min_n: int, max_n: int
@@ -50,10 +50,8 @@ def n_gram_indexes(sequence: Sequence[Any], min_n: int, max_n: int
     max_n = sequence_size if max_n > sequence_size else max_n
     
     for n_gram_size in range(max_n, min_n - 1, -1):
-        for sequence_index in range(sequence_size):
+        for sequence_index in range(sequence_size - n_gram_size + 1):
             last_n_gram_index = sequence_index + n_gram_size
-            if last_n_gram_index > sequence_size:
-                break
             yield (sequence_index, last_n_gram_index)
 
 

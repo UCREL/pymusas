@@ -2,7 +2,6 @@ from collections.abc import MutableMapping
 import importlib
 import os
 from pathlib import Path
-import re
 import tempfile
 
 import pytest
