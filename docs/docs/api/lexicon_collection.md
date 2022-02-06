@@ -318,43 +318,22 @@ least_likely_tag = mwe_collection['*_noun boot*_noun'][-1]
 assert least_likely_tag == 'Z3'
 ```
 
-<a id="pymusas.lexicon_collection.MWELexiconCollection.to_ordered_dictionary"></a>
+<a id="pymusas.lexicon_collection.MWELexiconCollection.to_dictionary"></a>
 
-### to\_ordered\_dictionary
+### to\_dictionary
 
 ```python
 class MWELexiconCollection(MutableMapping):
  | ...
- | def to_ordered_dictionary() -> OrderedDict[str, List[str]]
+ | def to_dictionary() -> Dict[str, List[str]]
 ```
 
-Returns the `data` instance attribute, as a `collections.OrderedDict`
-object, whereby the MWE templates, which are the keys, are ordered based
-on their n-gram length in decending order, e.g. the largest n-gram is
-first in the dictionary.
+Returns the `data` instance attribute.
 
-To determine the n-gram length the MWE template is split on whitespace
-using the following regex `\s+` as specified in the
-[Python regex library](https://docs.python.org/3/library/re.html).
-
-<h4 id="to_ordered_dictionary.returns">Returns<a className="headerlink" href="#to_ordered_dictionary.returns" title="Permanent link">&para;</a></h4>
+<h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
 
 
-- `collections.OrderedDict[str, List[str]]` <br/>
-
-<h4 id="to_ordered_dictionary.examples">Examples<a className="headerlink" href="#to_ordered_dictionary.examples" title="Permanent link">&para;</a></h4>
-
-``` python
-import collections
-from pymusas.lexicon_collection import MWELexiconCollection
-mwe_collection = MWELexiconCollection()
-mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
-mwe_collection['*_noun boot*_noun hire_noun'] = ['Z0']
-assert ({'*_noun boot*_noun': ['Z0', 'Z3'], '*_noun boot*_noun hire_noun': ['Z0']}
-== mwe_collection.data)
-assert (collections.OrderedDict([('*_noun boot*_noun hire_noun', ['Z0']), ('*_noun boot*_noun', ['Z0', 'Z3'])])
-== mwe_collection.to_ordered_dictionary())
-```
+- `Dict[str, List[str]]` <br/>
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.from_tsv"></a>
 
@@ -366,21 +345,16 @@ class MWELexiconCollection(MutableMapping):
  | @staticmethod
  | def from_tsv(
  |     tsv_file_path: Union[PathLike, str]
- | ) -> OrderedDict[str, List[str]]
+ | ) -> Dict[str, List[str]]
 ```
 
-Given a `tsv_file_path` it will return an ordered dictionary object
-that can be used to create a [`MWELexiconCollection`](#mwelexiconcollection). The ordering
-of the dictionary is determined by the MWE templates, which are the keys,
-based on their n-gram length in decending order, e.g. the largest n-gram is
-first in the dictionary. This is the same ordering as the
-`MWELexiconCollection.to_ordered_dictionary`.
+Given a `tsv_file_path` it will return a dictionary object
+that can be used to create a [`MWELexiconCollection`](#mwelexiconcollection).
 
 Each line in the TSV file will be read in and added to a temporary
 [`MWELexiconCollection`](#mwelexiconcollection), once all lines
-in the TSV have been parsed, the return value comes from performing
-the [`to_ordered_dictionary`](#to_ordered_dictionary) function from the
-temporary [`MWELexiconCollection`](#mwelexiconcollection).
+in the TSV have been parsed, the return value is the `data` attribute of
+the temporary [`MWELexiconCollection`](#mwelexiconcollection).
 
 If the file path is a URL, the file will be downloaded and cached using
 [`pymusas.file_utils.download_url_file`](/pymusas/api/file_utils/#download_url_file).
@@ -403,7 +377,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `collections.OrderedDict[str, List[str]]` <br/>
+- `Dict[str, List[str]]` <br/>
 
 <h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
 
@@ -416,12 +390,10 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 
 
 ``` python
-import collections
 from pymusas.lexicon_collection import MWELexiconCollection
 portuguese_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv'
 mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
 mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
-assert isinstance(mwe_lexicon_dict, collections.OrderedDict)
 assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
 assert mwe_lexicon_dict['arco_noun e_conj flecha_noun'][0] == 'K5.1'
 ```
