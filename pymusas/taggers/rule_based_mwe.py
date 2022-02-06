@@ -23,7 +23,7 @@ def n_gram_indexes(sequence: Sequence[Any], min_n: int, max_n: int
 
     # Returns
 
-    `Iterator[Sequence[Any]]`
+    `Iterator[Tuple[int, int]]`
 
     # Raises
 
@@ -37,7 +37,7 @@ def n_gram_indexes(sequence: Sequence[Any], min_n: int, max_n: int
     >>> tokens = ['hello', 'how', 'are', 'you', ',']
     >>> token_n_gram_indexes = n_gram_indexes(tokens, 2, 3)
     >>> expected_n_grams_indexes = [(0, 3), (1, 4), (2, 5), (0, 2), (1, 3), (2, 4), (3, 5)]
-    >>> assert expected_n_grams_indexes == token_n_gram_indexes
+    >>> assert expected_n_grams_indexes == list(token_n_gram_indexes)
 
     ```
     '''
@@ -90,7 +90,7 @@ def n_grams(sequence: Sequence[Any], min_n: int, max_n: int) -> Iterator[Sequenc
     >>> token_n_grams = n_grams(tokens, 2, 3)
     >>> expected_n_grams = [['hello', 'how', 'are'], ['how', 'are', 'you'], ['are', 'you', ','],
     ...                     ['hello', 'how'], ['how', 'are'], ['are', 'you'], ['you', ',']]
-    >>> assert expected_n_grams == token_n_grams
+    >>> assert expected_n_grams == list(token_n_grams)
 
     ```
     '''
