@@ -1,5 +1,4 @@
 from collections.abc import MutableMapping
-from dataclasses import FrozenInstanceError
 import importlib
 import os
 from pathlib import Path
@@ -34,29 +33,6 @@ for entry in [LEXICON_ENTRY, LEXICON_ENTRY_MULTI_SEM, NON_POS_ENTRY]:
 LEXICON_KEYS = ['London|noun', 'Laptop|noun', 'London']
 LEXICON_VALUES = [["Z2"], ["Z3", "Z0"], ["Z2"]]
 LEXICON_ITEMS = [(key, value) for key, value in zip(LEXICON_KEYS, LEXICON_VALUES)]
-
-
-def test_lexicon_entry() -> None:
-        
-    assert LEXICON_ENTRY.lemma == "London"
-    assert LEXICON_ENTRY.pos == "noun"
-    assert LEXICON_ENTRY.semantic_tags == ["Z2"]
-    assert str(LEXICON_ENTRY) == "LexiconEntry(lemma='London', semantic_tags=['Z2'], pos='noun')"
-    
-    with pytest.raises(FrozenInstanceError):
-        for attribute in ['lemma', 'pos', 'semantic_tags']:
-            setattr(LEXICON_ENTRY, attribute, 'test')
-
-    assert LEXICON_ENTRY_MULTI_SEM.lemma == "Laptop"
-    assert LEXICON_ENTRY_MULTI_SEM.pos == "noun"
-    assert LEXICON_ENTRY_MULTI_SEM.semantic_tags == ["Z3", "Z0"]
-    assert str(LEXICON_ENTRY_MULTI_SEM) == "LexiconEntry(lemma='Laptop', semantic_tags=['Z3', 'Z0'], pos='noun')"
-
-    assert LEXICON_ENTRY != LEXICON_ENTRY_MULTI_SEM
-    assert LEXICON_ENTRY == LexiconEntry('London', pos='noun', semantic_tags=['Z2'])
-
-    assert str(NON_POS_ENTRY) == "LexiconEntry(lemma='London', semantic_tags=['Z2'], pos=None)"
-    assert NON_POS_ENTRY == LexiconEntry('London', ['Z2'], None)
 
 
 def test_lexicon_collection_class_type() -> None:
