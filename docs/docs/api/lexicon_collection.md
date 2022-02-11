@@ -6,6 +6,87 @@
 
 ---
 
+<a id="pymusas.lexicon_collection.LexiconType"></a>
+
+## LexiconType
+
+```python
+@unique
+class LexiconType(Enum)
+```
+
+Descriptions of the type associated to single and Multi Word Expression (MWE)
+lexicon entires and templates. Any type with the word `NON_SPECIAL` means
+that it does not use any special syntax, for example does not use wildcards
+or curly braces.
+
+The `value` attribute of each instance attribute is of type `str` describing
+the type associated with that attribute. For the best explanation see the
+example below.
+
+<h4 id="lexicontype.instance_attributes">Instance Attributes<a className="headerlink" href="#lexicontype.instance_attributes" title="Permanent link">&para;</a></h4>
+
+
+- __SINGLE\_NON\_SPECIAL__ : `LexiconType` <br/>
+    Single word lexicon lookup.
+- __MWE\_NON\_SPECIAL__ : `LexiconType` <br/>
+    MWE lexicon lookup.
+- __MWE\_WILDCARD__ : `LexiconType` <br/>
+    MWE lexicon lookup using a wildcard.
+- __MWE\_CURLY\_BRACES__ : `LexiconType` <br/>
+    MWE lexicon lookup using curly braces.
+
+<h4 id="lexicontype.examples">Examples<a className="headerlink" href="#lexicontype.examples" title="Permanent link">&para;</a></h4>
+
+```python
+from pymusas.lexicon_collection import LexiconType
+assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
+assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
+all_possible_values = {'Single Non Special', 'MWE Non Special',
+'MWE Wildcard', 'MWE Curly Braces'}
+assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconType}
+```
+
+<a id="pymusas.lexicon_collection.LexiconType.SINGLE_NON_SPECIAL"></a>
+
+#### SINGLE\_NON\_SPECIAL
+
+```python
+class LexiconType(Enum):
+ | ...
+ | SINGLE_NON_SPECIAL = 'Single Non Special'
+```
+
+<a id="pymusas.lexicon_collection.LexiconType.MWE_NON_SPECIAL"></a>
+
+#### MWE\_NON\_SPECIAL
+
+```python
+class LexiconType(Enum):
+ | ...
+ | MWE_NON_SPECIAL = 'MWE Non Special'
+```
+
+<a id="pymusas.lexicon_collection.LexiconType.MWE_WILDCARD"></a>
+
+#### MWE\_WILDCARD
+
+```python
+class LexiconType(Enum):
+ | ...
+ | MWE_WILDCARD = 'MWE Wildcard'
+```
+
+<a id="pymusas.lexicon_collection.LexiconType.MWE_CURLY_BRACES"></a>
+
+#### MWE\_CURLY\_BRACES
+
+```python
+class LexiconType(Enum):
+ | ...
+ | MWE_CURLY_BRACES = 'MWE Curly Braces'
+```
+
 <a id="pymusas.lexicon_collection.LexiconEntry"></a>
 
 ## LexiconEntry
@@ -286,36 +367,121 @@ class MWELexiconCollection(MutableMapping):
  | ) -> None
 ```
 
-This is a dictionary object that will hold MWE templates in a fast to access
-object. The keys of the dictionary are expected to be a MWE template
-following the format specified in the MWE syntax notes, e.g. `*_noun boot*_noun`
+A collection that stores Multi Word Expression (MWE) templates and their
+associated meta data.
 
-The value to each key is the associated semantic tags, whereby the semantic
-tags are in rank order, the most likely tag is the first tag in the list.
+This collection allows users to:
+
+1. Easily load MWE templates from a single TSV file.
+2. Find strings that match MWE templates taking into account
+any special syntax rules that should be applied, e.g. wildcards allow zero
+or more characters to appear after the word token and/or Part Of Speech (POS) tag.
+For more information on the MWE special syntax rules see the following notes.
+
+**Note** that even though this a sub-class of a MutableMapping it has a
+time complexity of O(n) for deletion unlike the standard Python MutableMapping,
+see the [following dict time complexities](https://wiki.python.org/moin/TimeComplexity),
+this is due to keeping track of the `longest_non_special_mwe_template` and
+`longest_wildcard_mwe_template`.
 
 <h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 
 - __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+    Dictionary where the keys are MWE templates, of any [`LexiconType`](#lexicontype),
+    and the values are a list of associated semantic tags.
 
 <h4 id="mwelexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#mwelexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]` <br/>
-    Dictionary where the keys are MWE templates and the values are
-    a list of associated semantic tags. If the `data` parameter given was
-    `None` then the value of this attribute will be an empty dictionary.
+**Note** if the `data` parameter given was `None` then the value of all
+dictionary attributes will be an empty dictionary and all integer values will
+be `0`.
+
+- __meta\_data__ : `Dict[str, Tuple[List[str], int, LexiconType]]` <br/>
+    Dictionary where the keys are MWE templates, of any type, and the values
+    are a Tuple of length 3 containing the following meta data on the MWE
+    template:
+
+    1. Semantic tags.
+    2. Length of the MWE template, measured by n-gram size.
+    3. Type of MWE as defined by the [`LexiconType`](#lexicontype), e.g. `LexiconType.MWE_NON_SPECIAL`
+- __longest\_non\_special\_mwe\_template__ : `int` <br/>
+    The longest MWE template with no special symbols measured by n-gram size.
+    For example the MWE template `ski_noun boot_noun` will be of length 2.
+- __longest\_wildcard\_mwe\_template__ : `int` <br/>
+    The longest MWE template with at least one wildcard (`*`) measured by n-gram size.
+    For example the MWE template `*_noun boot*_noun` will be of length 2.
+- __mwe\_regular\_expression\_lookup__ : `Dict[int, Dict[str, Dict[str, re.Pattern]]]` <br/>
+    A dictionary that can lookup all special syntax MWE templates and there
+    regular expression pattern, only wildcard (`*`) symbols are supported, by
+    there n-gram length and then there first character symbol. The regular
+    expression pattern is used for quick matching within the [`mwe_match`](#mwe_match).
 
 <h4 id="mwelexiconcollection.examples">Examples<a className="headerlink" href="#mwelexiconcollection.examples" title="Permanent link">&para;</a></h4>
 
 ``` python
-from pymusas.lexicon_collection import MWELexiconCollection
+import re
+from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
 mwe_collection = MWELexiconCollection()
 mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
-most_likely_tag = mwe_collection['*_noun boot*_noun'][0]
+semantic_tags, n_gram_length, mwe_type = mwe_collection['*_noun boot*_noun']
+assert 2 == n_gram_length
+assert LexiconType.MWE_WILDCARD == mwe_type
+most_likely_tag = semantic_tags[0]
 assert most_likely_tag == 'Z0'
-least_likely_tag = mwe_collection['*_noun boot*_noun'][-1]
+least_likely_tag = semantic_tags[-1]
 assert least_likely_tag == 'Z3'
+# change defaultdict to dict so the dictionary is easier to read and understand
+assert ({k: dict(v) for k, v in mwe_collection.mwe_regular_expression_lookup.items()}
+        == {2: {'*': {'*_noun boot*_noun': re.compile('[^\\s_]*_noun\\ boot[^\\s_]*_noun')}}})
+```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.mwe_match"></a>
+
+### mwe\_match
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def mwe_match(
+ |     self,
+ |     mwe_template: str,
+ |     mwe_type: LexiconType
+ | ) -> List[str]
+```
+
+Returns a `List` of MWE templates, with the given `mwe_type`, that match
+the given `mwe_template`. If there are no matches the returned `List`
+will be empty.
+
+This method applies all of the special syntax rules that should be applied
+e.g. wildcards allow zero or more characters to appear after the word
+token and/or Part Of Speech (POS) tag. For more information on the MWE
+special syntax rules see the following notes.
+
+<h4 id="mwe_match.parameters">Parameters<a className="headerlink" href="#mwe_match.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __mwe\_template__ : `str` <br/>
+    The MWE template that you want to match against, e.g.
+    `river_noun bank_noun` or `*_noun boot*_noun`
+- __mwe\_type__ : `LexiconType` <br/>
+    The type of MWE templates that you want to return.
+
+<h4 id="mwe_match.returns">Returns<a className="headerlink" href="#mwe_match.returns" title="Permanent link">&para;</a></h4>
+
+
+- `Optional[List[str]]` <br/>
+
+<h4 id="mwe_match.examples">Examples<a className="headerlink" href="#mwe_match.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
+collection = MWELexiconCollection({'walking_noun boot_noun': ['Z2'], 'ski_noun boot_noun': ['Z2'], '*_noun boot_noun': ['Z2'], '*_noun *_noun': ['Z2']})
+assert [] == collection.mwe_match('river_noun bank_noun', LexiconType.MWE_NON_SPECIAL)
+assert ['walking_noun boot_noun'] == collection.mwe_match('walking_noun boot_noun', LexiconType.MWE_NON_SPECIAL)
+assert ['*_noun boot_noun', '*_noun *_noun'] == collection.mwe_match('walking_noun boot_noun', LexiconType.MWE_WILDCARD)
 ```
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.to_dictionary"></a>
@@ -328,12 +494,27 @@ class MWELexiconCollection(MutableMapping):
  | def to_dictionary() -> Dict[str, List[str]]
 ```
 
-Returns the `data` instance attribute.
+Returns a dictionary of all MWE templates, the keys, stored in the
+collection and their associated semantic tags, the values.
+
+This can then be used to re-create a [`MWELexiconCollection`](#mwelexiconcollection).
 
 <h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
 
 
 - `Dict[str, List[str]]` <br/>
+
+<h4 id="to_dictionary.examples">Examples<a className="headerlink" href="#to_dictionary.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
+mwe_collection = MWELexiconCollection()
+mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
+assert (mwe_collection['*_noun boot*_noun']
+== (['Z0', 'Z3'], 2, LexiconType.MWE_WILDCARD))
+assert (mwe_collection.to_dictionary()
+== {'*_noun boot*_noun': ['Z0', 'Z3']})
+```
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.from_tsv"></a>
 
@@ -396,6 +577,45 @@ mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
 mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
 assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
 assert mwe_lexicon_dict['arco_noun e_conj flecha_noun'][0] == 'K5.1'
+```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.escape_mwe"></a>
+
+### escape\_mwe
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def escape_mwe(mwe_template: str) -> str
+```
+
+Returns the MWE template escaped so that it can be used in a regular
+expression.
+
+The difference between this and the normal `re.escape`
+method, is that we apply the `re.escape` method to the MWE template and
+then replace `\*` with `[^\s_]*` so that the wildcards keep there original
+meaning with respect to the MWE special syntax rules.
+
+<h4 id="escape_mwe.parameters">Parameters<a className="headerlink" href="#escape_mwe.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __mwe\_template__ : `str` <br/>
+    The MWE template that you want to escape, e.g.
+    `river_noun bank_noun` or `*_noun boot*_noun`
+
+<h4 id="escape_mwe.returns">Returns<a className="headerlink" href="#escape_mwe.returns" title="Permanent link">&para;</a></h4>
+
+
+- `str` <br/>
+
+<h4 id="escape_mwe.examples">Examples<a className="headerlink" href="#escape_mwe.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import MWELexiconCollection
+mwe_escaped = MWELexiconCollection.escape_mwe('ano*_prep carta_noun')
+assert r'ano[^\s_]*_prep\ carta_noun' == mwe_escaped
 ```
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.__str__"></a>

@@ -1,12 +1,55 @@
+import collections
 from collections.abc import MutableMapping
 import csv
 from dataclasses import dataclass
+from enum import Enum, unique
 from os import PathLike
+import re
 import typing
-from typing import Dict, Generator, List, Optional, Set, Union
+from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union
 from urllib.parse import urlparse
 
 from . import file_utils
+
+
+@unique
+class LexiconType(Enum):
+    '''
+    Descriptions of the type associated to single and Multi Word Expression (MWE)
+    lexicon entires and templates. Any type with the word `NON_SPECIAL` means
+    that it does not use any special syntax, for example does not use wildcards
+    or curly braces.
+
+    The `value` attribute of each instance attribute is of type `str` describing
+    the type associated with that attribute. For the best explanation see the
+    example below.
+    
+    # Instance Attributes
+
+    SINGLE_NON_SPECIAL : `LexiconType`
+        Single word lexicon lookup.
+    MWE_NON_SPECIAL : `LexiconType`
+        MWE lexicon lookup.
+    MWE_WILDCARD : `LexiconType`
+        MWE lexicon lookup using a wildcard.
+    MWE_CURLY_BRACES : `LexiconType`
+        MWE lexicon lookup using curly braces.
+
+    # Examples
+    ```python
+    >>> from pymusas.lexicon_collection import LexiconType
+    >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
+    >>> assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
+    >>> all_possible_values = {'Single Non Special', 'MWE Non Special',
+    ... 'MWE Wildcard', 'MWE Curly Braces'}
+    >>> assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconType}
+    
+    ```
+    '''
+    SINGLE_NON_SPECIAL = 'Single Non Special'
+    MWE_NON_SPECIAL = 'MWE Non Special'
+    MWE_WILDCARD = 'MWE Wildcard'
+    MWE_CURLY_BRACES = 'MWE Curly Braces'
 
 
 @dataclass(init=True, repr=True, eq=True, order=False,
@@ -271,55 +314,174 @@ class LexiconCollection(MutableMapping):
 
 
 class MWELexiconCollection(MutableMapping):
-    '''
-    This is a dictionary object that will hold MWE templates in a fast to access
-    object. The keys of the dictionary are expected to be a MWE template
-    following the format specified in the MWE syntax notes, e.g. `*_noun boot*_noun`
+    r'''
+    A collection that stores Multi Word Expression (MWE) templates and their
+    associated meta data.
+    
+    This collection allows users to:
 
-    The value to each key is the associated semantic tags, whereby the semantic
-    tags are in rank order, the most likely tag is the first tag in the list.
+    1. Easily load MWE templates from a single TSV file.
+    2. Find strings that match MWE templates taking into account
+    any special syntax rules that should be applied, e.g. wildcards allow zero
+    or more characters to appear after the word token and/or Part Of Speech (POS) tag.
+    For more information on the MWE special syntax rules see the following notes.
+
+    **Note** that even though this a sub-class of a MutableMapping it has a
+    time complexity of O(n) for deletion unlike the standard Python MutableMapping,
+    see the [following dict time complexities](https://wiki.python.org/moin/TimeComplexity),
+    this is due to keeping track of the `longest_non_special_mwe_template` and
+    `longest_wildcard_mwe_template`.
 
     # Parameters
 
     data: `Dict[str, List[str]]`, optional (default = `None`)
+        Dictionary where the keys are MWE templates, of any :class:`LexiconType`,
+        and the values are a list of associated semantic tags.
 
     # Instance Attributes
-
-    data: `Dict[str, List[str]]`
-        Dictionary where the keys are MWE templates and the values are
-        a list of associated semantic tags. If the `data` parameter given was
-        `None` then the value of this attribute will be an empty dictionary.
+    
+    **Note** if the `data` parameter given was `None` then the value of all
+    dictionary attributes will be an empty dictionary and all integer values will
+    be `0`.
+    
+    meta_data: `Dict[str, Tuple[List[str], int, LexiconType]]`
+        Dictionary where the keys are MWE templates, of any type, and the values
+        are a Tuple of length 3 containing the following meta data on the MWE
+        template:
+        
+        1. Semantic tags.
+        2. Length of the MWE template, measured by n-gram size.
+        3. Type of MWE as defined by the :class:`LexiconType`, e.g. `LexiconType.MWE_NON_SPECIAL`
+    longest_non_special_mwe_template : `int`
+        The longest MWE template with no special symbols measured by n-gram size.
+        For example the MWE template `ski_noun boot_noun` will be of length 2.
+    longest_wildcard_mwe_template : `int`
+        The longest MWE template with at least one wildcard (`*`) measured by n-gram size.
+        For example the MWE template `*_noun boot*_noun` will be of length 2.
+    mwe_regular_expression_lookup: `Dict[int, Dict[str, Dict[str, re.Pattern]]]`
+        A dictionary that can lookup all special syntax MWE templates and there
+        regular expression pattern, only wildcard (`*`) symbols are supported, by
+        there n-gram length and then there first character symbol. The regular
+        expression pattern is used for quick matching within the :func:`mwe_match`.
 
     # Examples
     ``` python
-    >>> from pymusas.lexicon_collection import MWELexiconCollection
+    >>> import re
+    >>> from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
     >>> mwe_collection = MWELexiconCollection()
     >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
-    >>> most_likely_tag = mwe_collection['*_noun boot*_noun'][0]
+    >>> semantic_tags, n_gram_length, mwe_type = mwe_collection['*_noun boot*_noun']
+    >>> assert 2 == n_gram_length
+    >>> assert LexiconType.MWE_WILDCARD == mwe_type
+    >>> most_likely_tag = semantic_tags[0]
     >>> assert most_likely_tag == 'Z0'
-    >>> least_likely_tag = mwe_collection['*_noun boot*_noun'][-1]
+    >>> least_likely_tag = semantic_tags[-1]
     >>> assert least_likely_tag == 'Z3'
-
+    >>> # change defaultdict to dict so the dictionary is easier to read and understand
+    >>> assert ({k: dict(v) for k, v in mwe_collection.mwe_regular_expression_lookup.items()}
+    ...         == {2: {'*': {'*_noun boot*_noun': re.compile('[^\\s_]*_noun\\ boot[^\\s_]*_noun')}}})
+    
     ```
 
     '''
     
     def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
 
-        self.data: Dict[str, List[str]] = {}
+        self.meta_data: Dict[str, Tuple[List[str], int, LexiconType]] = {}
+        self.longest_non_special_mwe_template = 0
+        self.longest_wildcard_mwe_template = 0
+        self.mwe_regular_expression_lookup: DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]\
+            = collections.defaultdict(lambda: collections.defaultdict(dict))
         if data is not None:
-            self.data = data
+            for key, value in data.items():
+                self[key] = value
+
+    def mwe_match(self, mwe_template: str, mwe_type: LexiconType
+                  ) -> List[str]:
+        '''
+        Returns a `List` of MWE templates, with the given `mwe_type`, that match
+        the given `mwe_template`. If there are no matches the returned `List`
+        will be empty.
+        
+        This method applies all of the special syntax rules that should be applied
+        e.g. wildcards allow zero or more characters to appear after the word
+        token and/or Part Of Speech (POS) tag. For more information on the MWE
+        special syntax rules see the following notes.
+
+        # Parameters
+        
+        mwe_template : `str`
+            The MWE template that you want to match against, e.g.
+            `river_noun bank_noun` or `*_noun boot*_noun`
+        mwe_type : `LexiconType`
+            The type of MWE templates that you want to return.
+
+        # Returns
+
+        `Optional[List[str]]`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
+        >>> collection = MWELexiconCollection({'walking_noun boot_noun': ['Z2'], 'ski_noun boot_noun': ['Z2'], '*_noun boot_noun': ['Z2'], '*_noun *_noun': ['Z2']})
+        >>> assert [] == collection.mwe_match('river_noun bank_noun', LexiconType.MWE_NON_SPECIAL)
+        >>> assert ['walking_noun boot_noun'] == collection.mwe_match('walking_noun boot_noun', LexiconType.MWE_NON_SPECIAL)
+        >>> assert ['*_noun boot_noun', '*_noun *_noun'] == collection.mwe_match('walking_noun boot_noun', LexiconType.MWE_WILDCARD)
+        
+        ```
+        '''
+        mew_templates_matches: List[str] = []
+        if mwe_type == LexiconType.MWE_NON_SPECIAL:
+            potential_match = self.meta_data.get(mwe_template, None)
+            if potential_match is not None:
+                potential_match_type = potential_match[2]
+                if LexiconType.MWE_NON_SPECIAL == potential_match_type:
+                    mew_templates_matches.append(mwe_template)
+        elif mwe_type == LexiconType.MWE_WILDCARD:
+            n_gram_length = len(mwe_template.split())
+            mwe_template_length = len(mwe_template)
+            if mwe_template_length > 0:
+                # By default all MWE matches can start with a * as it covers all characters.
+                for character_lookup in ['*', mwe_template[0]]:
+                    regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
+                    if character_lookup not in regular_expression_lookup:
+                        continue
+                    
+                    for (potential_mwe_match,
+                         mwe_pattern) in regular_expression_lookup[character_lookup].items():
+                        match = mwe_pattern.match(mwe_template)
+                        if match is not None:
+                            if (match.start() == 0
+                               and match.end() == mwe_template_length):
+                                mew_templates_matches.append(potential_mwe_match)
+        
+        return mew_templates_matches
 
     def to_dictionary(self) -> Dict[str, List[str]]:
         '''
-        Returns the `data` instance attribute.
+        Returns a dictionary of all MWE templates, the keys, stored in the
+        collection and their associated semantic tags, the values.
+
+        This can then be used to re-create a :class:`MWELexiconCollection`.
 
         # Returns
 
         `Dict[str, List[str]]`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
+        >>> mwe_collection = MWELexiconCollection()
+        >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
+        >>> assert (mwe_collection['*_noun boot*_noun']
+        ... == (['Z0', 'Z3'], 2, LexiconType.MWE_WILDCARD))
+        >>> assert (mwe_collection.to_dictionary()
+        ... == {'*_noun boot*_noun': ['Z0', 'Z3']})
+        
+        ```
         '''
         
-        return self.data
+        return {key: value[0] for key, value in self.items()}
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str]
@@ -408,21 +570,103 @@ class MWELexiconCollection(MutableMapping):
                 collection_from_tsv[mwe_template] = semantic_tags
         
         return collection_from_tsv.to_dictionary()
+
+    @staticmethod
+    def escape_mwe(mwe_template: str) -> str:
+        r'''
+        Returns the MWE template escaped so that it can be used in a regular
+        expression.
+        
+        The difference between this and the normal `re.escape`
+        method, is that we apply the `re.escape` method to the MWE template and
+        then replace `\*` with `[^\s_]*` so that the wildcards keep there original
+        meaning with respect to the MWE special syntax rules.
+
+        # Parameters
+
+        mwe_template : `str`
+            The MWE template that you want to escape, e.g.
+            `river_noun bank_noun` or `*_noun boot*_noun`
+
+        # Returns
+
+        `str`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import MWELexiconCollection
+        >>> mwe_escaped = MWELexiconCollection.escape_mwe('ano*_prep carta_noun')
+        >>> assert r'ano[^\s_]*_prep\ carta_noun' == mwe_escaped
+
+        ```
+        '''
+        escaped_mwe_template = re.escape(mwe_template)
+        escaped_mwe_template = escaped_mwe_template.replace(r'\*', r'[^\s_]*')
+        return escaped_mwe_template
     
     def __setitem__(self, key: str, value: List[str]) -> None:
-        self.data[key] = value
+        semantic_tags = value
+        key_n_gram_length = len(key.split())
+        mwe_type: LexiconType = LexiconType.MWE_NON_SPECIAL
+        
+        if '*' in key:
+            mwe_type = LexiconType.MWE_WILDCARD
+            
+            if key_n_gram_length > self.longest_wildcard_mwe_template:
+                self.longest_wildcard_mwe_template = key_n_gram_length
+            
+            key_as_pattern = re.compile(self.escape_mwe(key))
+            self.mwe_regular_expression_lookup[key_n_gram_length][key[0]][key] = key_as_pattern
+        else:
+            
+            if key_n_gram_length > self.longest_non_special_mwe_template:
+                self.longest_non_special_mwe_template = key_n_gram_length
+        
+        self.meta_data[key] = (semantic_tags, key_n_gram_length, mwe_type)
 
-    def __getitem__(self, key: str) -> List[str]:
-        return self.data[key]
+    def __getitem__(self, key: str) -> Tuple[List[str], int, LexiconType]:
+        return self.meta_data[key]
 
     def __delitem__(self, key: str) -> None:
-        del self.data[key]
+        
+        def _get_new_longest_n_gram_lengths() -> Tuple[int, int]:
+            '''
+            Returns the `longest_non_special_mwe_template` and
+            `longest_wildcard_mwe_template` in the `meta_data`. This is required
+            after deleting an MWE as we do not know if we have just deleted the
+            longest non-special or wildcard MWE.
+
+            # Returns
+
+            `Tuple[int, int]`
+            '''
+            longest_non_special_mwe_template = 0
+            longest_wildcard_mwe_template = 0
+            for value in self.values():
+                mwe_type = value[2]
+                key_n_gram_length = value[1]
+                if mwe_type == LexiconType.MWE_NON_SPECIAL:
+                    if key_n_gram_length > longest_non_special_mwe_template:
+                        longest_non_special_mwe_template = key_n_gram_length
+                elif mwe_type == LexiconType.MWE_WILDCARD:
+                    if key_n_gram_length > longest_wildcard_mwe_template:
+                        longest_wildcard_mwe_template = key_n_gram_length
+            return longest_non_special_mwe_template, longest_wildcard_mwe_template
+        
+        _, key_n_gram_length, mwe_type = self[key]
+        del self.meta_data[key]
+        
+        if mwe_type == LexiconType.MWE_WILDCARD:
+            del self.mwe_regular_expression_lookup[key_n_gram_length][key[0]][key]
+        
+        (self.longest_non_special_mwe_template,
+         self.longest_wildcard_mwe_template) = _get_new_longest_n_gram_lengths()
 
     def __len__(self) -> int:
-        return len(self.data)
+        return len(self.meta_data)
 
     def __iter__(self) -> Generator[str, None, None]:
-        for key in self.data:
+        for key in self.meta_data:
             yield key
 
     def __str__(self) -> str:
@@ -432,7 +676,10 @@ class MWELexiconCollection(MutableMapping):
 
         object_str = f'{self.__class__.__name__}('
         for index, item in enumerate(self.items()):
-            object_str += f"('{item[0]}': {item[1]}), "
+            mwe_template = item[0]
+            semantic_tags, n_gram_length, mwe_type = item[1]
+            object_str += (f"('{mwe_template}': "
+                           f"({semantic_tags}, {n_gram_length}, {mwe_type})), ")
             if index == 1:
                 object_str += '... '
                 break
@@ -445,4 +692,4 @@ class MWELexiconCollection(MutableMapping):
         you should be able to recreate the object.
         '''
 
-        return f'{self.__class__.__name__}(data={self.data})'
+        return f'{self.__class__.__name__}(data={self.to_dictionary()})'
