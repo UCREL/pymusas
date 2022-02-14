@@ -51,6 +51,13 @@ class LexiconType(Enum):
     MWE_WILDCARD = 'MWE Wildcard'
     MWE_CURLY_BRACES = 'MWE Curly Braces'
 
+    def __repr__(self) -> str:
+        '''
+        Machine readable string. When printed and run `eval()` over the string
+        you should be able to recreate the object.
+        '''
+        return self.__str__()
+
 
 @dataclass(init=True, repr=True, eq=True, order=False,
            unsafe_hash=False, frozen=True)
@@ -61,6 +68,9 @@ class LexiconEntry:
 
     As frozen is true, the attributes cannot be assigned another value.
 
+    This data type is mainly used for single word lexicons, rather than
+    Multi Word Expression (MWE).
+
     **Note** the parameters to the `__init__` are the same as the Instance
     Attributes.
 
@@ -70,8 +80,8 @@ class LexiconEntry:
         The lemma of a token or the token itself.
     semantic_tags: `List[str]`
         The semantic tags associated with the `lemma` and optional `POS`.
-        The semantic tags are in rank order, the most likely tag associated
-        tag is the first tag in the list.
+        The semantic tags are in rank order, the most likely tag
+        is the first tag in the list.
     pos: `str`, optional (default = `None`)
         The Part Of Speech (POS) to be associated with the `lemma`.
     '''
@@ -79,6 +89,41 @@ class LexiconEntry:
     lemma: str
     semantic_tags: List[str]
     pos: Optional[str] = None
+
+
+@dataclass(init=True, repr=True, eq=True, order=False,
+           unsafe_hash=False, frozen=True)
+class LexiconMetaData:
+    '''
+    A LexiconMetaData object contains all of the meta data about a given
+    single word or Multi Word Expression (MWE) lexicon entry. This meta data can
+    be used to help rank single and MWE entries when tagging.
+
+    As frozen is true, the attributes cannot be assigned another value.
+
+    **Note** the parameters to the `__init__` are the same as the Instance
+    Attributes.
+
+    # Instance Attributes
+
+    semantic_tags : `List[str]`
+        The semantic tags associated with the lexicon entry.
+        The semantic tags are in rank order, the most likely tag
+        is the first tag in the list.
+    n_gram_length : `int`
+        The n-gram size of the lexicon entry, e.g. `*_noun boot*_noun` will be
+        of length 2 and all single word lexicon entries will be of length 1.
+    lexicon_type : `LexiconType`
+        Type associated to the lexicon entry.
+    wildcard_count : `int`
+        Number of wildcards in the lexicon entry, e.g. `*_noun boot*_noun` will
+        be 2 and `ski_noun boot_noun` will be 0.
+    '''
+
+    semantic_tags: List[str]
+    n_gram_length: int
+    lexicon_type: LexiconType
+    wildcard_count: int
 
 
 class LexiconCollection(MutableMapping):
@@ -93,6 +138,9 @@ class LexiconCollection(MutableMapping):
     
     **Note** that the `lemma` can be the token
     itself rather than just it's base form, e.g. can be `Cars` rather than `Car`.
+
+    This data type is used for single word lexicons, to store Multi Word
+    Expression (MWE) see the :class:`MWELexiconCollection`.
 
     # Parameters
 

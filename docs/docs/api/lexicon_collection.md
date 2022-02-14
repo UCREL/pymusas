@@ -87,6 +87,19 @@ class LexiconType(Enum):
  | MWE_CURLY_BRACES = 'MWE Curly Braces'
 ```
 
+<a id="pymusas.lexicon_collection.LexiconType.__repr__"></a>
+
+### \_\_repr\_\_
+
+```python
+class LexiconType(Enum):
+ | ...
+ | def __repr__() -> str
+```
+
+Machine readable string. When printed and run `eval()` over the string
+you should be able to recreate the object.
+
 <a id="pymusas.lexicon_collection.LexiconEntry"></a>
 
 ## LexiconEntry
@@ -102,6 +115,9 @@ A LexiconEntry contains the `semantic_tags` that are associated with a
 
 As frozen is true, the attributes cannot be assigned another value.
 
+This data type is mainly used for single word lexicons, rather than
+Multi Word Expression (MWE).
+
 **Note** the parameters to the `__init__` are the same as the Instance
 Attributes.
 
@@ -112,8 +128,8 @@ Attributes.
     The lemma of a token or the token itself.
 - __semantic\_tags__ : `List[str]` <br/>
     The semantic tags associated with the `lemma` and optional `POS`.
-    The semantic tags are in rank order, the most likely tag associated
-    tag is the first tag in the list.
+    The semantic tags are in rank order, the most likely tag
+    is the first tag in the list.
 - __pos__ : `str`, optional (default = `None`) <br/>
     The Part Of Speech (POS) to be associated with the `lemma`.
 
@@ -147,6 +163,81 @@ class LexiconEntry:
  | pos: Optional[str] = None
 ```
 
+<a id="pymusas.lexicon_collection.LexiconMetaData"></a>
+
+## LexiconMetaData
+
+```python
+@dataclass(init=True, repr=True, eq=True, order=False,
+           unsafe_hash=False, frozen=True)
+class LexiconMetaData
+```
+
+A LexiconMetaData object contains all of the meta data about a given
+single word or Multi Word Expression (MWE) lexicon entry. This meta data can
+be used to help rank single and MWE entries when tagging.
+
+As frozen is true, the attributes cannot be assigned another value.
+
+**Note** the parameters to the `__init__` are the same as the Instance
+Attributes.
+
+<h4 id="lexiconmetadata.instance_attributes">Instance Attributes<a className="headerlink" href="#lexiconmetadata.instance_attributes" title="Permanent link">&para;</a></h4>
+
+
+- __semantic\_tags__ : `List[str]` <br/>
+    The semantic tags associated with the lexicon entry.
+    The semantic tags are in rank order, the most likely tag
+    is the first tag in the list.
+- __n\_gram\_length__ : `int` <br/>
+    The n-gram size of the lexicon entry, e.g. `*_noun boot*_noun` will be
+    of length 2 and all single word lexicon entries will be of length 1.
+- __lexicon\_type__ : `LexiconType` <br/>
+    Type associated to the lexicon entry.
+- __wildcard\_count__ : `int` <br/>
+    Number of wildcards in the lexicon entry, e.g. `*_noun boot*_noun` will
+    be 2 and `ski_noun boot_noun` will be 0.
+
+<a id="pymusas.lexicon_collection.LexiconMetaData.semantic_tags"></a>
+
+#### semantic\_tags
+
+```python
+class LexiconMetaData:
+ | ...
+ | semantic_tags: List[str] = None
+```
+
+<a id="pymusas.lexicon_collection.LexiconMetaData.n_gram_length"></a>
+
+#### n\_gram\_length
+
+```python
+class LexiconMetaData:
+ | ...
+ | n_gram_length: int = None
+```
+
+<a id="pymusas.lexicon_collection.LexiconMetaData.lexicon_type"></a>
+
+#### lexicon\_type
+
+```python
+class LexiconMetaData:
+ | ...
+ | lexicon_type: LexiconType = None
+```
+
+<a id="pymusas.lexicon_collection.LexiconMetaData.wildcard_count"></a>
+
+#### wildcard\_count
+
+```python
+class LexiconMetaData:
+ | ...
+ | wildcard_count: int = None
+```
+
 <a id="pymusas.lexicon_collection.LexiconCollection"></a>
 
 ## LexiconCollection
@@ -170,6 +261,9 @@ tags are in rank order, the most likely tag is the first tag in the list.
 
 **Note** that the `lemma` can be the token
 itself rather than just it's base form, e.g. can be `Cars` rather than `Car`.
+
+This data type is used for single word lexicons, to store Multi Word
+Expression (MWE) see the [`MWELexiconCollection`](#mwelexiconcollection).
 
 <h4 id="lexiconcollection.parameters">Parameters<a className="headerlink" href="#lexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
