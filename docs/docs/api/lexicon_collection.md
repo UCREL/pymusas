@@ -492,14 +492,9 @@ this is due to keeping track of the `longest_non_special_mwe_template` and
 dictionary attributes will be an empty dictionary and all integer values will
 be `0`.
 
-- __meta\_data__ : `Dict[str, Tuple[List[str], int, LexiconType]]` <br/>
+- __meta\_data__ : `Dict[str, LexiconMetaData]` <br/>
     Dictionary where the keys are MWE templates, of any type, and the values
-    are a Tuple of length 3 containing the following meta data on the MWE
-    template:
-
-    1. Semantic tags.
-    2. Length of the MWE template, measured by n-gram size.
-    3. Type of MWE as defined by the [`LexiconType`](#lexicontype), e.g. `LexiconType.MWE_NON_SPECIAL`
+    are their associated meta data stored in a [`LexiconMetaData`](#lexiconmetadata) object.
 - __longest\_non\_special\_mwe\_template__ : `int` <br/>
     The longest MWE template with no special symbols measured by n-gram size.
     For example the MWE template `ski_noun boot_noun` will be of length 2.
@@ -519,12 +514,13 @@ import re
 from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
 mwe_collection = MWELexiconCollection()
 mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
-semantic_tags, n_gram_length, mwe_type = mwe_collection['*_noun boot*_noun']
-assert 2 == n_gram_length
-assert LexiconType.MWE_WILDCARD == mwe_type
-most_likely_tag = semantic_tags[0]
+meta_data = mwe_collection['*_noun boot*_noun']
+assert 2 == meta_data.n_gram_length
+assert LexiconType.MWE_WILDCARD == meta_data.lexicon_type
+assert 2 == meta_data.wildcard_count
+most_likely_tag = meta_data.semantic_tags[0]
 assert most_likely_tag == 'Z0'
-least_likely_tag = semantic_tags[-1]
+least_likely_tag = meta_data.semantic_tags[-1]
 assert least_likely_tag == 'Z3'
 # change defaultdict to dict so the dictionary is easier to read and understand
 assert ({k: dict(v) for k, v in mwe_collection.mwe_regular_expression_lookup.items()}
@@ -601,11 +597,12 @@ This can then be used to re-create a [`MWELexiconCollection`](#mwelexiconcollect
 <h4 id="to_dictionary.examples">Examples<a className="headerlink" href="#to_dictionary.examples" title="Permanent link">&para;</a></h4>
 
 ``` python
-from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
+from pymusas.lexicon_collection import (MWELexiconCollection,
+LexiconType, LexiconMetaData)
 mwe_collection = MWELexiconCollection()
 mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
 assert (mwe_collection['*_noun boot*_noun']
-== (['Z0', 'Z3'], 2, LexiconType.MWE_WILDCARD))
+== LexiconMetaData(['Z0', 'Z3'], 2, LexiconType.MWE_WILDCARD, 2))
 assert (mwe_collection.to_dictionary()
 == {'*_noun boot*_noun': ['Z0', 'Z3']})
 ```

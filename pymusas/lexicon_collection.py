@@ -392,14 +392,9 @@ class MWELexiconCollection(MutableMapping):
     dictionary attributes will be an empty dictionary and all integer values will
     be `0`.
     
-    meta_data: `Dict[str, Tuple[List[str], int, LexiconType]]`
+    meta_data: `Dict[str, LexiconMetaData]`
         Dictionary where the keys are MWE templates, of any type, and the values
-        are a Tuple of length 3 containing the following meta data on the MWE
-        template:
-        
-        1. Semantic tags.
-        2. Length of the MWE template, measured by n-gram size.
-        3. Type of MWE as defined by the :class:`LexiconType`, e.g. `LexiconType.MWE_NON_SPECIAL`
+        are their associated meta data stored in a :class:`LexiconMetaData` object.
     longest_non_special_mwe_template : `int`
         The longest MWE template with no special symbols measured by n-gram size.
         For example the MWE template `ski_noun boot_noun` will be of length 2.
@@ -418,12 +413,13 @@ class MWELexiconCollection(MutableMapping):
     >>> from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
     >>> mwe_collection = MWELexiconCollection()
     >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
-    >>> semantic_tags, n_gram_length, mwe_type = mwe_collection['*_noun boot*_noun']
-    >>> assert 2 == n_gram_length
-    >>> assert LexiconType.MWE_WILDCARD == mwe_type
-    >>> most_likely_tag = semantic_tags[0]
+    >>> meta_data = mwe_collection['*_noun boot*_noun']
+    >>> assert 2 == meta_data.n_gram_length
+    >>> assert LexiconType.MWE_WILDCARD == meta_data.lexicon_type
+    >>> assert 2 == meta_data.wildcard_count
+    >>> most_likely_tag = meta_data.semantic_tags[0]
     >>> assert most_likely_tag == 'Z0'
-    >>> least_likely_tag = semantic_tags[-1]
+    >>> least_likely_tag = meta_data.semantic_tags[-1]
     >>> assert least_likely_tag == 'Z3'
     >>> # change defaultdict to dict so the dictionary is easier to read and understand
     >>> assert ({k: dict(v) for k, v in mwe_collection.mwe_regular_expression_lookup.items()}
@@ -435,7 +431,7 @@ class MWELexiconCollection(MutableMapping):
     
     def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
 
-        self.meta_data: Dict[str, Tuple[List[str], int, LexiconType]] = {}
+        self.meta_data: Dict[str, LexiconMetaData] = {}
         self.longest_non_special_mwe_template = 0
         self.longest_wildcard_mwe_template = 0
         self.mwe_regular_expression_lookup: DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]\
@@ -482,7 +478,7 @@ class MWELexiconCollection(MutableMapping):
         if mwe_type == LexiconType.MWE_NON_SPECIAL:
             potential_match = self.meta_data.get(mwe_template, None)
             if potential_match is not None:
-                potential_match_type = potential_match[2]
+                potential_match_type = potential_match.lexicon_type
                 if LexiconType.MWE_NON_SPECIAL == potential_match_type:
                     mew_templates_matches.append(mwe_template)
         elif mwe_type == LexiconType.MWE_WILDCARD:
@@ -518,18 +514,19 @@ class MWELexiconCollection(MutableMapping):
 
         # Examples
         ``` python
-        >>> from pymusas.lexicon_collection import MWELexiconCollection, LexiconType
+        >>> from pymusas.lexicon_collection import (MWELexiconCollection,
+        ... LexiconType, LexiconMetaData)
         >>> mwe_collection = MWELexiconCollection()
         >>> mwe_collection['*_noun boot*_noun'] = ['Z0', 'Z3']
         >>> assert (mwe_collection['*_noun boot*_noun']
-        ... == (['Z0', 'Z3'], 2, LexiconType.MWE_WILDCARD))
+        ... == LexiconMetaData(['Z0', 'Z3'], 2, LexiconType.MWE_WILDCARD, 2))
         >>> assert (mwe_collection.to_dictionary()
         ... == {'*_noun boot*_noun': ['Z0', 'Z3']})
         
         ```
         '''
         
-        return {key: value[0] for key, value in self.items()}
+        return {key: value.semantic_tags for key, value in self.items()}
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str]
@@ -656,9 +653,11 @@ class MWELexiconCollection(MutableMapping):
         semantic_tags = value
         key_n_gram_length = len(key.split())
         mwe_type: LexiconType = LexiconType.MWE_NON_SPECIAL
+        wildcard_count = 0
         
         if '*' in key:
             mwe_type = LexiconType.MWE_WILDCARD
+            wildcard_count += key.count('*')
             
             if key_n_gram_length > self.longest_wildcard_mwe_template:
                 self.longest_wildcard_mwe_template = key_n_gram_length
@@ -670,9 +669,10 @@ class MWELexiconCollection(MutableMapping):
             if key_n_gram_length > self.longest_non_special_mwe_template:
                 self.longest_non_special_mwe_template = key_n_gram_length
         
-        self.meta_data[key] = (semantic_tags, key_n_gram_length, mwe_type)
+        self.meta_data[key] = LexiconMetaData(semantic_tags, key_n_gram_length,
+                                              mwe_type, wildcard_count)
 
-    def __getitem__(self, key: str) -> Tuple[List[str], int, LexiconType]:
+    def __getitem__(self, key: str) -> LexiconMetaData:
         return self.meta_data[key]
 
     def __delitem__(self, key: str) -> None:
@@ -691,8 +691,8 @@ class MWELexiconCollection(MutableMapping):
             longest_non_special_mwe_template = 0
             longest_wildcard_mwe_template = 0
             for value in self.values():
-                mwe_type = value[2]
-                key_n_gram_length = value[1]
+                mwe_type = value.lexicon_type
+                key_n_gram_length = value.n_gram_length
                 if mwe_type == LexiconType.MWE_NON_SPECIAL:
                     if key_n_gram_length > longest_non_special_mwe_template:
                         longest_non_special_mwe_template = key_n_gram_length
@@ -701,11 +701,13 @@ class MWELexiconCollection(MutableMapping):
                         longest_wildcard_mwe_template = key_n_gram_length
             return longest_non_special_mwe_template, longest_wildcard_mwe_template
         
-        _, key_n_gram_length, mwe_type = self[key]
+        lexicon_meta_data = self[key]
         del self.meta_data[key]
         
-        if mwe_type == LexiconType.MWE_WILDCARD:
-            del self.mwe_regular_expression_lookup[key_n_gram_length][key[0]][key]
+        lexicon_type = lexicon_meta_data.lexicon_type
+        n_gram_length = lexicon_meta_data.n_gram_length
+        if lexicon_type == LexiconType.MWE_WILDCARD:
+            del self.mwe_regular_expression_lookup[n_gram_length][key[0]][key]
         
         (self.longest_non_special_mwe_template,
          self.longest_wildcard_mwe_template) = _get_new_longest_n_gram_lengths()
@@ -725,9 +727,8 @@ class MWELexiconCollection(MutableMapping):
         object_str = f'{self.__class__.__name__}('
         for index, item in enumerate(self.items()):
             mwe_template = item[0]
-            semantic_tags, n_gram_length, mwe_type = item[1]
-            object_str += (f"('{mwe_template}': "
-                           f"({semantic_tags}, {n_gram_length}, {mwe_type})), ")
+            meta_data = item[1]
+            object_str += f"('{mwe_template}': {meta_data}), "
             if index == 1:
                 object_str += '... '
                 break

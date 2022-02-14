@@ -9,7 +9,7 @@ import pytest
 import responses
 
 from pymusas import config
-from pymusas.lexicon_collection import LexiconType, MWELexiconCollection
+from pymusas.lexicon_collection import LexiconMetaData, LexiconType, MWELexiconCollection
 
 
 MWE_TEMPLATES = {
@@ -21,12 +21,12 @@ MWE_TEMPLATES = {
     'bno*_prep carta_noun': ['C4', 'C5.1'],
 }
 MWE_TEMPLATE_ITEMS = {
-    'A_pnoun Arnoia_pnoun': (['Z2'], 2, LexiconType.MWE_NON_SPECIAL),
-    'A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': (['Z2'], 4, LexiconType.MWE_NON_SPECIAL),
-    'a_prep carta_noun cabal_adj': (['A4', 'A5.1'], 3, LexiconType.MWE_NON_SPECIAL),
-    '***_prep carta_* cabal_adj': (['A4', 'A5.1'], 3, LexiconType.MWE_WILDCARD),
-    'ano*_prep carta_noun': (['B4', 'B5.1'], 2, LexiconType.MWE_WILDCARD),
-    'bno*_prep carta_noun': (['C4', 'C5.1'], 2, LexiconType.MWE_WILDCARD),
+    'A_pnoun Arnoia_pnoun': LexiconMetaData(['Z2'], 2, LexiconType.MWE_NON_SPECIAL, 0),
+    'A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': LexiconMetaData(['Z2'], 4, LexiconType.MWE_NON_SPECIAL, 0),
+    'a_prep carta_noun cabal_adj': LexiconMetaData(['A4', 'A5.1'], 3, LexiconType.MWE_NON_SPECIAL, 0),
+    '***_prep carta_* cabal_adj': LexiconMetaData(['A4', 'A5.1'], 3, LexiconType.MWE_WILDCARD, 4),
+    'ano*_prep carta_noun': LexiconMetaData(['B4', 'B5.1'], 2, LexiconType.MWE_WILDCARD, 1),
+    'bno*_prep carta_noun': LexiconMetaData(['C4', 'C5.1'], 2, LexiconType.MWE_WILDCARD, 1),
 }
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
 LEXICON_DATA_DIR = Path(DATA_DIR, 'lexicon_collection', 'MWELexiconCollection')
@@ -75,7 +75,8 @@ def test_mwe_lexicon_collection_set_get_del_item() -> None:
     empty_collection['A_pnoun Arnoia_pnoun'] = ['Z2']
     empty_collection['A_pnoun Arnoia_pnoun'] = ['Z1']
     empty_collection['a_prep carta_noun cabal_adj'] = ['A4', 'A5.1']
-    assert empty_collection['A_pnoun Arnoia_pnoun'] == (['Z1'], 2, LexiconType.MWE_NON_SPECIAL)
+    expected_meta_data = LexiconMetaData(['Z1'], 2, LexiconType.MWE_NON_SPECIAL, 0)
+    assert expected_meta_data == empty_collection['A_pnoun Arnoia_pnoun']
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert 3 == empty_collection.longest_non_special_mwe_template
     assert 0 == empty_collection.longest_wildcard_mwe_template
@@ -160,8 +161,8 @@ def test_mwe_lexicon_collection_str() -> None:
     assert 'MWELexiconCollection() (0 entires in the collection)' == str(empty_collection)
 
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES)
-    expected_str = (f"MWELexiconCollection(('A_pnoun Arnoia_pnoun': (['Z2'], 2, {LexiconType.MWE_NON_SPECIAL})), "
-                    f"('A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': (['Z2'], 4, {LexiconType.MWE_NON_SPECIAL})), ... )"
+    expected_str = (f"MWELexiconCollection(('A_pnoun Arnoia_pnoun': LexiconMetaData(semantic_tags=['Z2'], n_gram_length=2, lexicon_type={LexiconType.MWE_NON_SPECIAL}, wildcard_count=0)), "
+                    f"('A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': LexiconMetaData(semantic_tags=['Z2'], n_gram_length=4, lexicon_type={LexiconType.MWE_NON_SPECIAL}, wildcard_count=0)), ... )"
                     " (6 entires in the collection)")
     assert expected_str == str(mwe_lexicon_collection)
 
