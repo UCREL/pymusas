@@ -65,7 +65,7 @@ def test_lexicon_entry_ranker() -> None:
 
     concrete_ranker = TestRanker()
     assert [[0]] == concrete_ranker([[RANKING_META_DATA]])
-    isinstance(concrete_ranker, LexiconEntryRanker)
+    assert isinstance(concrete_ranker, LexiconEntryRanker)
 
 
 def test_contextual_rule_based_ranker() -> None:
