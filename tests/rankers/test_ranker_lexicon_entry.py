@@ -72,7 +72,7 @@ def test_contextual_rule_based_ranker() -> None:
     assert isinstance(ContextualRuleBasedRanker(), LexiconEntryRanker)
 
     ranker = ContextualRuleBasedRanker()
-    assert [[]] == ranker([[]])
+    assert [[]] == ranker([])
 
     token_ranking_data = [
         [
