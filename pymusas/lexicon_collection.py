@@ -456,7 +456,7 @@ class MWELexiconCollection(MutableMapping):
         
         mwe_template : `str`
             The MWE template that you want to match against, e.g.
-            `river_noun bank_noun` or `*_noun boot*_noun`
+            `river_noun bank_noun` or `ski_noun boots_noun`
         mwe_type : `LexiconType`
             The type of MWE templates that you want to return.
 
