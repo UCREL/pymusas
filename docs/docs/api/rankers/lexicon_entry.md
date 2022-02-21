@@ -364,11 +364,14 @@ from pymusas.rankers.lexicon_entry import LexiconType
 from pymusas.rankers.lexicon_entry import LexicalMatch
 token_ranking_data = [
    [
-       RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False, LexicalMatch.TOKEN, 2, 3),
-       RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0, False, LexicalMatch.LEMMA, 2, 3),
+       RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False,
+                        LexicalMatch.TOKEN, 2, 3, 'ski_* boots_noun'),
+       RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0, False,
+                       LexicalMatch.LEMMA, 2, 3, 'ski_noun boots_noun'),
    ],
    [
-       RankingMetaData(LexiconType.SINGLE_NON_SPECIAL, 1, 0, True, LexicalMatch.TOKEN_LOWER, 21, 23),
+       RankingMetaData(LexiconType.SINGLE_NON_SPECIAL, 1, 0, True,
+                       LexicalMatch.TOKEN_LOWER, 21, 23, 'ski_noun'),
    ]
 ]
 expected_rankings = [[2211102, 1201202], [4102321]]
