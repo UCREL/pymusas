@@ -137,6 +137,10 @@ same text/sentence that is being tagged.
     Index of the first token in the lexicon entry match.
 - __token\_match\_end\_index__ : `int` <br/>
     Index of the last token in the lexicon entry match.
+- __lexicon\_entry\_match__ : `str` <br/>
+    The lexicon entry match, which can be either a single word or MWE entry
+    match. In the case for single word this could be `Car|noun` and in the
+    case for a MWE it would be it's template, e.g. `snow_noun boots_noun`.
 
 <a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexicon_type"></a>
 
@@ -206,6 +210,16 @@ class RankingMetaData:
 class RankingMetaData:
  | ...
  | token_match_end_index: int = None
+```
+
+<a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexicon_entry_match"></a>
+
+#### lexicon\_entry\_match
+
+```python
+class RankingMetaData:
+ | ...
+ | lexicon_entry_match: str = None
 ```
 
 <a id="pymusas.rankers.lexicon_entry.LexiconEntryRanker"></a>

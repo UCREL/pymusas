@@ -8,7 +8,8 @@ from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker, LexicalMatc
 
 
 RANKING_META_DATA = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 1,
-                                    False, LexicalMatch.TOKEN, 1, 3)
+                                    False, LexicalMatch.TOKEN, 1, 3,
+                                    'snow_noun boot_noun')
 
 
 def test_lexical_match() -> None:
@@ -32,25 +33,29 @@ def test_ranking_meta_data() -> None:
     assert LexicalMatch.TOKEN == RANKING_META_DATA.lexical_match
     assert 1 == RANKING_META_DATA.token_match_start_index
     assert 3 == RANKING_META_DATA.token_match_end_index
+    assert 'snow_noun boot_noun' == RANKING_META_DATA.lexicon_entry_match
 
     expected_str = ("RankingMetaData(lexicon_type=LexiconType.MWE_NON_SPECIAL, "
                     "lexicon_n_gram_length=2, "
                     "lexicon_wildcard_count=1, exclude_pos_information=False,"
                     " lexical_match=LexicalMatch.TOKEN, "
-                    "token_match_start_index=1, token_match_end_index=3)")
+                    "token_match_start_index=1, token_match_end_index=3,"
+                    " lexicon_entry_match='snow_noun boot_noun')")
     assert expected_str == str(RANKING_META_DATA)
 
     with pytest.raises(FrozenInstanceError):
         for attribute in ['lexicon_n_gram_length', 'lexicon_type',
                           'lexicon_wildcard_count', 'exclude_pos_information',
                           'lexical_match', 'token_match_start_index',
-                          'token_match_end_index']:
+                          'token_match_end_index', 'lexicon_entry_match']:
             setattr(RANKING_META_DATA, attribute, 'test')
     
     assert RANKING_META_DATA != RankingMetaData(LexiconType.MWE_NON_SPECIAL, 1,
-                                                1, False, LexicalMatch.TOKEN, 1, 3)
+                                                1, False, LexicalMatch.TOKEN, 1,
+                                                3, 'snow_noun boot_noun')
     assert RANKING_META_DATA == RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2,
-                                                1, False, LexicalMatch.TOKEN, 1, 3)
+                                                1, False, LexicalMatch.TOKEN, 1,
+                                                3, 'snow_noun boot_noun')
     eval(RANKING_META_DATA.__repr__())
     assert RANKING_META_DATA == eval(RANKING_META_DATA.__repr__())
 
@@ -72,19 +77,26 @@ def test_contextual_rule_based_ranker() -> None:
     assert isinstance(ContextualRuleBasedRanker(), LexiconEntryRanker)
 
     ranker = ContextualRuleBasedRanker()
-    assert [[]] == ranker([])
+    assert [] == ranker([])
 
     token_ranking_data = [
         [
-            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False, LexicalMatch.TOKEN, 2, 3),
-            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False, LexicalMatch.LEMMA, 2, 3),
-            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False, LexicalMatch.TOKEN_LOWER, 2, 3),
-            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False, LexicalMatch.LEMMA_LOWER, 2, 3)
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1,
+                            False, LexicalMatch.TOKEN, 2, 3, 'Snow_noun *_noun'),
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1,
+                            False, LexicalMatch.LEMMA, 2, 3, 'Snow_noun *_noun'),
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1,
+                            False, LexicalMatch.TOKEN_LOWER, 2, 3, 'snow_noun *_noun'),
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1,
+                            False, LexicalMatch.LEMMA_LOWER, 2, 3, 'snow_noun *_noun')
         ],
         [
-            RankingMetaData(LexiconType.MWE_CURLY_BRACES, 1, 1, False, LexicalMatch.TOKEN, 2, 3),
-            RankingMetaData(LexiconType.MWE_NON_SPECIAL, 1, 1, False, LexicalMatch.TOKEN, 3, 4),
-            RankingMetaData(LexiconType.SINGLE_NON_SPECIAL, 1, 1, True, LexicalMatch.TOKEN, 1, 5)
+            RankingMetaData(LexiconType.MWE_CURLY_BRACES, 2, 1,
+                            False, LexicalMatch.TOKEN, 2, 3, 'Asked_verb {noun} *_prep'),
+            RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 1,
+                            False, LexicalMatch.TOKEN, 3, 4, '*_noun Boot_noun'),
+            RankingMetaData(LexiconType.SINGLE_NON_SPECIAL, 1, 1,
+                            True, LexicalMatch.TOKEN, 1, 5, 'Iceland')
         ]
     ]
     expected_ranks = [
@@ -95,8 +107,8 @@ def test_contextual_rule_based_ranker() -> None:
             221142
         ],
         [
-            311112,
-            111113,
+            321112,
+            121113,
             411211
         ]
     ]
@@ -105,21 +117,24 @@ def test_contextual_rule_based_ranker() -> None:
     # Edge case whereby the token_match_start_index is a large number
     token_ranking_data = [
         [
-            RankingMetaData(LexiconType.MWE_WILDCARD, 1, 1, False, LexicalMatch.TOKEN, 200, 350),
-            RankingMetaData(LexiconType.MWE_WILDCARD, 1, 2, False, LexicalMatch.TOKEN, 200, 350)
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1,
+                            False, LexicalMatch.TOKEN, 200, 350, '*_noun Boot_noun'),
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 2, False,
+                            LexicalMatch.TOKEN, 200, 350, '*_noun Boot_*')
         ],
         [
-            RankingMetaData(LexiconType.MWE_WILDCARD, 1, 1, False, LexicalMatch.TOKEN, 220, 370)
+            RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False,
+                            LexicalMatch.TOKEN, 220, 370, '*_noun Boot_noun')
         ]
     ]
 
     expected_ranks = [
         [
-            21111200,
-            21211200
+            22111200,
+            22211200
         ],
         [
-            21111220
+            22111220
         ]
     ]
     assert expected_ranks == ranker(token_ranking_data)

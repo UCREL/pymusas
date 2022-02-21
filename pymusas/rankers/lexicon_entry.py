@@ -83,6 +83,10 @@ class RankingMetaData:
         Index of the first token in the lexicon entry match.
     token_match_end_index : `int`
         Index of the last token in the lexicon entry match.
+    lexicon_entry_match : `str`
+        The lexicon entry match, which can be either a single word or MWE entry
+        match. In the case for single word this could be `Car|noun` and in the
+        case for a MWE it would be it's template, e.g. `snow_noun boots_noun`.
     '''
     lexicon_type: LexiconType
     lexicon_n_gram_length: int
@@ -91,6 +95,7 @@ class RankingMetaData:
     lexical_match: LexicalMatch
     token_match_start_index: int
     token_match_end_index: int
+    lexicon_entry_match: str
 
 
 class LexiconEntryRanker(ABC):
@@ -264,8 +269,5 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
                 int_token_ranking = int(f'{str_ranking}{str_start_index}')
                 int_token_rankings.append(int_token_ranking)
             rankings.append(int_token_rankings)
-
-        if rankings == []:
-            return [[]]
         
         return rankings
