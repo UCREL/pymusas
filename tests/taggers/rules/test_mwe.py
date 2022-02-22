@@ -58,7 +58,8 @@ def generate_tag_test_data(test_data_file: Path, mwe_lexicon_file: Path
     `Tuple[List[str], List[str], List[str], Dict[str, List[str]],
            List[List[RankingMetaData]]]`
     '''
-    def json_to_ranking_meta_data(json_object: Dict[str, Union[str, int, bool]]
+    def json_to_ranking_meta_data(json_object: Dict[str, Union[str, int,
+                                                               bool, List[str]]]
                                   ) -> RankingMetaData:
         
         assert isinstance(json_object['lexicon_type'], str)
@@ -87,9 +88,16 @@ def generate_tag_test_data(test_data_file: Path, mwe_lexicon_file: Path
         lexicon_entry_match = json_object['lexicon_entry_match']
         assert isinstance(lexicon_entry_match, str)
 
+        semantic_tags_list = json_object['semantic_tags']
+        assert isinstance(semantic_tags_list, list)
+        for value in semantic_tags_list:
+            assert isinstance(value, str)
+        semantic_tags = tuple(semantic_tags_list)
+
         return RankingMetaData(lexicon_type, n_gram_length, wildcard_count,
                                exclude_pos_information, lexical_match,
-                               start_index, end_index, lexicon_entry_match)
+                               start_index, end_index, lexicon_entry_match,
+                               semantic_tags)
     
     test_tokens: List[str] = []
     test_lemmas: List[str] = []

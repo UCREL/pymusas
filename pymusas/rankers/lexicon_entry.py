@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import List
+from typing import List, Tuple
 
 from pymusas.lexicon_collection import LexiconType
 
@@ -87,6 +87,11 @@ class RankingMetaData:
         The lexicon entry match, which can be either a single word or MWE entry
         match. In the case for single word this could be `Car|noun` and in the
         case for a MWE it would be it's template, e.g. `snow_noun boots_noun`.
+    semantic_tags : `Tuple[str, ...]`
+        The semantic tags associated with the lexicon entry. The semantic tags
+        are in rank order, the most likely tag is the first tag in the tuple.
+        The Tuple can be of variable length hence the `...` in the
+        type annotation.
     '''
     lexicon_type: LexiconType
     lexicon_n_gram_length: int
@@ -96,6 +101,7 @@ class RankingMetaData:
     token_match_start_index: int
     token_match_end_index: int
     lexicon_entry_match: str
+    semantic_tags: Tuple[str, ...]
 
 
 class LexiconEntryRanker(ABC):
@@ -209,13 +215,16 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         >>> token_ranking_data = [
         ...    [
         ...        RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False,
-        ...                         LexicalMatch.TOKEN, 2, 3, 'ski_* boots_noun'),
+        ...                        LexicalMatch.TOKEN, 2, 3,
+        ...                        'ski_* boots_noun', ['Z1']),
         ...        RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0, False,
-        ...                        LexicalMatch.LEMMA, 2, 3, 'ski_noun boots_noun'),
+        ...                        LexicalMatch.LEMMA, 2, 3,
+        ...                        'ski_noun boots_noun', ['Z1']),
         ...    ],
         ...    [
         ...        RankingMetaData(LexiconType.SINGLE_NON_SPECIAL, 1, 0, True,
-        ...                        LexicalMatch.TOKEN_LOWER, 21, 23, 'ski_noun'),
+        ...                        LexicalMatch.TOKEN_LOWER, 21, 23,
+        ...                        'ski_noun', ['Z1']),
         ...    ]
         ... ]
         >>> expected_rankings = [[2211102, 1201202], [4102321]]

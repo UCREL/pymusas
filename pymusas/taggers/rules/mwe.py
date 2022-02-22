@@ -103,12 +103,14 @@ class MWERule(Rule):
 
                     for matched_mwe_template in matched_mwe_templates:
                         mwe_meta_data = self.mwe_lexicon_collection[matched_mwe_template]
+                        semantic_tags = tuple(mwe_meta_data.semantic_tags)
                         ranking_meta_data = RankingMetaData(mwe_type,
                                                             mwe_meta_data.n_gram_length,
                                                             mwe_meta_data.wildcard_count,
                                                             False, token_type, start_index,
                                                             end_index,
-                                                            matched_mwe_template)
+                                                            matched_mwe_template,
+                                                            semantic_tags)
                         for token_index in range(start_index, end_index):
                             token_ranking_meta_data[token_index].append(ranking_meta_data)
                 
