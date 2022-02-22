@@ -47,7 +47,7 @@ class MWERule(Rule):
         Given the tokens, lemmas, and POS tags for each word in a text,
         it returns for each token a `List` of rules matches defined by
         the :class:`pymusas.rankers.lexicon_entry.RankingMetaData` object based on
-        the rule matches states in the class docstring above.
+        the rule matches stated in the class docstring above.
         
         # Parameters
 
