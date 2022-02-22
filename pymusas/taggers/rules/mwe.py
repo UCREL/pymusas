@@ -33,8 +33,8 @@ class MWERule(Rule):
 
     mwe_lexicon_collection : `pymusas.lexicon_collection.MWELexiconCollection`
         A :class:`pymusas.lexicon_collection.MWELexiconCollection` instance that
-        has been initialised using the `data` parameter. This collection is used
-        to find MWE rule matches.
+        has been initialised using the `mwe_lexicon_lookup` parameter.
+        This collection is used to find MWE rule matches.
     '''
 
     def __init__(self, mwe_lexicon_lookup: Dict[str, List[str]]) -> None:
