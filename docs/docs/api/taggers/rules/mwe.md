@@ -43,8 +43,8 @@ lower cased versions of the token/lemma.
 
 - __mwe\_lexicon\_collection__ : `pymusas.lexicon_collection.MWELexiconCollection` <br/>
     A [`pymusas.lexicon_collection.MWELexiconCollection`](/pymusas/api/lexicon_collection/#mwelexiconcollection) instance that
-    has been initialised using the `data` parameter. This collection is used
-    to find MWE rule matches.
+    has been initialised using the `mwe_lexicon_lookup` parameter.
+    This collection is used to find MWE rule matches.
 
 <a id="pymusas.taggers.rules.mwe.MWERule.__call__"></a>
 
@@ -64,7 +64,7 @@ class MWERule(Rule):
 Given the tokens, lemmas, and POS tags for each word in a text,
 it returns for each token a `List` of rules matches defined by
 the [`pymusas.rankers.lexicon_entry.RankingMetaData`](/pymusas/api/rankers/lexicon_entry/#rankingmetadata) object based on
-the rule matches states in the class docstring above.
+the rule matches stated in the class docstring above.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
