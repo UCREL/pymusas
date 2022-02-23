@@ -8,7 +8,7 @@ from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
-RULE_DATA_DIR = Path(DATA_DIR, 'taggers', 'rules')
+RULE_DATA_DIR = Path(DATA_DIR, 'taggers', 'rules', 'single_word')
 NON_SPECIAL_LEXICON_FILE = Path(RULE_DATA_DIR, 'single_word_non_special_lexicon.tsv')
 NON_SPECIAL_DATA_FILE = Path(RULE_DATA_DIR, 'single_word_non_special_input_output.json')
 
