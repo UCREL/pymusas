@@ -8,10 +8,10 @@ from pymusas.taggers.rules.mwe import MWERule
 
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
-TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers')
+TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'rules', 'mwe')
 
-BASIC_LEXICON = Path(TAGGER_DATA_DIR, 'mwe_basic_lexicon.tsv')
-BASIC_DATA = Path(TAGGER_DATA_DIR, 'rule_based_mwe_basic_input_output.json')
+BASIC_LEXICON = Path(TAGGER_DATA_DIR, 'mwe_non_special_lexicon.tsv')
+BASIC_DATA = Path(TAGGER_DATA_DIR, 'rule_based_mwe_non_special_input_output.json')
 
 WILDCARD_LEXICON = Path(TAGGER_DATA_DIR, 'mwe_wildcard_lexicon.tsv')
 WILDCARD_DATA = Path(TAGGER_DATA_DIR, 'rule_based_mwe_wildcard_input_output.json')
