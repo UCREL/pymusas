@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod
+import collections
 from dataclasses import dataclass
 from enum import IntEnum
-from typing import List, Tuple
+from typing import DefaultDict, Dict, List, Optional, Set, Tuple
 
 from pymusas.lexicon_collection import LexiconType
 
@@ -109,20 +110,42 @@ class LexiconEntryRanker(ABC):
     An **abstract class** that defines the basic method, `__call__`, that is
     required for all :class:`LexiconEntryRanker`s.
 
-    A LexcionEntryRanker when called, `__call__`, ranks the lexicon entry matches
-    for each token, whereby each match is represented by a :class:`RankingMetaData`
-    object.
+    Each lexicon entry match is represented by a :class:`RankingMetaData` object.
 
     **Lower ranked lexicon entry matches should be given priority when making
-    tagging decisions.**
+    tagging decisions. A rank of 0 is better than a rank of 1.**
+
+    A LexcionEntryRanker when called, `__call__`, returns a tuple of two `List`s
+    whereby each entry in the list corresponds to a token:
+
+    1. Contains the ranks of the lexicon entry matches as a `List[int]`.
+    **Note** that the `List` can be empty if a token has no lexicon entry matches.
+    2. An `Optional[RankingMetaData]` that is the global lowest ranked entry
+    match for that token. If the value is `None` then no global lowest ranked
+    entry can be found for that token. If the `RankingMetaData` represents more
+    than one token, like a Multi Word Expression (MWE) match, then those associated tokens
+    will have the same `RankingMetaData` object as the global lowest ranked entry match.
+    
+    **The tagger will have to make a decision how to handle global lowest ranked
+    matches of value `None`, a suggested approach would be to assign an
+    unmatched/unknown semantic tag to those tokens.**
+
+    The reason for the adding the second list is that the **global** lowest
+    ranked match is not the same as the local/token lowest ranked match, this is
+    due to the potential of overlapping matches, e.g. `North East London brewery`
+    can have a match of `North East`, `North`, and `East London brewery` in this
+    case the lowest rank for `North` would be `North East`, but as we have a
+    lower match that uses `East` which is `East London brewery` then the
+    **global** lowest rank for `North` would be `North`.
     '''
     
     @abstractmethod
     def __call__(self, token_ranking_data: List[List[RankingMetaData]]
-                 ) -> List[List[int]]:
+                 ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]:
         '''
         For each token it returns a `List` of rankings for each lexicon entry
-        match.
+        match and the optional :class:`RankingMetaData` object of the **global**
+        lowest ranked match for each token.
 
         # Parameters
 
@@ -132,7 +155,7 @@ class LexiconEntryRanker(ABC):
 
         # Returns
         
-        `List[List[int]]`
+        `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
         '''
         ...
 
@@ -141,18 +164,11 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
     '''
     The contextual rule based ranker creates ranks based on the rules stated below.
     
-    These rankings are fully interpretable as each rank is a *n* digit integer,
-    whereby the first 5 digit indexes corresponds to the first 5 ranking rules
-    below, e.g. first digit index corresponds to the first rule. The last *m*
-    digits correspond to the start index which relates to the sixth/last rule.
-    For example the rank `12111020` the first 5 digits `12111` correspond to the
-    first 5 rules below and `020` means that the start index was 20 for the
-    lexicon match which relates to rule 6, the reason for the 0 before 20 was can
-    be due to the text sequence containing start indexes of more than 99 and less
-    than 1000.
+    Each lexicon entry match is represented by a :class:`RankingMetaData` object.
 
     **Lower ranked lexicon entry matches should be given priority when making
-    tagging decisions.** For example a rank of 0 is better than a rank of 1.
+    tagging decisions. See the :class:`LexiconEntryRanker` class docstring for
+    more details on the returned value of the `__call__` method.**
 
     **Ranking Rules:**
 
@@ -183,18 +199,212 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
     this is required for matches that do not apply to the same sequence
     of tokens.
 
-    In the case whereby the ranker has no more rules to apply and lexicon entry
-    matches per token have joint ranks, then those joint ranks will be returned
-    and the tagger will have to decide what to do with those joint ranked lexicon
-    matches.
+    In the case whereby the global lowest ranked lexicon entry match is joint
+    ranked with another entry then it is random which lexicon entry match is chosen.
+
+    # Parameters
+
+    maximum_n_gram_length : `int`
+        The largest n_gram rule match that will be encountered, e.g. a match
+        of `ski_noun boot_noun` will have a n-gram length of 2.
+    maximum_number_wildcards : `int`
+        The number of wildcards in the rule that contains the most wildcard, e.g.
+        the rule `ski_* *_noun` would contain 2 wildcards. This can be 0 if you
+        have no wildcard rules.
+
+    # Instance Attributes
+
+    n_gram_number_indexes : `int`
+        The number of indexes that each n-gram length value should have when
+        converting the n-gram length to a string using
+        `pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.int_2_str`.
+    wildcards_number_indexes : `int`
+        The number of indexes that each wildcard count value should have when
+        converting the wildcard count value to a string using
+        `pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.int_2_str`.
+    n_gram_ranking_dictionary : `Dict[int, int]`
+        Maps the n-gram length to it's rank value, as the n-gram length is
+        inverse to it's rank, as the larger the n-gram length the lower it's
+        rank.
     '''
 
+    def __init__(self, maximum_n_gram_length: int,
+                 maximum_number_wildcards: int) -> None:
+
+        self.n_gram_number_indexes = len(str(maximum_n_gram_length))
+        self.wildcards_number_indexes = len(str(maximum_number_wildcards))
+
+        self.n_gram_ranking_dictionary: Dict[int, int] = \
+            dict(zip(range(1, maximum_n_gram_length + 1, 1),
+                     range(maximum_n_gram_length, 0, -1)))
+
+    @staticmethod
+    def int_2_str(int_value: int, number_indexes: int) -> str:
+        '''
+        Converts the integer, `int_value`, to a string with `number_indexes`,
+        e.g. `10` and `05` both have `number_indexes` of 2 and `001`, `020`,
+        and `211` have `number_indexes` of 3.
+
+        # Parameters
+
+        int_value : `int`
+            The integer to converts to a string with the given `number_indexes`.
+        number_indexes : `int`
+            The number of indexes the `int_value` should have in the returned
+            string.
+        
+        # Returns
+        
+        `str`
+
+        # Raises
+
+        ValueError
+            If the `number_indexes` of the `int_value` when converted to a
+            string is greater than the given `number_indexes`.
+        '''
+        str_value = str(int_value)
+        str_value_number_indexes = len(str_value)
+        if str_value_number_indexes > number_indexes:
+            error_msg = (f"Cannot convert int ({int_value}) to a ranked"
+                         f" string as the maximum number of indexes it can be"
+                         f" is {number_indexes}.")
+            raise ValueError(error_msg)
+        
+        number_prefix_zeros_to_add = number_indexes - str_value_number_indexes
+        prefix_zeros = '0' * number_prefix_zeros_to_add
+        return f'{prefix_zeros}{str_value}'
+
+    @staticmethod
+    def get_global_lowest_ranks(token_ranking_data: List[List[RankingMetaData]],
+                                token_rankings: List[List[int]],
+                                ranking_data_to_exclude: Optional[Set[RankingMetaData]] = None
+                                ) -> List[Optional[RankingMetaData]]:
+        '''
+        Returns the global lowest ranked entry match for each token. If the value
+        is `None` then no global lowest ranked entry can be found for that token.
+        If the `RankingMetaData` represents more than one token, like a Multi
+        Word Expression (MWE) match, then those associated tokens will have the
+        same `RankingMetaData` object as the global lowest ranked entry match.
+
+        Time Complexity, given *N* is the number of tokens, *M* is the number
+        of unique ranking data, and *P* is the number of ranking data (non-unique)
+        then the time complexity is:
+        
+        O(N + P) + O(M log M) + O(M)
+        
+        # Parameters
+
+        token_ranking_data : `List[List[RankingMetaData]]`
+            For each token a `List` of :class:`RankingMetaData` representing
+            the lexicon entry match.
+        token_rankings : `List[List[int]]`
+            For each token contains the ranks of the lexicon entry matches.
+            **Note** that the `List` can be empty if a token has no lexicon
+            entry matches.
+        ranking_data_to_exclude : `Set[RankingMetaData]`, optional (default = `None`)
+            Any :class:`RankingMetaData` to exclude from the ranking selection, this can
+            be useful when wanting to get the next best global rank for each token.
+
+        # Raises
+
+        `AssertionError`
+            If the length of `token_ranking_data` is not equal to the length of
+            `token_rankings`, for both the outer and inner `List`s.
+
+        # Examples
+        ``` python
+        >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+        >>> from pymusas.rankers.lexicon_entry import RankingMetaData
+        >>> from pymusas.rankers.lexicon_entry import LexiconType
+        >>> from pymusas.rankers.lexicon_entry import LexicalMatch
+        >>> north_east = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0,
+        ...                              False, LexicalMatch.TOKEN, 0, 2,
+        ...                              'North_noun East_noun', ('Z1',))
+        >>> east_london_brewery = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 3, 0,
+        ...                                       False, LexicalMatch.TOKEN, 1, 4,
+        ...                                       'East_noun London_noun brewery_noun', ('Z1',))
+        >>> token_ranking_data = [
+        ...     [
+        ...         north_east
+        ...     ],
+        ...     [
+        ...         north_east,
+        ...         east_london_brewery
+        ...     ],
+        ...     [
+        ...         east_london_brewery
+        ...     ],
+        ...     [
+        ...         east_london_brewery
+        ...     ]
+        ... ]
+        >>> token_rankings = [[120110], [120110, 110111], [110111], [110111]]
+        >>> expected_lowest_ranked_matches = [None, east_london_brewery,
+        ...                                   east_london_brewery, east_london_brewery]
+        >>> assert (ContextualRuleBasedRanker.get_global_lowest_ranks(token_ranking_data, token_rankings, None)
+        ...         == expected_lowest_ranked_matches)
+
+        ```
+
+        Following on from the previous example, we now want to find the next best
+        global match for each token so we exclude the current best global match
+        for each token which is the `east_london_brewery` match:
+        
+        ``` python
+        >>> expected_lowest_ranked_matches = [north_east, north_east, None, None]
+        >>> ranking_data_to_exclude = {east_london_brewery}
+        >>> assert (ContextualRuleBasedRanker.get_global_lowest_ranks(token_ranking_data, token_rankings,
+        ...                                                          ranking_data_to_exclude)
+        ...         == expected_lowest_ranked_matches)
+
+        ```
+        '''
+        if ranking_data_to_exclude is None:
+            ranking_data_to_exclude = set()
+        
+        assert len(token_ranking_data) == len(token_rankings), 'Lengths should be equal'
+
+        ranking_meta_data: DefaultDict[int, Set[RankingMetaData]] = collections.defaultdict(set)
+        for token_data, token_ranking in zip(token_ranking_data, token_rankings):
+            assert len(token_data) == len(token_ranking), 'Lengths should be equal'
+            
+            for data, rank in zip(token_data, token_ranking):
+                if data in ranking_data_to_exclude:
+                    continue
+                ranking_meta_data[rank].add(data)
+        
+        global_lowest_ranks: List[Optional[RankingMetaData]] = \
+            [None for _ in token_ranking_data]
+        
+        ordered_ranking_meta_data = sorted(ranking_meta_data.items(),
+                                           key=lambda x: x[0])
+        for rank, meta_data in ordered_ranking_meta_data:
+            for data in meta_data:
+                start, end = data.token_match_start_index, data.token_match_end_index
+                if any(global_lowest_ranks[start: end]):
+                    continue
+
+                for index in range(start, end):
+                    global_lowest_ranks[index] = data
+
+        return global_lowest_ranks
+
     def __call__(self, token_ranking_data: List[List[RankingMetaData]]
-                 ) -> List[List[int]]:
+                 ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]:
         '''
         For each token it returns a `List` of rankings for each lexicon entry
-        match. See the ranking rules in the class docstring for details on how
+        match and the optional :class:`RankingMetaData` object of the **global**
+        lowest ranked match for each token.
+        
+        See the ranking rules in the class docstring for details on how
         each lexicon entry match is ranked.
+
+        Time Complexity, given *N* is the number of tokens, *M* is the number
+        of unique ranking data, and *P* is the number of ranking data (non-unique)
+        then the time complexity is:
+        
+        O(3(N + P)) + O(M log M) + O(M)
 
         # Parameters
 
@@ -204,7 +414,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         # Returns
         
-        `List[List[int]]`
+        `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
 
         # Examples
         ```python
@@ -212,28 +422,36 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         >>> from pymusas.rankers.lexicon_entry import RankingMetaData
         >>> from pymusas.rankers.lexicon_entry import LexiconType
         >>> from pymusas.rankers.lexicon_entry import LexicalMatch
+        >>> north_east = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0,
+        ...                              False, LexicalMatch.TOKEN, 0, 2,
+        ...                              'North_noun East_noun', ('Z1',))
+        >>> east_london_brewery = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 3, 0,
+        ...                                       False, LexicalMatch.TOKEN, 1, 4,
+        ...                                       'East_noun London_noun brewery_noun', ('Z1',))
         >>> token_ranking_data = [
-        ...    [
-        ...        RankingMetaData(LexiconType.MWE_WILDCARD, 2, 1, False,
-        ...                        LexicalMatch.TOKEN, 2, 3,
-        ...                        'ski_* boots_noun', ['Z1']),
-        ...        RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0, False,
-        ...                        LexicalMatch.LEMMA, 2, 3,
-        ...                        'ski_noun boots_noun', ['Z1']),
-        ...    ],
-        ...    [
-        ...        RankingMetaData(LexiconType.SINGLE_NON_SPECIAL, 1, 0, True,
-        ...                        LexicalMatch.TOKEN_LOWER, 21, 23,
-        ...                        'ski_noun', ['Z1']),
-        ...    ]
+        ...     [
+        ...         north_east
+        ...     ],
+        ...     [
+        ...         north_east,
+        ...         east_london_brewery
+        ...     ],
+        ...     [
+        ...         east_london_brewery
+        ...     ],
+        ...     [
+        ...         east_london_brewery
+        ...     ]
         ... ]
-        >>> expected_rankings = [[2211102, 1201202], [4102321]]
-        >>> ranker = ContextualRuleBasedRanker()
-        >>> assert expected_rankings == ranker(token_ranking_data)
+        >>> expected_ranks = [[120110], [120110, 110111], [110111], [110111]]
+        >>> expected_lowest_ranked_matches = [None, east_london_brewery,
+        ...                                   east_london_brewery, east_london_brewery]
+        >>> ranker = ContextualRuleBasedRanker(3, 0)
+        >>> assert ((expected_ranks, expected_lowest_ranked_matches)
+        ...         == ranker(token_ranking_data))
 
         ```
         '''
-        
         lexicon_type_to_rank = {
             LexiconType.MWE_NON_SPECIAL: 1,
             LexiconType.MWE_WILDCARD: 2,
@@ -252,11 +470,13 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
             token_rankings: List[str] = []
             for ranking_data in token:
                 lexicon_type_rank = lexicon_type_to_rank[ranking_data.lexicon_type]
-                n_gram_rank = ranking_data.lexicon_n_gram_length
-                wildcard_rank = ranking_data.lexicon_wildcard_count
+                n_gram_rank = self.n_gram_ranking_dictionary[ranking_data.lexicon_n_gram_length]
+                n_gram_str_rank = self.int_2_str(n_gram_rank, self.n_gram_number_indexes)
+                wildcard_str_rank = self.int_2_str(ranking_data.lexicon_wildcard_count,
+                                                   self.wildcards_number_indexes)
                 exclude_pos_information_rank = exclude_pos_information_to_rank[ranking_data.exclude_pos_information]
                 lexical_match_rank = ranking_data.lexical_match.value
-                rank_str = (f'{lexicon_type_rank}{n_gram_rank}{wildcard_rank}'
+                rank_str = (f'{lexicon_type_rank}{n_gram_str_rank}{wildcard_str_rank}'
                             f'{exclude_pos_information_rank}{lexical_match_rank}')
                 token_rankings.append(rank_str)
 
@@ -266,20 +486,18 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
                     largest_token_index = ranking_data.token_match_end_index
             initial_rankings.append(token_rankings)
 
-        largest_token_index_str_length = len(str(largest_token_index))
+        # Add to each token ranking where it first appears in the text, rule 6.
+        largest_token_index_number_indexes = len(str(largest_token_index))
         rankings: List[List[int]] = []
         for str_token_rankings, token in zip(initial_rankings, token_ranking_data):
             int_token_rankings: List[int] = []
             for str_ranking, ranking_data in zip(str_token_rankings, token):
-                str_start_index = str(ranking_data.token_match_start_index)
-                str_start_index_len = len(str_start_index)
-                start_index_len_diff = (largest_token_index_str_length
-                                        - str_start_index_len)
-                start_index_prefix = '0' * start_index_len_diff
-                str_start_index = f'{start_index_prefix}{str_start_index}'
-                
-                int_token_ranking = int(f'{str_ranking}{str_start_index}')
+                start_index_str_rank = self.int_2_str(ranking_data.token_match_start_index,
+                                                      largest_token_index_number_indexes)
+                int_token_ranking = int(f'{str_ranking}{start_index_str_rank}')
                 int_token_rankings.append(int_token_ranking)
             rankings.append(int_token_rankings)
-        
-        return rankings
+        global_lowest_rank_indexes = self.get_global_lowest_ranks(token_ranking_data,
+                                                                  rankings, None)
+
+        return (rankings, global_lowest_rank_indexes)
