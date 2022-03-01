@@ -1,0 +1,5 @@
+[
+    {"token": "London", "lemma": "london", "pos": "noun", "usas": "Z2"},
+    {"token": "the", "lemma": "the", "pos": "det", "usas": "Z99"},
+    {"token": "capital", "lemma": "cap", "pos": "noun", "usas": "Z1"}
+]
