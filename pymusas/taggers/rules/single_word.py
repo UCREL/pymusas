@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from pymusas.lexicon_collection import LexiconCollection, LexiconType
 from pymusas.rankers.lexicon_entry import LexicalMatch, RankingMetaData
@@ -32,6 +32,15 @@ class SingleWordRule(Rule):
         Dictionary where the keys are either just a lemma/token
         in the following format: `{lemma}` and the
         values are a list of associated semantic tags.
+    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+        If not `None`, maps from the given token's POS tagset to the desired
+        POS tagset, whereby the mapping is a `List` of tags, at the moment there
+        is no preference order in this list of POS tags. The POS mapping is
+        useful in situtation whereby the token's POS tagset is different to
+        those used in the lexicons. **Note** the longer the `List[str]` for
+        each POS mapping the slower the tagger, a one to one mapping will have
+        no speed impact on the tagger. A selection of POS mappers can be found in
+        :mod:`pymusas.pos_mapper`.
 
     # Instance Attributes
 
@@ -41,12 +50,16 @@ class SingleWordRule(Rule):
     lemma_lexicon_collection : `pymusas.lexicon_collection.LexiconCollection`
         A :class:`pymusas.lexicon_collection.LexiconCollection` instance that
         has been initialised using the `lemma_lexicon_collection` parameter.
+    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+        The given `pos_mapper`.
     '''
     def __init__(self, lexicon_collection: Dict[str, List[str]],
-                 lemma_lexicon_collection: Dict[str, List[str]]):
+                 lemma_lexicon_collection: Dict[str, List[str]],
+                 pos_mapper: Optional[Dict[str, List[str]]] = None):
 
         self.lexicon_collection = LexiconCollection(lexicon_collection)
         self.lemma_lexicon_collection = LexiconCollection(lemma_lexicon_collection)
+        self.pos_mapper = pos_mapper
 
     def __call__(self, tokens: List[str], lemmas: List[str], pos_tags: List[str]
                  ) -> List[List[RankingMetaData]]:
@@ -93,36 +106,44 @@ class SingleWordRule(Rule):
         
         index = 0
 
-        for token, lemma, pos in zip(tokens, lemmas, pos_tags):
+        for token, lemma, initial_pos in zip(tokens, lemmas, pos_tags):
+
             token_lower = token.lower()
             lemma_lower = lemma.lower()
 
             start_index = index
             end_index = start_index + 1
             
+            pos_tags = [initial_pos]
+            if self.pos_mapper is not None:
+                pos_tags = self.pos_mapper.get(initial_pos, [])
+            
             # All of these use POS information
-            token_pos = f'{token}|{pos}'
-            find_match_and_add_to_ranking_data(token_pos, False, LexicalMatch.TOKEN,
-                                               start_index, end_index,
-                                               token_ranking_meta_data)
-            
-            lemma_pos = f'{lemma}|{pos}'
-            find_match_and_add_to_ranking_data(lemma_pos, False, LexicalMatch.LEMMA,
-                                               start_index, end_index,
-                                               token_ranking_meta_data)
-            
-            token_lower_pos = f'{token_lower}|{pos}'
-            find_match_and_add_to_ranking_data(token_lower_pos, False,
-                                               LexicalMatch.TOKEN_LOWER,
-                                               start_index, end_index,
-                                               token_ranking_meta_data)
-            
-            lemma_lower_pos = f'{lemma_lower}|{pos}'
-            find_match_and_add_to_ranking_data(lemma_lower_pos, False,
-                                               LexicalMatch.LEMMA_LOWER,
-                                               start_index, end_index,
-                                               token_ranking_meta_data)
-            
+            for pos in pos_tags:
+                token_pos = f'{token}|{pos}'
+                find_match_and_add_to_ranking_data(token_pos, False,
+                                                   LexicalMatch.TOKEN,
+                                                   start_index, end_index,
+                                                   token_ranking_meta_data)
+                
+                lemma_pos = f'{lemma}|{pos}'
+                find_match_and_add_to_ranking_data(lemma_pos, False,
+                                                   LexicalMatch.LEMMA,
+                                                   start_index, end_index,
+                                                   token_ranking_meta_data)
+                
+                token_lower_pos = f'{token_lower}|{pos}'
+                find_match_and_add_to_ranking_data(token_lower_pos, False,
+                                                   LexicalMatch.TOKEN_LOWER,
+                                                   start_index, end_index,
+                                                   token_ranking_meta_data)
+                
+                lemma_lower_pos = f'{lemma_lower}|{pos}'
+                find_match_and_add_to_ranking_data(lemma_lower_pos, False,
+                                                   LexicalMatch.LEMMA_LOWER,
+                                                   start_index, end_index,
+                                                   token_ranking_meta_data)
+                
             # All of these do not use POS information
             lexical_value_type = [(token, LexicalMatch.TOKEN),
                                   (lemma, LexicalMatch.LEMMA),

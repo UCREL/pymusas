@@ -11,6 +11,7 @@ DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
 RULE_DATA_DIR = Path(DATA_DIR, 'taggers', 'rules', 'single_word')
 NON_SPECIAL_LEXICON_FILE = Path(RULE_DATA_DIR, 'single_word_non_special_lexicon.tsv')
 NON_SPECIAL_DATA_FILE = Path(RULE_DATA_DIR, 'single_word_non_special_input_output.json')
+POS_MAPPED_NON_SPECIAL_DATA_FILE = Path(RULE_DATA_DIR, 'single_word_pos_mapped_non_special_input_output.json')
 
 
 def generate_test_data(test_data_file: Path, lexicon_file: Path
@@ -163,5 +164,20 @@ def test_single_word_rule__NON_SPECIAL_CASES() -> None:
                                                       NON_SPECIAL_LEXICON_FILE)
     
     single_rule = SingleWordRule(lexicon, lemma_lexicon)
+    compare_token_ranking_meta_data(expected_ranking_meta_data,
+                                    single_rule(tokens, lemmas, pos_tags))
+
+
+def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES() -> None:
+    '''
+    This tests Single Word Rule using the `pos_mapper` when using only
+    NON SPECIAL CASES, which are direct matches, i.e. does not use any
+    special syntax like wildcards.
+    '''
+    (tokens, lemmas, pos_tags, lexicon, lemma_lexicon,
+     expected_ranking_meta_data) = generate_test_data(POS_MAPPED_NON_SPECIAL_DATA_FILE,
+                                                      NON_SPECIAL_LEXICON_FILE)
+    pos_mapper = {'NN': ['adv', 'noun']}
+    single_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, lemmas, pos_tags))

@@ -16,7 +16,8 @@ class SingleWordRule(Rule):
  | def __init__(
  |     self,
  |     lexicon_collection: Dict[str, List[str]],
- |     lemma_lexicon_collection: Dict[str, List[str]]
+ |     lemma_lexicon_collection: Dict[str, List[str]],
+ |     pos_mapper: Optional[Dict[str, List[str]]] = None
  | )
 ```
 
@@ -46,6 +47,15 @@ the `lexicon_collection` and `lemma_lexicon_collection` attributes.
     Dictionary where the keys are either just a lemma/token
     in the following format: `{lemma}` and the
     values are a list of associated semantic tags.
+- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+    If not `None`, maps from the given token's POS tagset to the desired
+    POS tagset, whereby the mapping is a `List` of tags, at the moment there
+    is no preference order in this list of POS tags. The POS mapping is
+    useful in situtation whereby the token's POS tagset is different to
+    those used in the lexicons. **Note** the longer the `List[str]` for
+    each POS mapping the slower the tagger, a one to one mapping will have
+    no speed impact on the tagger. A selection of POS mappers can be found in
+    [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
 
 <h4 id="singlewordrule.instance_attributes">Instance Attributes<a className="headerlink" href="#singlewordrule.instance_attributes" title="Permanent link">&para;</a></h4>
 
@@ -56,6 +66,8 @@ the `lexicon_collection` and `lemma_lexicon_collection` attributes.
 - __lemma\_lexicon\_collection__ : `pymusas.lexicon_collection.LexiconCollection` <br/>
     A [`pymusas.lexicon_collection.LexiconCollection`](/pymusas/api/lexicon_collection/#lexiconcollection) instance that
     has been initialised using the `lemma_lexicon_collection` parameter.
+- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+    The given `pos_mapper`.
 
 <a id="pymusas.taggers.rules.single_word.SingleWordRule.__call__"></a>
 
