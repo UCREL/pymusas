@@ -46,7 +46,7 @@ Returns the unique POS tag values in the given `lexicon_entry`.
 ``` python
 from pymusas.utils import unique_pos_tags_in_lexicon_entry
 mwe_template = 'East_noun London_noun is_det great_adj'
-assert ({'noun', 'adj', 'det'} 
+assert ({'noun', 'adj', 'det'}
         == unique_pos_tags_in_lexicon_entry(mwe_template))
 single_word_lexicon = 'East_noun'
 assert {'noun'} == unique_pos_tags_in_lexicon_entry(single_word_lexicon)
