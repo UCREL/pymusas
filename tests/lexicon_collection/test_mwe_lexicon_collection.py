@@ -286,8 +286,22 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert {} == empty_collection.pos_mapping_lookup
     assert temp_expected_pos_mapping_regular_expressions == empty_collection.pos_mapping_regular_expression_lookup
 
+    # Test adding a POS one-to-many NON-SPECIAL lexicon entry so that it proves
+    # it can update the longest_non_special_mwe_template attribute.
     # Test that it raises a ValueError when inserting a template which contains
     # a wildcard in the POS tag when the POS tags need to be mapped
+    empty_collection['a_prep carta_noun cabal_adj'] = ['Z2']
+    temp_expected_pos_mapping_regular_expressions[LexiconType.MWE_NON_SPECIAL][3]['a']['a_prep carta_noun cabal_adj'] \
+        = re.compile(r'a_prep\ carta_noun\ cabal_(?:ADJ|JJ)')
+    assert len(empty_collection) == 1
+    assert 3 == empty_collection.longest_non_special_mwe_template
+    assert 0 == empty_collection.longest_wildcard_mwe_template
+    assert len(empty_collection.mwe_regular_expression_lookup) == 0
+    assert POS_MAPPER == empty_collection.pos_mapper
+    assert {'adj'} == empty_collection.one_to_many_pos_tags
+    assert {} == empty_collection.pos_mapping_lookup
+    assert temp_expected_pos_mapping_regular_expressions == empty_collection.pos_mapping_regular_expression_lookup
+
     with pytest.raises(ValueError):
         empty_collection['it_det was_det great_adj*'] = ['Z1']
 
