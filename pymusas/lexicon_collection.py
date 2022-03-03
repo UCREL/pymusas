@@ -9,7 +9,7 @@ import typing
 from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union
 from urllib.parse import urlparse
 
-from . import file_utils
+from . import file_utils, utils
 
 
 @unique
@@ -373,6 +373,9 @@ class MWELexiconCollection(MutableMapping):
     any special syntax rules that should be applied, e.g. wildcards allow zero
     or more characters to appear after the word token and/or Part Of Speech (POS) tag.
     For more information on the MWE special syntax rules see the following notes.
+    3. POS mapping, it can find strings that match MWE templates while taking
+    into account mapping from one POS tagset to another in both a one to one and
+    one to many mapping.
 
     **Note** that even though this a sub-class of a MutableMapping it has a
     time complexity of O(n) for deletion unlike the standard Python MutableMapping,
@@ -385,6 +388,15 @@ class MWELexiconCollection(MutableMapping):
     data: `Dict[str, List[str]]`, optional (default = `None`)
         Dictionary where the keys are MWE templates, of any :class:`LexiconType`,
         and the values are a list of associated semantic tags.
+    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+        If not `None`, maps from the lexicon's POS tagset to the desired
+        POS tagset, whereby the mapping is a `List` of tags, at the moment there
+        is no preference order in this list of POS tags. The POS mapping is
+        useful in situtation whereby the leixcon's POS tagset is different to
+        the token's. **Note** that the longer the `List[str]` for each POS
+        mapping the longer it will take to match MWE templates. A one to one
+        mapping will have no speed impact on the tagger. A selection of POS
+        mappers can be found in :mod:`pymusas.pos_mapper`.
 
     # Instance Attributes
     
@@ -402,10 +414,30 @@ class MWELexiconCollection(MutableMapping):
         The longest MWE template with at least one wildcard (`*`) measured by n-gram size.
         For example the MWE template `*_noun boot*_noun` will be of length 2.
     mwe_regular_expression_lookup: `Dict[int, Dict[str, Dict[str, re.Pattern]]]`
-        A dictionary that can lookup all special syntax MWE templates and there
-        regular expression pattern, only wildcard (`*`) symbols are supported, by
-        there n-gram length and then there first character symbol. The regular
+        A dictionary that can lookup all special syntax MWE templates there
+        regular expression pattern. These templates are found first by
+        their n-gram length and then their first character symbol. The regular
         expression pattern is used for quick matching within the :func:`mwe_match`.
+        From the special syntax only wildcard (`*`) symbols are supported at the
+        moment.
+    pos_mapper : `Dict[str, List[str]]`
+        The given `pos_mapper`.
+    one_to_many_pos_tags : `Set[str]`
+        A set of POS tags that have a one to many mapping, this is created based
+        on the `pos_mapper`. This is empty if `pos_mapper` is `None`
+    pos_mapping_lookup : `Dict[str, str]`
+        Only used if `pos_mapper` is not `None`. For all one-to-one POS mappings
+        will store the mapped POS MWE template as keys and the original non-mapped
+        (original) MWE templates as values, which can be used to lookup the meta
+        data from `meta_data`.
+    pos_mapping_regular_expression_lookup : `Dict[LexiconType, Dict[int, Dict[str, Dict[str, re.Pattern]]]]`
+        Only used if `pos_mapper` is not `None` and will result in
+        `mwe_regular_expression_lookup` being empty as it replaces it
+        functionality and extends it and by handlining the one-to-many POS
+        mapping cases. When we have a one-to-many POS mapping case this requires
+        a regular expression mapping even for non special syntax MWE templates.
+        Compared to the `mwe_regular_expression_lookup` the first set of keys
+        represent the lexicon entry match type.
 
     # Examples
     ``` python
@@ -429,13 +461,27 @@ class MWELexiconCollection(MutableMapping):
 
     '''
     
-    def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, data: Optional[Dict[str, List[str]]] = None,
+                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
 
         self.meta_data: Dict[str, LexiconMetaData] = {}
         self.longest_non_special_mwe_template = 0
         self.longest_wildcard_mwe_template = 0
         self.mwe_regular_expression_lookup: DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]\
             = collections.defaultdict(lambda: collections.defaultdict(dict))
+
+        self.pos_mapper: Dict[str, List[str]] = {}
+        self.one_to_many_pos_tags: Set[str] = set()
+        self.pos_mapping_lookup: Dict[str, str] = {}
+        self.pos_mapping_regular_expression_lookup: DefaultDict[LexiconType, DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]]\
+            = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(dict)))
+        
+        if pos_mapper is not None:
+            self.pos_mapper = pos_mapper
+            for from_pos, to_pos in pos_mapper.items():
+                if len(to_pos) > 1:
+                    self.one_to_many_pos_tags.add(from_pos)
+        
         if data is not None:
             for key, value in data.items():
                 self[key] = value
@@ -474,32 +520,64 @@ class MWELexiconCollection(MutableMapping):
         
         ```
         '''
-        mew_templates_matches: List[str] = []
-        if mwe_type == LexiconType.MWE_NON_SPECIAL:
-            potential_match = self.meta_data.get(mwe_template, None)
-            if potential_match is not None:
-                potential_match_type = potential_match.lexicon_type
-                if LexiconType.MWE_NON_SPECIAL == potential_match_type:
-                    mew_templates_matches.append(mwe_template)
-        elif mwe_type == LexiconType.MWE_WILDCARD:
-            n_gram_length = len(mwe_template.split())
-            mwe_template_length = len(mwe_template)
-            if mwe_template_length > 0:
-                # By default all MWE matches can start with a * as it covers all characters.
-                for character_lookup in ['*', mwe_template[0]]:
-                    regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
-                    if character_lookup not in regular_expression_lookup:
-                        continue
-                    
-                    for (potential_mwe_match,
-                         mwe_pattern) in regular_expression_lookup[character_lookup].items():
-                        match = mwe_pattern.match(mwe_template)
-                        if match is not None:
-                            if (match.start() == 0
-                               and match.end() == mwe_template_length):
-                                mew_templates_matches.append(potential_mwe_match)
-        
-        return mew_templates_matches
+        mwe_templates_matches: List[str] = []
+        if self.pos_mapper:
+            if mwe_type == LexiconType.MWE_NON_SPECIAL:
+                mwe_mapped_template = self.pos_mapping_lookup.get(mwe_template, None)
+                if mwe_mapped_template is not None:
+                    potential_match = self.meta_data.get(mwe_mapped_template, None)
+                    if potential_match is not None:
+                        potential_match_type = potential_match.lexicon_type
+                        if LexiconType.MWE_NON_SPECIAL == potential_match_type:
+                            mwe_templates_matches.append(mwe_mapped_template)
+            
+            requires_regular_expression_matching = False
+            if mwe_type == LexiconType.MWE_WILDCARD:
+                requires_regular_expression_matching = True
+            if not mwe_templates_matches and self.one_to_many_pos_tags:
+                requires_regular_expression_matching = True
+            if requires_regular_expression_matching:
+                n_gram_length = len(mwe_template.split())
+                mwe_template_length = len(mwe_template)
+                if mwe_template_length > 0:
+                    for character_lookup in ['*', mwe_template[0]]:
+                        regular_expression_lookup = self.pos_mapping_regular_expression_lookup[mwe_type][n_gram_length]
+                        if character_lookup not in regular_expression_lookup:
+                            continue
+
+                        for (potential_mwe_match,
+                             mwe_pattern) in regular_expression_lookup[character_lookup].items():
+                            match = mwe_pattern.match(mwe_template)
+                            if match is not None:
+                                if (match.start() == 0
+                                   and match.end() == mwe_template_length):
+                                    mwe_templates_matches.append(potential_mwe_match)
+        else:
+            if mwe_type == LexiconType.MWE_NON_SPECIAL:
+                potential_match = self.meta_data.get(mwe_template, None)
+                if potential_match is not None:
+                    potential_match_type = potential_match.lexicon_type
+                    if LexiconType.MWE_NON_SPECIAL == potential_match_type:
+                        mwe_templates_matches.append(mwe_template)
+            elif mwe_type == LexiconType.MWE_WILDCARD:
+                n_gram_length = len(mwe_template.split())
+                mwe_template_length = len(mwe_template)
+                if mwe_template_length > 0:
+                    # By default all MWE matches can start with a * as it covers all characters.
+                    for character_lookup in ['*', mwe_template[0]]:
+                        regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
+                        if character_lookup not in regular_expression_lookup:
+                            continue
+
+                        for (potential_mwe_match,
+                             mwe_pattern) in regular_expression_lookup[character_lookup].items():
+                            match = mwe_pattern.match(mwe_template)
+                            if match is not None:
+                                if (match.start() == 0
+                                   and match.end() == mwe_template_length):
+                                    mwe_templates_matches.append(potential_mwe_match)
+
+        return mwe_templates_matches
 
     def to_dictionary(self) -> Dict[str, List[str]]:
         '''
@@ -623,9 +701,11 @@ class MWELexiconCollection(MutableMapping):
         expression.
         
         The difference between this and the normal `re.escape`
-        method, is that we apply the `re.escape` method to the MWE template and
-        then replace `\*` with `[^\s_]*` so that the wildcards keep there original
-        meaning with respect to the MWE special syntax rules.
+        method, is that we apply the `re.escape` method to the tokens in the
+        MWE template and then replace `\*` with `[^\s_]*` so that the wildcards
+        keep there original meaning with respect to the MWE special syntax rules.
+        Furthermore, the POS tags in the MWE template replace the `*` with
+        `[^\s_]*`.
 
         # Parameters
 
@@ -642,33 +722,93 @@ class MWELexiconCollection(MutableMapping):
         >>> from pymusas.lexicon_collection import MWELexiconCollection
         >>> mwe_escaped = MWELexiconCollection.escape_mwe('ano*_prep carta_noun')
         >>> assert r'ano[^\s_]*_prep\ carta_noun' == mwe_escaped
+        >>> mwe_escaped = MWELexiconCollection.escape_mwe('ano_prep carta_*')
+        >>> assert r'ano_prep\ carta_[^\s_]*' == mwe_escaped
 
         ```
         '''
-        escaped_mwe_template = re.escape(mwe_template)
-        escaped_mwe_template = escaped_mwe_template.replace(r'\*', r'[^\s_]*')
+        
+        escaped_mwe_template_list: List[str] = []
+        for token, pos in utils.token_pos_tags_in_lexicon_entry(mwe_template):
+            escaped_token = re.escape(token).replace(r'\*', r'[^\s_]*')
+            escaped_pos = pos.replace(r'*', r'[^\s_]*')
+            escaped_mwe_template_list.append(f'{escaped_token}_{escaped_pos}')
+        escaped_mwe_template = r'\ '.join(escaped_mwe_template_list)
         return escaped_mwe_template
     
     def __setitem__(self, key: str, value: List[str]) -> None:
+        '''
+        # Raises
+
+        `ValueError`
+            If using a `pos_mapper` all POS tags within a MWE template cannot
+            contain any wildcards or the POS tags can only be a wildcard, if
+            this is not the case a `ValueError` will be raised.
+        '''
         semantic_tags = value
         key_n_gram_length = len(key.split())
         mwe_type: LexiconType = LexiconType.MWE_NON_SPECIAL
         wildcard_count = 0
         
-        if '*' in key:
-            mwe_type = LexiconType.MWE_WILDCARD
-            wildcard_count += key.count('*')
-            
-            if key_n_gram_length > self.longest_wildcard_mwe_template:
-                self.longest_wildcard_mwe_template = key_n_gram_length
-            
-            key_as_pattern = re.compile(self.escape_mwe(key))
-            self.mwe_regular_expression_lookup[key_n_gram_length][key[0]][key] = key_as_pattern
+        if not self.pos_mapper:
+            if '*' in key:
+                mwe_type = LexiconType.MWE_WILDCARD
+                wildcard_count += key.count('*')
+                
+                if key_n_gram_length > self.longest_wildcard_mwe_template:
+                    self.longest_wildcard_mwe_template = key_n_gram_length
+                
+                key_as_pattern = re.compile(self.escape_mwe(key))
+                self.mwe_regular_expression_lookup[key_n_gram_length][key[0]][key] = key_as_pattern
+            else:
+                
+                if key_n_gram_length > self.longest_non_special_mwe_template:
+                    self.longest_non_special_mwe_template = key_n_gram_length
         else:
+            contains_one_to_many_pos_tag = False
+            pos_mapped_key_list: List[str] = []
+            for token, pos in utils.token_pos_tags_in_lexicon_entry(key):
+                if '*' in pos:
+                    pos_error = ('When using a POS mapper a POS tag within '
+                                 'a lexicon entry cannot contain a wildcard'
+                                 ' unless the POS tag is only a wildcard '
+                                 'and no other characters. Leixcon entry '
+                                 'and POS tag in that entry that caused '
+                                 f'this error: {key} {pos}')
+                    if set(pos.strip()) != set('*'):
+                        raise ValueError(pos_error)
+
+                mapped_pos_list = self.pos_mapper.get(pos, [pos])
+                if len(mapped_pos_list) > 1:
+                    contains_one_to_many_pos_tag = True
+                    mapped_pos = '|'.join(mapped_pos_list)
+                    mapped_pos = '(?:' + mapped_pos + ')'
+                    pos_mapped_key_list.append(f'{token}_{mapped_pos}')
+                else:
+                    mapped_pos = mapped_pos_list[0]
+                    pos_mapped_key_list.append(f'{token}_{mapped_pos}')
+            pos_mapped_key = ' '.join(pos_mapped_key_list)
             
-            if key_n_gram_length > self.longest_non_special_mwe_template:
-                self.longest_non_special_mwe_template = key_n_gram_length
-        
+            if '*' in pos_mapped_key:
+                mwe_type = LexiconType.MWE_WILDCARD
+                wildcard_count += key.count('*')
+                
+                if key_n_gram_length > self.longest_wildcard_mwe_template:
+                    self.longest_wildcard_mwe_template = key_n_gram_length
+                
+                key_as_pattern = re.compile(self.escape_mwe(pos_mapped_key))
+                self.pos_mapping_regular_expression_lookup[mwe_type][key_n_gram_length][key[0]][key] = key_as_pattern
+            elif contains_one_to_many_pos_tag:
+                key_as_pattern = re.compile(self.escape_mwe(pos_mapped_key))
+                self.pos_mapping_regular_expression_lookup[mwe_type][key_n_gram_length][key[0]][key] = key_as_pattern
+                
+                if key_n_gram_length > self.longest_non_special_mwe_template:
+                    self.longest_non_special_mwe_template = key_n_gram_length
+            else:
+                self.pos_mapping_lookup[pos_mapped_key] = key
+                if key_n_gram_length > self.longest_non_special_mwe_template:
+                    self.longest_non_special_mwe_template = key_n_gram_length
+
         self.meta_data[key] = LexiconMetaData(semantic_tags, key_n_gram_length,
                                               mwe_type, wildcard_count)
 
@@ -706,8 +846,23 @@ class MWELexiconCollection(MutableMapping):
         
         lexicon_type = lexicon_meta_data.lexicon_type
         n_gram_length = lexicon_meta_data.n_gram_length
-        if lexicon_type == LexiconType.MWE_WILDCARD:
-            del self.mwe_regular_expression_lookup[n_gram_length][key[0]][key]
+        if self.pos_mapper:
+            if lexicon_type == LexiconType.MWE_WILDCARD:
+                del self.pos_mapping_regular_expression_lookup[lexicon_type][n_gram_length][key[0]][key]
+            if lexicon_type == LexiconType.MWE_NON_SPECIAL:
+                unique_pos_tags_in_key = utils.unique_pos_tags_in_lexicon_entry(key)
+                if self.one_to_many_pos_tags.intersection(unique_pos_tags_in_key):
+                    del self.pos_mapping_regular_expression_lookup[lexicon_type][n_gram_length][key[0]][key]
+                else:
+                    _key_to_delete = ''
+                    for _key, value in self.pos_mapping_lookup.items():
+                        if value == key:
+                            _key_to_delete = _key
+                    if _key_to_delete:
+                        del self.pos_mapping_lookup[_key_to_delete]
+        else:
+            if lexicon_type == LexiconType.MWE_WILDCARD:
+                del self.mwe_regular_expression_lookup[n_gram_length][key[0]][key]
         
         (self.longest_non_special_mwe_template,
          self.longest_wildcard_mwe_template) = _get_new_longest_n_gram_lengths()

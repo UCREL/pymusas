@@ -457,7 +457,8 @@ class MWELexiconCollection(MutableMapping):
  | ...
  | def __init__(
  |     self,
- |     data: Optional[Dict[str, List[str]]] = None
+ |     data: Optional[Dict[str, List[str]]] = None,
+ |     pos_mapper: Optional[Dict[str, List[str]]] = None
  | ) -> None
 ```
 
@@ -471,6 +472,9 @@ This collection allows users to:
 any special syntax rules that should be applied, e.g. wildcards allow zero
 or more characters to appear after the word token and/or Part Of Speech (POS) tag.
 For more information on the MWE special syntax rules see the following notes.
+3. POS mapping, it can find strings that match MWE templates while taking
+into account mapping from one POS tagset to another in both a one to one and
+one to many mapping.
 
 **Note** that even though this a sub-class of a MutableMapping it has a
 time complexity of O(n) for deletion unlike the standard Python MutableMapping,
@@ -484,6 +488,15 @@ this is due to keeping track of the `longest_non_special_mwe_template` and
 - __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
     Dictionary where the keys are MWE templates, of any [`LexiconType`](#lexicontype),
     and the values are a list of associated semantic tags.
+- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+    If not `None`, maps from the lexicon's POS tagset to the desired
+    POS tagset, whereby the mapping is a `List` of tags, at the moment there
+    is no preference order in this list of POS tags. The POS mapping is
+    useful in situtation whereby the leixcon's POS tagset is different to
+    the token's. **Note** that the longer the `List[str]` for each POS
+    mapping the longer it will take to match MWE templates. A one to one
+    mapping will have no speed impact on the tagger. A selection of POS
+    mappers can be found in [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
 
 <h4 id="mwelexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#mwelexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
 
@@ -502,10 +515,30 @@ be `0`.
     The longest MWE template with at least one wildcard (`*`) measured by n-gram size.
     For example the MWE template `*_noun boot*_noun` will be of length 2.
 - __mwe\_regular\_expression\_lookup__ : `Dict[int, Dict[str, Dict[str, re.Pattern]]]` <br/>
-    A dictionary that can lookup all special syntax MWE templates and there
-    regular expression pattern, only wildcard (`*`) symbols are supported, by
-    there n-gram length and then there first character symbol. The regular
+    A dictionary that can lookup all special syntax MWE templates there
+    regular expression pattern. These templates are found first by
+    their n-gram length and then their first character symbol. The regular
     expression pattern is used for quick matching within the [`mwe_match`](#mwe_match).
+    From the special syntax only wildcard (`*`) symbols are supported at the
+    moment.
+- __pos\_mapper__ : `Dict[str, List[str]]` <br/>
+    The given `pos_mapper`.
+- __one\_to\_many\_pos\_tags__ : `Set[str]` <br/>
+    A set of POS tags that have a one to many mapping, this is created based
+    on the `pos_mapper`. This is empty if `pos_mapper` is `None`
+- __pos\_mapping\_lookup__ : `Dict[str, str]` <br/>
+    Only used if `pos_mapper` is not `None`. For all one-to-one POS mappings
+    will store the mapped POS MWE template as keys and the original non-mapped
+    (original) MWE templates as values, which can be used to lookup the meta
+    data from `meta_data`.
+- __pos\_mapping\_regular\_expression\_lookup__ : `Dict[LexiconType, Dict[int, Dict[str, Dict[str, re.Pattern]]]]` <br/>
+    Only used if `pos_mapper` is not `None` and will result in
+    `mwe_regular_expression_lookup` being empty as it replaces it
+    functionality and extends it and by handlining the one-to-many POS
+    mapping cases. When we have a one-to-many POS mapping case this requires
+    a regular expression mapping even for non special syntax MWE templates.
+    Compared to the `mwe_regular_expression_lookup` the first set of keys
+    represent the lexicon entry match type.
 
 <h4 id="mwelexiconcollection.examples">Examples<a className="headerlink" href="#mwelexiconcollection.examples" title="Permanent link">&para;</a></h4>
 
@@ -685,9 +718,11 @@ Returns the MWE template escaped so that it can be used in a regular
 expression.
 
 The difference between this and the normal `re.escape`
-method, is that we apply the `re.escape` method to the MWE template and
-then replace `\*` with `[^\s_]*` so that the wildcards keep there original
-meaning with respect to the MWE special syntax rules.
+method, is that we apply the `re.escape` method to the tokens in the
+MWE template and then replace `\*` with `[^\s_]*` so that the wildcards
+keep there original meaning with respect to the MWE special syntax rules.
+Furthermore, the POS tags in the MWE template replace the `*` with
+`[^\s_]*`.
 
 <h4 id="escape_mwe.parameters">Parameters<a className="headerlink" href="#escape_mwe.parameters" title="Permanent link">&para;</a></h4>
 
@@ -707,7 +742,27 @@ meaning with respect to the MWE special syntax rules.
 from pymusas.lexicon_collection import MWELexiconCollection
 mwe_escaped = MWELexiconCollection.escape_mwe('ano*_prep carta_noun')
 assert r'ano[^\s_]*_prep\ carta_noun' == mwe_escaped
+mwe_escaped = MWELexiconCollection.escape_mwe('ano_prep carta_*')
+assert r'ano_prep\ carta_[^\s_]*' == mwe_escaped
 ```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.__setitem__"></a>
+
+### \_\_setitem\_\_
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def __setitem__(key: str, value: List[str]) -> None
+```
+
+<h4 id="__setitem__.raises">Raises<a className="headerlink" href="#__setitem__.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If using a `pos_mapper` all POS tags within a MWE template cannot
+    contain any wildcards or the POS tags can only be a wildcard, if
+    this is not the case a `ValueError` will be raised.
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.__str__"></a>
 
