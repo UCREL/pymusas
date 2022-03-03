@@ -1,4 +1,4 @@
-from typing import Set, Tuple, Iterable
+from typing import Iterable, Set, Tuple
 
 
 def token_pos_tags_in_lexicon_entry(lexicon_entry: str
