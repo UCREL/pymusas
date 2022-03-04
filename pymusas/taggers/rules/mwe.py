@@ -35,16 +35,14 @@ class MWERule(Rule):
         **Note** the longer the `List[str]` for
         each POS mapping the slower the tagger, a one to one mapping will have
         no speed impact on the tagger. A selection of POS mappers can be found in
-        :mod:`pymusas.pos_mapper`. **Note** this is given to the
-        :class:`pymusas.lexicon_collection.MWELexiconCollection` construction
-        when creating the `mwe_lexicon_collection` attribute.
+        :mod:`pymusas.pos_mapper`.
 
     # Instance Attributes
 
     mwe_lexicon_collection : `pymusas.lexicon_collection.MWELexiconCollection`
         A :class:`pymusas.lexicon_collection.MWELexiconCollection` instance that
-        has been initialised using the `mwe_lexicon_lookup` parameter.
-        This collection is used to find MWE rule matches.
+        has been initialised using the `mwe_lexicon_lookup` and `pos_mapper`
+        parameters. This collection is used to find MWE rule matches.
     '''
 
     def __init__(self, mwe_lexicon_lookup: Dict[str, List[str]],
