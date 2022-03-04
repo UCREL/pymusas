@@ -1,6 +1,0 @@
-mwe_template	semantic_tags
-North_noun East_noun London_*	Z1
-North_* East**_noun London_noun	Z2
-East_* London_noun	Z3
-East_* London_*	Z4
-*as*_noun London_*	Z5

@@ -13,7 +13,11 @@
 ```python
 class MWERule(Rule):
  | ...
- | def __init__(mwe_lexicon_lookup: Dict[str, List[str]]) -> None
+ | def __init__(
+ |     self,
+ |     mwe_lexicon_lookup: Dict[str, List[str]],
+ |     pos_mapper: Optional[Dict[str, List[str]]] = None
+ | ) -> None
 ```
 
 A Multi Word Expression (MWE) rule match can be one of the following matches:
@@ -37,14 +41,22 @@ lower cased versions of the token/lemma.
     Dictionary where the keys are MWE templates, of any
     [`pymusas.lexicon_collection.LexiconType`](/pymusas/api/lexicon_collection/#lexicontype),
     and the values are a list of associated semantic tags.
+- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+    If not `None`, maps from the `mwe_lexicon_lookup` POS tagset to the
+    desired POS tagset,whereby the mapping is a `List` of tags,
+    at the moment there is no preference order in this list of POS tags.
+    **Note** the longer the `List[str]` for
+    each POS mapping the slower the tagger, a one to one mapping will have
+    no speed impact on the tagger. A selection of POS mappers can be found in
+    [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
 
 <h4 id="mwerule.instance_attributes">Instance Attributes<a className="headerlink" href="#mwerule.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
 - __mwe\_lexicon\_collection__ : `pymusas.lexicon_collection.MWELexiconCollection` <br/>
     A [`pymusas.lexicon_collection.MWELexiconCollection`](/pymusas/api/lexicon_collection/#mwelexiconcollection) instance that
-    has been initialised using the `mwe_lexicon_lookup` parameter.
-    This collection is used to find MWE rule matches.
+    has been initialised using the `mwe_lexicon_lookup` and `pos_mapper`
+    parameters. This collection is used to find MWE rule matches.
 
 <a id="pymusas.taggers.rules.mwe.MWERule.__call__"></a>
 

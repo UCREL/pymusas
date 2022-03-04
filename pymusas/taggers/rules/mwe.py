@@ -1,4 +1,4 @@
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from pymusas.lexicon_collection import LexiconType, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import LexicalMatch, RankingMetaData
@@ -28,6 +28,16 @@ class MWERule(Rule):
         Dictionary where the keys are MWE templates, of any
         :class:`pymusas.lexicon_collection.LexiconType`,
         and the values are a list of associated semantic tags.
+    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+        If not `None`, maps from the `mwe_lexicon_lookup` POS tagset to the
+        desired POS tagset,whereby the mapping is a `List` of tags,
+        at the moment there is no preference order in this list of POS tags.
+        **Note** the longer the `List[str]` for
+        each POS mapping the slower the tagger, a one to one mapping will have
+        no speed impact on the tagger. A selection of POS mappers can be found in
+        :mod:`pymusas.pos_mapper`. **Note** this is given to the
+        :class:`pymusas.lexicon_collection.MWELexiconCollection` construction
+        when creating the `mwe_lexicon_collection` attribute.
 
     # Instance Attributes
 
@@ -37,9 +47,11 @@ class MWERule(Rule):
         This collection is used to find MWE rule matches.
     '''
 
-    def __init__(self, mwe_lexicon_lookup: Dict[str, List[str]]) -> None:
+    def __init__(self, mwe_lexicon_lookup: Dict[str, List[str]],
+                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
         
-        self.mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_lookup)
+        self.mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_lookup,
+                                                           pos_mapper)
 
     def __call__(self, tokens: List[str], lemmas: List[str], pos_tags: List[str]
                  ) -> List[List[RankingMetaData]]:
