@@ -110,6 +110,8 @@ def test_mwe_lexicon_collection_init() -> None:
     assert not empty_collection.mwe_regular_expression_lookup
     assert 0 == empty_collection.longest_non_special_mwe_template
     assert 0 == empty_collection.longest_wildcard_mwe_template
+    assert 0 == empty_collection.longest_mwe_template
+    assert 0 == empty_collection.most_wildcards_in_mwe_template
     assert {} == empty_collection.pos_mapper
     assert set() == empty_collection.one_to_many_pos_tags
     assert {} == empty_collection.pos_mapping_lookup
@@ -120,6 +122,8 @@ def test_mwe_lexicon_collection_init() -> None:
     assert len(lexicon_collection.mwe_regular_expression_lookup) == 2
     assert 4 == lexicon_collection.longest_non_special_mwe_template
     assert 3 == lexicon_collection.longest_wildcard_mwe_template
+    assert 4 == lexicon_collection.longest_mwe_template
+    assert 4 == lexicon_collection.most_wildcards_in_mwe_template
     assert {} == lexicon_collection.pos_mapper
     assert set() == lexicon_collection.one_to_many_pos_tags
     assert {} == lexicon_collection.pos_mapping_lookup
@@ -130,6 +134,8 @@ def test_mwe_lexicon_collection_init() -> None:
     assert len(lexicon_collection.mwe_regular_expression_lookup) == 0
     assert 4 == lexicon_collection.longest_non_special_mwe_template
     assert 3 == lexicon_collection.longest_wildcard_mwe_template
+    assert 4 == lexicon_collection.longest_mwe_template
+    assert 4 == lexicon_collection.most_wildcards_in_mwe_template
     assert POS_MAPPER == lexicon_collection.pos_mapper
     assert {'adj'} == lexicon_collection.one_to_many_pos_tags
     assert MWE_TEMPLATES_POS_MAPPING_NON_SPECIAL == lexicon_collection.pos_mapping_lookup
@@ -158,18 +164,24 @@ def test_mwe_lexicon_collection_set_get_del_item() -> None:
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert 3 == empty_collection.longest_non_special_mwe_template
     assert 0 == empty_collection.longest_wildcard_mwe_template
+    assert 3 == empty_collection.longest_mwe_template
+    assert 0 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection) == 2
 
     del empty_collection['a_prep carta_noun cabal_adj']
     assert len(empty_collection) == 1
     assert 2 == empty_collection.longest_non_special_mwe_template
     assert 0 == empty_collection.longest_wildcard_mwe_template
+    assert 2 == empty_collection.longest_mwe_template
+    assert 0 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     
     empty_collection['a_prep *_noun cabal_adj'] = ['A4', 'A5.1']
     assert len(empty_collection) == 2
     assert 2 == empty_collection.longest_non_special_mwe_template
     assert 3 == empty_collection.longest_wildcard_mwe_template
+    assert 3 == empty_collection.longest_mwe_template
+    assert 1 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 1
     
     assert ('a_prep *_noun cabal_adj'
@@ -203,6 +215,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert 4 == empty_collection.longest_non_special_mwe_template
     assert 3 == empty_collection.longest_wildcard_mwe_template
+    assert 4 == empty_collection.longest_mwe_template
+    assert 4 == empty_collection.most_wildcards_in_mwe_template
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
     assert MWE_TEMPLATES_POS_MAPPING_NON_SPECIAL == empty_collection.pos_mapping_lookup
@@ -214,6 +228,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection) == 5
     assert 3 == empty_collection.longest_non_special_mwe_template
     assert 3 == empty_collection.longest_wildcard_mwe_template
+    assert 3 == empty_collection.longest_mwe_template
+    assert 4 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
@@ -227,6 +243,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection) == 5
     assert 4 == empty_collection.longest_non_special_mwe_template
     assert 3 == empty_collection.longest_wildcard_mwe_template
+    assert 4 == empty_collection.longest_mwe_template
+    assert 4 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
@@ -239,6 +257,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection) == 4
     assert 3 == empty_collection.longest_non_special_mwe_template
     assert 3 == empty_collection.longest_wildcard_mwe_template
+    assert 3 == empty_collection.longest_mwe_template
+    assert 4 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
@@ -253,6 +273,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection) == 3
     assert 0 == empty_collection.longest_non_special_mwe_template
     assert 3 == empty_collection.longest_wildcard_mwe_template
+    assert 3 == empty_collection.longest_mwe_template
+    assert 4 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
@@ -266,6 +288,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection) == 2
     assert 0 == empty_collection.longest_non_special_mwe_template
     assert 2 == empty_collection.longest_wildcard_mwe_template
+    assert 2 == empty_collection.longest_mwe_template
+    assert 1 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
@@ -280,6 +304,8 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
     assert len(empty_collection) == 0
     assert 0 == empty_collection.longest_non_special_mwe_template
     assert 0 == empty_collection.longest_wildcard_mwe_template
+    assert 0 == empty_collection.longest_mwe_template
+    assert 0 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
@@ -288,20 +314,22 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
 
     # Test adding a POS one-to-many NON-SPECIAL lexicon entry so that it proves
     # it can update the longest_non_special_mwe_template attribute.
-    # Test that it raises a ValueError when inserting a template which contains
-    # a wildcard in the POS tag when the POS tags need to be mapped
     empty_collection['a_prep carta_noun cabal_adj'] = ['Z2']
     temp_expected_pos_mapping_regular_expressions[LexiconType.MWE_NON_SPECIAL][3]['a']['a_prep carta_noun cabal_adj'] \
         = re.compile(r'a_prep\ carta_noun\ cabal_(?:ADJ|JJ)')
     assert len(empty_collection) == 1
     assert 3 == empty_collection.longest_non_special_mwe_template
     assert 0 == empty_collection.longest_wildcard_mwe_template
+    assert 3 == empty_collection.longest_mwe_template
+    assert 0 == empty_collection.most_wildcards_in_mwe_template
     assert len(empty_collection.mwe_regular_expression_lookup) == 0
     assert POS_MAPPER == empty_collection.pos_mapper
     assert {'adj'} == empty_collection.one_to_many_pos_tags
     assert {} == empty_collection.pos_mapping_lookup
     assert temp_expected_pos_mapping_regular_expressions == empty_collection.pos_mapping_regular_expression_lookup
 
+    # Test that it raises a ValueError when inserting a template which contains
+    # a wildcard in the POS tag when the POS tags need to be mapped
     with pytest.raises(ValueError):
         empty_collection['it_det was_det great_adj*'] = ['Z1']
 
