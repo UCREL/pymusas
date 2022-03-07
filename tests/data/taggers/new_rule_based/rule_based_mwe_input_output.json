@@ -1,0 +1,14 @@
+[
+    {"token": "East", "lemma": "East", "pos": "noun", "usas": ["S3"],
+     "start_indexes": [0], "end_indexes": [2]},
+    {"token": "London", "lemma": "London", "pos": "noun", "usas": ["S3"],
+     "start_indexes": [0], "end_indexes": [2]},
+    {"token": "Test", "lemma": "Test", "pos": "noun", "usas": ["Z99"],
+     "start_indexes": [2], "end_indexes": [3]},
+    {"token": "North", "lemma": "North", "pos": "noun", "usas": ["S4"],
+     "start_indexes": [3], "end_indexes": [6]},
+    {"token": "East", "lemma": "East", "pos": "noun", "usas": ["S4"],
+     "start_indexes": [3], "end_indexes": [6]},
+    {"token": "London", "lemma": "London", "pos": "noun", "usas": ["S4"],
+     "start_indexes": [3], "end_indexes": [6]}
+]
