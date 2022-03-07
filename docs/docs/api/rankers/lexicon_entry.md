@@ -367,7 +367,7 @@ ranked with another entry then it is random which lexicon entry match is chosen.
     The largest n_gram rule match that will be encountered, e.g. a match
     of `ski_noun boot_noun` will have a n-gram length of 2.
 - __maximum\_number\_wildcards__ : `int` <br/>
-    The number of wildcards in the rule that contains the most wildcard, e.g.
+    The number of wildcards in the rule that contains the most wildcards, e.g.
     the rule `ski_* *_noun` would contain 2 wildcards. This can be 0 if you
     have no wildcard rules.
 
