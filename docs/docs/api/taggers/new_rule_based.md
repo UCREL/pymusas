@@ -27,7 +27,7 @@ to create a list of possible candidate tags for each token in the sequence.
 Each candidate, represented as a
 [`pymusas.rankers.lexicon_entry.RankingMetaData`](/pymusas/api/rankers/lexicon_entry/#rankingmetadata) object, for each
 token is then Ranked using a
-`[`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker) ranker. The best
+[`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker) ranker. The best
 candidate and it's associated tag(s) for each token are then returned along
 with a `List` of token indexes indicating if the token is part of a Multi
 Word Expression (MWE).

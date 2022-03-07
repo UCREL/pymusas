@@ -13,7 +13,7 @@ class RuleBasedTagger():
     Each candidate, represented as a
     :class:`pymusas.rankers.lexicon_entry.RankingMetaData` object, for each
     token is then Ranked using a
-    `:class:`pymusas.rankers.lexicon_entry.LexiconEntryRanker` ranker. The best
+    :class:`pymusas.rankers.lexicon_entry.LexiconEntryRanker` ranker. The best
     candidate and it's associated tag(s) for each token are then returned along
     with a `List` of token indexes indicating if the token is part of a Multi
     Word Expression (MWE).
