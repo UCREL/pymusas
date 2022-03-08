@@ -516,7 +516,7 @@ be `0`.
     For example the MWE template `*_noun boot*_noun` will be of length 2.
 - __longest\_mwe\_template__ : `int` <br/>
     The longest MWE template regardless of type measured by n-gram size.
-most_wildcards_in_mwe_template
+- __most\_wildcards\_in\_mwe\_template__ : `int` <br/>
     The number of wildcards in the MWE template that contains the
     most wildcards, e.g. the MWE template `ski_* *_noun` would contain 2
     wildcards. This can be 0 if you have no wildcard MWE templates.

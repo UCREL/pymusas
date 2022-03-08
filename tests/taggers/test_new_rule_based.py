@@ -1,14 +1,14 @@
 import json
 from pathlib import Path
-from typing import List, Tuple, Optional, Dict
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 
 from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.taggers.new_rule_based import RuleBasedTagger
-from pymusas.taggers.rules.single_word import SingleWordRule
 from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()

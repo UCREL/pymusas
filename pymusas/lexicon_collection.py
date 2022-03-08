@@ -415,7 +415,7 @@ class MWELexiconCollection(MutableMapping):
         For example the MWE template `*_noun boot*_noun` will be of length 2.
     longest_mwe_template : `int`
         The longest MWE template regardless of type measured by n-gram size.
-    most_wildcards_in_mwe_template
+    most_wildcards_in_mwe_template : `int`
         The number of wildcards in the MWE template that contains the
         most wildcards, e.g. the MWE template `ski_* *_noun` would contain 2
         wildcards. This can be 0 if you have no wildcard MWE templates.
@@ -762,6 +762,9 @@ class MWELexiconCollection(MutableMapping):
             if '*' in key:
                 mwe_type = LexiconType.MWE_WILDCARD
                 wildcard_count += key.count('*')
+
+                if wildcard_count > self.most_wildcards_in_mwe_template:
+                    self.most_wildcards_in_mwe_template = wildcard_count
                 
                 if key_n_gram_length > self.longest_wildcard_mwe_template:
                     self.longest_wildcard_mwe_template = key_n_gram_length
@@ -800,6 +803,9 @@ class MWELexiconCollection(MutableMapping):
             if '*' in pos_mapped_key:
                 mwe_type = LexiconType.MWE_WILDCARD
                 wildcard_count += key.count('*')
+
+                if wildcard_count > self.most_wildcards_in_mwe_template:
+                    self.most_wildcards_in_mwe_template = wildcard_count
                 
                 if key_n_gram_length > self.longest_wildcard_mwe_template:
                     self.longest_wildcard_mwe_template = key_n_gram_length
@@ -817,6 +823,8 @@ class MWELexiconCollection(MutableMapping):
                 if key_n_gram_length > self.longest_non_special_mwe_template:
                     self.longest_non_special_mwe_template = key_n_gram_length
 
+        self.longest_mwe_template = max(self.longest_non_special_mwe_template,
+                                        self.longest_wildcard_mwe_template)
         self.meta_data[key] = LexiconMetaData(semantic_tags, key_n_gram_length,
                                               mwe_type, wildcard_count)
 
@@ -825,19 +833,20 @@ class MWELexiconCollection(MutableMapping):
 
     def __delitem__(self, key: str) -> None:
         
-        def _get_new_longest_n_gram_lengths() -> Tuple[int, int]:
+        def _get_lexicon_statistics() -> Tuple[int, int, int]:
             '''
-            Returns the `longest_non_special_mwe_template` and
-            `longest_wildcard_mwe_template` in the `meta_data`. This is required
-            after deleting an MWE as we do not know if we have just deleted the
-            longest non-special or wildcard MWE.
+            Returns the `longest_non_special_mwe_template`,
+            `longest_wildcard_mwe_template`, and `most_wildcards_in_mwe_template`
+            in the `meta_data` as a `Tuple`. This is required as after deleting
+            an MWE we do not know if it has affected any of these statistics.
 
             # Returns
 
-            `Tuple[int, int]`
+            `Tuple[int, int, int]`
             '''
             longest_non_special_mwe_template = 0
             longest_wildcard_mwe_template = 0
+            wildcard_count = 0
             for value in self.values():
                 mwe_type = value.lexicon_type
                 key_n_gram_length = value.n_gram_length
@@ -847,7 +856,11 @@ class MWELexiconCollection(MutableMapping):
                 elif mwe_type == LexiconType.MWE_WILDCARD:
                     if key_n_gram_length > longest_wildcard_mwe_template:
                         longest_wildcard_mwe_template = key_n_gram_length
-            return longest_non_special_mwe_template, longest_wildcard_mwe_template
+                if value.wildcard_count > wildcard_count:
+                    wildcard_count = value.wildcard_count
+            return (longest_non_special_mwe_template,
+                    longest_wildcard_mwe_template,
+                    wildcard_count)
         
         lexicon_meta_data = self[key]
         del self.meta_data[key]
@@ -873,7 +886,10 @@ class MWELexiconCollection(MutableMapping):
                 del self.mwe_regular_expression_lookup[n_gram_length][key[0]][key]
         
         (self.longest_non_special_mwe_template,
-         self.longest_wildcard_mwe_template) = _get_new_longest_n_gram_lengths()
+         self.longest_wildcard_mwe_template,
+         self.most_wildcards_in_mwe_template) = _get_lexicon_statistics()
+        self.longest_mwe_template = max(self.longest_non_special_mwe_template,
+                                        self.longest_wildcard_mwe_template)
 
     def __len__(self) -> int:
         return len(self.meta_data)
