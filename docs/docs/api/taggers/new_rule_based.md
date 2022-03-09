@@ -16,7 +16,9 @@ class RuleBasedTagger:
  | def __init__(
  |     self,
  |     rules: List[Rule],
- |     ranker: LexiconEntryRanker
+ |     ranker: LexiconEntryRanker,
+ |     default_punctuation_tags: Optional[Set[str]] = None,
+ |     default_number_tags: Optional[Set[str]] = None
  | ) -> None
 ```
 
@@ -32,7 +34,12 @@ candidate and it's associated tag(s) for each token are then returned along
 with a `List` of token indexes indicating if the token is part of a Multi
 Word Expression (MWE).
 
-If we cannot tag a token the default assigned tag is `Z99`.
+If we cannot tag a token then the following process will happen:
+1. If the token's POS tag is in `default_punctuation_tags` then it will assign the
+tag `PUNC`.
+2. If the token's POS tag is in `default_number_tags` then it will assign the tag
+`N1`.
+3. Assign the default tag `Z99`.
 
 <h4 id="rulebasedtagger.parameters">Parameters<a className="headerlink" href="#rulebasedtagger.parameters" title="Permanent link">&para;</a></h4>
 
@@ -43,6 +50,12 @@ If we cannot tag a token the default assigned tag is `Z99`.
     to the `ranker`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     A ranker to rank the output from all of the `rules`.
+- __default\_punctuation\_tags__ : `Set[str]`, optional (default = `None`) <br/>
+    The POS tags that represent punctuation. If `None` then we will use
+    the `Set`: `set(['punc'])`.
+- __default\_number\_tags__ : `Set[str]`, optional (default = `None`) <br/>
+    The POS tags that represent numbers. If `None` then we will use
+    the `Set`: `set(['num'])`.
 
 <h4 id="rulebasedtagger.instance_attributes">Instance Attributes<a className="headerlink" href="#rulebasedtagger.instance_attributes" title="Permanent link">&para;</a></h4>
 
@@ -51,6 +64,10 @@ If we cannot tag a token the default assigned tag is `Z99`.
     The given `rules`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     The given `ranker`.
+- __default\_punctuation\_tags__ : `Set[str]` <br/>
+    The given `default_punctuation_tags`
+- __default\_number\_tags__ : `Set[str]` <br/>
+    The given `default_number_tags`
 
 <h4 id="rulebasedtagger.examples">Examples<a className="headerlink" href="#rulebasedtagger.examples" title="Permanent link">&para;</a></h4>
 

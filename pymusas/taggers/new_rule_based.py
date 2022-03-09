@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Optional, Set, Tuple
 
 from pymusas.rankers.lexicon_entry import LexiconEntryRanker, RankingMetaData
 from pymusas.taggers.rules.rule import Rule
@@ -18,7 +18,12 @@ class RuleBasedTagger():
     with a `List` of token indexes indicating if the token is part of a Multi
     Word Expression (MWE).
 
-    If we cannot tag a token the default assigned tag is `Z99`.
+    If we cannot tag a token then the following process will happen:
+    1. If the token's POS tag is in `default_punctuation_tags` then it will assign the
+    tag `PUNCT`.
+    2. If the token's POS tag is in `default_number_tags` then it will assign the tag
+    `N1`.
+    3. Assign the default tag `Z99`.
 
     # Parameters
 
@@ -28,13 +33,23 @@ class RuleBasedTagger():
         to the `ranker`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
         A ranker to rank the output from all of the `rules`.
-
+    default_punctuation_tags : `Set[str]`, optional (default = `None`)
+        The POS tags that represent punctuation. If `None` then we will use
+        the `Set`: `set(['punc'])`.
+    default_number_tags : `Set[str]`, optional (default = `None`)
+        The POS tags that represent numbers. If `None` then we will use
+        the `Set`: `set(['num'])`.
+    
     # Instance Attributes
 
     rules : `List[pymusas.taggers.rules.rule.Rule]`
         The given `rules`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
         The given `ranker`.
+    default_punctuation_tags : `Set[str]`
+        The given `default_punctuation_tags`
+    default_number_tags : `Set[str]`
+        The given `default_number_tags`
 
     # Examples
     ``` python
@@ -54,11 +69,20 @@ class RuleBasedTagger():
     ```
     '''
 
-    def __init__(self, rules: List[Rule], ranker: LexiconEntryRanker
-                 ) -> None:
+    def __init__(self, rules: List[Rule], ranker: LexiconEntryRanker,
+                 default_punctuation_tags: Optional[Set[str]] = None,
+                 default_number_tags: Optional[Set[str]] = None) -> None:
 
         self.rules = rules
         self.ranker = ranker
+
+        self.default_punctuation_tags = set(['punc'])
+        if default_punctuation_tags is not None:
+            self.default_punctuation_tags = default_punctuation_tags
+        
+        self.default_number_tags = set(['num'])
+        if default_number_tags is not None:
+            self.default_number_tags = default_number_tags
 
     def __call__(self, tokens: List[str], lemmas: List[str],
                  pos_tags: List[str]) -> List[Tuple[List[str],
@@ -123,8 +147,16 @@ class RuleBasedTagger():
         tags_indexes: List[Tuple[List[str], List[Tuple[int, int]]]] = []
         for token_index, best_rank in enumerate(token_best_rank):
             if best_rank is None:
-                tags_indexes.append((['Z99'],
-                                     [(token_index, token_index + 1)]))
+                pos_tag = pos_tags[token_index]
+                if pos_tag in self.default_punctuation_tags:
+                    tags_indexes.append((['PUNCT'],
+                                         [(token_index, token_index + 1)]))
+                elif pos_tag in self.default_number_tags:
+                    tags_indexes.append((['N1'],
+                                         [(token_index, token_index + 1)]))
+                else:
+                    tags_indexes.append((['Z99'],
+                                         [(token_index, token_index + 1)]))
                 continue
             tags = list(best_rank.semantic_tags)
             indexes = [(best_rank.token_match_start_index,

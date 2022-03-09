@@ -128,6 +128,19 @@ def test_rule_based_tagger__call__() -> None:
     with pytest.raises(ValueError):
         tagger(['', '', ''], ['', ''], [''])
 
+    # Test the default punctutation and number POS tags
+    expected_output = [
+        (['PUNCT'], [(0, 1)]),
+        (['N1'], [(1, 2)])
+    ]
+    assert expected_output == tagger(['test', 'test'], ['', ''], ['punc', 'num'])
+    
+    # Test the punctutation and number POS tags when set by the user
+    tagger = RuleBasedTagger([], ranker, set(['pu', 'pc']), set(['nu', 'st']))
+    assert expected_output == tagger(['test', 'test'], ['', ''], ['pc', 'st'])
+    assert expected_output == tagger(['test', 'test'], ['', ''], ['pu', 'nu'])
+    assert expected_output != tagger(['test', 'test'], ['', ''], ['punc', 'num'])
+
     # Test the case where we only use single word lexicon rules.
     test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_single_input_output.json')
     
