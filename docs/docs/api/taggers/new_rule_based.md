@@ -36,7 +36,7 @@ Word Expression (MWE).
 
 If we cannot tag a token then the following process will happen:
 1. If the token's POS tag is in `default_punctuation_tags` then it will assign the
-tag `PUNC`.
+tag `PUNCT`.
 2. If the token's POS tag is in `default_number_tags` then it will assign the tag
 `N1`.
 3. Assign the default tag `Z99`.
