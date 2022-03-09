@@ -3,7 +3,8 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Union
 
 from pymusas.lexicon_collection import LexiconCollection, LexiconType
-from pymusas.rankers.lexicon_entry import LexicalMatch, RankingMetaData
+from pymusas.rankers.lexical_match import LexicalMatch
+from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 

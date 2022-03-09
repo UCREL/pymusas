@@ -25,7 +25,7 @@ tokens and their associated lingustic data (lemma, Part Of Speech (POS))
 to tag will apply one or more [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule)s
 to create a list of possible candidate tags for each token in the sequence.
 Each candidate, represented as a
-[`pymusas.rankers.lexicon_entry.RankingMetaData`](/pymusas/api/rankers/lexicon_entry/#rankingmetadata) object, for each
+[`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object, for each
 token is then Ranked using a
 [`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker) ranker. The best
 candidate and it's associated tag(s) for each token are then returned along
@@ -93,8 +93,8 @@ Part Of Speech (POS) tags it returns for each token:
 2. A `List` of `Tuples` whereby each `Tuple` indicates the start and end
 token index of the associated Multi Word Expression (MWE). If the `List` contains
 more than one `Tuple` then the MWE is discontinuous. For single word
-expressions the `List` will only contain 1 `Tuple` which will only contain
-an index of (start_index, start_index + 1).
+expressions the `List` will only contain 1 `Tuple` which will be
+(token_start_index, token_start_index + 1).
 
 All the generated tags and MWEs are based on the rules and ranker given
 to this model.

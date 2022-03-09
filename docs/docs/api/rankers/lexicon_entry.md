@@ -6,237 +6,6 @@
 
 ---
 
-<a id="pymusas.rankers.lexicon_entry.LexicalMatch"></a>
-
-## LexicalMatch
-
-```python
-class LexicalMatch(IntEnum)
-```
-
-Descriptions of the lexical matches and their ordering in tagging priority
-during ranking. Lower the value and rank the higher the tagging priority.
-
-The `value` attribute of each instance attribute is of type `int`. For the
-best explanation see the example below.
-
-<h4 id="lexicalmatch.instance_attributes">Instance Attributes<a className="headerlink" href="#lexicalmatch.instance_attributes" title="Permanent link">&para;</a></h4>
-
-
-- __TOKEN__ : `int` <br/>
-    The lexicon entry matched on the token text.
-- __LEMMA__ : `int` <br/>
-    The lexicon entry matched on the lemma of the token.
-- __TOKEN\_LOWER__ : `int` <br/>
-    The lexicon entry matched on the lower cased token text.
-- __LEMMA\_LOWER__ : `int` <br/>
-    The lexicon entry matched on the lower cased lemma of the token.
-
-<h4 id="lexicalmatch.examples">Examples<a className="headerlink" href="#lexicalmatch.examples" title="Permanent link">&para;</a></h4>
-
-``` python
-from pymusas.rankers.lexicon_entry import LexicalMatch
-assert 1 == LexicalMatch.TOKEN
-assert 'TOKEN' == LexicalMatch.TOKEN.name
-assert 1 == LexicalMatch.TOKEN.value
-
-assert 2 == LexicalMatch.LEMMA
-assert 3 == LexicalMatch.TOKEN_LOWER
-assert 4 == LexicalMatch.LEMMA_LOWER
-
-assert 2 < LexicalMatch.LEMMA_LOWER
-```
-
-<a id="pymusas.rankers.lexicon_entry.LexicalMatch.TOKEN"></a>
-
-#### TOKEN
-
-```python
-class LexicalMatch(IntEnum):
- | ...
- | TOKEN = 1
-```
-
-<a id="pymusas.rankers.lexicon_entry.LexicalMatch.LEMMA"></a>
-
-#### LEMMA
-
-```python
-class LexicalMatch(IntEnum):
- | ...
- | LEMMA = 2
-```
-
-<a id="pymusas.rankers.lexicon_entry.LexicalMatch.TOKEN_LOWER"></a>
-
-#### TOKEN\_LOWER
-
-```python
-class LexicalMatch(IntEnum):
- | ...
- | TOKEN_LOWER = 3
-```
-
-<a id="pymusas.rankers.lexicon_entry.LexicalMatch.LEMMA_LOWER"></a>
-
-#### LEMMA\_LOWER
-
-```python
-class LexicalMatch(IntEnum):
- | ...
- | LEMMA_LOWER = 4
-```
-
-<a id="pymusas.rankers.lexicon_entry.LexicalMatch.__repr__"></a>
-
-### \_\_repr\_\_
-
-```python
-class LexicalMatch(IntEnum):
- | ...
- | def __repr__() -> str
-```
-
-Machine readable string. When printed and run `eval()` over the string
-you should be able to recreate the object.
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData"></a>
-
-## RankingMetaData
-
-```python
-@dataclass(init=True, repr=True, eq=True, order=False,
-           unsafe_hash=False, frozen=True)
-class RankingMetaData
-```
-
-A RankingMetaData object contains all of the meta data about a lexicon
-entry match during the tagging process. This meta data can then be used
-to determine the ranking of the match comapred to other matches within the
-same text/sentence that is being tagged.
-
-<h4 id="rankingmetadata.instance_attributes">Instance Attributes<a className="headerlink" href="#rankingmetadata.instance_attributes" title="Permanent link">&para;</a></h4>
-
-
-- __lexicon\_type__ : `LexiconType` <br/>
-    Type associated to the lexicon entry.
-- __lexicon\_n\_gram\_length__ : `int` <br/>
-    The n-gram size of the lexicon entry, e.g. `*_noun boot*_noun` will be
-    of length 2 and all single word lexicon entries will be of length 1.
-- __lexicon\_wildcard\_count__ : `int` <br/>
-    Number of wildcards in the lexicon entry, e.g. `*_noun boot*_noun` will
-    be 2 and `ski_noun boot_noun` will be 0.
-- __exclude\_pos\_information__ : `bool` <br/>
-    Whether the POS information was excluded in the match. This is only `True`
-    when the match ignores the POS information for single word lexicon entries.
-    This is always `False` when used in a Multi Word Expression (MWE) lexicon
-    entry match.
-- __lexical\_match__ : `LexicalMatch` <br/>
-    What [`LexicalMatch`](#lexicalmatch) the lexicon entry matched on.
-- __token\_match\_start\_index__ : `int` <br/>
-    Index of the first token in the lexicon entry match.
-- __token\_match\_end\_index__ : `int` <br/>
-    Index of the last token in the lexicon entry match.
-- __lexicon\_entry\_match__ : `str` <br/>
-    The lexicon entry match, which can be either a single word or MWE entry
-    match. In the case for single word this could be `Car|noun` and in the
-    case for a MWE it would be it's template, e.g. `snow_noun boots_noun`.
-- __semantic\_tags__ : `Tuple[str, ...]` <br/>
-    The semantic tags associated with the lexicon entry. The semantic tags
-    are in rank order, the most likely tag is the first tag in the tuple.
-    The Tuple can be of variable length hence the `...` in the
-    type annotation.
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexicon_type"></a>
-
-#### lexicon\_type
-
-```python
-class RankingMetaData:
- | ...
- | lexicon_type: LexiconType = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexicon_n_gram_length"></a>
-
-#### lexicon\_n\_gram\_length
-
-```python
-class RankingMetaData:
- | ...
- | lexicon_n_gram_length: int = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexicon_wildcard_count"></a>
-
-#### lexicon\_wildcard\_count
-
-```python
-class RankingMetaData:
- | ...
- | lexicon_wildcard_count: int = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.exclude_pos_information"></a>
-
-#### exclude\_pos\_information
-
-```python
-class RankingMetaData:
- | ...
- | exclude_pos_information: bool = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexical_match"></a>
-
-#### lexical\_match
-
-```python
-class RankingMetaData:
- | ...
- | lexical_match: LexicalMatch = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.token_match_start_index"></a>
-
-#### token\_match\_start\_index
-
-```python
-class RankingMetaData:
- | ...
- | token_match_start_index: int = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.token_match_end_index"></a>
-
-#### token\_match\_end\_index
-
-```python
-class RankingMetaData:
- | ...
- | token_match_end_index: int = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.lexicon_entry_match"></a>
-
-#### lexicon\_entry\_match
-
-```python
-class RankingMetaData:
- | ...
- | lexicon_entry_match: str = None
-```
-
-<a id="pymusas.rankers.lexicon_entry.RankingMetaData.semantic_tags"></a>
-
-#### semantic\_tags
-
-```python
-class RankingMetaData:
- | ...
- | semantic_tags: Tuple[str, ...] = None
-```
-
 <a id="pymusas.rankers.lexicon_entry.LexiconEntryRanker"></a>
 
 ## LexiconEntryRanker
@@ -248,7 +17,8 @@ class LexiconEntryRanker(ABC)
 An **abstract class** that defines the basic method, `__call__`, that is
 required for all [`LexiconEntryRanker`](#lexiconentryranker)s.
 
-Each lexicon entry match is represented by a [`RankingMetaData`](#rankingmetadata) object.
+Each lexicon entry match is represented by a
+[`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object.
 
 **Lower ranked lexicon entry matches should be given priority when making
 tagging decisions. A rank of 0 is better than a rank of 1.**
@@ -291,15 +61,15 @@ class LexiconEntryRanker(ABC):
 ```
 
 For each token it returns a `List` of rankings for each lexicon entry
-match and the optional [`RankingMetaData`](#rankingmetadata) object of the **global**
-lowest ranked match for each token.
+match and the optional [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
+object of the **global** lowest ranked match for each token.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
 - __token\_ranking\_data__ : `List[List[RankingMetaData]]` <br/>
-    For each token a `List` of [`RankingMetaData`](#rankingmetadata) representing
-    the lexicon entry match.
+    For each token a `List` of [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
+    representing the lexicon entry match.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
@@ -322,7 +92,8 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
 The contextual rule based ranker creates ranks based on the rules stated below.
 
-Each lexicon entry match is represented by a [`RankingMetaData`](#rankingmetadata) object.
+Each lexicon entry match is represented by a
+[`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object.
 
 **Lower ranked lexicon entry matches should be given priority when making
 tagging decisions. See the [`LexiconEntryRanker`](#lexiconentryranker) class docstring for
@@ -386,6 +157,50 @@ ranked with another entry then it is random which lexicon entry match is chosen.
     Maps the n-gram length to it's rank value, as the n-gram length is
     inverse to it's rank, as the larger the n-gram length the lower it's
     rank.
+
+<a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.get_construction_arguments"></a>
+
+### get\_construction\_arguments
+
+```python
+class ContextualRuleBasedRanker(LexiconEntryRanker):
+ | ...
+ | @staticmethod
+ | def get_construction_arguments(
+ |     rules: List['Rule']
+ | ) -> Tuple[int, int]
+```
+
+Given a `List` of rules it will return the `maximum_n_gram_length` and
+`maximum_number_wildcards` from the lexicon collections that those
+[`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule)(s) are based on. The output from
+this function can then be used as the arguments to the constructor of
+[`ContextualRuleBasedRanker`](#contextualrulebasedranker).
+
+<h4 id="get_construction_arguments.parameters">Parameters<a className="headerlink" href="#get_construction_arguments.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __rules__ : `List[Rule]` <br/>
+    A `List` of rules. This `List` is typically required when creating
+    a [`pymusas.taggers.new_rule_based.RuleBasedTagger`](/pymusas/api/taggers/new_rule_based/#rulebasedtagger) tagger.
+
+<h4 id="get_construction_arguments.returns">Returns<a className="headerlink" href="#get_construction_arguments.returns" title="Permanent link">&para;</a></h4>
+
+
+- `Tuple[int, int]` <br/>
+
+<h4 id="get_construction_arguments.examples">Examples<a className="headerlink" href="#get_construction_arguments.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.lexicon_collection import MWELexiconCollection
+pt_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv"
+mwe_dict = MWELexiconCollection.from_tsv(pt_mwe_lexicon_url)
+mwe_rule = MWERule(mwe_dict)
+ranker_construction_arguments = ContextualRuleBasedRanker.get_construction_arguments([mwe_rule])
+ranker = ContextualRuleBasedRanker(*ranker_construction_arguments)
+```
 
 <a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.int_2_str"></a>
 
@@ -454,15 +269,17 @@ O(N + P) + O(M log M) + O(M)
 
 
 - __token\_ranking\_data__ : `List[List[RankingMetaData]]` <br/>
-    For each token a `List` of [`RankingMetaData`](#rankingmetadata) representing
+    For each token a `List` of
+    [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) representing
     the lexicon entry match.
 - __token\_rankings__ : `List[List[int]]` <br/>
     For each token contains the ranks of the lexicon entry matches.
     **Note** that the `List` can be empty if a token has no lexicon
     entry matches.
 - __ranking\_data\_to\_exclude__ : `Set[RankingMetaData]`, optional (default = `None`) <br/>
-    Any [`RankingMetaData`](#rankingmetadata) to exclude from the ranking selection, this can
-    be useful when wanting to get the next best global rank for each token.
+    Any [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) to
+    exclude from the ranking selection, this can be useful when wanting
+    to get the next best global rank for each token.
 
 <h4 id="get_global_lowest_ranks.raises">Raises<a className="headerlink" href="#get_global_lowest_ranks.raises" title="Permanent link">&para;</a></h4>
 
@@ -475,9 +292,9 @@ O(N + P) + O(M log M) + O(M)
 
 ``` python
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
-from pymusas.rankers.lexicon_entry import RankingMetaData
-from pymusas.rankers.lexicon_entry import LexiconType
-from pymusas.rankers.lexicon_entry import LexicalMatch
+from pymusas.rankers.ranking_meta_data import RankingMetaData
+from pymusas.lexicon_collection import LexiconType
+from pymusas.rankers.lexical_match import LexicalMatch
 north_east = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0,
                              False, LexicalMatch.TOKEN, 0, 2,
                              'North_noun East_noun', ('Z1',))
@@ -532,8 +349,8 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 ```
 
 For each token it returns a `List` of rankings for each lexicon entry
-match and the optional [`RankingMetaData`](#rankingmetadata) object of the **global**
-lowest ranked match for each token.
+match and the optional [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
+object of the **global** lowest ranked match for each token.
 
 See the ranking rules in the class docstring for details on how
 each lexicon entry match is ranked.
@@ -548,8 +365,8 @@ O(3(N + P)) + O(M log M) + O(M)
 
 
 - __token\_ranking\_data__ : `List[List[RankingMetaData]]` <br/>
-    For each token a `List` of [`RankingMetaData`](#rankingmetadata) representing
-    the lexicon entry match.
+    For each token a `List` of [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
+    representing the lexicon entry match.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
@@ -560,9 +377,9 @@ O(3(N + P)) + O(M log M) + O(M)
 
 ```python
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
-from pymusas.rankers.lexicon_entry import RankingMetaData
-from pymusas.rankers.lexicon_entry import LexiconType
-from pymusas.rankers.lexicon_entry import LexicalMatch
+from pymusas.rankers.ranking_meta_data import RankingMetaData
+from pymusas.lexicon_collection import LexiconType
+from pymusas.rankers.lexical_match import LexicalMatch
 north_east = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 0,
                              False, LexicalMatch.TOKEN, 0, 2,
                              'North_noun East_noun', ('Z1',))

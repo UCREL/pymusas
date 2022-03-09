@@ -1,6 +1,6 @@
 from typing import List
 
-from pymusas.rankers.lexicon_entry import RankingMetaData
+from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.rule import Rule
 
 

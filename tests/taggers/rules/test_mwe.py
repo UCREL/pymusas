@@ -6,7 +6,8 @@ from _pytest.fixtures import SubRequest
 import pytest
 
 from pymusas.lexicon_collection import LexiconType
-from pymusas.rankers.lexicon_entry import LexicalMatch, RankingMetaData
+from pymusas.rankers.lexical_match import LexicalMatch
+from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.mwe import MWERule
 from pymusas.utils import token_pos_tags_in_lexicon_entry
 

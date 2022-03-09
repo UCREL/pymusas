@@ -1,7 +1,8 @@
 from typing import Dict, List, Optional
 
 from pymusas.lexicon_collection import LexiconCollection, LexiconType
-from pymusas.rankers.lexicon_entry import LexicalMatch, RankingMetaData
+from pymusas.rankers.lexical_match import LexicalMatch
+from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.rule import Rule
 
 
@@ -66,8 +67,8 @@ class SingleWordRule(Rule):
         '''
         Given the tokens, lemmas, and POS tags for each word in a text,
         it returns for each token a `List` of rules matches defined by
-        the :class:`pymusas.rankers.lexicon_entry.RankingMetaData` object based on
-        the rule matches stated in the class docstring above.
+        the :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
+        object based on the rule matches stated in the class docstring above.
         
         # Parameters
 

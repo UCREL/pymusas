@@ -19,7 +19,7 @@ required for all [`Rule`](#rule)s.
 
 A Rule when called, `__call__`, creates a `List` of rules matches for each
 token, whereby each rule matched is defined by the
-[`pymusas.rankers.lexicon_entry.RankingMetaData`](/pymusas/api/rankers/lexicon_entry/#rankingmetadata) object. These
+[`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object. These
 rules matches per token can then be, optionally, combined with other rule
 matches per token from other [`Rule`](#rule) classes to then be ranked by a
 [`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker).
@@ -41,7 +41,7 @@ class Rule(ABC):
 ```
 
 For each token it returns a `List` of rules matches defined by the
-[`pymusas.rankers.lexicon_entry.RankingMetaData`](/pymusas/api/rankers/lexicon_entry/#rankingmetadata) object.
+[`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object.
 
 Each `List` of `tokens`, `lemmas`, and `pos_tags` are assumed to be of
 equal length.

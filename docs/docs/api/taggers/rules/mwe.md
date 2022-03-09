@@ -75,7 +75,7 @@ class MWERule(Rule):
 
 Given the tokens, lemmas, and POS tags for each word in a text,
 it returns for each token a `List` of rules matches defined by
-the [`pymusas.rankers.lexicon_entry.RankingMetaData`](/pymusas/api/rankers/lexicon_entry/#rankingmetadata) object based on
+the [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object based on
 the rule matches stated in the class docstring above.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>

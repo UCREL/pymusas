@@ -1,68 +1,19 @@
-from dataclasses import FrozenInstanceError
 from typing import List, Optional, Tuple
 
 import pytest
 
-from pymusas.lexicon_collection import LexiconType
-from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker, LexicalMatch, LexiconEntryRanker, RankingMetaData
+from pymusas.lexicon_collection import LexiconCollection, LexiconType, MWELexiconCollection
+from pymusas.rankers.lexical_match import LexicalMatch
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker, LexiconEntryRanker
+from pymusas.rankers.ranking_meta_data import RankingMetaData
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
+from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 RANKING_META_DATA = RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2, 1,
                                     False, LexicalMatch.TOKEN, 1, 3,
                                     'snow_noun boot_noun', ('Z5', 'Z4'))
-
-
-def test_lexical_match() -> None:
-    expected_name_values = [('TOKEN', 1), ('LEMMA', 2),
-                            ('TOKEN_LOWER', 3), ('LEMMA_LOWER', 4)]
-    for name, value in expected_name_values:
-        assert value == getattr(LexicalMatch, name)
-    
-    assert 2 < LexicalMatch.LEMMA_LOWER
-    assert 2 > LexicalMatch.TOKEN
-
-    eval(LexicalMatch.TOKEN.__repr__())
-    assert LexicalMatch.TOKEN == eval(LexicalMatch.TOKEN.__repr__())
-
-
-def test_ranking_meta_data() -> None:
-    assert 2 == RANKING_META_DATA.lexicon_n_gram_length
-    assert LexiconType.MWE_NON_SPECIAL == RANKING_META_DATA.lexicon_type
-    assert 1 == RANKING_META_DATA.lexicon_wildcard_count
-    assert not RANKING_META_DATA.exclude_pos_information
-    assert LexicalMatch.TOKEN == RANKING_META_DATA.lexical_match
-    assert 1 == RANKING_META_DATA.token_match_start_index
-    assert 3 == RANKING_META_DATA.token_match_end_index
-    assert 'snow_noun boot_noun' == RANKING_META_DATA.lexicon_entry_match
-    assert ('Z5', 'Z4') == RANKING_META_DATA.semantic_tags
-
-    expected_str = ("RankingMetaData(lexicon_type=LexiconType.MWE_NON_SPECIAL, "
-                    "lexicon_n_gram_length=2, "
-                    "lexicon_wildcard_count=1, exclude_pos_information=False,"
-                    " lexical_match=LexicalMatch.TOKEN, "
-                    "token_match_start_index=1, token_match_end_index=3,"
-                    " lexicon_entry_match='snow_noun boot_noun', "
-                    "semantic_tags=('Z5', 'Z4'))")
-    assert expected_str == str(RANKING_META_DATA)
-
-    with pytest.raises(FrozenInstanceError):
-        for attribute in ['lexicon_n_gram_length', 'lexicon_type',
-                          'lexicon_wildcard_count', 'exclude_pos_information',
-                          'lexical_match', 'token_match_start_index',
-                          'token_match_end_index', 'lexicon_entry_match',
-                          'semantic_tags']:
-            setattr(RANKING_META_DATA, attribute, 'test')
-    
-    assert RANKING_META_DATA != RankingMetaData(LexiconType.MWE_NON_SPECIAL, 1,
-                                                1, False, LexicalMatch.TOKEN, 1,
-                                                3, 'snow_noun boot_noun',
-                                                ('Z5', 'Z4'))
-    assert RANKING_META_DATA == RankingMetaData(LexiconType.MWE_NON_SPECIAL, 2,
-                                                1, False, LexicalMatch.TOKEN, 1,
-                                                3, 'snow_noun boot_noun',
-                                                ('Z5', 'Z4'))
-    eval(RANKING_META_DATA.__repr__())
-    assert RANKING_META_DATA == eval(RANKING_META_DATA.__repr__())
 
 
 def test_lexicon_entry_ranker() -> None:
@@ -475,3 +426,32 @@ def test_contextual_rule_based_ranker_get_global_lowest_ranks() -> None:
     with pytest.raises(AssertionError):
         ContextualRuleBasedRanker.get_global_lowest_ranks(token_ranking_data,
                                                           token_rankings)
+
+
+def test_contextual_rule_based_ranker_get_construction_arguments() -> None:
+    rules: List[Rule] = []
+    # Empty case
+    assert (0, 0) == ContextualRuleBasedRanker.get_construction_arguments(rules)
+
+    # Single Word Rules
+    pt_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv"
+    single_lexicon = LexiconCollection.from_tsv(pt_lexicon_url)
+    single_lemma_lexicon = LexiconCollection.from_tsv(pt_lexicon_url, False)
+    single_word_rule = SingleWordRule(single_lexicon, single_lemma_lexicon)
+    rules.append(single_word_rule)
+    assert (1, 0) == ContextualRuleBasedRanker.get_construction_arguments(rules)
+
+    pt_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv"
+    mwe_lexicon = MWELexiconCollection.from_tsv(pt_mwe_lexicon_url)
+    mwe_word_rule = MWERule(mwe_lexicon)
+    rules.append(mwe_word_rule)
+    assert (9, 4) == ContextualRuleBasedRanker.get_construction_arguments(rules)
+
+    es_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Spanish/mwe-es.tsv"
+    es_mwe_lexicon = MWELexiconCollection.from_tsv(es_mwe_lexicon_url)
+    es_mwe_word_rule = MWERule(es_mwe_lexicon)
+    rules.append(es_mwe_word_rule)
+    assert (9, 4) == ContextualRuleBasedRanker.get_construction_arguments(rules)
+
+    del rules[1]
+    assert (9, 1) == ContextualRuleBasedRanker.get_construction_arguments(rules)
