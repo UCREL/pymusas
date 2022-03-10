@@ -8,7 +8,7 @@ class RuleBasedTagger():
     '''
     The tagger when called, through :func:`__call__`, and given a sequence of
     tokens and their associated lingustic data (lemma, Part Of Speech (POS))
-    to tag will apply one or more :class:`pymusas.taggers.rules.rule.Rule`s
+    will apply one or more :class:`pymusas.taggers.rules.rule.Rule`s
     to create a list of possible candidate tags for each token in the sequence.
     Each candidate, represented as a
     :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` object, for each
