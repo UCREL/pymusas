@@ -21,7 +21,7 @@ Defines a custom attribute of the spaCy Token which becomes avaliable
 via `Token._.{extension_name}`. The difference between this and using the
 spaCy [Token.set_extension method](https://spacy.io/api/token#set_extension)
 is this method will check if the extension exists already and if so will force it
-through and output a log message that it has had to force this through.
+through and output an UserWarning message that it has had to force this through.
 
 <h4 id="set_custom_token_extension.parameters">Parameters<a className="headerlink" href="#set_custom_token_extension.parameters" title="Permanent link">&para;</a></h4>
 
@@ -52,9 +52,9 @@ by replacing the `old_attribute_name` with the `new_attribute_name`.
 - __factory\_name__ : `str` <br/>
     The name of the component factory, e.g. `pymusas_rule_based_tagger`
 - __new\_attribute\_name__ : `str` <br/>
-    The name of the new `{new_attribute_name}` attribute that is
-    required for this component. An example, `token.pos`
+    The name of the new attribute that is required for this component.
+    An example, `token.pos`.
 - __old\_attribute\_name__ : `str` <br/>
-    The name of the `{old_attribute_name}` that is to be replaced with
-    the `new_attribute_name`. An example, `token.tag`
+    The name of the old attribute that is to be replaced with
+    the `new_attribute_name`. An example, `token.tag`.
 

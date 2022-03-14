@@ -17,7 +17,7 @@ def set_custom_token_extension(extension_name: str) -> None:
     via `Token._.{extension_name}`. The difference between this and using the
     spaCy [Token.set_extension method](https://spacy.io/api/token#set_extension)
     is this method will check if the extension exists already and if so will force it
-    through and output a log message that it has had to force this through.
+    through and output an UserWarning message that it has had to force this through.
 
     # Parameters
 
@@ -52,11 +52,11 @@ def update_factory_attributes(factory_name: str, new_attribute_name: str,
     factory_name : `str`
         The name of the component factory, e.g. `pymusas_rule_based_tagger`
     new_attribute_name : `str`
-        The name of the new `{new_attribute_name}` attribute that is
-        required for this component. An example, `token.pos`
+        The name of the new attribute that is required for this component.
+        An example, `token.pos`.
     old_attribute_name : `str`
-        The name of the `{old_attribute_name}` that is to be replaced with
-        the `new_attribute_name`. An example, `token.tag`
+        The name of the old attribute that is to be replaced with
+        the `new_attribute_name`. An example, `token.tag`.
     '''
     factory_meta = Language.get_factory_meta(factory_name)
     required_attributes = copy.deepcopy(factory_meta.requires)
