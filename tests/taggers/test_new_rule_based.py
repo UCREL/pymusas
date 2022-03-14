@@ -37,7 +37,8 @@ def generate_test_data(test_data_file: Path,
       2. A List of tuples of length 2. each `Tuple` indicates the start and end
     token index of the associated Multi Word Expression (MWE). If the `List` contains
     more than one `Tuple` then the MWE is discontinuous. For single word
-    expressions the `List` will only contain 1 `Tuple` which will only contain
+    expressions the `List` will only contain 1 `Tuple` which will be
+    (token_start_index, token_start_index + 1).
 
     # Parameters
 
