@@ -40,15 +40,22 @@ def set_custom_token_extension(extension_name: str) -> None:
         Token.set_extension(extension_name, default=None)
 
 
-def update_factory_attributes(factory_name: str, new_attribute_name: str,
+def update_factory_attributes(meta_information_to_update: str,
+                              factory_name: str,
+                              new_attribute_name: str,
                               old_attribute_name: str) -> None:
     '''
-    Updates the [spaCy Language required attributes meta information](https://spacy.io/api/language#factorymeta)
-    for the given component, find through it's factory name,
-    by replacing the `old_attribute_name` with the `new_attribute_name`.
+    Updates the
+    [spaCy Language meta information](https://spacy.io/api/language#factorymeta)
+    for either `assigns` or `requires` for the given component, find through
+    it's factory name, by replacing the `old_attribute_name` with the
+    `new_attribute_name`.
 
     # Parameters
 
+    meta_information_to_update : `str`
+        Either `assigns` or `requires`, raises a ValueError if it is any other
+        value.
     factory_name : `str`
         The name of the component factory, e.g. `pymusas_rule_based_tagger`
     new_attribute_name : `str`
@@ -58,10 +65,17 @@ def update_factory_attributes(factory_name: str, new_attribute_name: str,
         The name of the old attribute that is to be replaced with
         the `new_attribute_name`. An example, `token.tag`.
     '''
+    value_error = ('`meta_information_to_update` has to be either `assigns` '
+                   f'or `requires` and not {meta_information_to_update}')
+    if meta_information_to_update not in set(['assigns', 'requires']):
+        raise ValueError(value_error)
+
     factory_meta = Language.get_factory_meta(factory_name)
-    required_attributes = copy.deepcopy(factory_meta.requires)
+    required_attributes = copy.deepcopy(getattr(factory_meta,
+                                                meta_information_to_update))
     updated_attributes = [attribute for attribute in required_attributes
                           if attribute != old_attribute_name]
     updated_attributes.append(f'{new_attribute_name}')
     
-    factory_meta.requires = validate_attrs(updated_attributes)
+    setattr(factory_meta, meta_information_to_update,
+            validate_attrs(updated_attributes))

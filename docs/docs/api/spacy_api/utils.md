@@ -36,19 +36,25 @@ through and output an UserWarning message that it has had to force this through.
 
 ```python
 def update_factory_attributes(
+    meta_information_to_update: str,
     factory_name: str,
     new_attribute_name: str,
     old_attribute_name: str
 ) -> None
 ```
 
-Updates the [spaCy Language required attributes meta information](https://spacy.io/api/language#factorymeta)
-for the given component, find through it's factory name,
-by replacing the `old_attribute_name` with the `new_attribute_name`.
+Updates the
+[spaCy Language meta information](https://spacy.io/api/language#factorymeta)
+for either `assigns` or `requires` for the given component, find through
+it's factory name, by replacing the `old_attribute_name` with the
+`new_attribute_name`.
 
 <h4 id="update_factory_attributes.parameters">Parameters<a className="headerlink" href="#update_factory_attributes.parameters" title="Permanent link">&para;</a></h4>
 
 
+- __meta\_information\_to\_update__ : `str` <br/>
+    Either `assigns` or `requires`, raises a ValueError if it is any other
+    value.
 - __factory\_name__ : `str` <br/>
     The name of the component factory, e.g. `pymusas_rule_based_tagger`
 - __new\_attribute\_name__ : `str` <br/>

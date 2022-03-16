@@ -29,10 +29,23 @@ def test_set_custom_token_extension() -> None:
         set_custom_token_extension('tags')
 
 
-def test_update_factory_attributes(create_test_component: str) -> None:
-    factory_meta_data = Language.get_factory_meta(create_test_component)
-    assert not factory_meta_data.requires
-    factory_meta_data.requires = ['token._.pos']
+@pytest.mark.parametrize("meta_information_to_update",
+                         ["assigns", "requires", "error"])
+def test_update_factory_attributes(meta_information_to_update: str,
+                                   create_test_component: str) -> None:
+    
+    if meta_information_to_update == 'error':
+        with pytest.raises(ValueError):
+            update_factory_attributes(meta_information_to_update,
+                                      create_test_component,
+                                      'token._.tag', 'token._.pos')
+    else:
+        factory_meta_data = Language.get_factory_meta(create_test_component)
+        assert not getattr(factory_meta_data, meta_information_to_update)
+        setattr(factory_meta_data, meta_information_to_update, ['token._.pos'])
 
-    update_factory_attributes(create_test_component, 'token._.tag', 'token._.pos')
-    assert factory_meta_data.requires == ['token._.tag']
+        update_factory_attributes(meta_information_to_update,
+                                  create_test_component,
+                                  'token._.tag', 'token._.pos')
+        assert getattr(factory_meta_data,
+                       meta_information_to_update) == ['token._.tag']
