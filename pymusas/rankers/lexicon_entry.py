@@ -62,7 +62,7 @@ class LexiconEntryRanker(ABC):
         
         `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
         '''
-        ...
+        ...  # pragma: no cover
 
 
 class ContextualRuleBasedRanker(LexiconEntryRanker):

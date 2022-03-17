@@ -40,4 +40,4 @@ class Rule(ABC):
 
         `List[List[RankingMetaData]]`
         '''
-        ...
+        ...  # pragma: no cover
