@@ -36,6 +36,7 @@ ignore_missing_imports = true
 known_first_party = "pymusas"
 known_third_party = [
     "spacy",
+    "srsly",
     "tqdm",
     "requests",
     "pytest",
