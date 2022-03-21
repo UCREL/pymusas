@@ -395,11 +395,18 @@ def test_mwe_lexicon_collection_str(pos_mapper: Optional[Dict[str, List[str]]]
                                     ) -> None:
 
     empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
-    assert 'MWELexiconCollection() (0 entires in the collection)' == str(empty_collection)
+    assert 'MWELexiconCollection() (0 entires in the collection)' \
+        == str(empty_collection)
 
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
-    expected_str = (f"MWELexiconCollection(('A_pnoun Arnoia_pnoun': LexiconMetaData(semantic_tags=['Z2'], n_gram_length=2, lexicon_type={LexiconType.MWE_NON_SPECIAL}, wildcard_count=0)), "
-                    f"('A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': LexiconMetaData(semantic_tags=['Z2'], n_gram_length=4, lexicon_type={LexiconType.MWE_NON_SPECIAL}, wildcard_count=0)), ... )"
+    expected_str = ("MWELexiconCollection(('A_pnoun Arnoia_pnoun': "
+                    "LexiconMetaData(semantic_tags=['Z2'], n_gram_length=2, "
+                    f"lexicon_type={LexiconType.MWE_NON_SPECIAL.__str__()}, "
+                    "wildcard_count=0)), "
+                    "('A_pnoun Pobra_pnoun de_pnoun Trives_pnoun': "
+                    "LexiconMetaData(semantic_tags=['Z2'], n_gram_length=4, "
+                    f"lexicon_type={LexiconType.MWE_NON_SPECIAL.__str__()}, "
+                    "wildcard_count=0)), ... )"
                     " (6 entires in the collection)")
     assert expected_str == str(mwe_lexicon_collection)
 
@@ -527,6 +534,25 @@ def test_to_dictionary(pos_mapper: Optional[Dict[str, List[str]]]
 
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
     assert MWE_TEMPLATES == mwe_lexicon_collection.to_dictionary()
+
+
+@pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
+def test_to_from_bytes(pos_mapper: Optional[Dict[str, List[str]]]
+                       ) -> None:
+    expected_pos_mapper = pos_mapper if pos_mapper is not None else {}
+    
+    empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
+    a_collection = MWELexiconCollection.from_bytes(empty_collection.to_bytes())
+    
+    assert expected_pos_mapper == a_collection.pos_mapper
+    assert dict() == a_collection.to_dictionary()
+    
+    del a_collection
+
+    mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
+    a_collection = MWELexiconCollection.from_bytes(mwe_lexicon_collection.to_bytes())
+    assert expected_pos_mapper == a_collection.pos_mapper
+    assert MWE_TEMPLATES == a_collection.to_dictionary()
 
 
 def test_mwe_lexicon_collection_from_tsv() -> None:

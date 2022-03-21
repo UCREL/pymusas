@@ -12,7 +12,7 @@
 
 ```python
 @unique
-class LexiconType(Enum)
+class LexiconType(str,  Enum)
 ```
 
 Descriptions of the type associated to single and Multi Word Expression (MWE)
@@ -40,6 +40,7 @@ example below.
 
 ```python
 from pymusas.lexicon_collection import LexiconType
+assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL
 assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
 assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
 all_possible_values = {'Single Non Special', 'MWE Non Special',
@@ -52,7 +53,7 @@ assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconTyp
 #### SINGLE\_NON\_SPECIAL
 
 ```python
-class LexiconType(Enum):
+class LexiconType(str,  Enum):
  | ...
  | SINGLE_NON_SPECIAL = 'Single Non Special'
 ```
@@ -62,7 +63,7 @@ class LexiconType(Enum):
 #### MWE\_NON\_SPECIAL
 
 ```python
-class LexiconType(Enum):
+class LexiconType(str,  Enum):
  | ...
  | MWE_NON_SPECIAL = 'MWE Non Special'
 ```
@@ -72,7 +73,7 @@ class LexiconType(Enum):
 #### MWE\_WILDCARD
 
 ```python
-class LexiconType(Enum):
+class LexiconType(str,  Enum):
  | ...
  | MWE_WILDCARD = 'MWE Wildcard'
 ```
@@ -82,7 +83,7 @@ class LexiconType(Enum):
 #### MWE\_CURLY\_BRACES
 
 ```python
-class LexiconType(Enum):
+class LexiconType(str,  Enum):
  | ...
  | MWE_CURLY_BRACES = 'MWE Curly Braces'
 ```
@@ -92,7 +93,7 @@ class LexiconType(Enum):
 ### \_\_repr\_\_
 
 ```python
-class LexiconType(Enum):
+class LexiconType(str,  Enum):
  | ...
  | def __repr__() -> str
 ```
@@ -503,7 +504,8 @@ this is due to keeping track of the `longest_non_special_mwe_template` and
 
 **Note** if the `data` parameter given was `None` then the value of all
 dictionary attributes will be an empty dictionary and all integer values will
-be `0`.
+be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
+will be an empty dictionary.
 
 - __meta\_data__ : `Dict[str, LexiconMetaData]` <br/>
     Dictionary where the keys are MWE templates, of any type, and the values
@@ -645,6 +647,48 @@ assert (mwe_collection['*_noun boot*_noun']
 assert (mwe_collection.to_dictionary()
 == {'*_noun boot*_noun': ['Z0', 'Z3']})
 ```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`MWELexiconCollection`](#mwelexiconcollection) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def from_bytes(bytes_data: bytes) -> "MWELexiconCollection"
+```
+
+Loads [`MWELexiconCollection`](#mwelexiconcollection) from the given bytestring and
+returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`MWELexiconCollection`](#mwelexiconcollection) <br/>
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.from_tsv"></a>
 

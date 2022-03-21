@@ -6,14 +6,16 @@ from enum import Enum, unique
 from os import PathLike
 import re
 import typing
-from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union
+from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urlparse
+
+import srsly
 
 from . import file_utils, utils
 
 
 @unique
-class LexiconType(Enum):
+class LexiconType(str, Enum):
     '''
     Descriptions of the type associated to single and Multi Word Expression (MWE)
     lexicon entires and templates. Any type with the word `NON_SPECIAL` means
@@ -38,6 +40,7 @@ class LexiconType(Enum):
     # Examples
     ```python
     >>> from pymusas.lexicon_collection import LexiconType
+    >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL
     >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
     >>> assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
     >>> all_possible_values = {'Single Non Special', 'MWE Non Special',
@@ -402,7 +405,8 @@ class MWELexiconCollection(MutableMapping):
     
     **Note** if the `data` parameter given was `None` then the value of all
     dictionary attributes will be an empty dictionary and all integer values will
-    be `0`.
+    be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
+    will be an empty dictionary.
     
     meta_data: `Dict[str, LexiconMetaData]`
         Dictionary where the keys are MWE templates, of any type, and the values
@@ -613,6 +617,41 @@ class MWELexiconCollection(MutableMapping):
         '''
         
         return {key: value.semantic_tags for key, value in self.items()}
+
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`MWELexiconCollection` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        serialise = {}
+        data: Dict[str, List[str]] = {key: value.semantic_tags
+                                      for key, value in self.meta_data.items()}
+        serialise['data'] = srsly.msgpack_dumps(data)
+        serialise['pos_mapper'] = srsly.msgpack_dumps(self.pos_mapper)
+        return cast(bytes, srsly.msgpack_dumps(serialise))
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "MWELexiconCollection":
+        '''
+        Loads :class:`MWELexiconCollection` from the given bytestring and
+        returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`MWELexiconCollection`
+        '''
+        serialise_data = srsly.msgpack_loads(bytes_data)
+        data = srsly.msgpack_loads(serialise_data['data'])
+        pos_mapper = srsly.msgpack_loads(serialise_data['pos_mapper'])
+        return MWELexiconCollection(data, pos_mapper)
 
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str]
