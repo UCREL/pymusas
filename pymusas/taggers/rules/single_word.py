@@ -1,4 +1,6 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
+
+import srsly
 
 from pymusas.lexicon_collection import LexiconCollection, LexiconType
 from pymusas.rankers.lexical_match import LexicalMatch
@@ -158,3 +160,45 @@ class SingleWordRule(Rule):
             index += 1
 
         return token_ranking_meta_data
+
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`SingleWordRule` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        serialise = {}
+        serialise['lexicon_collection'] = self.lexicon_collection.to_bytes()
+        serialise['lemma_lexicon_collection'] \
+            = self.lemma_lexicon_collection.to_bytes()
+        serialise['pos_mapper'] = srsly.msgpack_dumps(self.pos_mapper)
+        return cast(bytes, srsly.msgpack_dumps(serialise))
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "SingleWordRule":
+        '''
+        Loads :class:`SingleWordRule` from the given bytestring and returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`SingleWordRule`
+        '''
+        serialise_data = srsly.msgpack_loads(bytes_data)
+        lexicon_collection \
+            = LexiconCollection.from_bytes(serialise_data['lexicon_collection'])
+        lemma_lexicon_collection \
+            = LexiconCollection.from_bytes(serialise_data['lemma_lexicon_collection'])
+        pos_mapper = srsly.msgpack_loads(serialise_data['pos_mapper'])
+        
+        single_word_rule = SingleWordRule({}, {}, None)
+        single_word_rule.lexicon_collection = lexicon_collection
+        single_word_rule.lemma_lexicon_collection = lemma_lexicon_collection
+        single_word_rule.pos_mapper = pos_mapper
+        return single_word_rule

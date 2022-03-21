@@ -340,6 +340,48 @@ Returns the `data` instance attribute.
 
 - `Dict[str, List[str]]` <br/>
 
+<a id="pymusas.lexicon_collection.LexiconCollection.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class LexiconCollection(MutableMapping):
+ | ...
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`LexiconCollection`](#lexiconcollection) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.lexicon_collection.LexiconCollection.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class LexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def from_bytes(bytes_data: bytes) -> "LexiconCollection"
+```
+
+Loads [`LexiconCollection`](#lexiconcollection) from the given bytestring and
+returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`LexiconCollection`](#lexiconcollection) <br/>
+
 <a id="pymusas.lexicon_collection.LexiconCollection.from_tsv"></a>
 
 ### from\_tsv

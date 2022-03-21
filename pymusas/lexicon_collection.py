@@ -212,6 +212,33 @@ class LexiconCollection(MutableMapping):
 
         return self.data
 
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`LexiconCollection` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        return cast(bytes, srsly.msgpack_dumps(self.data))
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "LexiconCollection":
+        '''
+        Loads :class:`LexiconCollection` from the given bytestring and
+        returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`LexiconCollection`
+        '''
+        return LexiconCollection(srsly.msgpack_loads(bytes_data))
+
     @staticmethod
     def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
                  ) -> Dict[str, List[str]]:

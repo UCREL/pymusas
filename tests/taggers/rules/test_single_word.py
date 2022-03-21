@@ -1,6 +1,8 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Tuple, Union, Optional
+
+import pytest
 
 from pymusas.lexicon_collection import LexiconCollection, LexiconType
 from pymusas.rankers.lexical_match import LexicalMatch
@@ -149,7 +151,8 @@ def compare_token_ranking_meta_data(token_ranking_meta_data_1: List[List[Ranking
         assert set(ranking_meta_data_1) == set(ranking_meta_data_2), index
 
 
-def test_single_word_rule__NON_SPECIAL_CASES() -> None:
+@pytest.mark.parametrize('from_bytes', [False, True])
+def test_single_word_rule__NON_SPECIAL_CASES(from_bytes: bool) -> None:
     '''
     This tests Single Word Rule when using only NON SPECIAL CASES,
     which are direct matches, i.e. does not use any special syntax
@@ -165,11 +168,17 @@ def test_single_word_rule__NON_SPECIAL_CASES() -> None:
                                                       NON_SPECIAL_LEXICON_FILE)
     
     single_rule = SingleWordRule(lexicon, lemma_lexicon)
+    
+    if from_bytes:
+        single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
+    
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, lemmas, pos_tags))
 
 
-def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES() -> None:
+@pytest.mark.parametrize('from_bytes', [False, True])
+def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES(from_bytes: bool
+                                                        ) -> None:
     '''
     This tests Single Word Rule using the `pos_mapper` when using only
     NON SPECIAL CASES, which are direct matches, i.e. does not use any
@@ -180,5 +189,24 @@ def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES() -> None:
                                                       NON_SPECIAL_LEXICON_FILE)
     pos_mapper = {'NN': ['adv', 'noun']}
     single_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
+    
+    if from_bytes:
+        single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
+    
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, lemmas, pos_tags))
+
+
+@pytest.mark.parametrize("pos_mapper", [None, {'NN': ['adv', 'noun']}])
+def test_to_from_bytes(pos_mapper: Optional[Dict[str, List[str]]]) -> None:
+
+    (_, _, _, lexicon, lemma_lexicon, _) = generate_test_data(NON_SPECIAL_DATA_FILE,
+                                                              NON_SPECIAL_LEXICON_FILE)
+    single_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
+    single_rule_from_bytes = SingleWordRule.from_bytes(single_rule.to_bytes())
+
+    assert single_rule.pos_mapper == single_rule_from_bytes.pos_mapper
+    assert single_rule.lexicon_collection.data \
+        == single_rule_from_bytes.lexicon_collection.data
+    assert single_rule.lemma_lexicon_collection.data \
+        == single_rule_from_bytes.lemma_lexicon_collection.data

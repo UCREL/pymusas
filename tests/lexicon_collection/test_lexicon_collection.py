@@ -144,6 +144,20 @@ def test_lexicon_collection_to_dictionary() -> None:
     assert isinstance(lexicon_collection.to_dictionary(), dict)
 
 
+def test_to_from_bytes() -> None:
+    
+    empty_collection = LexiconCollection()
+    a_collection = LexiconCollection.from_bytes(empty_collection.to_bytes())
+    
+    assert {} == a_collection.data
+    
+    del a_collection
+
+    lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
+    a_collection = LexiconCollection.from_bytes(lexicon_collection.to_bytes())
+    assert LEXICON_ENTRIES == a_collection.data
+
+
 def test_lexicon_collection_from_tsv() -> None:
 
     lexicon_collection = LexiconCollection.from_tsv(LEXICON_FILE_PATH)
