@@ -296,5 +296,5 @@ def test_to_from_bytes() -> None:
     assert mwe_rule.mwe_lexicon_collection.pos_mapper \
         == mwe_rule_from_bytes.mwe_lexicon_collection.pos_mapper
     
-    for key, value in mwe_rule.mwe_lexicon_collection.items():
-        assert value == mwe_rule_from_bytes.mwe_lexicon_collection[key]
+    assert mwe_rule.mwe_lexicon_collection.meta_data \
+        == mwe_rule_from_bytes.mwe_lexicon_collection.meta_data
