@@ -215,12 +215,14 @@ def wildcard_data(request: SubRequest) -> Tuple[Tuple[List[str],
     return (test_data, pos_mapped_lexicon, noun_mapper)
 
 
+@pytest.mark.parametrize('from_bytes', [False, True])
 def test_mwe_rule__NON_SPECIAL_CASES(non_special_data: Tuple[Tuple[List[str],
                                                                    List[str],
                                                                    List[str],
                                                                    List[List[RankingMetaData]]],
                                                              Dict[str, List[str]],
-                                                             Optional[Dict[str, List[str]]]]
+                                                             Optional[Dict[str, List[str]]]],
+                                     from_bytes: bool
                                      ) -> None:
     '''
     This tests MWE Rule when using only NON SPECIAL CASES, which are direct
@@ -246,16 +248,21 @@ def test_mwe_rule__NON_SPECIAL_CASES(non_special_data: Tuple[Tuple[List[str],
     # Test that it covers all of the non special syntax cases, e.g. all of the
     # cases that do not contain a wildcard or curly braces.
     mwe_rule = MWERule(lexicon, pos_mapper)
+    if from_bytes:
+        mwe_rule = MWERule.from_bytes(mwe_rule.to_bytes())
+
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     mwe_rule(tokens, lemmas, pos_tags))
 
 
+@pytest.mark.parametrize('from_bytes', [False, True])
 def test_mwe_rules_WILDCARD_CASES(wildcard_data: Tuple[Tuple[List[str],
                                                              List[str],
                                                              List[str],
                                                              List[List[RankingMetaData]]],
                                                        Dict[str, List[str]],
-                                                       Optional[Dict[str, List[str]]]]
+                                                       Optional[Dict[str, List[str]]]],
+                                  from_bytes: bool
                                   ) -> None:
     '''
     This tests MWE Rule when using only WILDCARD cases, e.g. `ski_noun *_noun`
@@ -264,5 +271,30 @@ def test_mwe_rules_WILDCARD_CASES(wildcard_data: Tuple[Tuple[List[str],
     tokens, lemmas, pos_tags, expected_ranking_meta_data = data
     
     mwe_rule = MWERule(lexicon, pos_mapper)
+    if from_bytes:
+        mwe_rule = MWERule.from_bytes(mwe_rule.to_bytes())
+
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     mwe_rule(tokens, lemmas, pos_tags))
+
+
+def test_to_from_bytes() -> None:
+    lexicon = {
+        "North_noun East_noun London_*": ['Z1'],
+        "North_* East**_noun London_noun": ['Z2'],
+        "East_* London_noun": ['Z3'],
+        "East_* London_*": ['Z4'],
+        "*as*_noun London_*": ['Z5']
+    }
+    pos_mapper = {'NN': ['noun']}
+    mwe_rule = MWERule(lexicon, pos_mapper)
+    mwe_rule_from_bytes = MWERule.from_bytes(mwe_rule.to_bytes())
+
+    assert len(mwe_rule_from_bytes.mwe_lexicon_collection) \
+        == len(mwe_rule.mwe_lexicon_collection)
+    
+    assert mwe_rule.mwe_lexicon_collection.pos_mapper \
+        == mwe_rule_from_bytes.mwe_lexicon_collection.pos_mapper
+    
+    for key, value in mwe_rule.mwe_lexicon_collection.items():
+        assert value == mwe_rule_from_bytes.mwe_lexicon_collection[key]

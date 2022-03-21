@@ -61,3 +61,46 @@ equal length.
 
 - `List[List[RankingMetaData]]` <br/>
 
+<a id="pymusas.taggers.rules.rule.Rule.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class Rule(ABC):
+ | ...
+ | @abstractmethod
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`Rule`](#rule) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.taggers.rules.rule.Rule.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class Rule(ABC):
+ | ...
+ | @staticmethod
+ | @abstractmethod
+ | def from_bytes(bytes_data: bytes) -> "Rule"
+```
+
+Loads [`Rule`](#rule) from the given bytestring and returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`Rule`](#rule) <br/>
+

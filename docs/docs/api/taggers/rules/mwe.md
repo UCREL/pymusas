@@ -93,3 +93,44 @@ the rule matches stated in the class docstring above.
 
 - `List[List[RankingMetaData]]` <br/>
 
+<a id="pymusas.taggers.rules.mwe.MWERule.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class MWERule(Rule):
+ | ...
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`MWERule`](#mwerule) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.taggers.rules.mwe.MWERule.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class MWERule(Rule):
+ | ...
+ | @staticmethod
+ | def from_bytes(bytes_data: bytes) -> "MWERule"
+```
+
+Loads [`MWERule`](#mwerule) from the given bytestring and returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`MWERule`](#mwerule) <br/>
+

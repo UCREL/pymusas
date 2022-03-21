@@ -41,3 +41,31 @@ class Rule(ABC):
         `List[List[RankingMetaData]]`
         '''
         ...  # pragma: no cover
+
+    @abstractmethod
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`Rule` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        ...  # pragma: no cover
+
+    @staticmethod
+    @abstractmethod
+    def from_bytes(bytes_data: bytes) -> "Rule":
+        '''
+        Loads :class:`Rule` from the given bytestring and returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`Rule`
+        '''
+        ...  # pragma: no cover

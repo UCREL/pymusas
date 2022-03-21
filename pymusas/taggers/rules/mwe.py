@@ -203,3 +203,32 @@ class MWERule(Rule):
                              token_ranking_meta_data)
 
         return token_ranking_meta_data
+
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`MWERule` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        return self.mwe_lexicon_collection.to_bytes()
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "MWERule":
+        '''
+        Loads :class:`MWERule` from the given bytestring and returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`MWERule`
+        '''
+        mwe_rule = MWERule({}, None)
+        mwe_lexicon_collection = MWELexiconCollection.from_bytes(bytes_data)
+        mwe_rule.mwe_lexicon_collection = mwe_lexicon_collection
+        return mwe_rule
