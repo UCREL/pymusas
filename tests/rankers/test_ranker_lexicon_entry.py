@@ -24,9 +24,19 @@ def test_lexicon_entry_ranker() -> None:
                      ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]:
             return ([[0]], [None])
 
+        def to_bytes(self) -> bytes:
+            return b'test'
+
+        @staticmethod
+        def from_bytes(bytes_data: bytes) -> 'TestRanker':
+            return TestRanker()
+
     concrete_ranker = TestRanker()
     assert ([[0]], [None]) == concrete_ranker([[RANKING_META_DATA]])
     assert isinstance(concrete_ranker, LexiconEntryRanker)
+
+    assert b'test' == concrete_ranker.to_bytes()
+    assert isinstance(concrete_ranker.from_bytes(b'test'), TestRanker)
 
 
 def test_contextual_rule_based_ranker__init__() -> None:
@@ -54,6 +64,17 @@ def test_contextual_rule_based_ranker__init__() -> None:
     assert 1 == ranker.n_gram_number_indexes
     assert 2 == ranker.wildcards_number_indexes
     assert {1: 2, 2: 1} == ranker.n_gram_ranking_dictionary
+
+
+def test_to_from_bytes() -> None:
+    maximum_n_gram_length = 2
+    maximum_number_wildcards = 1
+    ranker = ContextualRuleBasedRanker(maximum_n_gram_length,
+                                       maximum_number_wildcards)
+    ranker_from_bytes = ContextualRuleBasedRanker.from_bytes(ranker.to_bytes())
+    assert 1 == ranker_from_bytes.n_gram_number_indexes
+    assert 1 == ranker_from_bytes.wildcards_number_indexes
+    assert {2: 1, 1: 2} == ranker_from_bytes.n_gram_ranking_dictionary
 
 
 def test_contextual_rule_based_ranker__call__() -> None:

@@ -1,6 +1,8 @@
 from abc import ABC, abstractmethod
 import collections
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple
+from typing import DefaultDict, Dict, List, Optional, Set, Tuple, cast
+
+import srsly
 
 from pymusas.lexicon_collection import LexiconType
 from pymusas.rankers.ranking_meta_data import RankingMetaData
@@ -11,8 +13,9 @@ from pymusas.taggers.rules.single_word import SingleWordRule
 
 class LexiconEntryRanker(ABC):
     '''
-    An **abstract class** that defines the basic method, `__call__`, that is
-    required for all :class:`LexiconEntryRanker`s.
+    An **abstract class** that defines the basic methods, `__call__`,
+    `to_bytes`, and `from_bytes`, that is required for all
+    :class:`LexiconEntryRanker`s.
 
     Each lexicon entry match is represented by a
     :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` object.
@@ -61,6 +64,35 @@ class LexiconEntryRanker(ABC):
         # Returns
         
         `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
+        '''
+        ...  # pragma: no cover
+
+    @abstractmethod
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`LexiconEntryRanker` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        ...  # pragma: no cover
+
+    @staticmethod
+    @abstractmethod
+    def from_bytes(bytes_data: bytes) -> "LexiconEntryRanker":
+        '''
+        Loads :class:`LexiconEntryRanker` from the given bytestring and
+        returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`LexiconEntryRanker`
         '''
         ...  # pragma: no cover
 
@@ -137,12 +169,49 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
     def __init__(self, maximum_n_gram_length: int,
                  maximum_number_wildcards: int) -> None:
 
+        self._maximum_n_gram_length = maximum_n_gram_length
+        self._maximum_number_wildcards = maximum_number_wildcards
+        
         self.n_gram_number_indexes = len(str(maximum_n_gram_length))
         self.wildcards_number_indexes = len(str(maximum_number_wildcards))
 
         self.n_gram_ranking_dictionary: Dict[int, int] = \
             dict(zip(range(1, maximum_n_gram_length + 1, 1),
                      range(maximum_n_gram_length, 0, -1)))
+
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`ContextualRuleBasedRanker` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        serialise = {}
+        serialise['maximum_n_gram_length'] = srsly.msgpack_dumps(self._maximum_n_gram_length)
+        serialise['maximum_number_wildcards'] = srsly.msgpack_dumps(self._maximum_number_wildcards)
+        return cast(bytes, srsly.msgpack_dumps(serialise))
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "ContextualRuleBasedRanker":
+        '''
+        Loads :class:`ContextualRuleBasedRanker` from the given bytestring and
+        returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+        
+        # Returns
+
+        :class:`ContextualRuleBasedRanker`
+        '''
+        serialise_data = srsly.msgpack_loads(bytes_data)
+        maximum_n_gram_length = srsly.msgpack_loads(serialise_data['maximum_n_gram_length'])
+        maximum_number_wildcards = srsly.msgpack_loads(serialise_data['maximum_number_wildcards'])
+        return ContextualRuleBasedRanker(maximum_n_gram_length,
+                                         maximum_number_wildcards)
 
     @staticmethod
     def get_construction_arguments(rules: List['Rule']) -> Tuple[int, int]:

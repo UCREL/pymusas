@@ -14,8 +14,9 @@
 class LexiconEntryRanker(ABC)
 ```
 
-An **abstract class** that defines the basic method, `__call__`, that is
-required for all [`LexiconEntryRanker`](#lexiconentryranker)s.
+An **abstract class** that defines the basic methods, `__call__`,
+`to_bytes`, and `from_bytes`, that is required for all
+[`LexiconEntryRanker`](#lexiconentryranker)s.
 
 Each lexicon entry match is represented by a
 [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object.
@@ -75,6 +76,50 @@ object of the **global** lowest ranked match for each token.
 
 
 - `Tuple[List[List[int]], List[Optional[RankingMetaData]]]` <br/>
+
+<a id="pymusas.rankers.lexicon_entry.LexiconEntryRanker.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class LexiconEntryRanker(ABC):
+ | ...
+ | @abstractmethod
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`LexiconEntryRanker`](#lexiconentryranker) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.rankers.lexicon_entry.LexiconEntryRanker.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class LexiconEntryRanker(ABC):
+ | ...
+ | @staticmethod
+ | @abstractmethod
+ | def from_bytes(bytes_data: bytes) -> "LexiconEntryRanker"
+```
+
+Loads [`LexiconEntryRanker`](#lexiconentryranker) from the given bytestring and
+returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`LexiconEntryRanker`](#lexiconentryranker) <br/>
 
 <a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker"></a>
 
@@ -157,6 +202,48 @@ ranked with another entry then it is random which lexicon entry match is chosen.
     Maps the n-gram length to it's rank value, as the n-gram length is
     inverse to it's rank, as the larger the n-gram length the lower it's
     rank.
+
+<a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class ContextualRuleBasedRanker(LexiconEntryRanker):
+ | ...
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`ContextualRuleBasedRanker`](#contextualrulebasedranker) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class ContextualRuleBasedRanker(LexiconEntryRanker):
+ | ...
+ | @staticmethod
+ | def from_bytes(bytes_data: bytes) -> "ContextualRuleBasedRanker"
+```
+
+Loads [`ContextualRuleBasedRanker`](#contextualrulebasedranker) from the given bytestring and
+returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`ContextualRuleBasedRanker`](#contextualrulebasedranker) <br/>
 
 <a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.get_construction_arguments"></a>
 
