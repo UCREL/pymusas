@@ -96,6 +96,10 @@ class LexiconEntryRanker(ABC):
         '''
         ...  # pragma: no cover
 
+    @abstractmethod
+    def __eq__(self, other: object) -> bool:
+        ...  # pragma: no cover
+
 
 class ContextualRuleBasedRanker(LexiconEntryRanker):
     '''
@@ -529,3 +533,29 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
                                                                   rankings, None)
 
         return (rankings, global_lowest_rank_indexes)
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and was initialised using with the same
+        `maximum_n_gram_length` and `maximum_number_wildcards` values.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+        
+        # Returns
+
+        `True`
+        '''
+        if not isinstance(other, ContextualRuleBasedRanker):
+            return False
+        
+        if self._maximum_n_gram_length != other._maximum_n_gram_length:
+            return False
+
+        if self._maximum_number_wildcards != other._maximum_number_wildcards:
+            return False
+
+        return True

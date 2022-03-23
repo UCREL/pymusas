@@ -496,3 +496,28 @@ assert ((expected_ranks, expected_lowest_ranked_matches)
         == ranker(token_ranking_data))
 ```
 
+<a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.__eq__"></a>
+
+### \_\_eq\_\_
+
+```python
+class ContextualRuleBasedRanker(LexiconEntryRanker):
+ | ...
+ | def __eq__(other: object) -> bool
+```
+
+Given another object to compare too it will return `True` if the other
+object is the same class and was initialised using with the same
+`maximum_n_gram_length` and `maximum_number_wildcards` values.
+
+<h4 id="__eq__.parameters">Parameters<a className="headerlink" href="#__eq__.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __other__ : `object` <br/>
+    The object to compare too.
+
+<h4 id="__eq__.returns">Returns<a className="headerlink" href="#__eq__.returns" title="Permanent link">&para;</a></h4>
+
+
+- `True` <br/>
+
