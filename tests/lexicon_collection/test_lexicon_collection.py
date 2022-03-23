@@ -59,6 +59,25 @@ def test_lexicon_collection_len() -> None:
     assert len(lexicon_collection) == 3
 
 
+def test_lexicon_collection__eq__() -> None:
+    empty_collection = LexiconCollection()
+    
+    assert 1 != empty_collection
+
+    assert empty_collection == LexiconCollection()
+
+    empty_collection.add_lexicon_entry(LEXICON_ENTRY)
+    assert empty_collection != LexiconCollection(LEXICON_ENTRIES)
+
+    empty_collection.add_lexicon_entry(LEXICON_ENTRY_MULTI_SEM)
+    empty_collection.add_lexicon_entry(NON_POS_ENTRY)
+    assert empty_collection == LexiconCollection(LEXICON_ENTRIES)
+
+    del empty_collection['London|noun']
+    empty_collection['Cambridge|noun'] = ['Z1']
+    assert empty_collection != LexiconCollection(LEXICON_ENTRIES)
+
+
 def test_lexicon_collection_set_get_del_item() -> None:
 
     empty_collection = LexiconCollection()

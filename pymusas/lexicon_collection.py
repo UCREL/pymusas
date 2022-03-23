@@ -390,6 +390,31 @@ class LexiconCollection(MutableMapping):
         '''
         return f'{self.__class__.__name__}(data={self.data})'
 
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and contains the same `data` instance attribute.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+        
+        # Returns
+
+        `True`
+        '''
+        if not isinstance(other, LexiconCollection):
+            return False
+        
+        if len(self) != len(other):
+            return False
+        
+        if self.data != other.data:
+            return False
+        
+        return True
+
 
 class MWELexiconCollection(MutableMapping):
     r'''
@@ -978,6 +1003,8 @@ class MWELexiconCollection(MutableMapping):
                 object_str += '... '
                 break
         object_str += f') ({len(self)} entires in the collection)'
+        if self.pos_mapper:
+            object_str += ' (Using a POS Mapper)'
         return object_str
 
     def __repr__(self) -> str:
@@ -986,4 +1013,34 @@ class MWELexiconCollection(MutableMapping):
         you should be able to recreate the object.
         '''
 
-        return f'{self.__class__.__name__}(data={self.to_dictionary()})'
+        return (f'{self.__class__.__name__}(data={self.to_dictionary()}, '
+                f'pos_mapper={self.pos_mapper})')
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and contains the same `meta_data` and
+        `pos_mapper` instance attributes.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+        
+        # Returns
+
+        `True`
+        '''
+        if not isinstance(other, MWELexiconCollection):
+            return False
+        
+        if len(self) != len(other):
+            return False
+
+        if self.pos_mapper != other.pos_mapper:
+            return False
+
+        if self.meta_data != other.meta_data:
+            return False
+        
+        return True

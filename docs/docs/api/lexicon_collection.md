@@ -491,6 +491,30 @@ class LexiconCollection(MutableMapping):
 Machine readable string. When printed and run `eval()` over the string
 you should be able to recreate the object.
 
+<a id="pymusas.lexicon_collection.LexiconCollection.__eq__"></a>
+
+### \_\_eq\_\_
+
+```python
+class LexiconCollection(MutableMapping):
+ | ...
+ | def __eq__(other: object) -> bool
+```
+
+Given another object to compare too it will return `True` if the other
+object is the same class and contains the same `data` instance attribute.
+
+<h4 id="__eq__.parameters">Parameters<a className="headerlink" href="#__eq__.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __other__ : `object` <br/>
+    The object to compare too.
+
+<h4 id="__eq__.returns">Returns<a className="headerlink" href="#__eq__.returns" title="Permanent link">&para;</a></h4>
+
+
+- `True` <br/>
+
 <a id="pymusas.lexicon_collection.MWELexiconCollection"></a>
 
 ## MWELexiconCollection
@@ -880,4 +904,29 @@ class MWELexiconCollection(MutableMapping):
 
 Machine readable string. When printed and run `eval()` over the string
 you should be able to recreate the object.
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.__eq__"></a>
+
+### \_\_eq\_\_
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | def __eq__(other: object) -> bool
+```
+
+Given another object to compare too it will return `True` if the other
+object is the same class and contains the same `meta_data` and
+`pos_mapper` instance attributes.
+
+<h4 id="__eq__.parameters">Parameters<a className="headerlink" href="#__eq__.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __other__ : `object` <br/>
+    The object to compare too.
+
+<h4 id="__eq__.returns">Returns<a className="headerlink" href="#__eq__.returns" title="Permanent link">&para;</a></h4>
+
+
+- `True` <br/>
 

@@ -151,6 +151,27 @@ def test_mwe_lexicon_collection_len() -> None:
     assert len(lexicon_collection) == 6
 
 
+def test_mwe_lexicon_collection__eq__() -> None:
+    empty_collection = MWELexiconCollection()
+    
+    assert 1 != empty_collection
+
+    assert empty_collection == MWELexiconCollection()
+
+    empty_collection['snow_noun boots_noun'] = ['Z1']
+    assert empty_collection != MWELexiconCollection(MWE_TEMPLATES)
+
+    for key, value in MWE_TEMPLATES.items():
+        empty_collection[key] = value
+    del empty_collection['A_pnoun Arnoia_pnoun']
+    assert empty_collection != MWELexiconCollection(MWE_TEMPLATES)
+    
+    del empty_collection['snow_noun boots_noun']
+    empty_collection['A_pnoun Arnoia_pnoun'] = ['Z2']
+    assert empty_collection == MWELexiconCollection(MWE_TEMPLATES)
+    assert empty_collection != MWELexiconCollection(MWE_TEMPLATES, POS_MAPPER)
+
+
 def test_mwe_lexicon_collection_set_get_del_item() -> None:
 
     empty_collection = MWELexiconCollection()
@@ -374,9 +395,14 @@ def test_mwe_lexicon_collection_items(pos_mapper: Optional[Dict[str, List[str]]]
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
 def test_mwe_lexicon_collection_repr(pos_mapper: Optional[Dict[str, List[str]]]
                                      ) -> None:
+    str_pos_mapper = pos_mapper
+    if str_pos_mapper is None:
+        str_pos_mapper = {}
 
     empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
-    assert 'MWELexiconCollection(data={})' == empty_collection.__repr__()
+    expected_empty_collection = ('MWELexiconCollection(data={}, '
+                                 f'pos_mapper={str_pos_mapper})')
+    assert expected_empty_collection == empty_collection.__repr__()
     assert empty_collection == eval(empty_collection.__repr__())
 
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
@@ -385,7 +411,8 @@ def test_mwe_lexicon_collection_repr(pos_mapper: Optional[Dict[str, List[str]]]
                         "'a_prep carta_noun cabal_adj': ['A4', 'A5.1'], "
                         "'***_prep carta_* cabal_adj': ['A4', 'A5.1'], "
                         "'ano*_prep carta_noun': ['B4', 'B5.1'], "
-                        "'bno*_prep carta_noun': ['C4', 'C5.1']})")
+                        "'bno*_prep carta_noun': ['C4', 'C5.1']},"
+                        f" pos_mapper={str_pos_mapper})")
     assert mwe_lexicon_repr == mwe_lexicon_collection.__repr__()
     assert mwe_lexicon_collection == eval(mwe_lexicon_collection.__repr__())
 
@@ -395,7 +422,10 @@ def test_mwe_lexicon_collection_str(pos_mapper: Optional[Dict[str, List[str]]]
                                     ) -> None:
 
     empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
-    assert 'MWELexiconCollection() (0 entires in the collection)' \
+    expected_str = 'MWELexiconCollection() (0 entires in the collection)'
+    if pos_mapper is not None:
+        expected_str += ' (Using a POS Mapper)'
+    assert expected_str \
         == str(empty_collection)
 
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
@@ -408,6 +438,8 @@ def test_mwe_lexicon_collection_str(pos_mapper: Optional[Dict[str, List[str]]]
                     f"lexicon_type={LexiconType.MWE_NON_SPECIAL.__str__()}, "
                     "wildcard_count=0)), ... )"
                     " (6 entires in the collection)")
+    if pos_mapper is not None:
+        expected_str += ' (Using a POS Mapper)'
     assert expected_str == str(mwe_lexicon_collection)
 
 
