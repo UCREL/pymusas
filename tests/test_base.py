@@ -1,10 +1,11 @@
 from typing import List
+
 import pytest
 
 from pymusas.base import Serialise
-from pymusas.taggers.rules.single_word import SingleWordRule
 from pymusas.taggers.rules.mwe import MWERule
 from pymusas.taggers.rules.rule import Rule
+from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 @pytest.fixture
