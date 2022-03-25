@@ -225,7 +225,7 @@ this function can then be used as the arguments to the constructor of
 
 - __rules__ : `List[Rule]` <br/>
     A `List` of rules. This `List` is typically required when creating
-    a [`pymusas.taggers.new_rule_based.RuleBasedTagger`](/pymusas/api/taggers/new_rule_based/#rulebasedtagger) tagger.
+    a [`pymusas.taggers.rule_based.RuleBasedTagger`](/pymusas/api/taggers/rule_based/#rulebasedtagger) tagger.
 
 <h4 id="get_construction_arguments.returns">Returns<a className="headerlink" href="#get_construction_arguments.returns" title="Permanent link">&para;</a></h4>
 

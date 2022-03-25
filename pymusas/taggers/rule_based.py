@@ -54,7 +54,7 @@ class RuleBasedTagger():
     # Examples
     ``` python
     >>> from pymusas.lexicon_collection import LexiconCollection
-    >>> from pymusas.taggers.new_rule_based import RuleBasedTagger
+    >>> from pymusas.taggers.rule_based import RuleBasedTagger
     >>> from pymusas.taggers.rules.single_word import SingleWordRule
     >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
     >>> from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE

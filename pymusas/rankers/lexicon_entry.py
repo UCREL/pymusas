@@ -202,7 +202,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         rules : `List[Rule]`
             A `List` of rules. This `List` is typically required when creating
-            a :class:`pymusas.taggers.new_rule_based.RuleBasedTagger` tagger.
+            a :class:`pymusas.taggers.rule_based.RuleBasedTagger` tagger.
         
         # Returns
 

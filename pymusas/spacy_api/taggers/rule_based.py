@@ -18,7 +18,7 @@ from pymusas.taggers.rules.rule import Rule
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
     '''
     [spaCy pipeline component](https://spacy.io/usage/processing-pipelines)
-    of the :class:`pymusas.taggers.new_rule_based.RuleBasedTagger`.
+    of the :class:`pymusas.taggers.rule_based.RuleBasedTagger`.
 
     This component applies one or more :class:`pymusas.taggers.rules.rule.Rule`s
     to create a list of possible candidate tags for each token in the sequence.
@@ -150,7 +150,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
     >>> from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE
     >>> from pymusas.lexicon_collection import LexiconCollection
     >>> from pymusas.taggers.rules.single_word import SingleWordRule
-    >>> from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+    >>> from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
     >>> # Construction via spaCy pipeline
     >>> nlp = spacy.blank('en')
     >>> # Using default config
@@ -360,7 +360,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         ``` python
         >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
         >>> from pymusas.taggers.rules.single_word import SingleWordRule
-        >>> from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+        >>> from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
         >>> rules = [SingleWordRule({'example|noun': ['Z1']}, {})]
         >>> ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
         >>> tagger = RuleBasedTagger()
@@ -407,7 +407,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         ``` python
         >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
         >>> from pymusas.taggers.rules.single_word import SingleWordRule
-        >>> from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+        >>> from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
         >>> rules = [SingleWordRule({'example|noun': ['Z1']}, {})]
         >>> ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
         >>> tagger = RuleBasedTagger()
@@ -468,7 +468,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         >>> from tempfile import TemporaryDirectory
         >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
         >>> from pymusas.taggers.rules.single_word import SingleWordRule
-        >>> from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+        >>> from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
         >>> rules = [SingleWordRule({'example|noun': ['Z1']}, {})]
         >>> ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
         >>> tagger = RuleBasedTagger()
@@ -530,7 +530,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         >>> from tempfile import TemporaryDirectory
         >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
         >>> from pymusas.taggers.rules.single_word import SingleWordRule
-        >>> from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+        >>> from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
         >>> rules = [SingleWordRule({'example|noun': ['Z1']}, {})]
         >>> ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
         >>> tagger = RuleBasedTagger()

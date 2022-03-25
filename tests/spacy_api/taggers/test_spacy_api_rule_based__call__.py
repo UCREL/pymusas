@@ -8,14 +8,14 @@ from spacy.vocab import Vocab
 
 from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
-from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.mwe import MWERule
 from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
-TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'new_rule_based')
+TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'rule_based')
 
 
 def generate_test_data(test_data_file: Path,

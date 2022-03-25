@@ -10,7 +10,7 @@ from spacy.language import Language
 from spacy.tokens import Token
 
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
-from pymusas.spacy_api.taggers.new_rule_based import RuleBasedTagger
+from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
