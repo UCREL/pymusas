@@ -202,3 +202,32 @@ class SingleWordRule(Rule):
         single_word_rule.lemma_lexicon_collection = lemma_lexicon_collection
         single_word_rule.pos_mapper = pos_mapper
         return single_word_rule
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and initialised using with the same argument
+        values.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+        
+        # Returns
+
+        `True`
+        '''
+        if not isinstance(other, SingleWordRule):
+            return False
+        
+        if self.pos_mapper != other.pos_mapper:
+            return False
+        
+        if self.lexicon_collection != other.lexicon_collection:
+            return False
+
+        if self.lemma_lexicon_collection != other.lemma_lexicon_collection:
+            return False
+        
+        return True

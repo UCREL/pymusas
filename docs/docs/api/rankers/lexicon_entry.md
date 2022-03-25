@@ -11,7 +11,7 @@
 ## LexiconEntryRanker
 
 ```python
-class LexiconEntryRanker(ABC)
+class LexiconEntryRanker(Serialise)
 ```
 
 An **abstract class** that defines the basic methods, `__call__`,
@@ -52,7 +52,7 @@ lower match that uses `East` which is `East London brewery` then the
 ### \_\_call\_\_
 
 ```python
-class LexiconEntryRanker(ABC):
+class LexiconEntryRanker(Serialise):
  | ...
  | @abstractmethod
  | def __call__(
@@ -76,50 +76,6 @@ object of the **global** lowest ranked match for each token.
 
 
 - `Tuple[List[List[int]], List[Optional[RankingMetaData]]]` <br/>
-
-<a id="pymusas.rankers.lexicon_entry.LexiconEntryRanker.to_bytes"></a>
-
-### to\_bytes
-
-```python
-class LexiconEntryRanker(ABC):
- | ...
- | @abstractmethod
- | def to_bytes() -> bytes
-```
-
-Serialises the [`LexiconEntryRanker`](#lexiconentryranker) to a bytestring.
-
-<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
-
-
-- `bytes` <br/>
-
-<a id="pymusas.rankers.lexicon_entry.LexiconEntryRanker.from_bytes"></a>
-
-### from\_bytes
-
-```python
-class LexiconEntryRanker(ABC):
- | ...
- | @staticmethod
- | @abstractmethod
- | def from_bytes(bytes_data: bytes) -> "LexiconEntryRanker"
-```
-
-Loads [`LexiconEntryRanker`](#lexiconentryranker) from the given bytestring and
-returns it.
-
-<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
-
-
-- __bytes\_data__ : `bytes` <br/>
-    The bytestring to load.
-
-<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
-
-
-- [`LexiconEntryRanker`](#lexiconentryranker) <br/>
 
 <a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker"></a>
 

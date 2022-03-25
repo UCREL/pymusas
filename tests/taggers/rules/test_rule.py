@@ -20,9 +20,13 @@ def test_rule() -> None:
         def from_bytes(bytes_data: bytes) -> 'TestRule':
             return TestRule()
 
+        def __eq__(self, other: object) -> bool:
+            return True
+
     concrete_rule = TestRule()
     assert [[]] == concrete_rule([], [], [])
     assert isinstance(concrete_rule, Rule)
 
     assert b'test' == concrete_rule.to_bytes()
     assert isinstance(TestRule.from_bytes(b'test'), TestRule)
+    assert concrete_rule == TestRule()

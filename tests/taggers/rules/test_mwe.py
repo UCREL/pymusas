@@ -298,3 +298,27 @@ def test_to_from_bytes() -> None:
     
     assert mwe_rule.mwe_lexicon_collection.meta_data \
         == mwe_rule_from_bytes.mwe_lexicon_collection.meta_data
+
+
+def test__eq__() -> None:
+    lexicon = {
+        "North_noun East_noun London_*": ['Z1'],
+        "North_* East**_noun London_noun": ['Z2'],
+        "East_* London_noun": ['Z3'],
+        "East_* London_*": ['Z4'],
+        "*as*_noun London_*": ['Z5']
+    }
+    pos_mapper = {'NN': ['noun']}
+
+    empty_rule = MWERule({}, None)
+    assert 1 != empty_rule
+
+    assert empty_rule != MWERule(lexicon, None)
+    assert empty_rule != MWERule({}, pos_mapper)
+    
+    empty_rule = MWERule(lexicon, None)
+    assert empty_rule == MWERule(lexicon, None)
+    assert empty_rule != MWERule(lexicon, pos_mapper)
+
+    empty_rule = MWERule(lexicon, pos_mapper)
+    assert empty_rule == MWERule(lexicon, pos_mapper)

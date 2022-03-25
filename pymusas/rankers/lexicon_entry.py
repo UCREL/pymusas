@@ -1,9 +1,10 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import collections
 from typing import DefaultDict, Dict, List, Optional, Set, Tuple, cast
 
 import srsly
 
+from pymusas.base import Serialise
 from pymusas.lexicon_collection import LexiconType
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.mwe import MWERule
@@ -11,7 +12,7 @@ from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
-class LexiconEntryRanker(ABC):
+class LexiconEntryRanker(Serialise):
     '''
     An **abstract class** that defines the basic methods, `__call__`,
     `to_bytes`, and `from_bytes`, that is required for all
@@ -64,35 +65,6 @@ class LexiconEntryRanker(ABC):
         # Returns
         
         `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
-        '''
-        ...  # pragma: no cover
-
-    @abstractmethod
-    def to_bytes(self) -> bytes:
-        '''
-        Serialises the :class:`LexiconEntryRanker` to a bytestring.
-
-        # Returns
-
-        `bytes`
-        '''
-        ...  # pragma: no cover
-
-    @staticmethod
-    @abstractmethod
-    def from_bytes(bytes_data: bytes) -> "LexiconEntryRanker":
-        '''
-        Loads :class:`LexiconEntryRanker` from the given bytestring and
-        returns it.
-
-        # Parameters
-
-        bytes_data : `bytes`
-            The bytestring to load.
-        
-        # Returns
-
-        :class:`LexiconEntryRanker`
         '''
         ...  # pragma: no cover
 

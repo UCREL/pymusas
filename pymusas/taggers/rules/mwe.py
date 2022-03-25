@@ -232,3 +232,26 @@ class MWERule(Rule):
         mwe_lexicon_collection = MWELexiconCollection.from_bytes(bytes_data)
         mwe_rule.mwe_lexicon_collection = mwe_lexicon_collection
         return mwe_rule
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and initialised using with the same argument
+        values.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+        
+        # Returns
+
+        `True`
+        '''
+        if not isinstance(other, MWERule):
+            return False
+        
+        if self.mwe_lexicon_collection != other.mwe_lexicon_collection:
+            return False
+
+        return True

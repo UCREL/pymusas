@@ -145,3 +145,28 @@ Loads [`SingleWordRule`](#singlewordrule) from the given bytestring and returns 
 
 - [`SingleWordRule`](#singlewordrule) <br/>
 
+<a id="pymusas.taggers.rules.single_word.SingleWordRule.__eq__"></a>
+
+### \_\_eq\_\_
+
+```python
+class SingleWordRule(Rule):
+ | ...
+ | def __eq__(other: object) -> bool
+```
+
+Given another object to compare too it will return `True` if the other
+object is the same class and initialised using with the same argument
+values.
+
+<h4 id="__eq__.parameters">Parameters<a className="headerlink" href="#__eq__.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __other__ : `object` <br/>
+    The object to compare too.
+
+<h4 id="__eq__.returns">Returns<a className="headerlink" href="#__eq__.returns" title="Permanent link">&para;</a></h4>
+
+
+- `True` <br/>
+

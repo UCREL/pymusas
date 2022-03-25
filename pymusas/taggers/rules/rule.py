@@ -1,10 +1,11 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from typing import List
 
+from pymusas.base import Serialise
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 
 
-class Rule(ABC):
+class Rule(Serialise):
     '''
     An **abstract class** that defines the basic method, `__call__`, that is
     required for all :class:`Rule`s.
@@ -43,29 +44,5 @@ class Rule(ABC):
         ...  # pragma: no cover
 
     @abstractmethod
-    def to_bytes(self) -> bytes:
-        '''
-        Serialises the :class:`Rule` to a bytestring.
-
-        # Returns
-
-        `bytes`
-        '''
-        ...  # pragma: no cover
-
-    @staticmethod
-    @abstractmethod
-    def from_bytes(bytes_data: bytes) -> "Rule":
-        '''
-        Loads :class:`Rule` from the given bytestring and returns it.
-
-        # Parameters
-
-        bytes_data : `bytes`
-            The bytestring to load.
-        
-        # Returns
-
-        :class:`Rule`
-        '''
+    def __eq__(self, other: object) -> bool:
         ...  # pragma: no cover

@@ -1,6 +1,6 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Tuple, Union, Optional
+from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -210,3 +210,18 @@ def test_to_from_bytes(pos_mapper: Optional[Dict[str, List[str]]]) -> None:
         == single_rule_from_bytes.lexicon_collection.data
     assert single_rule.lemma_lexicon_collection.data \
         == single_rule_from_bytes.lemma_lexicon_collection.data
+
+
+def test__eq__() -> None:
+    (_, _, _, lexicon, lemma_lexicon, _) = generate_test_data(NON_SPECIAL_DATA_FILE,
+                                                              NON_SPECIAL_LEXICON_FILE)
+    pos_mapper = {'NN': ['adv', 'noun']}
+
+    empty_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
+    assert empty_rule == SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
+
+    empty_rule = SingleWordRule({}, {}, None)
+    assert empty_rule != SingleWordRule(lexicon, {}, None)
+    assert empty_rule != SingleWordRule({}, lemma_lexicon, None)
+    assert empty_rule != SingleWordRule({}, {}, pos_mapper)
+    assert 1 != empty_rule
