@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Roadmap added.
 -  Define the MWE template and it's syntax, this is stated in `Notes -> Multi Word Expression Syntax` in the `Usage` section of the documentation. This is the first task of issue [#24](https://github.com/UCREL/pymusas/issues/24).
 - [PEP 561](https://peps.python.org/pep-0561/) (Distributing and Packaging Type Information) compatible by adding `py.typed` file.
 - Added [srsly](https://github.com/explosion/srsly) as a pip requirement, we use srsly to serialise components to bytes, for example the `pymusas.lexicon_collection.LexiconCollection.to_bytes` function uses `srsly` to serialise the `LexiconCollection` to `bytes`.
@@ -35,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pymusas.lexicon_collection.LexiconMetaData`, object that contains all of the meta data about a single or Multi Word Expression lexicon entry.
 - `pymusas.lexicon_collection.LexiconType` which describes the different types of single and Multi Word Expression (MWE) lexicon entires and templates that PyMUSAS uses or will use in the case of curly braces.
 - The usage documentation, for the "How-to Tag Text", has been updated so that it includes an Indonesian example which does not use spaCy instead uses the [Indonesian TreeTagger](https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build).
+- spaCy registered functions for reading in a `LexiconCollection` or `MWELexiconCollection` from a TSV. These can be find in `pymusas.spacy_api.lexicon_collection`.
 
 ### Removed
 
