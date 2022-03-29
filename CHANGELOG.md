@@ -36,7 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pymusas.lexicon_collection.LexiconMetaData`, object that contains all of the meta data about a single or Multi Word Expression lexicon entry.
 - `pymusas.lexicon_collection.LexiconType` which describes the different types of single and Multi Word Expression (MWE) lexicon entires and templates that PyMUSAS uses or will use in the case of curly braces.
 - The usage documentation, for the "How-to Tag Text", has been updated so that it includes an Indonesian example which does not use spaCy instead uses the [Indonesian TreeTagger](https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build).
-- spaCy registered functions for reading in a `LexiconCollection` or `MWELexiconCollection` from a TSV. These can be find in `pymusas.spacy_api.lexicon_collection`.
+- spaCy registered functions for reading in a `LexiconCollection` or `MWELexiconCollection` from a TSV. These can be found in `pymusas.spacy_api.lexicon_collection`.
+- spaCy registered functions for creating `SingleWordRule` and `MWERule`. These can be found in `pymusas.spacy_api.taggers.rules`.
 
 ### Removed
 
