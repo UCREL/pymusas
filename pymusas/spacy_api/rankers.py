@@ -6,8 +6,8 @@ from typing import List
 
 import spacy
 
-from pymusas.taggers.rules.rule import Rule
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.taggers.rules.rule import Rule
 
 
 @spacy.util.registry.misc('pymusas.rankers.ContextualRuleBasedRanker.v1')

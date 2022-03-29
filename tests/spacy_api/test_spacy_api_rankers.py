@@ -2,11 +2,11 @@ from typing import Callable, List
 
 import spacy
 
-from pymusas.spacy_api import rankers  # noqa: F401
 from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
-from pymusas.taggers.rules.rule import Rule
+from pymusas.spacy_api import rankers  # noqa: F401
 from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
