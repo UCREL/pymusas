@@ -12,13 +12,13 @@ import spacy
 from ..lexicon_collection import LexiconCollection, MWELexiconCollection
 
 
-@spacy.util.registry.readers('pymusas.LexiconCollection.from_tsv')
+@spacy.util.registry.misc('pymusas.LexiconCollection.from_tsv')
 def lexicon_collection_from_tsv(tsv_file_path: Union[PathLike, str],
                                 include_pos: bool = True
                                 ) -> Dict[str, List[str]]:
     '''
     `pymusas.LexiconCollection.from_tsv` is a registered function under the
-    `@readers` function register. Given a `tsv_file_path` it will return a
+    `@misc` function register. Given a `tsv_file_path` it will return a
     dictionary object that can be used to create a
     :class:`pymusas.lexicon_collection.LexiconCollection`.
 
@@ -45,12 +45,12 @@ def lexicon_collection_from_tsv(tsv_file_path: Union[PathLike, str],
     return LexiconCollection.from_tsv(tsv_file_path, include_pos)
 
 
-@spacy.util.registry.readers('pymusas.MWELexiconCollection.from_tsv')
+@spacy.util.registry.misc('pymusas.MWELexiconCollection.from_tsv')
 def mwe_lexicon_collection_from_tsv(tsv_file_path: Union[PathLike, str]
                                     ) -> Dict[str, List[str]]:
     '''
     `pymusas.MWELexiconCollection.from_tsv` is a registered function under the
-    `@readers` function register. Given a `tsv_file_path` it will return a
+    `@misc` function register. Given a `tsv_file_path` it will return a
     dictionary object that can be used to create a
     :class:`pymusas.lexicon_collection.MWELexiconCollection`.
 
