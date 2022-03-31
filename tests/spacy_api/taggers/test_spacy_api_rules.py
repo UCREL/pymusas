@@ -3,8 +3,8 @@ from typing import Callable, Dict, List
 import spacy
 
 from pymusas.spacy_api.taggers import rules  # noqa: F401
-from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 

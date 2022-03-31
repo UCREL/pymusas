@@ -10,8 +10,8 @@ from typing import Dict, List, Optional
 import spacy
 
 from pymusas.taggers.rules.mwe import MWERule
-from pymusas.taggers.rules.single_word import SingleWordRule
 from pymusas.taggers.rules.rule import Rule
+from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 @spacy.util.registry.misc('pymusas.taggers.rules.SingleWordRule.v1')
