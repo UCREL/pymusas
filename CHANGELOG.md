@@ -39,6 +39,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - spaCy registered functions for reading in a `LexiconCollection` or `MWELexiconCollection` from a TSV. These can be found in `pymusas.spacy_api.lexicon_collection`.
 - spaCy registered functions for creating `SingleWordRule` and `MWERule`. These can be found in `pymusas.spacy_api.taggers.rules`.
 - spaCy registered function for creating `ContextualRuleBasedRanker`. This can be found in `pymusas.spacy_api.rankers`.
+- spaCy registered function for creating a `List` of `Rule`s, this can be found here: `pymusas.spacy_api.taggers.rules.rule_list`.
+- `LexiconCollection` and `MWELexiconCollection` open the TSV file downloaded through `from_tsv` method by default using `utf-8` encoding.
 
 ### Removed
 

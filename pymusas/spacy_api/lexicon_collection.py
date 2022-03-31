@@ -14,7 +14,7 @@ from ..lexicon_collection import LexiconCollection, MWELexiconCollection
 
 @spacy.util.registry.readers('pymusas.LexiconCollection.from_tsv')
 def lexicon_collection_from_tsv(tsv_file_path: Union[PathLike, str],
-                                include_pos: bool
+                                include_pos: bool = True
                                 ) -> Dict[str, List[str]]:
     '''
     `pymusas.LexiconCollection.from_tsv` is a registered function under the
@@ -33,7 +33,7 @@ def lexicon_collection_from_tsv(tsv_file_path: Union[PathLike, str],
         3. `pos` (Optional)
         
         All other fields will be ignored.
-    include_pos: `bool`
+    include_pos: `bool`, optional (default = `True`)
         Whether to include the POS information, if the information is avaliable,
         or not. See :func:`add_lexicon_entry` for more information on this
         parameter.

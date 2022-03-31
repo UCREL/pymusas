@@ -18,7 +18,7 @@ spaCy registered functions for reading in a
 @spacy.util.registry.readers('pymusas.LexiconCollection.from_tsv')
 def lexicon_collection_from_tsv(
     tsv_file_path: Union[PathLike, str],
-    include_pos: bool
+    include_pos: bool = True
 ) -> Dict[str, List[str]]
 ```
 
@@ -39,7 +39,7 @@ dictionary object that can be used to create a
     3. `pos` (Optional)
 
     All other fields will be ignored.
-- __include\_pos__ : `bool` <br/>
+- __include\_pos__ : `bool`, optional (default = `True`) <br/>
     Whether to include the POS information, if the information is avaliable,
     or not. See [`add_lexicon_entry`](#add_lexicon_entry) for more information on this
     parameter.
