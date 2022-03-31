@@ -88,11 +88,11 @@ jobs:
       - name: mypy
         run: mypy
 
-      - name: Pytest and code coverage
+      - name: Code coverage testing
         run: |
           coverage run
           
-      - name: Report
+      - name: Code coverage report
         run: |    
           coverage report
           coverage xml
