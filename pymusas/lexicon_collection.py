@@ -324,7 +324,7 @@ class LexiconCollection(MutableMapping):
         if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
             tsv_file_path = file_utils.download_url_file(tsv_file_path)
 
-        with open(tsv_file_path, 'r', newline='') as fp:
+        with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
             file_field_names: Set[str] = set()
             if csv_reader.fieldnames:
@@ -768,7 +768,7 @@ class MWELexiconCollection(MutableMapping):
         if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
             tsv_file_path = file_utils.download_url_file(tsv_file_path)
 
-        with open(tsv_file_path, 'r', newline='') as fp:
+        with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
             file_field_names: Set[str] = set()
             if csv_reader.fieldnames:
