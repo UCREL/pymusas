@@ -91,6 +91,9 @@ jobs:
       - name: Pytest and code coverage
         run: |
           coverage run
+          
+      - name: Report
+        run: |    
           coverage report
           coverage xml
 
