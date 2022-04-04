@@ -221,6 +221,11 @@ def test_mwe_lexicon_collection_set_get_del_item() -> None:
     assert (lexicon_collection.mwe_regular_expression_lookup[3]['*']['***_prep carta_* cabal_adj']
             == re.compile(r'[^\s_]*[^\s_]*[^\s_]*_prep\ carta_[^\s_]*\ cabal_adj'))
 
+    # Test that warning is raised when trying to add a MWE tempalate that contains
+    # a curly brace, as we currently do not support curly braces.
+    with pytest.warns(UserWarning):
+        MWELexiconCollection({'cynllun*_NOUN {NOUN} bws_NOUN am_PREP ddim_NOUN': ['Z1']})
+
 
 def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
 
@@ -359,6 +364,12 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
 
     with pytest.raises(ValueError):
         empty_collection['it_det was_det great_ad*j'] = ['Z1']
+
+    # Test that warning is raised when trying to add a MWE tempalate that contains
+    # a curly brace, as we currently do not support curly braces.
+    with pytest.warns(UserWarning):
+        MWELexiconCollection({'cynllun*_NOUN {NOUN} bws_NOUN am_PREP ddim_NOUN': ['Z1']},
+                             pos_mapper=POS_MAPPER)
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])

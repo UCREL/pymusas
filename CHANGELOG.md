@@ -42,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - spaCy registered function for creating a `List` of `Rule`s, this can be found here: `pymusas.spacy_api.taggers.rules.rule_list`.
 - `LexiconCollection` and `MWELexiconCollection` open the TSV file downloaded through `from_tsv` method by default using `utf-8` encoding.
 - `pymusas_rule_based_tagger` is now a spacy registered factory by using an entry point.
+- `MWELexiconCollection` warns users that it does not support curly braces MWE template expressions.
 
 ### Removed
 

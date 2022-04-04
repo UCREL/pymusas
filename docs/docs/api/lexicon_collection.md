@@ -549,6 +549,11 @@ see the [following dict time complexities](https://wiki.python.org/moin/TimeComp
 this is due to keeping track of the `longest_non_special_mwe_template` and
 `longest_wildcard_mwe_template`.
 
+As we do not currently support curly braces MWE template syntax, therefore
+any MWE templates that contain a `{` or `}` will be ignored and will not be
+added to this collection, in addition a `UserWarning` will be raised stating
+this.
+
 <h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 

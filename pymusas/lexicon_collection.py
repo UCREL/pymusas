@@ -8,6 +8,7 @@ import re
 import typing
 from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urlparse
+import warnings
 
 import srsly
 
@@ -438,6 +439,11 @@ class MWELexiconCollection(MutableMapping):
     this is due to keeping track of the `longest_non_special_mwe_template` and
     `longest_wildcard_mwe_template`.
 
+    As we do not currently support curly braces MWE template syntax, therefore
+    any MWE templates that contain a `{` or `}` will be ignored and will not be
+    added to this collection, in addition a `UserWarning` will be raised stating
+    this.
+
     # Parameters
 
     data: `Dict[str, List[str]]`, optional (default = `None`)
@@ -844,6 +850,13 @@ class MWELexiconCollection(MutableMapping):
             contain any wildcards or the POS tags can only be a wildcard, if
             this is not the case a `ValueError` will be raised.
         '''
+        if '{' in key or '}' in key:
+            warnings.warn('We do not currently support Curly Braces expressions'
+                          ' within Multi Word Expression (MWE) lexicons and '
+                          'therefore any MWE template that contains a `{` '
+                          'or `}` will be ignored.')
+            return None
+
         semantic_tags = value
         key_n_gram_length = len(key.split())
         mwe_type: LexiconType = LexiconType.MWE_NON_SPECIAL
