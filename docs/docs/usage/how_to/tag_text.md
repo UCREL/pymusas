@@ -3,15 +3,23 @@ title: Tag Text
 sidebar_position: 1
 ---
 
-In this guide we are going to show you how to tag text using the [USASRuleBasedTagger](/api/spacy_api/taggers/rule_based#usasrulebasedtagger), the guide is broken down into different languages, each language guide is almost identical with the exception of the USAS lexicon used and the spaCy pipeline that is required for lemmatisation and Part Of Speech (POS) tagging. In each of the language examples we will download the small version of the spaCy pipeline, but any version of the spaCy pipeline can be used.
+In this guide we are going to show you how to tag text using the PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based#rulebasedtagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide is broken down into different languages, for each guide we are going to: 
+
+1. Download the relevant pre-configured PyMUSAS `RuleBasedTagger` spaCy component for the language.
+2. Download and use a Natural Language Processing (NLP) pipeline that will tokenise, lemmatise, and Part Of Speech (POS) tag. In most cases this will be a spaCy pipeline. **Note** that the PyMUSAS `RuleBasedTagger` only requires at minimum the data to be tokenised but having the lemma and POS tag will improve the accuracy of the tagging of the text.
+3. Run the PyMUSAS `RuleBasedTagger`.
+4. Extract token level linguistic information from the tagged text, which will include USAS semantic tags.
+5. For Chinese, Italian, Portuguese, Spanish, and Welsh taggers which support Multi Word Expression (MWE) identification and tagging we will show how to extract this information from the tagged text as well.
+
 
 ## Chinese
 <details>
 <summary>Expand</summary>
 
-First download the relevant spaCy pipeline, through the command line, link to [Chinese spaCy models](https://spacy.io/models/zh):
+First download both the [Chinese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/cmn_dual_upos2usas_contextual-0.3.0) and the [small Chinese spaCy model](https://spacy.io/models/zh):
 
 ``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/cmn_dual_upos2usas_contextual-0.3.0/cmn_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
 python -m spacy download zh_core_web_sm
 ```
 
@@ -24,63 +32,90 @@ Currently there is no lemmatisation component in the spaCy pipeline for Chinese.
 ``` python
 import spacy
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('zh_core_web_sm', exclude=['parser', 'ner'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-chinese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Chinese/semantic_lexicon_chi.tsv'
-# Includes the POS information
-chinese_lexicon_lookup = LexiconCollection.from_tsv(chinese_usas_lexicon_url)
-# excludes the POS information
-chinese_lemma_lexicon_lookup = LexiconCollection.from_tsv(chinese_usas_lexicon_url, 
-                                                          include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = chinese_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = chinese_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+# Load the Chinese PyMUSAS rule based tagger in a seperate spaCy pipeline
+chinese_tagger_pipeline = spacy.load('cmn_dual_upos2usas_contextual')
+# Adds the Chinese PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=chinese_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Chinese Wikipedia page on the topic of [`Bank` as a financial institution.](https://zh.wikipedia.org/wiki/%E9%8A%80%E8%A1%8C):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Chinese Wikipedia page on the topic of [`The Nile River`](https://zh.wikipedia.org/wiki/%E5%B0%BC%E7%BD%97%E6%B2%B3):
 
 ``` python
-text = "銀行是吸收公众存款、发放貸款、办理结算等業務的金融機構。"
+text = "尼罗河 是一条流經非洲東部與北部的河流，與中非地區的剛果河、非洲南部的赞比西河以及西非地区的尼日尔河並列非洲最大的四個河流系統。"
 
 output_doc = nlp(text)
 
 print(f'Text\tPOS\tUSAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.pos_}\t{token._.usas_tags}')
+    print(f'{token.text}\t{token.pos_}\t{token._.pymusas_tags}')
 ```
 
-Output:
+<details>
+<summary>Output:</summary>
 
 ``` tsv
-Text	POS	USAS Tags
-銀行	NOUN	['Z99']
-是	VERB	['A3', 'Z5']
-吸收	VERB	['A1.1.1', 'T1.3+', 'X2.3+', 'X5.2+', 'C1', 'M2', 'A9+', 'X5.1+', 'I1.2', 'O4.2+', 'X2.1', 'K5.1', 'I3.1/A9+', 'S5+', 'N5', 'O4.1', 'A2.1/O1.2', 'A6.1+/A2.1']
-公众	NOUN	['A10+', 'G3/S7.1+/S2mf', 'B3/H1', 'N5+', 'A4.2-', 'S5+', 'S5+c']
-存款	NOUN	['I1.1', 'O1.1', 'S7.1-/A2.1']
-、	PUNCT	['PUNCT']
-发放	VERB	['A9-', 'A1.1.1', 'Q2.2', 'S6+', 'I1', 'O4.5']
-貸款	NOUN	['Z99']
-、	PUNCT	['PUNCT']
-办理	VERB	['A1.1.1', 'S7.1+', 'X9.2+', 'I2.2', 'S1.1.1', 'S7.1+c']
-结算	NOUN	['L3', 'M2', 'A7+', 'A10+', 'I1.1', 'B4', 'O4.1']
-等	PART	['T1.3', 'A3+', 'S1.1.1']
-業務	VERB	['Z99']
-的	PART	['Z5']
-金融	NOUN	['I1', 'I1.1', 'X2.6+', 'M1', 'H1']
-機構	NOUN	['Z99']
-。	PUNCT	['PUNCT']
+Text    POS     USAS Tags
+尼罗河     PROPN   ['Z2']
+是       VERB    ['A3', 'Z5']
+一       NUM     ['N1']
+条       NUM     ['G2.1/P1', 'S7.4-', 'A1.7+', 'S8-']
+流經      ADJ     ['Z99']
+非洲      PROPN   ['Z2']
+東部      NOUN    ['Z99']
+與北部     PROPN   ['Z99']
+的       PART    ['Z5']
+河流      NOUN    ['W3/M4', 'N5+']
+，       PUNCT   ['PUNCT']
+與       VERB    ['Z99']
+中非      PROPN   ['Z99']
+地區      NOUN    ['Z99']
+的       PART    ['Z5']
+剛果河     PROPN   ['Z99']
+、       PUNCT   ['PUNCT']
+非洲      PROPN   ['Z2']
+南部      NOUN    ['M6']
+的       PART    ['Z5']
+赞比西河    NOUN    ['Z99']
+以及      CCONJ   ['N5++', 'N5.2+', 'A13.3', 'Z5']
+西非      PROPN   ['Z99']
+地区      NOUN    ['A1.1.1', 'B3/X1', 'G1.1c', 'W3', 'F4/M7', 'K2', 'M7', 'A4.1', 'N3.6', 'B1', 'T1.1', 'O4.4', 'N5.1-', 'S5+c', 'B3', 'Y1', 'C1/H1@']
+的       PART    ['Z5']
+尼日尔河    NOUN    ['Z99']
+並列      VERB    ['Z99']
+非洲      PROPN   ['Z2']
+最       ADV     ['A11.1+', 'N5+++', 'N3.2+++', 'A11.1+++', 'N5.1+', 'O2/M4', 'O3']
+大       VERB    ['A11.1+', 'N5+++', 'N3.2+++', 'A11.1+++', 'N5.1+', 'O2/M4', 'O3']
+的       PART    ['Z5']
+四       NUM     ['N1']
+個       NUM     ['N1']
+河流      NOUN    ['W3/M4', 'N5+']
+系統      NOUN    ['Z99']
+。       PUNCT   ['PUNCT']
 ```
+
+</details>
+
+For Chinese the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+
+``` python
+print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+for token in output_doc:
+    start, end = token._.pymusas_mwe_indexes[0]
+    if (end - start) > 1:
+        print(f'{token.text}\t{token.pos_}\t{(start, end)}\t{token._.pymusas_tags}')
+```
+
+Which will output the following:
+
+``` tsv
+Text    POS    MWE start and end index    USAS Tags
+最       ADV    (28, 30)                   ['A11.1+', 'N5+++', 'N3.2+++', 'A11.1+++', 'N5.1+', 'O2/M4', 'O3']
+大       VERB   (28, 30)                   ['A11.1+', 'N5+++', 'N3.2+++', 'A11.1+++', 'N5.1+', 'O2/M4', 'O3']
+```
+
+
 </details>
 
 ## Dutch
@@ -88,9 +123,10 @@ Text	POS	USAS Tags
 <details>
 <summary>Expand</summary>
 
-First download the relevant spaCy pipeline, through the command line, link to [Dutch spaCy models](https://spacy.io/models/nl):
+First download both the [Dutch PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/nl_single_upos2usas_contextual-0.3.0) and the [small Dutch spaCy model](https://spacy.io/models/nl):
 
 ``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/nl_single_upos2usas_contextual-0.3.0/nl_single_upos2usas_contextual-0.3.0-py3-none-any.whl
 python -m spacy download nl_core_news_sm
 ```
 
@@ -99,69 +135,59 @@ Then create the tagger, in a Python script:
 ``` python
 import spacy
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('nl_core_news_sm', exclude=['parser', 'ner', 'tagger'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-dutch_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Dutch/semantic_lexicon_dut.tsv'
-# Includes the POS information
-dutch_lexicon_lookup = LexiconCollection.from_tsv(dutch_usas_lexicon_url)
-# excludes the POS information
-dutch_lemma_lexicon_lookup = LexiconCollection.from_tsv(dutch_usas_lexicon_url, 
-                                                        include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = dutch_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = dutch_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+# Load the Dutch PyMUSAS rule based tagger in a separate spaCy pipeline
+dutch_tagger_pipeline = spacy.load('nl_single_upos2usas_contextual')
+# Adds the Dutch PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=dutch_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on the topic of [`Bank` as a financial institution.](https://nl.wikipedia.org/wiki/Bank_(financi%C3%ABle_instelling)):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on the topic of [`The Nile River`](https://nl.wikipedia.org/wiki/Nijl):
 
 ``` python
-text = "Een bank of een kredietinstelling is een financieel instituut dat bewaring van geld, leningen, betaalverkeer en diverse andere diensten aanbiedt."
+text = "De Nijl is met een lengte van 5499 tot 6695 km de langste of de op een na langste rivier van de wereld."
 
 output_doc = nlp(text)
 
 print(f'Text\tLemma\tPOS\tUSAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
 ```
 
-Output:
+<details>
+
+<summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Een	een	DET	['Z5']
-bank	bank	NOUN	['Z99']
-of	of	CCONJ	['Z5']
-een	een	DET	['Z5']
-kredietinstelling	kredietinstelling	NOUN	['Z99']
-is	is	AUX	['Z99']
-een	een	DET	['Z5']
-financieel	financieel	ADJ	['I1']
-instituut	instituut	NOUN	['P1/S5+c', 'X2.4/S5+c', 'S5+c', 'T2+']
-dat	dat	SCONJ	['A13.3', 'A6.1+', 'Z5', 'Z8']
-bewaring	bewaring	NOUN	['Z99']
-van	van	ADP	['Z5']
-geld	geld	NOUN	['I1']
-,	,	PUNCT	['PUNCT']
-leningen	lening	NOUN	['A9-', 'I1.2']
-,	,	PUNCT	['PUNCT']
-betaalverkeer	betaalverkeer	PROPN	['Z99']
-en	en	CCONJ	['Z5']
-diverse	divers	ADJ	['A6.3+']
-andere	ander	ADJ	['A6.1-', 'A6.1-/Z8']
-diensten	dienst	NOUN	['A1.1.1', 'S8+', 'S7.1-', 'I2.2', 'S9', 'I3.1', 'F1', 'G3@', 'G1.1@', 'G2.1@']
-aanbiedt	aanbieden	VERB	['A9-', 'Q2.2']
-.	.	PUNCT	['PUNCT']
+Text    Lemma   POS     USAS Tags
+De      de      DET     ['Z5']
+Nijl    nijl    PROPN   ['Z99']
+is      is      AUX     ['Z99']
+met     met     ADP     ['Z5']
+een     een     DET     ['Z5']
+lengte  lengte  NOUN    ['N3.7', 'T1.3', 'M4']
+van     van     ADP     ['Z5']
+5499    5499    NUM     ['N1']
+tot     tot     ADP     ['Z99']
+6695    6695    NUM     ['N1']
+km      km      SYM     ['Z99']
+de      de      DET     ['Z5']
+langste lang    ADJ     ['N3.7+', 'T1.3+', 'N3.3+', 'N3.2+', 'X7+']
+of      of      CCONJ   ['Z5']
+de      de      DET     ['Z5']
+op      op      ADP     ['A5.1+', 'G2.2+', 'A1.1.1', 'M6', 'Z5']
+een     e       NUM     ['N1', 'T3', 'T1.2', 'Z8']
+na      na      ADP     ['N4', 'Z5']
+langste lang    ADJ     ['N3.7+', 'T1.3+', 'N3.3+', 'N3.2+', 'X7+']
+rivier  rivier  NOUN    ['W3/M4', 'N5+']
+van     van     ADP     ['Z5']
+de      de      DET     ['Z5']
+wereld  wereld  NOUN    ['W1', 'S5+c', 'A4.1', 'N5+']
+.       .       PUNCT   ['PUNCT']
 ```
+</details>
+
 </details>
 
 ## French
@@ -169,9 +195,10 @@ aanbiedt	aanbieden	VERB	['A9-', 'Q2.2']
 <details>
 <summary>Expand</summary>
 
-First download the relevant spaCy pipeline, through the command line, link to [French spaCy models](https://spacy.io/models/fr):
+First download both the [French PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.0) and the [small French spaCy model](https://spacy.io/models/fr):
 
 ``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual-0.3.0/fr_single_upos2usas_contextual-0.3.0-py3-none-any.whl
 python -m spacy download fr_core_news_sm
 ```
 
@@ -180,68 +207,67 @@ Then create the tagger, in a Python script:
 ``` python
 import spacy
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('fr_core_news_sm', exclude=['parser', 'ner'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-french_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.tsv'
-# Includes the POS information
-french_lexicon_lookup = LexiconCollection.from_tsv(french_usas_lexicon_url)
-# excludes the POS information
-french_lemma_lexicon_lookup = LexiconCollection.from_tsv(french_usas_lexicon_url, 
-                                                         include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = french_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = french_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+# Load the French PyMUSAS rule based tagger in a separate spaCy pipeline
+french_tagger_pipeline = spacy.load('fr_single_upos2usas_contextual')
+# Adds the French PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=french_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on the topic of [`Bank` as a financial institution.](https://fr.wikipedia.org/wiki/Banque):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on the topic of [`The Nile River`](https://fr.wikipedia.org/wiki/Nil):
 
 ``` python
-text = "Une banque est une institution financière qui fournit des services bancaires, soit notamment de dépôt, de crédit et paiement."
+text = "Le Nil est un fleuve d'Afrique. Avec une longueur d'environ 6 700 km, c'est avec le fleuve Amazone, le plus long fleuve du monde."
 
 output_doc = nlp(text)
 
 print(f'Text\tLemma\tPOS\tUSAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
 ```
 
-Output:
+<details>
+
+<summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Une	un	DET	['Z5']
-banque	banque	NOUN	['I1.1', 'X2.6+', 'M1', 'I1/H1', 'I1.1/I2.1c', 'W3/M4', 'A9+/H1', 'O2', 'M6']
-est	être	AUX	['M6']
-une	un	DET	['Z5']
-institution	institution	NOUN	['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
-financière	financier	ADJ	['Z99']
-qui	qui	PRON	['Z8']
-fournit	fournir	VERB	['Z99']
-des	de	ADP	['Z5']
-services	service	NOUN	['A1.1.1', 'S8+', 'S7.1-', 'I2.2', 'S9', 'I3.1', 'F1', 'G3@', 'G1.1@', 'G2.1@']
-bancaires	bancaire	NOUN	['I1.1', 'X2.6+', 'M1', 'H1']
-,	,	PUNCT	['PUNCT']
-soit	soit	CCONJ	['Z99']
-notamment	notamment	ADV	['A14', 'A13.3']
-de	de	ADP	['Z5']
-dépôt	dépôt	NOUN	['Z99']
-,	,	PUNCT	['PUNCT']
-de	de	ADP	['Z5']
-crédit	crédit	NOUN	['I1.1', 'A5.1+', 'X2.1', 'P1']
-et	et	CCONJ	['Z5']
-paiement	paiement	NOUN	['I1.1']
-.	.	PUNCT	['PUNCT']
+Text      Lemma     POS       USAS Tags
+Le        le        DET       ['Z5']
+Nil       Nil       PROPN     ['Z99']
+est       être      AUX       ['M6']
+un        un        DET       ['Z5']
+fleuve    fleuve    NOUN      ['W3/M4', 'N5+']
+d'        de        ADP       ['Z5']
+Afrique   Afrique   PROPN     ['Z99']
+.         .         PUNCT     ['PUNCT']
+Avec      avec      ADP       ['Z5']
+une       un        DET       ['Z5']
+longueur  longueur  NOUN      ['N3.7', 'T1.3', 'M4']
+d'        de        ADP       ['Z5']
+environ   environ   ADV       ['Z5']
+6         6         DET       ['Z99']
+700       700       NUM       ['N1']
+km        kilomètre NOUN      ['N3.3', 'N3.7']
+,         ,         PUNCT     ['PUNCT']
+c'        ce        PRON      ['Z8']
+est       être      VERB      ['M6']
+avec      avec      ADP       ['Z5']
+le        le        DET       ['Z5']
+fleuve    fleuve    NOUN      ['W3/M4', 'N5+']
+Amazone   amazone   NOUN      ['Z99']
+,         ,         PUNCT     ['PUNCT']
+le        le        DET       ['Z5']
+plus      plus      ADV       ['Z5']
+long      long      ADJ       ['Z99']
+fleuve    fleuve    NOUN      ['W3/M4', 'N5+']
+du        de        ADP       ['Z5']
+monde     monde     NOUN      ['Z99']
+.         .         PUNCT     ['PUNCT']
 ```
+
+</details>
+
 </details>
 
 ## Italian
@@ -249,9 +275,10 @@ paiement	paiement	NOUN	['I1.1']
 <details>
 <summary>Expand</summary>
 
-First download the relevant spaCy pipeline, through the command line, link to [Italian spaCy models](https://spacy.io/models/it):
+First download both the [Italian PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/it_dual_upos2usas_contextual-0.3.0) and the [small Italian spaCy model](https://spacy.io/models/it):
 
 ``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/it_dual_upos2usas_contextual-0.3.0/it_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
 python -m spacy download it_core_news_sm
 ```
 
@@ -260,106 +287,90 @@ Then create the tagger, in a Python script:
 ``` python
 import spacy
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('it_core_news_sm', exclude=['parser', 'ner', 'tagger'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-italian_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Italian/semantic_lexicon_ita.tsv'
-# Includes the POS information
-italian_lexicon_lookup = LexiconCollection.from_tsv(italian_usas_lexicon_url)
-# excludes the POS information
-italian_lemma_lexicon_lookup = LexiconCollection.from_tsv(italian_usas_lexicon_url, 
-                                                          include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = italian_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = italian_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+# Load the Italian PyMUSAS rule based tagger in a separate spaCy pipeline
+italian_tagger_pipeline = spacy.load('it_dual_upos2usas_contextual')
+# Adds the Italian PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=italian_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on the topic of [`Bank` as a financial institution.](https://it.wikipedia.org/wiki/Banca):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on the topic of [`The Nile River`](https://it.wikipedia.org/wiki/Nilo):
 
 ``` python
-text = "Una banca (detta anche istituto di credito) è un istituto pubblico o privato che esercita congiuntamente l'attività di raccolta del risparmio tra il pubblico e di esercizio del credito (attività bancaria) verso i propri clienti (imprese e privati cittadini); costituisce raccolta del risparmio l'acquisizione di fondi con obbligo di rimborso."
+text = "Il Nilo è un fiume africano lungo 6.852 km che attraversa otto stati dell'Africa. Tradizionalmente considerato il fiume più lungo del mondo, contende il primato della lunghezza al Rio delle Amazzoni."
 
 output_doc = nlp(text)
 
 print(f'Text\tLemma\tPOS\tUSAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
 ```
 
-Output:
+<details>
+
+<summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Una	uno	DET	['N1']
-banca	banca	NOUN	['I2.1']
-(	(	PUNCT	['PUNCT']
-detta	dire	VERB	['Q2.2']
-anche	anche	ADV	['Z5']
-istituto	istituto	NOUN	['P1/S5+c', 'X2.4/S5+c']
-di	di	ADP	['Z5']
-credito	credito	NOUN	['I1.1', 'A5.1+', 'X2.1', 'P1', 'Q1.2', 'X3.2', 'T1.3', 'L2']
-)	)	PUNCT	['PUNCT']
-è	essere	AUX	['A5.1', 'S7.1++', 'X3.2', 'Q2.2', 'A8', 'N3.1%']
-un	uno	DET	['Z5']
-istituto	istituto	NOUN	['P1/S5+c', 'X2.4/S5+c']
-pubblico	pubblico	ADJ	['A10+']
-o	o	CCONJ	['Z5']
-privato	privato	ADJ	['S1.2.1+', 'A1.7-']
-che	che	PRON	['Z8']
-esercita	esercitare	VERB	['A1.1.1', 'S7.1+', 'X8+', 'X2.4', 'M1', 'A9-', 'K5.1', 'A1.5.1']
-congiuntamente	congiuntamente	ADV	['Z99']
-l'	il	DET	['Z5']
-attività	attività	NOUN	['A1.1.1', 'X8+', 'X2.4', 'M1']
-di	di	ADP	['Z5']
-raccolta	raccolta	NOUN	['F4', 'N4', 'Q4.3%', 'S9%', 'N5+', 'A9+']
-del	del	ADP	['Z5']
-risparmio	risparmio	NOUN	['I2.1', 'I1.3-', 'A1.5.1/A1.3+', 'A1.9']
-tra	tra	ADP	['Z5']
-il	il	DET	['Z5']
-pubblico	pubblico	NOUN	['S1.1.3+', 'S5+']
-e	e	CCONJ	['Z5']
-di	di	ADP	['Z5']
-esercizio	esercizio	NOUN	['K5.1', 'P1', 'A1.1.1', 'G3@', 'O2', 'G3', 'B5']
-del	del	ADP	['Z5']
-credito	credito	NOUN	['I1.1', 'A5.1+', 'X2.1', 'P1', 'Q1.2', 'X3.2', 'T1.3', 'L2']
-(	(	PUNCT	['PUNCT']
-attività	attività	NOUN	['A1.1.1', 'X8+', 'X2.4', 'M1']
-bancaria	bancario	ADJ	['M1', 'M2', 'I1.2']
-)	)	PUNCT	['PUNCT']
-verso	verso	ADP	['Z5', 'M6']
-i	il	DET	['Z5']
-propri	proprio	DET	['Z5']
-clienti	cliente	NOUN	['I2.2/S2mf']
-(	(	PUNCT	['PUNCT']
-imprese	impresa	NOUN	['A12-']
-e	e	CCONJ	['Z5']
-privati	privato	NOUN	['S1.2.1+', 'A1.7-']
-cittadini	cittadino	NOUN	['M7/S2mf']
-)	)	PUNCT	['PUNCT']
-;	;	PUNCT	['PUNCT']
-costituisce	costituire	VERB	['A1.1.1', 'A9+', 'A2.2', 'S6+', 'A3+', 'A9-', 'X9.2+', 'X6+']
-raccolta	raccolta	NOUN	['F4', 'N4', 'Q4.3%', 'S9%', 'N5+', 'A9+']
-del	del	ADP	['Z5']
-risparmio	risparmio	NOUN	['I2.1', 'I1.3-', 'A1.5.1/A1.3+', 'A1.9']
-l'	il	DET	['Z5']
-acquisizione	acquisizione	NOUN	['Z99']
-di	di	ADP	['Z5']
-fondi	fondo	NOUN	['M6']
-con	con	ADP	['Z5']
-obbligo	obbligo	NOUN	['S6+']
-di	di	ADP	['Z5']
-rimborso	rimborso	NOUN	['I1.1', 'I1.1+/A9-', 'I1.2-', 'S1.1.2+', 'S8-']
-.	.	PUNCT	['PUNCT']
+Text              Lemma             POS     USAS Tags
+Il                il                DET     ['Z5']
+Nilo              nilo              PROPN   ['Z99']
+è                 essere            AUX     ['A5.1', 'S7.1++', 'X3.2', 'Q2.2', 'A8', 'N3.1%']
+un                uno               DET     ['Z5']
+fiume             fiume             NOUN    ['W3']
+africano          africano          ADJ     ['Z2']
+lungo             lungo             ADP     ['Z5']
+6.852             6.852             NUM     ['N1']
+km                km                NOUN    ['N3.3']
+che               che               PRON    ['Z8']
+attraversa        attraversare      VERB    ['M1', 'M6', 'S8-', 'A1.8+', 'A6.3+', 'F4/L2', 'O4.4', 'Q1.2', 'E3-', 'S1.1.1', 'S9@']
+otto              otto              NUM     ['N1']
+stati             stato             NOUN    ['G2.1/H1', 'B2', 'A3']
+dell'             dell'             ADP     ['Z99']
+Africa            Africa            PROPN   ['Z2']
+.                 .                 PUNCT   ['PUNCT']
+Tradizionalmente  tradizionalmente  ADV     ['Z99']
+considerato       considerare       VERB    ['A5.1', 'N2', 'A11.1+', 'Q2.2', 'S1.1.1', 'Q1.3', 'S9%', 'X2.1', 'X2.4', 'X6']
+il                il                DET     ['Z5']
+fiume             fiume             NOUN    ['W3']
+più               molto             ADV     ['N3.3+', 'A13.3']
+lungo             lungo             ADJ     ['N3.3+', 'A13.3']
+del               del               ADP     ['Z5']
+mondo             mondo             NOUN    ['W1']
+,                 ,                 PUNCT   ['PUNCT']
+contende          contendere        VERB    ['S7.3']
+il                il                DET     ['Z5']
+primato           primato           NOUN    ['A5.1+++', 'A11.1+']
+della             della             ADP     ['Z99']
+lunghezza         lunghezza         NOUN    ['N3.7', 'T1.3', 'M4']
+al                al                ADP     ['Z5']
+Rio               Rio               PROPN   ['Z2']
+delle             della             ADP     ['Z5']
+Amazzoni          amazzoni          PROPN   ['Z99']
+.                 .                 PUNCT   ['PUNCT']
 ```
+
+</details>
+
+For Italian the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+
+``` python
+print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+
+for token in output_doc:
+    start, end = token._.pymusas_mwe_indexes[0]
+    if (end - start) > 1:
+        print(f'{token.text}\t{token.pos_}\t{(start, end)}\t{token._.pymusas_tags}')
+```
+
+Which will output the following:
+
+``` tsv
+Text    POS     MWE start and end index    USAS Tags
+più     ADV     (20, 22)                   ['N3.3+', 'A13.3']
+lungo   ADJ     (20, 22)                   ['N3.3+', 'A13.3']
+```
+
 </details>
 
 ## Portuguese
@@ -367,9 +378,10 @@ rimborso	rimborso	NOUN	['I1.1', 'I1.1+/A9-', 'I1.2-', 'S1.1.2+', 'S8-']
 <details>
 <summary>Expand</summary>
 
-First download the relevant spaCy pipeline, through the command line, link to [Portuguese spaCy models](https://spacy.io/models/pt):
+First download both the [Portuguese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/pt_dual_upos2usas_contextual-0.3.0) and the [small Portuguese spaCy model](https://spacy.io/models/pt):
 
 ``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/pt_dual_upos2usas_contextual-0.3.0/pt_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
 python -m spacy download pt_core_news_sm
 ```
 
@@ -378,69 +390,93 @@ Then create the tagger, in a Python script:
 ``` python
 import spacy
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('pt_core_news_sm', exclude=['parser', 'ner'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-portuguese_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv'
-# Includes the POS information
-portuguese_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_url)
-# excludes the POS information
-portuguese_lemma_lexicon_lookup = LexiconCollection.from_tsv(portuguese_usas_lexicon_url, 
-                                                             include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = portuguese_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = portuguese_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+# Load the Portuguese PyMUSAS rule based tagger in a separate spaCy pipeline
+portuguese_tagger_pipeline = spacy.load('pt_dual_upos2usas_contextual')
+# Adds the Portuguese PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=portuguese_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Portuguese Wikipedia page on the topic of [`Bank` as a financial institution.](https://pt.wikipedia.org/wiki/Banco):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Portuguese Wikipedia page on the topic of [`The Nile River`](https://pt.wikipedia.org/wiki/Rio_Nilo):
 
 ``` python
-text = "Banco (do germânico banki, através do latim vulgar) é uma instituição financeira intermediária entre agentes superavitários e agentes deficitários."
+text = "Todos estes estudos levam a que o comprimento de ambos os rios permaneça em aberto, continuando por isso o debate e como tal, continuando-se a considerar o Nilo como o rio mais longo."
 
 output_doc = nlp(text)
 
 print(f'Text\tLemma\tPOS\tUSAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
 ```
 
-Output:
+<details>
+
+<summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Banco	Banco	PROPN	['H5', 'B1%', 'I1/H1', 'I1.1/I2.1c', 'W3/M4', 'A9+/H1', 'O2', 'M6', 'G2.1c']
-(	(	PUNCT	['PUNCT']
-do	do	ADP	['Z5']
-germânico	germânico	ADJ	['Z2', 'Z2/Q3']
-banki	banki	ADJ	['Z99']
-,	,	PUNCT	['PUNCT']
-através	através	ADV	['M6', 'Z5']
-do	do	ADP	['Z5']
-latim	latim	NOUN	['Z2/Q3', 'Z2/S2mf']
-vulgar	vulgar	VERB	['A6.2+', 'A5.1', 'N2', 'N5++', 'S5+', 'O4.2-', 'M7', 'S1.2.4-']
-)	)	PUNCT	['PUNCT']
-é	ser	AUX	['A3+', 'Z5']
-uma	umar	DET	['Z99']
-instituição	instituição	NOUN	['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
-financeira	financeiro	ADJ	['I1', 'I1/G1.1']
-intermediária	intermediário	ADJ	['N5', 'N4', 'S8+/S2mf']
-entre	entrar	ADP	['M1', 'S5+', 'T2+', 'A1.8+', 'Y2']
-agentes	agente	NOUN	['I2.1/S2mf', 'G1.1/X2.2+/S2mf', 'K4/S2mf', 'I2.2/S2.2m', 'S8+/S2.2m']
-superavitários	superavitários	ADJ	['Z99']
-e	e	CCONJ	['Z5']
-agentes	agente	NOUN	['I2.1/S2mf', 'G1.1/X2.2+/S2mf', 'K4/S2mf', 'I2.2/S2.2m', 'S8+/S2.2m']
-deficitários	deficitário	ADJ	['Z99']
-.	.	PUNCT	['PUNCT']
+Text            Lemma           POS     USAS Tags
+Todos           Todos           DET     ['Z8/N5.1+c']
+estes           este            DET     ['Z5', 'Z8']
+estudos         estudo          NOUN    ['P1', 'X2.4', 'H2', 'Q1.2', 'C1']
+levam           levar           VERB    ['A9+', 'T1.3', 'C1', 'A1.1.1', 'M2', 'S7.1-', 'A2.1+', 'X2.4', 'S6+', 'S7.4+', 'N3', 'A2.1+', 'P1', 'M1', 'X2.5+', 'F1@', 'F2@', 'Q1.2@', 'B3@']
+a               o               SCONJ   ['M6', 'Z5']
+que             que             SCONJ   ['A13.3', 'A6.1+', 'Z5', 'Z8']
+o               o               DET     ['Z5']
+comprimento     comprimento     NOUN    ['N3.7', 'T1.3', 'M4']
+de              de              ADP     ['Z5']
+ambos           ambos           DET     ['N5']
+os              o               DET     ['Z5']
+rios            rio             NOUN    ['W3/M4', 'N5+']
+permaneça       permanecer      VERB    ['T2++', 'M8', 'N5.2+']
+em              em              SCONJ   ['A5.1+', 'G2.2+', 'A1.1.1', 'M6', 'O4.2+', 'Z5']
+aberto          aberto          VERB    ['A10+', 'T2+']
+,               ,               PUNCT   ['PUNCT']
+continuando     continuar       VERB    ['Z99']
+por             por             ADP     ['N4', 'Z5', 'T1.2']
+isso            isso            PRON    ['N4', 'Z5', 'T1.2']
+o               o               DET     ['Z5']
+debate          debater         NOUN    ['Q2.1', 'Q2.1/A6.1-', 'Q2.1/E3-', 'Q2.2']
+e               e               CCONJ   ['Z5']
+como            comer           ADP     ['Z5']
+tal             tal             PRON    ['Z5']
+,               ,               PUNCT   ['PUNCT']
+continuando-se  continuando-se  VERB    ['Z99']
+a               o               SCONJ   ['M6', 'Z5']
+considerar      considerar      VERB    ['Z99']
+o               o               DET     ['Z5']
+Nilo            Nilo            PROPN   ['Z2']
+como            comer           ADP     ['Z5']
+o               o               DET     ['Z5']
+rio             rir             NOUN    ['W3/M4', 'N5+']
+mais            mais            ADV     ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2++']
+longo           longo           ADJ     ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2++']
+.               .               PUNCT   ['PUNCT']
 ```
+</details>
+
+For Portuguese the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+
+``` python
+print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+
+for token in output_doc:
+    start, end = token._.pymusas_mwe_indexes[0]
+    if (end - start) > 1:
+        print(f'{token.text}\t{token.pos_}\t{(start, end)}\t{token._.pymusas_tags}')
+```
+
+Which will output the following:
+
+``` tsv
+Text    POS     MWE start and end index    USAS Tags
+por     ADP     (17, 19)                   ['N4', 'Z5', 'T1.2']
+isso    PRON    (17, 19)                   ['N4', 'Z5', 'T1.2']
+mais    ADV     (33, 35)                   ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2++']
+longo   ADJ     (33, 35)                   ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2++']
+```
+
+
 </details>
 
 ## Spanish
@@ -448,9 +484,10 @@ deficitários	deficitário	ADJ	['Z99']
 <details>
 <summary>Expand</summary>
 
-First download the relevant spaCy pipeline, through the command line, link to [Spanish spaCy models](https://spacy.io/models/es):
+First download both the [Spanish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/es_dual_upos2usas_contextual-0.3.0) and the [small Spanish spaCy model](https://spacy.io/models/es):
 
 ``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/es_dual_upos2usas_contextual-0.3.0/es_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
 python -m spacy download es_core_news_sm
 ```
 
@@ -459,95 +496,103 @@ Then create the tagger, in a Python script:
 ``` python
 import spacy
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.spacy_api.taggers import rule_based
-from pymusas.pos_mapper import UPOS_TO_USAS_CORE
-
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('es_core_news_sm', exclude=['parser', 'ner'])
-# Adds the tagger to the pipeline and returns the tagger 
-usas_tagger = nlp.add_pipe('usas_tagger')
-
-# Rule based tagger requires a USAS lexicon
-spanish_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Spanish/semantic_lexicon_es.tsv'
-# Includes the POS information
-spanish_lexicon_lookup = LexiconCollection.from_tsv(spanish_usas_lexicon_url)
-# excludes the POS information
-spanish_lemma_lexicon_lookup = LexiconCollection.from_tsv(spanish_usas_lexicon_url, 
-                                                          include_pos=False)
-# Add the lexicon information to the USAS tagger within the pipeline
-usas_tagger.lexicon_lookup = spanish_lexicon_lookup
-usas_tagger.lemma_lexicon_lookup = spanish_lemma_lexicon_lookup
-# Maps from the POS model tagset to the lexicon POS tagset
-usas_tagger.pos_mapper = UPOS_TO_USAS_CORE
+# Load the Spanish PyMUSAS rule based tagger in a separate spaCy pipeline
+spanish_tagger_pipeline = spacy.load('es_dual_upos2usas_contextual')
+# Adds the Spanish PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=spanish_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Spanish Wikipedia page on the topic of [`Bank` as a financial institution.](https://es.wikipedia.org/wiki/Banco):
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Spanish Wikipedia page on the topic of [`Países Bajos`](https://es.wikipedia.org/wiki/Pa%C3%ADses_Bajos):
 
 ``` python
-text = "Un banco, también conocido como entidad de crédito o entidad de depósito es una empresa financiera que acepta depósitos del público y crea depósitos a la vista, lo que coloquialmente se denominan cuentas bancarias; así mismo proveen otro tipo de servicios financieros, como créditos."
+text = "Los Países Bajos son un país soberano ubicado al noreste de la Europa continental y el país constituyente más grande de los cuatro que, junto con las islas de Aruba, Curazao y San Martín, forman el Reino de los Países Bajos."
 
 output_doc = nlp(text)
 
 print(f'Text\tLemma\tPOS\tUSAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.usas_tags}')
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
 ```
 
-Output:
+<details>
+
+<summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Un	uno	DET	['Z5', 'N1']
-banco	banco	NOUN	['I2', 'M7']
-,	,	PUNCT	['PUNCT']
-también	también	ADV	['N5++', 'Z5']
-conocido	conocido	ADJ	['Z99']
-como	como	SCONJ	['Z5']
-entidad	entidad	NOUN	['I2.1.3', 'G1', 'A3', 'S7.2+', 'S5+']
-de	de	ADP	['Z5']
-crédito	crédito	NOUN	['I2.1']
-o	o	CCONJ	['Z5', 'A1.8-']
-entidad	entidad	NOUN	['I2.1.3', 'G1', 'A3', 'S7.2+', 'S5+']
-de	de	ADP	['Z5']
-depósito	depósito	NOUN	['Z99']
-es	ser	AUX	['Z5', 'A3+']
-una	uno	DET	['Z5', 'Z8', 'N1']
-empresa	empresa	NOUN	['I1.2.1.3', 'X6/X7']
-financiera	financiero	ADJ	['I1', 'S2mf', 'S7']
-que	que	PRON	['Z5', 'Z8']
-acepta	aceptar	VERB	['A9+', 'X2.5+', 'S7.4+', 'S9@']
-depósitos	depósito	NOUN	['Z99']
-del	del	ADP	['Z5']
-público	público	NOUN	['K1/S2mfc', 'S2mfc', 'S1.1.3+', 'S5+c', 'A10+']
-y	y	CCONJ	['Z5', 'A1.8+']
-crea	crea	VERB	['Z99']
-depósitos	depósito	NOUN	['Z99']
-a	a	ADP	['Z5']
-la	el	DET	['Z5']
-vista	vista	NOUN	['X3.4', 'M5', 'B2', 'G2.1']
-,	,	PUNCT	['PUNCT']
-lo	él	PRON	['Z5', 'Z8']
-que	que	PRON	['Z5', 'Z8']
-coloquialmente	coloquialmentar	VERB	['Z99']
-se	él	PRON	['Z5', 'Z8', 'S1.1']
-denominan	denominar	VERB	['Z99']
-cuentas	cuenta	NOUN	['I1.1/N2/Y2', 'N5', 'N5.1+', 'I1.3.1', 'O2']
-bancarias	bancario	ADJ	['Z99']
-;	;	PUNCT	['PUNCT']
-así	así	ADV	['Z5', 'A8', 'N3']
-mismo	mismo	PRON	['A6']
-proveen	proveer	VERB	['A9+', 'S6+']
-otro	otro	DET	['Z8', 'A6.1-m', 'N5++']
-tipo	tipo	NOUN	['A4.1', 'A6.1', 'S2.2m', 'Y2', 'I1.2', 'I1.3']
-de	de	ADP	['Z5']
-servicios	servicio	NOUN	['I1', 'S8+', 'G1']
-financieros	financiero	ADJ	['I1', 'S2mf', 'S7']
-,	,	PUNCT	['PUNCT']
-como	como	SCONJ	['Z5']
-créditos	crédito	NOUN	['I2.1']
-.	.	PUNCT	['PUNCT']
+Text            Lemma           POS     USAS Tags
+Los             el              DET     ['Z5']
+Países          Países          PROPN   ['Z2']
+Bajos           Bajos           PROPN   ['Z2']
+son             ser             AUX     ['A3+', 'L1', 'Z5']
+un              uno             DET     ['Z5', 'N1']
+país            país            NOUN    ['G1.1c', 'W3', 'M7']
+soberano        soberano        ADJ     ['Z99']
+ubicado         ubicado         ADJ     ['Z99']
+al              al              ADP     ['Z5']
+noreste         noreste         NOUN    ['Z99']
+de              de              ADP     ['Z5']
+la              el              DET     ['Z5']
+Europa          Europa          PROPN   ['Z2', 'S7', 'M7']
+continental     continental     ADJ     ['Z99']
+y               y               CCONJ   ['Z5', 'A1.8+']
+el              el              DET     ['Z5']
+país            país            NOUN    ['G1.1c', 'W3', 'M7']
+constituyente   constituyente   ADJ     ['Z99']
+más             más             ADV     ['A13.3', 'N6++', 'Z5']
+grande          grande          ADJ     ['N3.1+/A6.1+/A13.2+', 'A5']
+de              de              ADP     ['Z5']
+los             el              DET     ['Z5']
+cuatro          cuatro          NUM     ['N1']
+que             que             PRON    ['Z5', 'Z8']
+,               ,               PUNCT   ['PUNCT']
+junto           junto           ADJ     ['A2.2', 'S5+', 'A1.8+']
+con             con             ADP     ['Z5', 'A4.1']
+las             el              DET     ['Z5']
+islas           isla            NOUN    ['W3M7']
+de              de              ADP     ['Z5']
+Aruba           Aruba           PROPN   ['Z99']
+,               ,               PUNCT   ['PUNCT']
+Curazao         Curazao         PROPN   ['Z99']
+y               y               CCONJ   ['Z5', 'A1.8+']
+San             San             PROPN   ['S9', 'S2', 'A4.1']
+Martín          Martín          PROPN   ['Z1', 'S2']
+,               ,               PUNCT   ['PUNCT']
+forman          formar          VERB    ['T2+', 'A2.1+', 'A1.8+', 'A3+', 'A1.1.1']
+el              el              DET     ['Z5']
+Reino           Reino           PROPN   ['M7']
+de              de              ADP     ['Z5']
+los             el              DET     ['Z5']
+Países          Países          PROPN   ['Z2']
+Bajos           Bajos           PROPN   ['Z2']
+.               .               PUNCT   ['PUNCT']
 ```
+</details>
+
+
+
+For Spainsh the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+
+``` python
+print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+
+for token in output_doc:
+    start, end = token._.pymusas_mwe_indexes[0]
+    if (end - start) > 1:
+        print(f'{token.text}\t{token.pos_}\t{(start, end)}\t{token._.pymusas_tags}')
+```
+
+Which will output the following:
+
+``` tsv
+Text    POS     MWE start and end index    USAS Tags
+Países  PROPN   (1, 3)                     ['Z2']
+Bajos   PROPN   (1, 3)                     ['Z2']
+Países  PROPN   (42, 44)                   ['Z2']
+Bajos   PROPN   (42, 44)                   ['Z2']
+```
+
 </details>
 
 
@@ -557,13 +602,13 @@ créditos	crédito	NOUN	['I2.1']
 
 In this example we will not be using spaCy for tokenisation, lemmatisation, and POS tagging, as we will be using the [CyTag toolkit](https://github.com/UCREL/CyTag) that has been wrapped in a docker container. Therefore, first you will need to [install docker](https://docs.docker.com/get-docker/).
 
-We assume that you would like to tag the following text, of which this text is stored in the file named `welsh_text_example.txt`. The example text is taken from the Welsh Wikipedia page on the topic of [`Bank` as a financial institution.](https://cy.wikipedia.org/wiki/Banc)
+We assume that you would like to tag the following text, of which this text is stored in the file named `welsh_text_example.txt`. The example text is taken from the Welsh Wikipedia page on the topic of [`Bank` as a financial institution.](https://cy.wikipedia.org/wiki/Banc) With an additional random sentence at the end to demonstrate the Multi Word Expression (MWE) identification and tagging attributes of the tagger.
 
 ``` txt title="welsh_text_example.txt"
-Sefydliad cyllidol yw bancwr neu fanc sy'n actio fel asiant talu ar gyfer cwsmeriaid, ac yn rhoi benthyg ac yn benthyg arian. Yn rhai gwledydd, megis yr Almaen a Siapan, mae banciau'n brif berchenogion corfforaethau diwydiannol, tra mewn gwledydd eraill, megis yr Unol Daleithiau, mae banciau'n cael eu gwahardd rhag bod yn berchen ar gwmniau sydd ddim yn rhai cyllidol.
+Sefydliad cyllidol yw bancwr neu fanc sy'n actio fel asiant talu ar gyfer cwsmeriaid, ac yn rhoi benthyg ac yn benthyg arian. Yn rhai gwledydd, megis yr Almaen a Siapan, mae banciau'n brif berchenogion corfforaethau diwydiannol, tra mewn gwledydd eraill, megis yr Unol Daleithiau, mae banciau'n cael eu gwahardd rhag bod yn berchen ar gwmniau sydd ddim yn rhai cyllidol. Adran Iechyd Cymru.
 ```
 
-First we will need to run the CyTag toolkit, more specifically we will run version 1 of the toolkit as we have a mapping from the POS tags produced in version 1 (the [basic CorCencC POS tagset](https://cytag.corcencc.org/tagset?lang=en)) to the POS tags that the USAS lexicon uses (the USAS core POS tagset)
+First we will need to run the CyTag toolkit, more specifically we will run version 1 of the toolkit as we have a mapping from the POS tags produced in version 1 (the [basic CorCencC POS tagset](https://cytag.corcencc.org/tagset?lang=en)) to the POS tags that the USAS lexicon uses (the USAS core POS tagset) within the pre-configured Welsh PyMUSAS `RuleBasedTagger` tagger.
 
 ``` bash
 cat welsh_text_example.txt | docker run -i --rm ghcr.io/ucrel/cytag:1.0.4 > welsh_text_example.tsv
@@ -646,30 +691,38 @@ Line Number	Token	Sentence Index, Token Index	Lemma	Basic POS	Enriched POS	Mutat
 68	yn	2,43	yn	U	Utra	
 69	rhai	2,44	rhai	unk	unk	
 70	cyllidol	2,45	cyllidol	Ans	Anscadu	
-71	.	2,46	.	Atd	Atdt
+71	.	2,46	.	Atd	Atdt	
+72	Adran	3,1	adran	E	Ebu	
+73	Iechyd	3,2	iechyd	E	Egu	
+74	Cymru	3,3	Cymru	E	Epb	
+75	.	3,4	.	Atd	Atdt
 ```
 
 </details>
 
-Now we have the token, lemma, and POS tag information we can now create a [USASRuleBasedTagger](https://ucrel.github.io/pymusas/api/taggers/rule_based#usasrulebasedtagger) and run the tagger over this `tsv` data using the following Python script:
+Now we have the token, lemma, and POS tag information we can run the [Welsh PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/cy_dual_basiccorcencc2usas_contextual-0.3.0), so first we will download it:
+
+``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/cy_dual_basiccorcencc2usas_contextual-0.3.0/cy_dual_basiccorcencc2usas_contextual-0.3.0-py3-none-any.whl
+```
+
+Now we can run the tagger over the `tsv` data using the following Python script:
 
 ``` python
 from pathlib import Path
+from typing import List
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.taggers.rule_based import USASRuleBasedTagger
-from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE
+import spacy
+from spacy.tokens import Doc
+from spacy.vocab import Vocab
 
-# Rule based tagger requires a USAS lexicon
-welsh_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
-# Includes the POS information
-welsh_lexicon_lookup = LexiconCollection.from_tsv(welsh_usas_lexicon_url)
-# excludes the POS information
-welsh_lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_usas_lexicon_url,
-                                                        include_pos=False)
-usas_tagger = USASRuleBasedTagger(welsh_lexicon_lookup,
-                                  welsh_lemma_lexicon_lookup,
-                                  pos_mapper=BASIC_CORCENCC_TO_USAS_CORE)
+# Load the Welsh PyMUSAS rule based tagger
+nlp = spacy.load("cy_dual_basiccorcencc2usas_contextual")
+
+tokens: List[str] = []
+spaces: List[bool] = []
+basic_pos_tags: List[str] = []
+lemmas: List[str] = []
 
 welsh_tagged_file = Path(Path.cwd(), 'welsh_text_example.tsv').resolve()
 
@@ -679,92 +732,123 @@ with welsh_tagged_file.open('r', encoding='utf-8') as welsh_tagged_data:
         line = line.strip()
         if line:
             line_tags = line.split('\t')
-            token = line_tags[1]
-            lemma = line_tags[3]
-            basic_pos = line_tags[4]
-            usas_tags = usas_tagger.tag_token((token, lemma, basic_pos))
-            print(f'{token}\t{lemma}\t{basic_pos}\t{usas_tags}')
+            tokens.append(line_tags[1])
+            lemmas.append(line_tags[3])
+            basic_pos_tags.append(line_tags[4])
+            spaces.append(True)
+
+
+# As the tagger is a spaCy component that expects tokens, pos, and lemma
+# we need to create a spaCy Doc object that will contain this information
+doc = Doc(Vocab(), words=tokens, tags=basic_pos_tags, lemmas=lemmas)
+output_doc = nlp(doc)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.tag_}\t{token._.pymusas_tags}')
 ```
 
 <details>
 <summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Sefydliad	sefydliad	E	['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
-cyllidol	cyllidol	Ans	['I1']
-yw	bod	B	['A3+', 'Z5']
-bancwr	bancwr	E	['Z99']
-neu	neu	Cys	['Z5']
-fanc	banc	E	['I1.1', 'X2.6+', 'M1']
-sy	bod	B	['A3+', 'Z5']
-'n	yn	U	['Z5']
-actio	actio	B	['A1.1.1', 'T1.1.2', 'A8', 'K4']
-fel	fel	Cys	['Z5']
-asiant	asiant | asio	E | B	['I2.1/S2mf', 'G3/S2mf', 'K4/S2mf']
-talu	talu	B	['I1.2', 'A9-', 'I1.1/I3.1']
-ar	ar	Ar	['Z5']
-gyfer	cyfer	E	['M6', 'Q2.2', 'Q2.2', 'S7.1+', 'X4.2', 'K4']
-cwsmeriaid	cwsmer	E	['I2.2/S2mf']
-,	,	Atd	['PUNCT']
-ac	a	Cys	['Z5']
-yn	yn	U	['Z5']
-rhoi	rhoi	B	['A9-', 'A1.1.1']
-benthyg	benthyg	E	['A9-']
-ac	a	Cys	['Z5']
-yn	yn	U	['Z5']
-benthyg	benthyg	B	['A9-']
-arian	arian	E	['I1']
-.	.	Atd	['PUNCT']
-Yn	yn	Ar	['Z5']
-rhai	rhai	unk	['A13.5']
-gwledydd	gwlad	E	['M7']
-,	,	Atd	['PUNCT']
-megis	megis	Cys	['Z5']
-yr	y	YFB	['Z5']
-Almaen	Almaen	E	['Z2']
-a	a	Cys	['Z5']
-Siapan	Siapan	E	['Z2']
-,	,	Atd	['PUNCT']
-mae	bod	B	['A3+', 'Z5']
-banciau	banc	E	['I1.1', 'X2.6+', 'M1']
-'n	yn	U	['Z5']
-brif	brif	unk	['Z99']
-berchenogion	berchenogion	unk	['Z99']
-corfforaethau	corfforaeth	E	['I2.1/S5c', 'G1.1c']
-diwydiannol	diwydiannol	Ans	['I4']
-,	,	Atd	['PUNCT']
-tra	tra	Cys	['Z5']
-mewn	mewn	Ar	['Z5']
-gwledydd	gwlad	E	['M7']
-eraill	arall	Ans	['A6.1-/Z8']
-,	,	Atd	['PUNCT']
-megis	megis	Cys	['Z5']
-yr	y	YFB	['Z5']
-Unol	unol	Ans	['S5+', 'A1.1.1']
-Daleithiau	Daleithiau	E	['Z99']
-,	,	Atd	['PUNCT']
-mae	bod	B	['A3+', 'Z5']
-banciau	banc	E	['I1.1', 'X2.6+', 'M1']
-'n	yn	U	['Z5']
-cael	cael	B	['A9+', 'Z5', 'X9.2+', 'A2.1+', 'A2.2', 'M1', 'M2', 'X2.5+', 'E4.1-']
-eu	eu	Rha	['Z8']
-gwahardd	gwahardd	B	['S7.4-']
-rhag	rhag	Ar	['Z5']
-bod	bod	B	['A3+', 'Z5']
-yn	yn	U	['Z5']
-berchen	perchen	E	['A9+/S2mf']
-ar	ar	Ar	['Z5']
-gwmniau	gwmniau	unk	['Z99']
-sydd	bod	B	['A3+', 'Z5']
-ddim	dim	E	['Z6/Z8']
-yn	yn	U	['Z5']
-rhai	rhai	unk	['A13.5']
-cyllidol	cyllidol	Ans	['I1']
-.	.	Atd	['PUNCT']
+Text            Lemma           POS     USAS Tags
+Sefydliad       sefydliad       E       ['S5+c', 'S7.1+', 'H1c', 'S1.1.1', 'T2+']
+cyllidol        cyllidol        Ans     ['I1']
+yw              bod             B       ['A3+', 'Z5']
+bancwr          bancwr          E       ['Z99']
+neu             neu             Cys     ['Z5']
+fanc            banc            E       ['I1.1', 'X2.6+', 'M1']
+sy              bod             B       ['A3+', 'Z5']
+'n              yn              U       ['Z5']
+actio           actio           B       ['A1.1.1', 'T1.1.2', 'A8', 'K4']
+fel             fel             Cys     ['Z5']
+asiant          asiant | asio   E | B   ['I2.1/S2mf', 'G3/S2mf', 'K4/S2mf']
+talu            talu            B       ['I1.2', 'A9-', 'I1.1/I3.1']
+ar              ar              Ar      ['Z5']
+gyfer           cyfer           E       ['M6', 'Q2.2', 'Q2.2', 'S7.1+', 'X4.2', 'K4']
+cwsmeriaid      cwsmer          E       ['I2.2/S2mf']
+,               ,               Atd     ['PUNCT']
+ac              a               Cys     ['Z5']
+yn              yn              U       ['Z5']
+rhoi            rhoi            B       ['A9-', 'A1.1.1']
+benthyg         benthyg         E       ['A9-']
+ac              a               Cys     ['Z5']
+yn              yn              U       ['Z5']
+benthyg         benthyg         B       ['A9-']
+arian           arian           E       ['I1']
+.               .               Atd     ['PUNCT']
+Yn              yn              Ar      ['Z5']
+rhai            rhai            unk     ['A13.5']
+gwledydd        gwlad           E       ['M7']
+,               ,               Atd     ['PUNCT']
+megis           megis           Cys     ['Z5']
+yr              y               YFB     ['Z5']
+Almaen          Almaen          E       ['Z2']
+a               a               Cys     ['Z5']
+Siapan          Siapan          E       ['Z2']
+,               ,               Atd     ['PUNCT']
+mae             bod             B       ['A3+', 'Z5']
+banciau         banc            E       ['I1.1', 'X2.6+', 'M1']
+'n              yn              U       ['Z5']
+brif            brif            unk     ['Z99']
+berchenogion    berchenogion    unk     ['Z99']
+corfforaethau   corfforaeth     E       ['I2.1/S5c', 'G1.1c']
+diwydiannol     diwydiannol     Ans     ['I4']
+,               ,               Atd     ['PUNCT']
+tra             tra             Cys     ['Z5']
+mewn            mewn            Ar      ['Z5']
+gwledydd        gwlad           E       ['M7']
+eraill          arall           Ans     ['A6.1-/Z8']
+,               ,               Atd     ['PUNCT']
+megis           megis           Cys     ['Z5']
+yr              y               YFB     ['Z5']
+Unol            unol            Ans     ['S5+', 'A1.1.1']
+Daleithiau      Daleithiau      E       ['Z99']
+,               ,               Atd     ['PUNCT']
+mae             bod             B       ['A3+', 'Z5']
+banciau         banc            E       ['I1.1', 'X2.6+', 'M1']
+'n              yn              U       ['Z5']
+cael            cael            B       ['A9+', 'Z5', 'X9.2+', 'A2.1+', 'A2.2', 'M1', 'M2', 'X2.5+', 'E4.1-']
+eu              eu              Rha     ['Z8']
+gwahardd        gwahardd        B       ['S7.4-']
+rhag            rhag            Ar      ['Z5']
+bod             bod             B       ['A3+', 'Z5']
+yn              yn              U       ['Z5']
+berchen         perchen         E       ['A9+/S2mf']
+ar              ar              Ar      ['Z5']
+gwmniau         gwmniau         unk     ['Z99']
+sydd            bod             B       ['A3+', 'Z5']
+ddim            dim             E       ['Z6/Z8']
+yn              yn              U       ['Z5']
+rhai            rhai            unk     ['A13.5']
+cyllidol        cyllidol        Ans     ['I1']
+.               .               Atd     ['PUNCT']
+Adran           adran           E       ['G1.1']
+Iechyd          iechyd          E       ['G1.1']
+Cymru           Cymru           E       ['Z2', 'Z1mf']
+.               .               Atd     ['PUNCT']
 ```
 
 </details>
+
+For Welsh the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+
+``` python
+print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+for token in output_doc:
+    start, end = token._.pymusas_mwe_indexes[0]
+    if (end - start) > 1:
+        print(f'{token.text}\t{token.tag_}\t{(start, end)}\t{token._.pymusas_tags}')
+```
+
+Which will output the following:
+
+``` tsv
+Text    POS     MWE start and end index    USAS Tags
+Adran   E       (71, 73)                   ['G1.1']
+Iechyd  E       (71, 73)                   ['G1.1']
+```
 
 </details>
 
@@ -829,23 +913,29 @@ bayar	VB	bayar
 
 </details>
 
-Now we have the token, lemma, and POS tag information we can now create a [USASRuleBasedTagger](https://ucrel.github.io/pymusas/api/taggers/rule_based#usasrulebasedtagger) and run the tagger over this `tsv` data using the following Python script:
+Now we have the token, lemma, and POS tag information we can run the [Indonsian PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/id_single_none_contextual-0.3.0), so first we will download it:
+
+``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/id_single_none_contextual-0.3.0/id_single_none_contextual-0.3.0-py3-none-any.whl
+```
+
+Now we can run the tagger over the `tsv` data using the following Python script:
 
 ``` python
 from pathlib import Path
+from typing import List
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.taggers.rule_based import USASRuleBasedTagger
+import spacy
+from spacy.tokens import Doc
+from spacy.vocab import Vocab
 
-# Rule based tagger requires a USAS lexicon
-indonesian_usas_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Indonesian/semantic_lexicon_id.tsv'
-# Includes the POS information
-indonesian_lexicon_lookup = LexiconCollection.from_tsv(indonesian_usas_lexicon_url)
-# excludes the POS information
-indonesian_lemma_lexicon_lookup = LexiconCollection.from_tsv(indonesian_usas_lexicon_url,
-                                                             include_pos=False)
-usas_tagger = USASRuleBasedTagger(indonesian_lexicon_lookup,
-                                  indonesian_lemma_lexicon_lookup)
+# Load the Indonesian PyMUSAS rule based tagger
+nlp = spacy.load("id_single_none_contextual")
+
+tokens: List[str] = []
+spaces: List[bool] = []
+pos_tags: List[str] = []
+lemmas: List[str] = []
 
 indonesian_tagged_file = Path(Path.cwd(), 'indonesian_text_example.tsv').resolve()
 
@@ -855,42 +945,51 @@ with indonesian_tagged_file.open('r', encoding='utf-8') as indonesian_tagged_dat
         line = line.strip()
         if line:
             line_tags = line.split('\t')
-            token = line_tags[0]
-            pos = line_tags[1]
-            lemma = line_tags[2]
-            usas_tags = usas_tagger.tag_token((token, lemma, pos))
-            print(f'{token}\t{lemma}\t{pos}\t{usas_tags}')
+            tokens.append(line_tags[0])
+            lemmas.append(line_tags[2])
+            pos_tags.append(line_tags[1])
+            spaces.append(True)
+
+
+# As the tagger is a spaCy component that expects tokens, pos, and lemma
+# we need to create a spaCy Doc object that will contain this information
+doc = Doc(Vocab(), words=tokens, tags=pos_tags, lemmas=lemmas)
+output_doc = nlp(doc)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.tag_}\t{token._.pymusas_tags}')
 ```
 
 <details>
 <summary>Output:</summary>
 
 ``` tsv
-Text	Lemma	POS	USAS Tags
-Bank	bank	NNP	['Z99']
-adalah	adalah	VB	['Z99']
-sebuah	sebuah	NND	['Z99']
-lembaga keuangan	lembaga	NN	['Z99']
-intermediasi	intermediasi	NN	['Z99']
-yang	yang	SC	['Z5']
-umumnya	umumnya	NN	['Z99']
-didirikan	diri	VB	['Z99']
-dengan	dengan	IN	['Z5']
-kewenangan	wenang	NN	['Z99']
-untuk	untuk	SC	['Z5']
-menerima	terima	VB	['Z99']
-simpanan	simpan	NN	['Z99']
-uang	uang	NN	['Z99']
-,	,	Z	['Z99']
-meminjamkan	pinjam	VB	['Z99']
-uang	uang	NN	['Z99']
-,	,	Z	['Z99']
-dan	dan	CC	['Z5']
-menerbitkan	terbit	VB	['Z99']
-surat	surat	NN	['Z99']
-sanggup	sanggup	VB	['Z99']
-bayar	bayar	VB	['Z99']
-.	.	Z	['Z99']
+Text                Lemma               POS     USAS Tags
+Bank                bank                NNP     ['Z99']
+adalah              adalah              VB      ['Z99']
+sebuah              sebuah              NND     ['Z99']
+lembaga keuangan    lembaga             NN      ['Z99']
+intermediasi        intermediasi        NN      ['Z99']
+yang                yang                SC      ['Z5']
+umumnya             umumnya             NN      ['Z99']
+didirikan           diri                VB      ['Z99']
+dengan              dengan              IN      ['Z5']
+kewenangan          wenang              NN      ['Z99']
+untuk               untuk               SC      ['Z5']
+menerima            terima              VB      ['Z99']
+simpanan            simpan              NN      ['Z99']
+uang                uang                NN      ['Z99']
+,                   ,                   Z       ['PUNCT']
+meminjamkan         pinjam              VB      ['Z99']
+uang                uang                NN      ['Z99']
+,                   ,                   Z       ['PUNCT']
+dan                 dan                 CC      ['Z5']
+menerbitkan         terbit              VB      ['Z99']
+surat               surat               NN      ['Z99']
+sanggup             sanggup             VB      ['Z99']
+bayar               bayar               VB      ['Z99']
+.                   .                   Z       ['PUNCT']
 ```
 
 </details>
