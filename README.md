@@ -38,7 +38,7 @@
 
 ## Language support
 
-PyMUSAS currently support 8 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text using PyMUSAS](/usage/how_to/tag_text). Below we show the languages supported, if the model for that language supports Multi Word Expression (MWE) identification and tagging (all languages support token level tagging by default), and size of the model:
+PyMUSAS currently support 8 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text using PyMUSAS](https://ucrel.github.io/pymusas/usage/how_to/tag_text). Below we show the languages supported, if the model for that language supports Multi Word Expression (MWE) identification and tagging (all languages support token level tagging by default), and size of the model:
 
 | Language (BCP 47 language code) | MWE Support | Size |
 | --- | --- | --- |
