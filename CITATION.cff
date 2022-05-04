@@ -23,5 +23,5 @@ authors:
 repository-code: 'https://github.com/ucrel/pymusas'
 url: 'https://ucrel.github.io/pymusas/'
 license: Apache-2.0
-version: 0.2.0
-date-released: '2022-01-18'
+version: 0.3.0
+date-released: '2022-04-04'
