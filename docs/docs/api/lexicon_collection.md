@@ -538,7 +538,8 @@ This collection allows users to:
 2. Find strings that match MWE templates taking into account
 any special syntax rules that should be applied, e.g. wildcards allow zero
 or more characters to appear after the word token and/or Part Of Speech (POS) tag.
-For more information on the MWE special syntax rules see the following notes.
+For more information on the MWE special syntax rules see the following
+[notes](/usage/notes/mwe_syntax).
 3. POS mapping, it can find strings that match MWE templates while taking
 into account mapping from one POS tagset to another in both a one to one and
 one to many mapping.
@@ -660,7 +661,7 @@ will be empty.
 This method applies all of the special syntax rules that should be applied
 e.g. wildcards allow zero or more characters to appear after the word
 token and/or Part Of Speech (POS) tag. For more information on the MWE
-special syntax rules see the following notes.
+special syntax rules see the following [notes](/usage/notes/mwe_syntax).
 
 <h4 id="mwe_match.parameters">Parameters<a className="headerlink" href="#mwe_match.parameters" title="Permanent link">&para;</a></h4>
 
