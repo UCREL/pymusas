@@ -44,11 +44,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pymusas_rule_based_tagger` is now a spacy registered factory by using an entry point.
 - `MWELexiconCollection` warns users that it does not support curly braces MWE template expressions.
 - All of the POS mappings can now be called through a spaCy registered function, all of these functions can be found in the `pymusas.spacy_api.pos_mapper` module.
+- Updated the `Introduction` and `How-to Tag Text` usage documentation with the new updates that PyMUSAS now supports, e.g. MWE's. Also the `How-to Tag Text` is updated so that it uses the pre-configured spaCy components that have been created for each language, this spaCy components can be found and downloaded from the [pymusas-models repository](https://github.com/UCREL/pymusas-models).
+
 
 ### Removed
 
 - `pymusas.taggers.rule_based.USASRuleBasedTagger` this is now replaced with `pymusas.taggers.rule_based.RuleBasedTagger`.
 - `pymusas.spacy_api.taggers.rule_based.USASRuleBasedTagger` this is now replaced with `pymusas.spacy_api.taggers.rule_based.RuleBasedTagger`.
+- `Using PyMUSAS` usage documentation page as it requires updating.
 
 ## [v0.2.0](https://github.com/UCREL/pymusas/releases/tag/v0.2.0) - 2022-01-18
 
