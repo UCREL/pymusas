@@ -6,175 +6,139 @@
 
 ---
 
-<a id="pymusas.taggers.rule_based.USASRuleBasedTagger"></a>
+<a id="pymusas.taggers.rule_based.RuleBasedTagger"></a>
 
-## USASRuleBasedTagger
+## RuleBasedTagger
 
 ```python
-class USASRuleBasedTagger:
+class RuleBasedTagger:
  | ...
  | def __init__(
  |     self,
- |     lexicon_lookup: Optional[Dict[str, List[str]]] = None,
- |     lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = None,
- |     pos_mapper: Optional[Dict[str, List[str]]] = None
+ |     rules: List[Rule],
+ |     ranker: LexiconEntryRanker,
+ |     default_punctuation_tags: Optional[Set[str]] = None,
+ |     default_number_tags: Optional[Set[str]] = None
  | ) -> None
 ```
 
-The USAS Rule Based Tagger is based around the
-[USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
-The Tagger uses two Lexicon like data structures, both in the format of
-`Dict[str, List[str]]`, this structure maps a lemma (with or without it's
-Part Of Speech (POS) ) to a `List` of USAS semantic tags.
-The first semantic tag in the `List` of tags is the most likely tag.
+The tagger when called, through [`__call__`](#__call__), and given a sequence of
+tokens and their associated lingustic data (lemma, Part Of Speech (POS))
+will apply one or more [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule)s
+to create a list of possible candidate tags for each token in the sequence.
+Each candidate, represented as a
+[`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object, for each
+token is then Ranked using a
+[`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker) ranker. The best
+candidate and it's associated tag(s) for each token are then returned along
+with a `List` of token indexes indicating if the token is part of a Multi
+Word Expression (MWE).
 
-The easiest way of producing the Lexicon like data structures is through
-[`pymusas.lexicon_collection.from_tsv`](/pymusas/api/lexicon_collection/#from_tsv)
-whereby the TSV file path would be to a USAS Semantic Lexicon.
+If we cannot tag a token then the following process will happen:
+1. If the token's POS tag is in `default_punctuation_tags` then it will assign the
+tag `PUNCT`.
+2. If the token's POS tag is in `default_number_tags` then it will assign the tag
+`N1`.
+3. Assign the default tag `Z99`.
 
-The optional POS mapper is used in this tagger when the POS tagset within
-the lexicons does not match the tagset used by the POS model that has
-been applied to the text. For instance a lot of the
-[USAS Semantic Lexicon(s).](https://github.com/UCREL/Multilingual-USAS)
-use the USAS core tagset which does not align with the Universal Part of Speech (UPOS)
-tagset that a lot of the [spaCy POS models](https://spacy.io/usage/linguistic-features#pos-tagging)
-have in common. Therefore, when using the UPOS tags from the spaCy POS model for tagging text using a USAS
-Semantic lexicon with this tagger a POS mapper is required to map UPOS to
-USAS core tags. The POS mapper is expected to map from the tagset of the POS model
-to the tagset of the lexicons, whereby the mapping is a `List`
-of tags, the first tag in the list is assumed to be the most relevant
-and the last to be the least. Some pre-compiled Dictionaries can be found in
-the [`pymusas.pos_mapper`](/pymusas/api/pos_mapper) module, e.g. the UPOS to USAS core [`pymusas.pos_mapper.UPOS_TO_USAS_CORE`](/pymusas/api/pos_mapper/#upos_to_usas_core)
-
-Using these lexicon lookups the following rules are applied to assign a
-`List` of USAS semantic tags from the lexicon lookups to the given tokens
-in the given text. The text given is assumed to have been tokenised,
-lemmatised, and POS tagged:
-
-**Rules:**
-
-1. **If `pos_mapper` is not `None`**, map the POS, from the POS model,
-to the first POS value in the `List` from the `pos_mapper`s `Dict`. **If** the
-`pos_mapper` cannot map the POS, from the POS model, go to step 9.
-2. If `POS==punc` label as `PUNCT`
-3. Lookup token and POS tag
-4. Lookup lemma and POS tag
-5. Lookup lower case token and POS tag
-6. Lookup lower case lemma and POS tag
-7. if `POS==num` label as `N1`
-8. **If there is another POS value in the `pos_mapper`** go back to step 2
-with this new POS value else carry on to step 9.
-9. Lookup token with any POS tag and choose first entry in lexicon.
-10. Lookup lemma with any POS tag and choose first entry in lexicon.
-11. Lookup lower case token with any POS tag and choose first entry in lexicon.
-12. Lookup lower case lemma with any POS tag and choose first entry in lexicon.
-13. Label as `Z99`, this is the unmatched semantic tag.
-
-**NOTE** this tagger has been designed to be flexible with the amount of
-resources avaliable, if you do not have a POS tagger then assign
-the POS tag an empty string e.g. `''`. If you do not have a lexicon with
-POS information then `lexicon_lookup` can be `None`. However, the fewer
-resources avaliable, less rules, stated above, will be applied making the
-tagger less effective.
-
-<h4 id="usasrulebasedtagger.parameters">Parameters<a className="headerlink" href="#usasrulebasedtagger.parameters" title="Permanent link">&para;</a></h4>
+<h4 id="rulebasedtagger.parameters">Parameters<a className="headerlink" href="#rulebasedtagger.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __lexicon\_lookup__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
-    The lexicon data structure with both lemma and POS information mapped to
-    a `List` of USAS semantic tags e.g. `{'car_noun': ['Z2', 'Z1']}`
-- __lemma\_lexicon\_lookup__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
-    The lexicon data structure with only lemma information mapped to
-    a `List` of USAS semantic tags e.g. `{'car': ['Z2', 'Z1']}`
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
-    If not `None`, maps from the POS model tagset to the lexicon data
-    POS tagset, whereby the mapping is a `List` of tags, the first tag in
-    the list is assumed to be the most relevant and the last to be the least.
+- __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
+    A list of rules to apply to the sequence of tokens in the
+    [`__call__`](#__call__). The output from each rule is concatendated and given
+    to the `ranker`.
+- __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
+    A ranker to rank the output from all of the `rules`.
+- __default\_punctuation\_tags__ : `Set[str]`, optional (default = `None`) <br/>
+    The POS tags that represent punctuation. If `None` then we will use
+    the `Set`: `set(['punc'])`.
+- __default\_number\_tags__ : `Set[str]`, optional (default = `None`) <br/>
+    The POS tags that represent numbers. If `None` then we will use
+    the `Set`: `set(['num'])`.
 
-<h4 id="usasrulebasedtagger.instance_attributes">Instance Attributes<a className="headerlink" href="#usasrulebasedtagger.instance_attributes" title="Permanent link">&para;</a></h4>
+<h4 id="rulebasedtagger.instance_attributes">Instance Attributes<a className="headerlink" href="#rulebasedtagger.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __lexicon\_lookup__ : `Dict[str, List[str]]` <br/>
-    The given `lexicon_lookup` data, if that was `None` then this becomes
-    an empty dictionary e.g. `{}`
-- __lemma\_lexicon\_lookup__ : `Dict[str, List[str]]` <br/>
-    The given `lemma_lexicon_lookup` data, if that was `None` then this
-    becomes an empty dictionary e.g. `{}`
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
-    The given `pos_mapper`.
+- __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
+    The given `rules`.
+- __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
+    The given `ranker`.
+- __default\_punctuation\_tags__ : `Set[str]` <br/>
+    The given `default_punctuation_tags`
+- __default\_number\_tags__ : `Set[str]` <br/>
+    The given `default_number_tags`
 
-<h4 id="usasrulebasedtagger.examples">Examples<a className="headerlink" href="#usasrulebasedtagger.examples" title="Permanent link">&para;</a></h4>
+<h4 id="rulebasedtagger.examples">Examples<a className="headerlink" href="#rulebasedtagger.examples" title="Permanent link">&para;</a></h4>
 
 ``` python
 from pymusas.lexicon_collection import LexiconCollection
-from pymusas.taggers.rule_based import USASRuleBasedTagger
+from pymusas.taggers.rule_based import RuleBasedTagger
+from pymusas.taggers.rules.single_word import SingleWordRule
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE
 welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
 lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
 lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
-tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
+single_word_rule = SingleWordRule(lexicon_lookup, lemma_lexicon_lookup,
+                                  BASIC_CORCENCC_TO_USAS_CORE)
+ranker = ContextualRuleBasedRanker(1, 0)
+tagger = RuleBasedTagger([single_word_rule], ranker)
 ```
 
-<a id="pymusas.taggers.rule_based.USASRuleBasedTagger.tag_token"></a>
+<a id="pymusas.taggers.rule_based.RuleBasedTagger.__call__"></a>
 
-### tag\_token
-
-```python
-class USASRuleBasedTagger:
- | ...
- | def tag_token(token: Tuple[str, str, str]) -> List[str]
-```
-
-Given a tokens with the relevant lingustic information it returns
-a list of USAS semantic tags, tagged according
-to the tagger's rules (see the class's doc string for tagger's rules).
-The first semantic tag in the `List` of tags is the most likely tag.
-
-<h4 id="tag_token.parameters">Parameters<a className="headerlink" href="#tag_token.parameters" title="Permanent link">&para;</a></h4>
-
-
-- __tokens__ : `List[Tuple[str, str, str]]` <br/>
-    Each tuple represents a token. The tuple must contain the
-    following lingustic information per token;
-    1. Full text form e.g. `cars`
-    2. Lemma/base form e.g. `car`
-    3. Part Of Speech e.g. `Noun`
-
-<h4 id="tag_token.returns">Returns<a className="headerlink" href="#tag_token.returns" title="Permanent link">&para;</a></h4>
-
-
-- `List[str]` <br/>
-
-<a id="pymusas.taggers.rule_based.USASRuleBasedTagger.tag_tokens"></a>
-
-### tag\_tokens
+### \_\_call\_\_
 
 ```python
-class USASRuleBasedTagger:
+class RuleBasedTagger:
  | ...
- | def tag_tokens(
+ | def __call__(
  |     self,
- |     tokens: Iterable[Tuple[str, str, str]]
- | ) -> Iterator[List[str]]
+ |     tokens: List[str],
+ |     lemmas: List[str],
+ |     pos_tags: List[str]
+ | ) -> List[Tuple[List[str],
+ |                                                     List[Tuple[int, int]]
+ |                                                     ]]
 ```
 
-Given a list/iterable of tokens with the relevant lingustic
-information it returns for each token a list of USAS semantic
-tags, tagged according to the tagger's rules (see the class's doc string for
-tagger's rules). The first semantic tag in the `List` of tags is the
-most likely tag.
+Given a `List` of tokens, their associated lemmas and
+Part Of Speech (POS) tags it returns for each token:
 
-<h4 id="tag_tokens.parameters">Parameters<a className="headerlink" href="#tag_tokens.parameters" title="Permanent link">&para;</a></h4>
+1. A `List` of tags. The first tag in the `List` of tags is the most likely tag.
+2. A `List` of `Tuples` whereby each `Tuple` indicates the start and end
+token index of the associated Multi Word Expression (MWE). If the `List` contains
+more than one `Tuple` then the MWE is discontinuous. For single word
+expressions the `List` will only contain 1 `Tuple` which will be
+(token_start_index, token_start_index + 1).
+
+All the generated tags and MWEs are based on the rules and ranker given
+to this model.
+
+**NOTE** this tagger has been designed to be flexible with the amount of
+resources avaliable, if you do not have POS or lemma information assign
+them a `List` of empty strings.
+
+<h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tokens__ : `Iterable[Tuple[str, str, str]]` <br/>
-    Each tuple represents a token. The tuple must contain the
-    following lingustic information per token;
-    1. Full text form e.g. `cars`
-    2. Lemma/base form e.g. `car`
-    3. Part Of Speech e.g. `Noun`
+- __tokens__ : `List[str]` <br/>
+    A List of full text form of the tokens to be tagged.
+- __lemmas__ : `List[str]` <br/>
+    The List of lemma/base form of the tokens to be tagged.
+- __pos\_tags__ : `List[str]` <br/>
+    The List of POS tags of the tokens to be tagged.
 
-<h4 id="tag_tokens.returns">Returns<a className="headerlink" href="#tag_tokens.returns" title="Permanent link">&para;</a></h4>
+<h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Iterator[List[str]]` <br/>
+- `List[Tuple[List[str], List[Tuple[int, int]]]]` <br/>
+
+<h4 id="__call__.raises">Raises<a className="headerlink" href="#__call__.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
+    the same legnth.
 

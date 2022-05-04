@@ -8,6 +8,9 @@ UPOS_TO_USAS_CORE: `Dict[str, List[str]]`
     [paper by Petrov et al. 2012](http://www.lrec-conf.org/proceedings/lrec2012/pdf/274_Paper.pdf),
     for this original tagset see the following [GitHub repository](https://github.com/slavpetrov/universal-pos-tags).
 
+USAS_CORE_TO_UPOS : `Dict[str, List[str]]`
+    The reverse of :var:`UPOS_TO_USAS_CORE`.
+
 PENN_CHINESE_TREEBANK_TO_USAS_CORE: `Dict[str, List[str]]`
     A mapping from the [Penn Chinese Treebank tagset](https://verbs.colorado.edu/chinese/posguide.3rd.ch.pdf)
     to the USAS core tagset. The Penn Chinese Treebank tagset here is slightly different to the original
@@ -15,11 +18,17 @@ PENN_CHINESE_TREEBANK_TO_USAS_CORE: `Dict[str, List[str]]`
     the [spaCy Chinese models](https://spacy.io/models/zh). For more information on how this mapping was
     created, see the following [GitHub issue](https://github.com/UCREL/pymusas/issues/19).
 
+USAS_CORE_TO_PENN_CHINESE_TREEBANK : `Dict[str, List[str]]`
+    The reverse of :var:`PENN_CHINESE_TREEBANK_TO_USAS_CORE`.
+
 BASIC_CORCENCC_TO_USAS_CORE: `Dict[str, List[str]]`
     A mapping from the [basic CorCenCC tagset](https://cytag.corcencc.org/tagset?lang=en)
     to the USAS core tagset. This mapping has come from table A.1
     in the paper [Leveraging Pre-Trained Embeddings for Welsh Taggers.](https://aclanthology.org/W19-4332.pdf)
     and from table 6 in the paper [Towards A Welsh Semantic Annotation System](https://aclanthology.org/L18-1158.pdf).
+
+USAS_CORE_TO_BASIC_CORCENCC: `Dict[str, List[str]]`
+    The reverse of :var:`BASIC_CORCENCC_TO_USAS_CORE`.
 '''
 from typing import Dict, List
 
@@ -42,6 +51,26 @@ UPOS_TO_USAS_CORE: Dict[str, List[str]] = {
     'SYM': ['code'],
     'VERB': ['verb'],
     'X': ['fw', 'xx']
+}
+
+USAS_CORE_TO_UPOS: Dict[str, List[str]] = {
+    'adj': ['ADJ'],
+    'prep': ['ADP'],
+    'adv': ['ADV'],
+    'verb': ['VERB', 'AUX'],
+    'conj': ['CCONJ', 'SCONJ'],
+    'det': ['DET'],
+    'art': ['DET'],
+    'intj': ['INTJ'],
+    'noun': ['NOUN'],
+    'num': ['NUM'],
+    'part': ['PART'],
+    'pron': ['PRON'],
+    'pnoun': ['PROPN'],
+    'punc': ['PUNCT'],
+    'code': ['SYM'],
+    'fw': ['X'],
+    'xx': ['X']
 }
 
 PENN_CHINESE_TREEBANK_TO_USAS_CORE: Dict[str, List[str]] = {
@@ -84,6 +113,27 @@ PENN_CHINESE_TREEBANK_TO_USAS_CORE: Dict[str, List[str]] = {
 }
 
 
+USAS_CORE_TO_PENN_CHINESE_TREEBANK: Dict[str, List[str]] = {
+    'part': ['AS', 'DEC', 'DEG', 'DER', 'DEV', 'ETC', 'LC', 'MSP', 'SP'],
+    'fw': ['BA', 'FW', 'LB', 'ON', 'SB', 'X', 'URL', 'INF'],
+    'xx': ['BA', 'FW', 'LB', 'ON', 'SB', 'X', 'URL', 'INF'],
+    'intj': ['IJ'],
+    'noun': ['NN', 'NT'],
+    'pnoun': ['NR'],
+    'verb': ['VA', 'VC', 'VE', 'VV'],
+    'num': ['CD', 'M', 'OD'],
+    'det': ['DT'],
+    'art': ['DT'],
+    'conj': ['CC', 'CS'],
+    'adv': ['AD'],
+    'adj': ['JJ'],
+    'prep': ['P'],
+    'pron': ['PN'],
+    'punc': ['PU'],
+    'code': ['PU']
+}
+
+
 BASIC_CORCENCC_TO_USAS_CORE: Dict[str, List[str]] = {
     "E": ["noun"],
     "YFB": ["art"],
@@ -98,6 +148,27 @@ BASIC_CORCENCC_TO_USAS_CORE: Dict[str, List[str]] = {
     "Ebych": ["intj"],
     "Gw": ["xx"],
     "Atd": ["punc"]
+}
+
+
+USAS_CORE_TO_BASIC_CORCENCC: Dict[str, List[str]] = {
+    "noun": ["E"],
+    "pnoun": ["E"],
+    "art": ["YFB"],
+    "det": ["YFB"],
+    "prep": ["Ar"],
+    "conj": ["Cys"],
+    "num": ["Rhi"],
+    "adj": ["Ans"],
+    "adv": ["Adf"],
+    "verb": ["B"],
+    "pron": ["Rha"],
+    "part": ["U"],
+    "intj": ["Ebych"],
+    "xx": ["Gw"],
+    "fw": ["Gw"],
+    "code": ["Gw"],
+    "punc": ["Atd"]
 }
 
 

@@ -70,7 +70,7 @@ const config = {
             position: 'left',
             label: 'Usage',
           },
-          {to: '/api/spacy_api/taggers/rule_based', label: 'API', position: 'left'},
+          {to: '/api/base', label: 'API', position: 'left'},
           //{to: '/blog', label: 'Blog', position: 'left'},
           {
             href: 'https://github.com/ucrel/pymusas',
@@ -91,7 +91,7 @@ const config = {
               },
               {
                 label: 'API',
-                to: '/api/spacy_api/taggers/rule_based',
+                to: '/api/base',
               },
             ],
           },

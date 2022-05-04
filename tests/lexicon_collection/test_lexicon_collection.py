@@ -1,5 +1,4 @@
 from collections.abc import MutableMapping
-from dataclasses import FrozenInstanceError
 import importlib
 import os
 from pathlib import Path
@@ -13,12 +12,13 @@ from pymusas import config
 from pymusas.lexicon_collection import LexiconCollection, LexiconEntry
 
 
-DATA_DIR = Path(__file__, '..', 'data').resolve()
-LEXICON_FILE_PATH = Path(DATA_DIR, 'lexicon.tsv')
-EXTRA_FIELDS_LEXICON_FILE_PATH = Path(DATA_DIR, 'extra_fields_lexicon.tsv')
-MINIMUM_LEXICON_FILE_PATH = Path(DATA_DIR, 'minimum_lexicon.tsv')
-ERROR_LEXICON_FILE_PATH = Path(DATA_DIR, 'error_lexicon.tsv')
-NO_HEADER_LEXICON_FILE_PATH = Path(DATA_DIR, 'no_header_lexicon.tsv')
+DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
+LEXICON_DATA_DIR = Path(DATA_DIR, 'lexicon_collection', 'LexiconCollection')
+LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'lexicon.tsv')
+EXTRA_FIELDS_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'extra_fields_lexicon.tsv')
+MINIMUM_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'minimum_lexicon.tsv')
+ERROR_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'error_lexicon.tsv')
+NO_HEADER_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'no_header_lexicon.tsv')
 
 LEXICON_ENTRY = LexiconEntry('London', ['Z2'], 'noun')
 LEXICON_ENTRY_MULTI_SEM = LexiconEntry('Laptop', ['Z3', 'Z0'], 'noun')
@@ -33,29 +33,6 @@ for entry in [LEXICON_ENTRY, LEXICON_ENTRY_MULTI_SEM, NON_POS_ENTRY]:
 LEXICON_KEYS = ['London|noun', 'Laptop|noun', 'London']
 LEXICON_VALUES = [["Z2"], ["Z3", "Z0"], ["Z2"]]
 LEXICON_ITEMS = [(key, value) for key, value in zip(LEXICON_KEYS, LEXICON_VALUES)]
-
-
-def test_lexicon_entry() -> None:
-        
-    assert LEXICON_ENTRY.lemma == "London"
-    assert LEXICON_ENTRY.pos == "noun"
-    assert LEXICON_ENTRY.semantic_tags == ["Z2"]
-    assert str(LEXICON_ENTRY) == "LexiconEntry(lemma='London', semantic_tags=['Z2'], pos='noun')"
-    
-    with pytest.raises(FrozenInstanceError):
-        for attribute in ['lemma', 'pos', 'semantic_tags']:
-            setattr(LEXICON_ENTRY, attribute, 'test')
-
-    assert LEXICON_ENTRY_MULTI_SEM.lemma == "Laptop"
-    assert LEXICON_ENTRY_MULTI_SEM.pos == "noun"
-    assert LEXICON_ENTRY_MULTI_SEM.semantic_tags == ["Z3", "Z0"]
-    assert str(LEXICON_ENTRY_MULTI_SEM) == "LexiconEntry(lemma='Laptop', semantic_tags=['Z3', 'Z0'], pos='noun')"
-
-    assert LEXICON_ENTRY != LEXICON_ENTRY_MULTI_SEM
-    assert LEXICON_ENTRY == LexiconEntry('London', pos='noun', semantic_tags=['Z2'])
-
-    assert str(NON_POS_ENTRY) == "LexiconEntry(lemma='London', semantic_tags=['Z2'], pos=None)"
-    assert NON_POS_ENTRY == LexiconEntry('London', ['Z2'], None)
 
 
 def test_lexicon_collection_class_type() -> None:
@@ -80,6 +57,25 @@ def test_lexicon_collection_len() -> None:
 
     lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
     assert len(lexicon_collection) == 3
+
+
+def test_lexicon_collection__eq__() -> None:
+    empty_collection = LexiconCollection()
+    
+    assert 1 != empty_collection
+
+    assert empty_collection == LexiconCollection()
+
+    empty_collection.add_lexicon_entry(LEXICON_ENTRY)
+    assert empty_collection != LexiconCollection(LEXICON_ENTRIES)
+
+    empty_collection.add_lexicon_entry(LEXICON_ENTRY_MULTI_SEM)
+    empty_collection.add_lexicon_entry(NON_POS_ENTRY)
+    assert empty_collection == LexiconCollection(LEXICON_ENTRIES)
+
+    del empty_collection['London|noun']
+    empty_collection['Cambridge|noun'] = ['Z1']
+    assert empty_collection != LexiconCollection(LEXICON_ENTRIES)
 
 
 def test_lexicon_collection_set_get_del_item() -> None:
@@ -165,6 +161,20 @@ def test_lexicon_collection_to_dictionary() -> None:
     expected_dictionary = {'London|noun': ['Z2']}
     assert expected_dictionary == lexicon_collection.to_dictionary()
     assert isinstance(lexicon_collection.to_dictionary(), dict)
+
+
+def test_to_from_bytes() -> None:
+    
+    empty_collection = LexiconCollection()
+    a_collection = LexiconCollection.from_bytes(empty_collection.to_bytes())
+    
+    assert {} == a_collection.data
+    
+    del a_collection
+
+    lexicon_collection = LexiconCollection(LEXICON_ENTRIES)
+    a_collection = LexiconCollection.from_bytes(lexicon_collection.to_bytes())
+    assert LEXICON_ENTRIES == a_collection.data
 
 
 def test_lexicon_collection_from_tsv() -> None:

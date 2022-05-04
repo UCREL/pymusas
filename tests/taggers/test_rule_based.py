@@ -1,34 +1,44 @@
 import json
 from pathlib import Path
-from typing import Dict, Generator, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 import pytest
 
-from pymusas.lexicon_collection import LexiconCollection
-from pymusas.taggers.rule_based import USASRuleBasedTagger, _tag_token
+from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.taggers.rule_based import RuleBasedTagger
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
-POS_MAPPER = {'DET': ['det', 'art'], 'NOUN': ['noun'], 'SCONJ': ['conj'],
-              'PUNCT': ['PUNCT'], 'obj': ['obj']}
+TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'rule_based')
 
 
-def generate_tag_test_data(test_data_file: Path, lexicon_file: Path
-                           ) -> Tuple[List[Tuple[str, str, str]],
-                                      Dict[str, List[str]],
-                                      Dict[str, List[str]],
-                                      List[List[str]]]:
+def generate_test_data(test_data_file: Path,
+                       pos_mapper: Optional[Dict[str, str]] = None
+                       ) -> Tuple[List[str],
+                                  List[str],
+                                  List[str],
+                                  List[Tuple[List[str],
+                                             List[Tuple[int, int]]]
+                                       ]]:
     '''
-    Given the test data stored at `test_data_file`, and
-    the semantic lexicon at `lexicon_file`, it returns this data as a
+    Given the test data stored at `test_data_file` it returns this data as a
     Tuple of length 4:
 
-    1. A List of expected `token`, `lemma`, and `pos`. From the `test_data_file`.
-    2. The semantic lexicon including Part Of Speech tag information.
-    3. The semantic lexicon excluding Part Of Speech tag information.
-    4. A list of a list of expected semantic tags that should be generated based
-    on the associated `token`, `lemma`, and `pos` from the first value of the tuple and
-    the semantic lexicons data from the second and third tuple values.
+    1. A List of expected `token`s
+    2. A list of expected `lemma`s
+    3. A list of expected `POS tags`s
+    4. A list of Tuples of length 2, each tuple corresponds to a token and
+    contains the following:
+      1. A list of expected semantic tags that should be generated based
+    on the associated `token`, `lemma`, and `pos`.
+      2. A List of tuples of length 2. each `Tuple` indicates the start and end
+    token index of the associated Multi Word Expression (MWE). If the `List` contains
+    more than one `Tuple` then the MWE is discontinuous. For single word
+    expressions the `List` will only contain 1 `Tuple` which will be
+    (token_start_index, token_start_index + 1).
 
     # Parameters
 
@@ -39,124 +49,144 @@ def generate_tag_test_data(test_data_file: Path, lexicon_file: Path
         2. lemma
         3. pos
         4. usas
+        5. start_indexes
+        6. end_indexes
+    pos_mapper : `Dict[str, str]`, optional (default = `None`)
+        If not `None` it will map the pos tags using this mapper.
 
-    lexicon_file : `Path`
-        A TSV file that can be converted into a :class:`pymusas.lexicon_collection.LexiconCollection`
-        by using the class method :func:`pymusas.lexicon_collection.LexiconCollection.from_tsv`
-    
     # Returns
 
-    `Tuple[List[Tuple[str, str, str]], Dict[str, List[str]], Dict[str, List[str]], List[List[str]]]`
+    `Tuple[List[str], List[str], List[str], List[Tuple[List[str], List[Tuple[int, int]]]]]`
     '''
-    test_data: List[Tuple[str, str, str]] = []
+    tokens: List[str] = []
+    lemmas: List[str] = []
+    pos_tags: List[str] = []
+    if pos_mapper is None:
+        pos_mapper = {}
     
-    expected_usas_tags: List[List[str]] = []
+    expected_output: List[Tuple[List[str], List[Tuple[int, int]]]] = []
     with test_data_file.open('r') as test_data_fp:
         for token_data in json.load(test_data_fp):
-            token = token_data['token']
-            lemma = token_data['lemma']
+            tokens.append(token_data['token'])
+            lemmas.append(token_data['lemma'])
             pos = token_data['pos']
-            test_data.append((token, lemma, pos))
-            expected_usas_tags.append([token_data['usas']])
+            pos = pos_mapper.get(pos, pos)
+            pos_tags.append(pos)
+            
+            usas_tags = token_data['usas']
+            mwe_indexes: List[Tuple[int, int]] = []
+            for start, end in zip(token_data['start_indexes'],
+                                  token_data['end_indexes']):
+                mwe_indexes.append((int(start), int(end)))
+            expected_output.append((usas_tags, mwe_indexes))
     
-    lexicon_lookup = LexiconCollection.from_tsv(lexicon_file, include_pos=True)
-    lemma_lexicon_lookup = LexiconCollection.from_tsv(lexicon_file, include_pos=False)
+    return tokens, lemmas, pos_tags, expected_output
+
+
+def single_word_rule(pos_mapper: Optional[Dict[str, List[str]]]
+                     ) -> SingleWordRule:
+    lexicon_file = Path(TAGGER_DATA_DIR, 'single_lexicon.tsv')
+    single_lexicon = LexiconCollection.from_tsv(lexicon_file)
+    single_lemma_lexicon = LexiconCollection.from_tsv(lexicon_file, include_pos=False)
+    return SingleWordRule(single_lexicon, single_lemma_lexicon, pos_mapper)
+
+
+def mwe_word_rule(pos_mapper: Optional[Dict[str, List[str]]]) -> MWERule:
+    lexicon_file = Path(TAGGER_DATA_DIR, 'mwe_lexicon.tsv')
+    mwe_lexicon = MWELexiconCollection.from_tsv(lexicon_file)
+    return MWERule(mwe_lexicon, pos_mapper)
+
+
+def test_rule_based_tagger__init__() -> None:
+    single_word_rule = SingleWordRule({}, {})
+    ranker = ContextualRuleBasedRanker(1, 0)
+    tagger = RuleBasedTagger([single_word_rule], ranker)
+
+    assert 1 == len(tagger.rules)
+    assert isinstance(tagger.rules[0], SingleWordRule)
+    assert isinstance(tagger.ranker, ContextualRuleBasedRanker)
+
+
+def test_rule_based_tagger__call__() -> None:
+
+    # Test the first case where we have no rules and it should tag everything as
+    # Z99
+    ranker = ContextualRuleBasedRanker(1, 0)
+    tagger = RuleBasedTagger([], ranker)
+    assert [] == tagger([], [], [])
+    expected_output = [
+        (['Z99'], [(0, 1)]),
+        (['Z99'], [(1, 2)])
+    ]
+    assert expected_output == tagger(['London', 'is'], ['', ''], ['', ''])
+
+    # Ensure that the ValueError is raised when the length of tokens, lemmas,
+    # and POS tags are not the same
+    with pytest.raises(ValueError):
+        tagger([''], ['', ''], [''])
+    with pytest.raises(ValueError):
+        tagger(['', ''], ['', ''], [''])
+    with pytest.raises(ValueError):
+        tagger(['', '', ''], ['', ''], [''])
+
+    # Test the default punctutation and number POS tags
+    expected_output = [
+        (['PUNCT'], [(0, 1)]),
+        (['N1'], [(1, 2)])
+    ]
+    assert expected_output == tagger(['test', 'test'], ['', ''], ['punc', 'num'])
     
-    return test_data, lexicon_lookup, lemma_lexicon_lookup, expected_usas_tags
+    # Test the punctutation and number POS tags when set by the user
+    tagger = RuleBasedTagger([], ranker, set(['pu', 'pc']), set(['nu', 'st']))
+    assert expected_output == tagger(['test', 'test'], ['', ''], ['pc', 'st'])
+    assert expected_output == tagger(['test', 'test'], ['', ''], ['pu', 'nu'])
+    assert expected_output != tagger(['test', 'test'], ['', ''], ['punc', 'num'])
 
-
-def test__tag_token() -> None:
-
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
-    lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
-    (test_data, lexicon_lookup,
-     lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
-    for data, expected_tags in zip(test_data, expected_usas_tags):
-        text, lemma, pos = data
-        predicted_tags = _tag_token(text, lemma, [pos], lexicon_lookup, lemma_lexicon_lookup)
-        assert predicted_tags == expected_tags
-
-    # Test that it works with a POS mapper
-    pos_map_test_data_file = Path(DATA_DIR, 'rule_based_input_output_pos_mapped.json')
-    (test_data, lexicon_lookup,
-     lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
-    for data, expected_tags in zip(test_data, expected_usas_tags):
-        text, lemma, pos = data
-        mapped_pos = POS_MAPPER.get(pos, [])
-        predicted_tags = _tag_token(text, lemma, mapped_pos, lexicon_lookup, lemma_lexicon_lookup,)
-        assert predicted_tags == expected_tags
-
-    # Raise TypeError due to not converting a POS tag into a List rather than
-    # being kept as a String
-    with pytest.raises(TypeError):
-        _tag_token('example', 'example', 'pos', {}, {})  # type: ignore
-
-
-@pytest.mark.parametrize('empty_lexicon_lookup', [True, False])
-@pytest.mark.parametrize('empty_lemma_lexicon_lookup', [True, False])
-@pytest.mark.parametrize('empty_pos_mapper', [True, False])
-def test_USASRuleBasedTagger(empty_lexicon_lookup: bool,
-                             empty_lemma_lexicon_lookup: bool,
-                             empty_pos_mapper: bool) -> None:
-    lexicon_path = Path(DATA_DIR, 'lexicon.tsv')
-    lexicon_lookup: Optional[Dict[str, List[str]]] = LexiconCollection.from_tsv(lexicon_path, include_pos=True)
-    if empty_lexicon_lookup:
-        lexicon_lookup = None
-    lemma_lexicon_lookup: Optional[Dict[str, List[str]]] = LexiconCollection.from_tsv(lexicon_path, include_pos=False)
-    if empty_lemma_lexicon_lookup:
-        lemma_lexicon_lookup = None
-    pos_mapper: Optional[Dict[str, List[str]]] = POS_MAPPER
-    if empty_pos_mapper:
-        pos_mapper = None
-
-    tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup, pos_mapper)
-    if lexicon_lookup is None:
-        lexicon_lookup = {}
-    if lemma_lexicon_lookup is None:
-        lemma_lexicon_lookup = {}
-
-    assert lexicon_lookup == tagger.lexicon_lookup
-    assert lemma_lexicon_lookup == tagger.lemma_lexicon_lookup
-    assert pos_mapper == tagger.pos_mapper
+    # Test the case where we only use single word lexicon rules.
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_single_input_output.json')
     
-    expected_attributes = ['lexicon_lookup', 'lemma_lexicon_lookup', 'pos_mapper']
-    tagger_attributes = list(tagger.__dict__.keys())
-    assert len(expected_attributes) == len(tagger_attributes)
-    for expected_attribute in expected_attributes:
-        assert expected_attribute in tagger_attributes
+    tagger = RuleBasedTagger([single_word_rule(None)], ranker)
+    
+    (test_tokens, test_lemmas, test_pos_tags, expected_output) = \
+        generate_test_data(test_data_file)
+    tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
+    assert expected_output == tagger_output
 
+    # Test the case where we use the POS mapper on the single word lexicon rules.
+    rule_pos_mapper = {'adj': ['noun'], 'noun': ['adj']}
+    tagger = RuleBasedTagger([single_word_rule(rule_pos_mapper)], ranker)
+    tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
+    assert expected_output != tagger_output
 
-def test_tag_token() -> None:
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
-    lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
-    (test_data, lexicon_lookup,
-     lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
-    tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
-    for data, expected_tags in zip(test_data, expected_usas_tags):
-        predicted_tags = tagger.tag_token(data)
-        assert predicted_tags == expected_tags
+    test_data_pos_mapper = {'adj': 'noun', 'noun': 'adj'}
+    (test_tokens, test_lemmas, test_pos_tags, expected_output) = \
+        generate_test_data(test_data_file, test_data_pos_mapper)
+    tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
+    assert expected_output == tagger_output
 
-    # Test that it works with a POS mapper
-    pos_map_test_data_file = Path(DATA_DIR, 'rule_based_input_output_pos_mapped.json')
-    (test_data, lexicon_lookup,
-     lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(pos_map_test_data_file, lexicon_file)
-    tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup, POS_MAPPER)
-    for data, expected_tags in zip(test_data, expected_usas_tags):
-        predicted_tags = tagger.tag_token(data)
-        assert predicted_tags == expected_tags
+    # Test the MWE case
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_mwe_input_output.json')
+    (test_tokens, test_lemmas, test_pos_tags, expected_output) = \
+        generate_test_data(test_data_file)
+    ranker = ContextualRuleBasedRanker(3, 0)
+    tagger = RuleBasedTagger([mwe_word_rule(None)], ranker)
+    tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
+    assert expected_output == tagger_output
 
+    # Test the MWE case with POS Mapper
+    tagger = RuleBasedTagger([mwe_word_rule(rule_pos_mapper)], ranker)
+    tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
+    assert expected_output != tagger_output
+    (test_tokens, test_lemmas, test_pos_tags, expected_output) = \
+        generate_test_data(test_data_file, test_data_pos_mapper)
+    assert expected_output != tagger_output
 
-def test_tag_tokens() -> None:
-    test_data_file = Path(DATA_DIR, 'rule_based_input_output.json')
-    lexicon_file = Path(DATA_DIR, 'lexicon.tsv')
-    (test_data, lexicon_lookup,
-     lemma_lexicon_lookup, expected_usas_tags) = generate_tag_test_data(test_data_file, lexicon_file)
-    tagger = USASRuleBasedTagger(lexicon_lookup, lemma_lexicon_lookup)
-    output_usas_tags = tagger.tag_tokens(test_data)
-    assert isinstance(output_usas_tags, Generator)
-
-    assert len(expected_usas_tags) == len(list(output_usas_tags))
-    for expected, output, context in zip(expected_usas_tags,
-                                         output_usas_tags,
-                                         test_data):
-        assert expected == output, context
+    # Test the case of Single and MWE
+    test_data_file = Path(TAGGER_DATA_DIR, 'rule_based_single_mwe_input_output.json')
+    (test_tokens, test_lemmas, test_pos_tags, expected_output) = \
+        generate_test_data(test_data_file)
+    ranker = ContextualRuleBasedRanker(3, 0)
+    tagger = RuleBasedTagger([single_word_rule(None),
+                              mwe_word_rule(None)], ranker)
+    tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
+    assert expected_output == tagger_output

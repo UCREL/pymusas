@@ -34,6 +34,7 @@
 
 * 📚 [Usage Guides](https://ucrel.github.io/pymusas/) - What the package is, tutorials, how to guides, and explanations.
 * 🔎 [API Reference](https://ucrel.github.io/pymusas/api/spacy_api/taggers/rule_based) - The docstrings of the library, with minimum working examples.
+* 🚀 [Roadmap](./ROADMAP.md)
 
 ## Install PyMUSAS
 

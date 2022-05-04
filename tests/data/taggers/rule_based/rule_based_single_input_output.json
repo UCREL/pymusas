@@ -1,0 +1,8 @@
+[
+    {"token": "London", "lemma": "london", "pos": "noun", "usas": ["Z2"],
+     "start_indexes": [0], "end_indexes": [1]},
+    {"token": "the", "lemma": "the", "pos": "det", "usas": ["Z99"],
+     "start_indexes": [1], "end_indexes": [2]},
+    {"token": "capital", "lemma": "cap", "pos": "noun", "usas": ["Z1"],
+     "start_indexes": [2], "end_indexes": [3]}
+]
