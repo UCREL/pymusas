@@ -595,6 +595,71 @@ Bajos   PROPN   (42, 44)                   ['Z2']
 
 </details>
 
+## Finnish
+
+<details>
+<summary>Expand</summary>
+
+First download both the [Finnish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fi_single_upos2usas_contextual-0.3.1) and the [small Finnish spaCy model](https://spacy.io/models/fi):
+
+``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/fi_single_upos2usas_contextual-0.3.1/fi_single_upos2usas_contextual-0.3.1-py3-none-any.whl
+python -m spacy download fi_core_news_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load("fi_core_news_sm", exclude=['tagger', 'parser', 'attribute_ruler', 'ner'])
+# Load the Finnish PyMUSAS rule based tagger in a separate spaCy pipeline
+finnish_tagger_pipeline = spacy.load('fi_single_upos2usas_contextual')
+# Adds the Finnish PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=finnish_tagger_pipeline)
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Finnish Wikipedia page on the topic of [`Bank` as a financial institution](https://fi.wikipedia.org/wiki/Pankki):
+
+``` python
+text = "Pankki on instituutio, joka tarjoaa finanssipalveluita, erityisesti maksuliikenteen hoitoa ja luotonantoa."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
+print(f'{"Text":<20}{"Lemma":<20}{"POS":<8}USAS Tags')
+for token in output_doc:
+    print(f'{token.text:<20}{token.lemma_:<20}{token.pos_:<8}{token._.pymusas_tags}')
+```
+
+<details>
+
+<summary>Output:</summary>
+
+``` tsv
+Text                Lemma               POS     USAS Tags
+Pankki              pankki              NOUN    ['I1/H1', 'K5.2/I1.1']
+on                  olla                AUX     ['A3+', 'A1.1.1', 'M6', 'Z5']
+instituutio         instituutio         NOUN    ['S5+']
+,                   ,                   PUNCT   ['PUNCT']
+joka                joka                PRON    ['Z8', 'N5.1+']
+tarjoaa             tarjota             VERB    ['A9-', 'Q2.2', 'F1', 'S6+', 'A7+', 'I2.2']
+finanssipalveluita  finanssipalvelus    NOUN    ['Z99']
+,                   ,                   PUNCT   ['PUNCT']
+erityisesti         erityisesti         ADV     ['A14']
+maksuliikenteen     maksuliikentete     NOUN    ['Z99']
+hoitoa              hoito               NOUN    ['B3', 'S4']
+ja                  ja                  CCONJ   ['Z5']
+luotonantoa         luotonanto          NOUN    ['Z99']
+.                   .                   PUNCT   ['PUNCT']
+```
+
+</details>
+
+</details>
 
 ## Welsh
 <details>
