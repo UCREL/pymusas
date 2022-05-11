@@ -6,12 +6,9 @@ This document outlines our high level plans for expected developments in PyMUSAS
 
 - v0.1: Semantic tagger framework implementing single word lexicon using spaCy POS tagger and lemmatisers for Chinese, Dutch, French, Italian, Portuguese, Spanish (released 7th December 2021)
 - v0.2: Semantic tagger framework using external POS tagger and lemmatisers (released 18th January 2022) with exemplars for Welsh (using CorCenCC CyTag) and Indonesian (using TreeTagger)
+- v0.3: Semantic tagger framework implementing Multi Word Expression (MWE) lexicons for languages where we currently have MWE lexicons: Chinese, Italian, Portuguese, Spanish, Welsh plus to support loading of models (released 4th May 2022)
 
-## Ongoing development (as at March 2022)
-
-- v0.3: Semantic tagger framework implementing MWE lexicon for languages where we currently have MWE lexicons: Chinese, Italian, Portuguese, Spanish, Welsh
-
-## Future development (by end June 2022; with current UCREL research centre funding)
+## Ongoing development (by end June 2022; with current UCREL research centre funding)
 
 - Set up simple web page interface on http://ucrel-api.lancaster.ac.uk/ and REST API
 - Open release of the English USAS semantic lexicon
