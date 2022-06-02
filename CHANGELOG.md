@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - The documentation now has a `How-to` guide on `Tag CoNLL-U Files`.
+- The documentation now has a `How-to Tag Text` guide for Finnish and English.
 
 ## [v0.3.0](https://github.com/UCREL/pymusas/releases/tag/v0.3.0) - 2022-05-04
 

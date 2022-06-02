@@ -9,7 +9,7 @@ In this guide we are going to show you how to tag text using the PyMUSAS [RuleBa
 2. Download and use a Natural Language Processing (NLP) pipeline that will tokenise, lemmatise, and Part Of Speech (POS) tag. In most cases this will be a spaCy pipeline. **Note** that the PyMUSAS `RuleBasedTagger` only requires at minimum the data to be tokenised but having the lemma and POS tag will improve the accuracy of the tagging of the text.
 3. Run the PyMUSAS `RuleBasedTagger`.
 4. Extract token level linguistic information from the tagged text, which will include USAS semantic tags.
-5. For Chinese, Italian, Portuguese, Spanish, and Welsh taggers which support Multi Word Expression (MWE) identification and tagging we will show how to extract this information from the tagged text as well.
+5. For Chinese, Italian, Portuguese, Spanish, Welsh, and English taggers which support Multi Word Expression (MWE) identification and tagging we will show how to extract this information from the tagged text as well.
 
 
 ## Chinese
@@ -1058,5 +1058,85 @@ bayar               bayar               VB      ['Z99']
 ```
 
 </details>
+
+</details>
+
+## English
+
+<details>
+<summary>Expand</summary>
+
+First download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual-0.3.1) and the [small English spaCy model](https://spacy.io/models/en):
+
+``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual-0.3.1/en_dual_none_contextual-0.3.1-py3-none-any.whl
+python -m spacy download en_core_web_sm
+```
+
+Then create the tagger, in a Python script:
+
+``` python
+import spacy
+
+# We exclude the following components as we do not need them. 
+nlp = spacy.load('en_core_web_sm', exclude=['parser', 'ner'])
+# Load the English PyMUSAS rule based tagger in a separate spaCy pipeline
+english_tagger_pipeline = spacy.load('en_dual_none_contextual')
+# Adds the English PyMUSAS rule based tagger to the main spaCy pipeline
+nlp.add_pipe('pymusas_rule_based_tagger', source=english_tagger_pipeline)
+```
+
+The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the English Wikipedia page on the topic of [`The Nile River`](https://en.wikipedia.org/wiki/Nile), we captilised the *n* in `Northeastern`:
+
+``` python
+text = "The Nile is a major north-flowing river in Northeastern Africa."
+
+output_doc = nlp(text)
+
+print(f'Text\tLemma\tPOS\tUSAS Tags')
+for token in output_doc:
+    print(f'{token.text}\t{token.lemma_}\t{token.pos_}\t{token._.pymusas_tags}')
+```
+
+<details>
+
+<summary>Output:</summary>
+
+``` tsv
+Text            Lemma           POS     USAS Tags
+The             the             DET     ['Z5']
+Nile            Nile            PROPN   ['Z2']
+is              be              AUX     ['A3+', 'Z5']
+a               a               DET     ['Z5']
+major           major           ADJ     ['A11.1+', 'N3.2+']
+north           north           NOUN    ['M6']
+-               -               PUNCT   ['PUNCT']
+flowing         flow            VERB    ['M4', 'M1']
+river           river           NOUN    ['W3/M4', 'N5+']
+in              in              ADP     ['Z5']
+Northeastern    Northeastern    PROPN   ['Z1mf', 'Z3c']
+Africa          Africa          PROPN   ['Z1mf', 'Z3c']
+.               .               PUNCT   ['PUNCT']
+```
+</details>
+
+For English the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+
+``` python
+print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+
+for token in output_doc:
+    start, end = token._.pymusas_mwe_indexes[0]
+    if (end - start) > 1:
+        print(f'{token.text}\t{token.pos_}\t{(start, end)}\t{token._.pymusas_tags}')
+```
+
+Which will output the following:
+
+``` tsv
+Text            POS             MWE start and end index     USAS Tags
+Northeastern    PROPN           (10, 12)                    ['Z1mf', 'Z3c']
+Africa          PROPN           (10, 12)                    ['Z1mf', 'Z3c']
+```
 
 </details>
