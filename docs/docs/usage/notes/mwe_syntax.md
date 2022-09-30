@@ -72,6 +72,8 @@ If the POS tagset you are working with is more fine grained than having just `pn
 
 ### Curly Braces
 
+**NOT IMPLEMENTED YET** as of 2022-09-30!
+
 The curly braces, e.g. `{}` can be used to match discontinuous MWE. 
 
 The only symbols that can be used within a curly brace are: 
