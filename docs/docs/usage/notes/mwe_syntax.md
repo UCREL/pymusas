@@ -72,7 +72,7 @@ If the POS tagset you are working with is more fine grained than having just `pn
 
 ### Curly Braces
 
-**NOT IMPLEMENTED YET** as of 2022-09-30!
+**Note that this feature is not implemented yet, see [issue #24](https://github.com/UCREL/pymusas/issues/24)**
 
 The curly braces, e.g. `{}` can be used to match discontinuous MWE. 
 
