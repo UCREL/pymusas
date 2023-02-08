@@ -78,7 +78,9 @@ jobs:
         run: isort --check-only pymusas tests scripts
       
       - name: flake8
-        run: flake8
+        run: |
+          pip list
+          flake8
 
       - name: Cache mypy
         uses: actions/cache@v2
