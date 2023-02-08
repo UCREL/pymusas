@@ -6,3 +6,4 @@ types-requests
 flake8>=3.8.0,<3.10.0
 pydoc-markdown>=4.0.0,<4.6.0
 isort>=5.5.4
+importlib-metadata<5.0.0
