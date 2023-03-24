@@ -16,10 +16,10 @@ In this guide we are going to show you how to tag text using the PyMUSAS [RuleBa
 <details>
 <summary>Expand</summary>
 
-First download both the [Chinese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/cmn_dual_upos2usas_contextual-0.3.0) and the [small Chinese spaCy model](https://spacy.io/models/zh):
+First download both the [Chinese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/cmn_dual_upos2usas_contextual-0.3.2) and the [small Chinese spaCy model](https://spacy.io/models/zh):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/cmn_dual_upos2usas_contextual-0.3.0/cmn_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/cmn_dual_upos2usas_contextual-0.3.2/cmn_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download zh_core_web_sm
 ```
 
@@ -123,10 +123,10 @@ Text    POS    MWE start and end index    USAS Tags
 <details>
 <summary>Expand</summary>
 
-First download both the [Dutch PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/nl_single_upos2usas_contextual-0.3.0) and the [small Dutch spaCy model](https://spacy.io/models/nl):
+First download both the [Dutch PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/nl_single_upos2usas_contextual-0.3.2) and the [small Dutch spaCy model](https://spacy.io/models/nl):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/nl_single_upos2usas_contextual-0.3.0/nl_single_upos2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/nl_single_upos2usas_contextual-0.3.2/nl_single_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download nl_core_news_sm
 ```
 
@@ -195,10 +195,10 @@ wereld  wereld  NOUN    ['W1', 'S5+c', 'A4.1', 'N5+']
 <details>
 <summary>Expand</summary>
 
-First download both the [French PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.0) and the [small French spaCy model](https://spacy.io/models/fr):
+First download both the [French PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.2) and the [small French spaCy model](https://spacy.io/models/fr):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual-0.3.0/fr_single_upos2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual-0.3.2/fr_single_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download fr_core_news_sm
 ```
 
@@ -275,10 +275,10 @@ monde     monde     NOUN      ['Z99']
 <details>
 <summary>Expand</summary>
 
-First download both the [Italian PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/it_dual_upos2usas_contextual-0.3.0) and the [small Italian spaCy model](https://spacy.io/models/it):
+First download both the [Italian PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/it_dual_upos2usas_contextual-0.3.2) and the [small Italian spaCy model](https://spacy.io/models/it):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/it_dual_upos2usas_contextual-0.3.0/it_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/it_dual_upos2usas_contextual-0.3.2/it_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download it_core_news_sm
 ```
 
@@ -378,10 +378,10 @@ lungo   ADJ     (20, 22)                   ['N3.3+', 'A13.3']
 <details>
 <summary>Expand</summary>
 
-First download both the [Portuguese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/pt_dual_upos2usas_contextual-0.3.0) and the [small Portuguese spaCy model](https://spacy.io/models/pt):
+First download both the [Portuguese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/pt_dual_upos2usas_contextual-0.3.2) and the [small Portuguese spaCy model](https://spacy.io/models/pt):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/pt_dual_upos2usas_contextual-0.3.0/pt_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/pt_dual_upos2usas_contextual-0.3.2/pt_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download pt_core_news_sm
 ```
 
@@ -484,10 +484,10 @@ longo   ADJ     (33, 35)                   ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2+
 <details>
 <summary>Expand</summary>
 
-First download both the [Spanish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/es_dual_upos2usas_contextual-0.3.0) and the [small Spanish spaCy model](https://spacy.io/models/es):
+First download both the [Spanish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/es_dual_upos2usas_contextual-0.3.2) and the [small Spanish spaCy model](https://spacy.io/models/es):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/es_dual_upos2usas_contextual-0.3.0/es_dual_upos2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/es_dual_upos2usas_contextual-0.3.2/es_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download es_core_news_sm
 ```
 
@@ -600,10 +600,10 @@ Bajos   PROPN   (42, 44)                   ['Z2']
 <details>
 <summary>Expand</summary>
 
-First download both the [Finnish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fi_single_upos2usas_contextual-0.3.1) and the [small Finnish spaCy model](https://spacy.io/models/fi):
+First download both the [Finnish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fi_single_upos2usas_contextual-0.3.2) and the [small Finnish spaCy model](https://spacy.io/models/fi):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/fi_single_upos2usas_contextual-0.3.1/fi_single_upos2usas_contextual-0.3.1-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/fi_single_upos2usas_contextual-0.3.2/fi_single_upos2usas_contextual-0.3.2-py3-none-any.whl
 python -m spacy download fi_core_news_sm
 ```
 
@@ -765,10 +765,10 @@ Line Number	Token	Sentence Index, Token Index	Lemma	Basic POS	Enriched POS	Mutat
 
 </details>
 
-Now we have the token, lemma, and POS tag information we can run the [Welsh PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/cy_dual_basiccorcencc2usas_contextual-0.3.0), so first we will download it:
+Now we have the token, lemma, and POS tag information we can run the [Welsh PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/cy_dual_basiccorcencc2usas_contextual-0.3.2), so first we will download it:
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/cy_dual_basiccorcencc2usas_contextual-0.3.0/cy_dual_basiccorcencc2usas_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/cy_dual_basiccorcencc2usas_contextual-0.3.2/cy_dual_basiccorcencc2usas_contextual-0.3.2-py3-none-any.whl
 ```
 
 Now we can run the tagger over the `tsv` data using the following Python script:
@@ -978,10 +978,10 @@ bayar	VB	bayar
 
 </details>
 
-Now we have the token, lemma, and POS tag information we can run the [Indonsian PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/id_single_none_contextual-0.3.0), so first we will download it:
+Now we have the token, lemma, and POS tag information we can run the [Indonsian PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/id_single_none_contextual-0.3.2), so first we will download it:
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/id_single_none_contextual-0.3.0/id_single_none_contextual-0.3.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/id_single_none_contextual-0.3.2/id_single_none_contextual-0.3.2-py3-none-any.whl
 ```
 
 Now we can run the tagger over the `tsv` data using the following Python script:
@@ -1066,10 +1066,10 @@ bayar               bayar               VB      ['Z99']
 <details>
 <summary>Expand</summary>
 
-First download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual-0.3.1) and the [small English spaCy model](https://spacy.io/models/en):
+First download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual-0.3.2) and the [small English spaCy model](https://spacy.io/models/en):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual-0.3.1/en_dual_none_contextual-0.3.1-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual-0.3.2/en_dual_none_contextual-0.3.2-py3-none-any.whl
 python -m spacy download en_core_web_sm
 ```
 
