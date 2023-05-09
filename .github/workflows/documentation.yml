@@ -5,7 +5,8 @@ on:
   pull_request:
     
 permissions:
-    contents: write  
+    contents: write
+    pages: write
 jobs:
   doc-generated-check:
     name: Check documentation has been generated
