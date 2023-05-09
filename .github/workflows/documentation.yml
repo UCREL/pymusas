@@ -3,7 +3,9 @@ name: Documentation
 on:
   push:
   pull_request:
-  
+    
+permissions:
+    contents: write  
 jobs:
   doc-generated-check:
     name: Check documentation has been generated
