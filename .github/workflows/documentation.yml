@@ -56,43 +56,38 @@ jobs:
           cd ./docs
           yarn install
           yarn build
-  
-  gh-release:
-    needs: doc-build-check
-    if: github.ref == 'refs/heads/main'
+
+
+  deploy:
+    name: Deploy to GitHub Pages
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: Node JS
-        uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
           node-version: 16
-      - name: Cache packages
-        uses: actions/cache@v2
-        with:
-          path: ./docs/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('./docs/yarn.lock') }}
-          restore-keys: ${{ runner.os }}-
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v4
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-          git_config_global: true
-      - name: Release to GitHub Pages
-        env:
-          USE_SSH: false
-          GIT_USER: apmoore1
-          DEPLOYMENT_BRANCH: gh-pages
-          CURRENT_BRANCH: main
-          GIT_PASS: ${{ secrets.PAT }}
+
+      - name: Install dependencies
         run: |
-          git config --global user.email "andrew.p.moore94@gmail.com"
-          git config --global user.name "Andrew Moore"
           cd ./docs
           yarn install
-          yarn deploy
+      - name: Build website
+        run: |
+          cd ./docs
+          yarn build
+
+      # Popular action to deploy to GitHub Pages:
+      # Docs: https://github.com/peaceiris/actions-gh-pages#%EF%B8%8F-docusaurus
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          # Build output to publish to the `gh-pages` branch:
+          publish_dir: ./docs/build
+          # The following lines assign commit authorship to the official
+          # GH-Actions bot for deploys to `gh-pages` branch:
+          # https://github.com/actions/checkout/issues/13#issuecomment-724415212
+          # The GH actions bot is used by default if you didn't specify the two fields.
+          # You can swap them out with your own user credentials.
+          user_name: github-actions[bot]
+          user_email: 41898282+github-actions[bot]@users.noreply.github.com          
