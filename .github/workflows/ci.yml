@@ -133,26 +133,17 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
+      - name: update env checkout
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          token: ${{ secrets.PAT }}
-          persist-credentials: true
-      - name: Import GPG key
-        id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v4
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.GPG_PASSPHRASE }}
-          git_user_signingkey: true
-          git_commit_gpgsign: true
-      - name: Update environment file
+      - name: update env commits
         run: |
+          git branch
           git checkout binder-main
           git checkout main binder/environment.yml
-          git config --global user.email "andrew.p.moore94@gmail.com"
-          git config --global user.name "Andrew Moore"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
           if [ $(git diff-index binder-main | wc -l) -gt 0 ]; then git commit -m "update"; git push origin binder-main; fi
 
   publish:
