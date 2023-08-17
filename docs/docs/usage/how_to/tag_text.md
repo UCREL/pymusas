@@ -3,12 +3,12 @@ title: Tag Text
 sidebar_position: 1
 ---
 
-In this guide we are going to show you how to tag text using the PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based#rulebasedtagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide is broken down into different languages, for each guide we are going to: 
+In this guide, we are going to show you how to tag text using the PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based#rulebasedtagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide is broken down into different languages, for each guide we are going to: 
 
 1. Download the relevant pre-configured PyMUSAS `RuleBasedTagger` spaCy component for the language.
-2. Download and use a Natural Language Processing (NLP) pipeline that will tokenise, lemmatise, and Part Of Speech (POS) tag. In most cases this will be a spaCy pipeline. **Note** that the PyMUSAS `RuleBasedTagger` only requires at minimum the data to be tokenised but having the lemma and POS tag will improve the accuracy of the tagging of the text.
+2. Download and use a Natural Language Processing (NLP) pipeline that will tokenize, lemmatize, and Part Of Speech (POS) tag. In most cases, this will be a spaCy pipeline. **Note** that the PyMUSAS `RuleBasedTagger` only requires at minimum the data to be tokenized but having the lemma and POS tag will improve the accuracy of the tagging of the text.
 3. Run the PyMUSAS `RuleBasedTagger`.
-4. Extract token level linguistic information from the tagged text, which will include USAS semantic tags.
+4. Extract token-level linguistic information from the tagged text, which will include USAS semantic tags.
 5. For Chinese, Italian, Portuguese, Spanish, Welsh, and English taggers which support Multi Word Expression (MWE) identification and tagging we will show how to extract this information from the tagged text as well.
 
 
@@ -16,17 +16,17 @@ In this guide we are going to show you how to tag text using the PyMUSAS [RuleBa
 <details>
 <summary>Expand</summary>
 
-First download both the [Chinese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/cmn_dual_upos2usas_contextual-0.3.2) and the [small Chinese spaCy model](https://spacy.io/models/zh):
+First download both the [Chinese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/cmn_dual_upos2usas_contextual-0.3.3) and the [small Chinese spaCy model](https://spacy.io/models/zh):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/cmn_dual_upos2usas_contextual-0.3.2/cmn_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/cmn_dual_upos2usas_contextual-0.3.3/cmn_dual_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download zh_core_web_sm
 ```
 
 Then create the tagger, in a Python script:
 
 :::note
-Currently there is no lemmatisation component in the spaCy pipeline for Chinese.
+Currently, there is no lemmatization component in the spaCy pipeline for Chinese.
 :::
 
 ``` python
@@ -34,13 +34,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('zh_core_web_sm', exclude=['parser', 'ner'])
-# Load the Chinese PyMUSAS rule based tagger in a seperate spaCy pipeline
+# Load the Chinese PyMUSAS rule-based tagger in a separate spaCy pipeline
 chinese_tagger_pipeline = spacy.load('cmn_dual_upos2usas_contextual')
-# Adds the Chinese PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the Chinese PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=chinese_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Chinese Wikipedia page on the topic of [`The Nile River`](https://zh.wikipedia.org/wiki/%E5%B0%BC%E7%BD%97%E6%B2%B3):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Chinese Wikipedia page on the topic of [`The Nile River`](https://zh.wikipedia.org/wiki/%E5%B0%BC%E7%BD%97%E6%B2%B3):
 
 ``` python
 text = "尼罗河 是一条流經非洲東部與北部的河流，與中非地區的剛果河、非洲南部的赞比西河以及西非地区的尼日尔河並列非洲最大的四個河流系統。"
@@ -97,7 +97,7 @@ Text    POS     USAS Tags
 
 </details>
 
-For Chinese the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+For Chinese the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
 print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
@@ -123,10 +123,10 @@ Text    POS    MWE start and end index    USAS Tags
 <details>
 <summary>Expand</summary>
 
-First download both the [Dutch PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/nl_single_upos2usas_contextual-0.3.2) and the [small Dutch spaCy model](https://spacy.io/models/nl):
+First download both the [Dutch PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/nl_single_upos2usas_contextual-0.3.3) and the [small Dutch spaCy model](https://spacy.io/models/nl):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/nl_single_upos2usas_contextual-0.3.2/nl_single_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/nl_single_upos2usas_contextual-0.3.3/nl_single_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download nl_core_news_sm
 ```
 
@@ -137,13 +137,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('nl_core_news_sm', exclude=['parser', 'ner', 'tagger'])
-# Load the Dutch PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the Dutch PyMUSAS rule-based tagger in a separate spaCy pipeline
 dutch_tagger_pipeline = spacy.load('nl_single_upos2usas_contextual')
-# Adds the Dutch PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the Dutch PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=dutch_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on the topic of [`The Nile River`](https://nl.wikipedia.org/wiki/Nijl):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Dutch Wikipedia page on the topic of [`The Nile River`](https://nl.wikipedia.org/wiki/Nijl):
 
 ``` python
 text = "De Nijl is met een lengte van 5499 tot 6695 km de langste of de op een na langste rivier van de wereld."
@@ -195,10 +195,10 @@ wereld  wereld  NOUN    ['W1', 'S5+c', 'A4.1', 'N5+']
 <details>
 <summary>Expand</summary>
 
-First download both the [French PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.2) and the [small French spaCy model](https://spacy.io/models/fr):
+First download both the [French PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.3) and the [small French spaCy model](https://spacy.io/models/fr):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual-0.3.2/fr_single_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual-0.3.3/fr_single_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download fr_core_news_sm
 ```
 
@@ -209,13 +209,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('fr_core_news_sm', exclude=['parser', 'ner'])
-# Load the French PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the French PyMUSAS rule-based tagger in a separate spaCy pipeline
 french_tagger_pipeline = spacy.load('fr_single_upos2usas_contextual')
-# Adds the French PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the French PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=french_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on the topic of [`The Nile River`](https://fr.wikipedia.org/wiki/Nil):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the French Wikipedia page on the topic of [`The Nile River`](https://fr.wikipedia.org/wiki/Nil):
 
 ``` python
 text = "Le Nil est un fleuve d'Afrique. Avec une longueur d'environ 6 700 km, c'est avec le fleuve Amazone, le plus long fleuve du monde."
@@ -275,10 +275,10 @@ monde     monde     NOUN      ['Z99']
 <details>
 <summary>Expand</summary>
 
-First download both the [Italian PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/it_dual_upos2usas_contextual-0.3.2) and the [small Italian spaCy model](https://spacy.io/models/it):
+First download both the [Italian PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/it_dual_upos2usas_contextual-0.3.3) and the [small Italian spaCy model](https://spacy.io/models/it):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/it_dual_upos2usas_contextual-0.3.2/it_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/it_dual_upos2usas_contextual-0.3.3/it_dual_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download it_core_news_sm
 ```
 
@@ -289,13 +289,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('it_core_news_sm', exclude=['parser', 'ner', 'tagger'])
-# Load the Italian PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the Italian PyMUSAS rule-based tagger in a separate spaCy pipeline
 italian_tagger_pipeline = spacy.load('it_dual_upos2usas_contextual')
-# Adds the Italian PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the Italian PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=italian_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on the topic of [`The Nile River`](https://it.wikipedia.org/wiki/Nilo):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Italian Wikipedia page on the topic of [`The Nile River`](https://it.wikipedia.org/wiki/Nilo):
 
 ``` python
 text = "Il Nilo è un fiume africano lungo 6.852 km che attraversa otto stati dell'Africa. Tradizionalmente considerato il fiume più lungo del mondo, contende il primato della lunghezza al Rio delle Amazzoni."
@@ -352,7 +352,7 @@ Amazzoni          amazzoni          PROPN   ['Z99']
 
 </details>
 
-For Italian the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+For Italian the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
 print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
@@ -378,10 +378,10 @@ lungo   ADJ     (20, 22)                   ['N3.3+', 'A13.3']
 <details>
 <summary>Expand</summary>
 
-First download both the [Portuguese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/pt_dual_upos2usas_contextual-0.3.2) and the [small Portuguese spaCy model](https://spacy.io/models/pt):
+First download both the [Portuguese PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/pt_dual_upos2usas_contextual-0.3.3) and the [small Portuguese spaCy model](https://spacy.io/models/pt):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/pt_dual_upos2usas_contextual-0.3.2/pt_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/pt_dual_upos2usas_contextual-0.3.3/pt_dual_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download pt_core_news_sm
 ```
 
@@ -392,13 +392,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('pt_core_news_sm', exclude=['parser', 'ner'])
-# Load the Portuguese PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the Portuguese PyMUSAS rule-based tagger in a separate spaCy pipeline
 portuguese_tagger_pipeline = spacy.load('pt_dual_upos2usas_contextual')
-# Adds the Portuguese PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the Portuguese PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=portuguese_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Portuguese Wikipedia page on the topic of [`The Nile River`](https://pt.wikipedia.org/wiki/Rio_Nilo):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Portuguese Wikipedia page on the topic of [`The Nile River`](https://pt.wikipedia.org/wiki/Rio_Nilo):
 
 ``` python
 text = "Todos estes estudos levam a que o comprimento de ambos os rios permaneça em aberto, continuando por isso o debate e como tal, continuando-se a considerar o Nilo como o rio mais longo."
@@ -455,7 +455,7 @@ longo           longo           ADJ     ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2++']
 ```
 </details>
 
-For Portuguese the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+For Portuguese the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
 print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
@@ -484,10 +484,10 @@ longo   ADJ     (33, 35)                   ['T1.3++', 'N3.7++', 'N3.3++', 'N3.2+
 <details>
 <summary>Expand</summary>
 
-First download both the [Spanish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/es_dual_upos2usas_contextual-0.3.2) and the [small Spanish spaCy model](https://spacy.io/models/es):
+First download both the [Spanish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/es_dual_upos2usas_contextual-0.3.3) and the [small Spanish spaCy model](https://spacy.io/models/es):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/es_dual_upos2usas_contextual-0.3.2/es_dual_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/es_dual_upos2usas_contextual-0.3.3/es_dual_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download es_core_news_sm
 ```
 
@@ -498,13 +498,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('es_core_news_sm', exclude=['parser', 'ner'])
-# Load the Spanish PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the Spanish PyMUSAS rule-based tagger in a separate spaCy pipeline
 spanish_tagger_pipeline = spacy.load('es_dual_upos2usas_contextual')
-# Adds the Spanish PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the Spanish PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=spanish_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Spanish Wikipedia page on the topic of [`Países Bajos`](https://es.wikipedia.org/wiki/Pa%C3%ADses_Bajos):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Spanish Wikipedia page on the topic of [`Países Bajos`](https://es.wikipedia.org/wiki/Pa%C3%ADses_Bajos):
 
 ``` python
 text = "Los Países Bajos son un país soberano ubicado al noreste de la Europa continental y el país constituyente más grande de los cuatro que, junto con las islas de Aruba, Curazao y San Martín, forman el Reino de los Países Bajos."
@@ -572,7 +572,7 @@ Bajos           Bajos           PROPN   ['Z2']
 
 
 
-For Spainsh the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+For Spanish the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
 print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
@@ -600,10 +600,10 @@ Bajos   PROPN   (42, 44)                   ['Z2']
 <details>
 <summary>Expand</summary>
 
-First download both the [Finnish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fi_single_upos2usas_contextual-0.3.2) and the [small Finnish spaCy model](https://spacy.io/models/fi):
+First download both the [Finnish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/fi_single_upos2usas_contextual-0.3.3) and the [small Finnish spaCy model](https://spacy.io/models/fi):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/fi_single_upos2usas_contextual-0.3.2/fi_single_upos2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/fi_single_upos2usas_contextual-0.3.3/fi_single_upos2usas_contextual-0.3.3-py3-none-any.whl
 python -m spacy download fi_core_news_sm
 ```
 
@@ -614,13 +614,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load("fi_core_news_sm", exclude=['tagger', 'parser', 'attribute_ruler', 'ner'])
-# Load the Finnish PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the Finnish PyMUSAS rule-based tagger in a separate spaCy pipeline
 finnish_tagger_pipeline = spacy.load('fi_single_upos2usas_contextual')
-# Adds the Finnish PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the Finnish PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=finnish_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Finnish Wikipedia page on the topic of [`Bank` as a financial institution](https://fi.wikipedia.org/wiki/Pankki):
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the Finnish Wikipedia page on the topic of [`Bank` as a financial institution](https://fi.wikipedia.org/wiki/Pankki):
 
 ``` python
 text = "Pankki on instituutio, joka tarjoaa finanssipalveluita, erityisesti maksuliikenteen hoitoa ja luotonantoa."
@@ -665,21 +665,21 @@ luotonantoa         luotonanto          NOUN    ['Z99']
 <details>
 <summary>Expand</summary>
 
-In this example we will not be using spaCy for tokenisation, lemmatisation, and POS tagging, as we will be using the [CyTag toolkit](https://github.com/UCREL/CyTag) that has been wrapped in a docker container. Therefore, first you will need to [install docker](https://docs.docker.com/get-docker/).
+In this example, we will not be using spaCy for tokenization, lemmatization, and POS tagging, as we will be using the [CyTag toolkit](https://github.com/UCREL/CyTag) that has been wrapped in a docker container. Therefore, first, you will need to [install docker](https://docs.docker.com/get-docker/).
 
-We assume that you would like to tag the following text, of which this text is stored in the file named `welsh_text_example.txt`. The example text is taken from the Welsh Wikipedia page on the topic of [`Bank` as a financial institution.](https://cy.wikipedia.org/wiki/Banc) With an additional random sentence at the end to demonstrate the Multi Word Expression (MWE) identification and tagging attributes of the tagger.
+We assume that you would like to tag the following text, of which this text is stored in the file named `welsh_text_example.txt`. The example text is taken from the Welsh Wikipedia page on the topic of [`Bank` as a financial institution.](https://cy.wikipedia.org/wiki/Banc) With an additional random sentence at the end to demonstrate the Multi-Word Expression (MWE) identification and tagging attributes of the tagger.
 
 ``` txt title="welsh_text_example.txt"
 Sefydliad cyllidol yw bancwr neu fanc sy'n actio fel asiant talu ar gyfer cwsmeriaid, ac yn rhoi benthyg ac yn benthyg arian. Yn rhai gwledydd, megis yr Almaen a Siapan, mae banciau'n brif berchenogion corfforaethau diwydiannol, tra mewn gwledydd eraill, megis yr Unol Daleithiau, mae banciau'n cael eu gwahardd rhag bod yn berchen ar gwmniau sydd ddim yn rhai cyllidol. Adran Iechyd Cymru.
 ```
 
-First we will need to run the CyTag toolkit, more specifically we will run version 1 of the toolkit as we have a mapping from the POS tags produced in version 1 (the [basic CorCencC POS tagset](https://cytag.corcencc.org/tagset?lang=en)) to the POS tags that the USAS lexicon uses (the USAS core POS tagset) within the pre-configured Welsh PyMUSAS `RuleBasedTagger` tagger.
+First, we will need to run the CyTag toolkit, more specifically we will run version 1 of the toolkit as we have a mapping from the POS tags produced in version 1 (the [basic CorCencC POS tagset](https://cytag.corcencc.org/tagset?lang=en)) to the POS tags that the USAS lexicon uses (the USAS core POS tagset) within the pre-configured Welsh PyMUSAS `RuleBasedTagger` tagger.
 
 ``` bash
 cat welsh_text_example.txt | docker run -i --rm ghcr.io/ucrel/cytag:1.0.4 > welsh_text_example.tsv
 ```
 
-We now have a `tsv` version of the file that has been tokenised, lemmatised, and POS tagged. The `welsh_text_example.tsv` file should contain the following (I have added column headers here to explain what each column represents, these headers should not be in your file, also note that the "Mutation" column is optional):
+We now have a `tsv` version of the file that has been tokenized, lemmatized, and POS tagged. The `welsh_text_example.tsv` file should contain the following (I have added column headers here to explain what each column represents, these headers should not be in your file, also note that the "Mutation" column is optional):
 
 <details>
 <summary>welsh_text_example.tsv:</summary>
@@ -765,10 +765,10 @@ Line Number	Token	Sentence Index, Token Index	Lemma	Basic POS	Enriched POS	Mutat
 
 </details>
 
-Now we have the token, lemma, and POS tag information we can run the [Welsh PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/cy_dual_basiccorcencc2usas_contextual-0.3.2), so first we will download it:
+Now we have the token, lemma, and POS tag information we can run the [Welsh PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/cy_dual_basiccorcencc2usas_contextual-0.3.3), so first we will download it:
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/cy_dual_basiccorcencc2usas_contextual-0.3.2/cy_dual_basiccorcencc2usas_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/cy_dual_basiccorcencc2usas_contextual-0.3.3/cy_dual_basiccorcencc2usas_contextual-0.3.3-py3-none-any.whl
 ```
 
 Now we can run the tagger over the `tsv` data using the following Python script:
@@ -781,7 +781,7 @@ import spacy
 from spacy.tokens import Doc
 from spacy.vocab import Vocab
 
-# Load the Welsh PyMUSAS rule based tagger
+# Load the Welsh PyMUSAS rule-based tagger
 nlp = spacy.load("cy_dual_basiccorcencc2usas_contextual")
 
 tokens: List[str] = []
@@ -804,7 +804,7 @@ with welsh_tagged_file.open('r', encoding='utf-8') as welsh_tagged_data:
 
 
 # As the tagger is a spaCy component that expects tokens, pos, and lemma
-# we need to create a spaCy Doc object that will contain this information
+# We need to create a spaCy Doc object that will contain this information
 doc = Doc(Vocab(), words=tokens, tags=basic_pos_tags, lemmas=lemmas)
 output_doc = nlp(doc)
 
@@ -897,7 +897,7 @@ Cymru           Cymru           E       ['Z2', 'Z1mf']
 
 </details>
 
-For Welsh the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+For Welsh the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
 print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
@@ -921,7 +921,7 @@ Iechyd  E       (71, 73)                   ['G1.1']
 <details>
 <summary>Expand</summary>
 
-In this example we will not be using spaCy for tokenisation, lemmatisation, and POS tagging, as we will be using the [Indonesian TreeTagger](https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build) that has been wrapped in a docker container. Therefore, first you will need to [install docker](https://docs.docker.com/get-docker/). After installing docker you will need to build the Indonesian TreeTagger docker container locally, of which by doing this you agree to the [TreeTagger license](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/Tagger-Licence) (this license stops you from re-distributing the TreeTagger code, therefore please do not upload your built docker container to a registry like [Docker Hub](https://hub.docker.com/)), like so (docker container size roughly 139MB):
+In this example, we will not be using spaCy for tokenization, lemmatization, and POS tagging, as we will be using the [Indonesian TreeTagger](https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build) that has been wrapped in a docker container. Therefore, first, you will need to [install docker](https://docs.docker.com/get-docker/). After installing docker you will need to build the Indonesian TreeTagger docker container locally, of which by doing this you agree to the [TreeTagger license](https://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/Tagger-Licence) (this license stops you from re-distributing the TreeTagger code, therefore please do not upload your built docker container to a registry like [Docker Hub](https://hub.docker.com/)), like so (docker container size roughly 139MB):
 
 ``` bash
 docker build -t indonesian-treetagger:1.0.0 https://github.com/UCREL/Indonesian-TreeTagger-Docker-Build.git#main
@@ -933,13 +933,13 @@ We assume that you would like to tag the following text, of which this text is s
 Bank adalah sebuah lembaga keuangan intermediasi yang umumnya didirikan dengan kewenangan untuk menerima simpanan uang, meminjamkan uang, dan menerbitkan surat sanggup bayar.
 ```
 
-First we will need to run the Indonesian TreeTagger:
+First, we will need to run the Indonesian TreeTagger:
 
 ``` bash
 cat indonesian_text_example.txt | docker run -i --rm indonesian-treetagger:1.0.0 > indonesian_text_example.tsv
 ```
 
-We now have a `tsv` version of the file that has been tokenised, lemmatised, and POS tagged. The `indonesian_text_example.tsv` file should contain the following (I have added column headers here to explain what each column represents, these headers should not be in your file):
+We now have a `tsv` version of the file that has been tokenized, lemmatized, and POS tagged. The `indonesian_text_example.tsv` file should contain the following (I have added column headers here to explain what each column represents, these headers should not be in your file):
 
 :::note
 The POS tagset for Indonesian is not the USAS core or [UPOS](https://universaldependencies.org/u/pos/) tagset, but rather the [UI tagset](https://drive.google.com/file/d/1Pnhj2vVEEP5eIc655Af-WPDXxthyZdwb/view).
@@ -978,10 +978,10 @@ bayar	VB	bayar
 
 </details>
 
-Now we have the token, lemma, and POS tag information we can run the [Indonsian PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/id_single_none_contextual-0.3.2), so first we will download it:
+Now we have the token, lemma, and POS tag information we can run the [Indonsian PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/id_single_none_contextual-0.3.3), so first we will download it:
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/id_single_none_contextual-0.3.2/id_single_none_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/id_single_none_contextual-0.3.3/id_single_none_contextual-0.3.3-py3-none-any.whl
 ```
 
 Now we can run the tagger over the `tsv` data using the following Python script:
@@ -1066,10 +1066,10 @@ bayar               bayar               VB      ['Z99']
 <details>
 <summary>Expand</summary>
 
-First download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual-0.3.2) and the [small English spaCy model](https://spacy.io/models/en):
+First download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual-0.3.3) and the [small English spaCy model](https://spacy.io/models/en):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual-0.3.2/en_dual_none_contextual-0.3.2-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual-0.3.3/en_dual_none_contextual-0.3.3-py3-none-any.whl
 python -m spacy download en_core_web_sm
 ```
 
@@ -1080,13 +1080,13 @@ import spacy
 
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('en_core_web_sm', exclude=['parser', 'ner'])
-# Load the English PyMUSAS rule based tagger in a separate spaCy pipeline
+# Load the English PyMUSAS rule-based tagger in a separate spaCy pipeline
 english_tagger_pipeline = spacy.load('en_dual_none_contextual')
-# Adds the English PyMUSAS rule based tagger to the main spaCy pipeline
+# Adds the English PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=english_tagger_pipeline)
 ```
 
-The tagger is now setup for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the English Wikipedia page on the topic of [`The Nile River`](https://en.wikipedia.org/wiki/Nile), we captilised the *n* in `Northeastern`:
+The tagger is now set up for tagging text through the spaCy pipeline like so (this example follows on from the last). The example text is taken from the English Wikipedia page on the topic of [`The Nile River`](https://en.wikipedia.org/wiki/Nile), we capitalised the *n* in `Northeastern`:
 
 ``` python
 text = "The Nile is a major north-flowing river in Northeastern Africa."
@@ -1120,7 +1120,7 @@ Africa          Africa          PROPN   ['Z1mf', 'Z3c']
 ```
 </details>
 
-For English the tagger also identifies and tags Multi Word Expressions (MWE), to find these MWE's you can run the following:
+For English, the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
 print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
