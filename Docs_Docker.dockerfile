@@ -1,4 +1,4 @@
-FROM node:16.13-alpine3.15
+FROM node:lts-alpine3.22
 
 RUN apk add --no-cache git
 
