@@ -26,13 +26,15 @@ def read_gold_data(gold_data_path: Path,
     return all_sentence_data
 
 
-def read_cytag_data(cytag_data_path: Path
+def read_cytag_data(cytag_data_path: Path,
+                    basic_to_core_pos_mapper: dict[str, str]
                     ) -> list[list[dict[str, str]]]:
     '''
     :returns: A list whereby the outer list represents each sentence/line data. 
               The inner list represents each token's data. The dictionary is 
               made up of the following keys: 1. `lemma`, 2. `enhanced_pos`, 
-              3. `token`. **NOTE** the lemmas if they have a space in them e.g. 
+              3. `token` and 4. `basic_pos`.
+              **NOTE** the lemmas if they have a space in them e.g. 
               `mod rewrite` the space is replace with an underscore e.g. 
               `mod_rewrite`
     '''
@@ -49,11 +51,25 @@ def read_cytag_data(cytag_data_path: Path
             # lemma we take the first lemma and associated rich pos tag.
             token_data['lemma'] = token.get('lemma').split('|')[0].strip(' ')
             token_data['lemma'] = token_data['lemma'].replace(' ', '_')
+            
             enhanced_pos = token.get('rich_pos').split('|')[0].strip(' ')
             if enhanced_pos in rich_pos_error_mapper:
                 enhanced_pos = rich_pos_error_mapper[enhanced_pos]
+            
+            basic_pos = token.get('basic_pos').split('|')[0].strip(' ')
+            if basic_pos == 'unk':
+                basic_pos = 'Gw'
+            if basic_pos in rich_pos_error_mapper:
+                basic_pos = rich_pos_error_mapper[basic_pos]
+            if basic_pos not in basic_to_core_pos_mapper:
+                raise KeyError(f"The predicted basic POS tag ({basic_pos}) cannot be found in "
+                               "the mapper file of basic POS to core USAS POS "
+                               "tags.")
+
+            token_data['basic_pos'] = basic_pos
             token_data['enhanced_pos'] = enhanced_pos
             token_data['token'] = token.text.strip(' ')
+            
             sentence_data.append(token_data)
         all_sentence_data.append(sentence_data)
     return all_sentence_data
@@ -72,13 +88,15 @@ def collapse_sentences_to_tokens(sentence_data: list[list[dict[str, str]]]
     return token_data
             
 
-cytag_data_path = Path('.', 'cytag_output.xml').resolve()
-cytag_data = read_cytag_data(cytag_data_path)
-
 basic_to_core_pos_mapper_path = Path('.', 'basic_cy_tags_to_core_tags.json').resolve()
 basic_to_core_pos_mapper = {}
 with basic_to_core_pos_mapper_path.open('r') as basic_to_core_data:
     basic_to_core_pos_mapper = json.load(basic_to_core_data)
+
+cytag_data_path = Path('.', 'cytag_output.xml').resolve()
+cytag_data = read_cytag_data(cytag_data_path, basic_to_core_pos_mapper)
+
+
 
 gold_data_path = Path('.', 'original_gold_standard_data.txt').resolve()
 gold_data = read_gold_data(gold_data_path, basic_to_core_pos_mapper)
@@ -101,6 +119,7 @@ with enhanced_gold_path.open('w') as enhanced_fp:
             token_string = (f'{gold_token_data["token"]}|{pred_token_data["lemma"]}|'
                             f'{token["core_pos"]}|{token["basic_pos"]}'
                             f'|{pred_token_data["enhanced_pos"]}'
+                            f'|{pred_token_data["basic_pos"]}'
                             f'|{gold_token_data["usas_tag"]}')
             enhanced_token_data.append(token_string)
             token_count += 1
