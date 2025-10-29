@@ -7,7 +7,8 @@ import type * as Preset from '@docusaurus/preset-classic';
 const config: Config = {
   title: 'PyMUSAS',
   tagline: 'PYthon Multilingual Ucrel Semantic Analysis System',
-  favicon: 'img/favicon.png',
+  favicon: '/pymusas/img/favicon.png',
+  staticDirectories: ['static'],
 
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
@@ -75,7 +76,7 @@ const config: Config = {
   themeConfig: {
     // Replace with your project's social card
     // Cannot be a SVG.
-    image: 'img/favicon.png',
+    image: '/pymusas/img/ucrel_logo.png',
     colorMode: {
       respectPrefersColorScheme: true,
     },
@@ -83,7 +84,7 @@ const config: Config = {
       title: 'PyMUSAS',
       logo: {
         alt: 'UCREL logo',
-        src: 'img/ucrel_logo.svg',
+        src: '/pymusas/img/ucrel_logo.png',
       },
       items: [
         {

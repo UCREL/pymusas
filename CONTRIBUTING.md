@@ -183,4 +183,10 @@ The website is ran using a node based docker container, dockerfile that is used 
 * To build the documentation files: `make build-docs`
 * To build the static documentation files and serve them locally: `make serve-built-docs`
 * To generate the API pages from the code base: `make create-api-docs`
-* To create the documentation website from scratch (this should never be needed but just in case it does): `make create-docs`
+
+To update to the latest docusaurs version easiest way is to (before doing this ensure that any changes you have not committed to git within `./docs` have been committed.):
+
+(Does require you to enter `y` to proceed when creating the docusaurus website directory)
+```
+make create-docs
+```

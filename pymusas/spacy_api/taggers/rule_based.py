@@ -55,7 +55,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
             <td> Token._.pymusas_tags </td>
             <td> `List[str]` </td>
             <td> Prediced tags, the first tag in the List of tags is the
-            most likely tag. </td>
+            most likely tag.</td>
         </tr>
         <tr>
             <td> Token._.pymusas_mwe_indexes </td>
@@ -64,8 +64,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
             associated Multi Word Expression (MWE). If the `List` contains
             more than one `Tuple` then the MWE is discontinuous. For single word
             expressions the `List` will only contain 1 `Tuple` which will be
-            (token_start_index, token_start_index + 1).
-            </td>
+            (token_start_index, token_start_index + 1).</td>
         </tr>
     </table>
     
