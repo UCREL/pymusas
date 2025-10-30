@@ -52,7 +52,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v5
-      - run: corepack enable
+      - name: Enables corepack so that Yarn v4 is used
+        run: corepack enable
       - name: Node JS
         uses: actions/setup-node@v6
         with:
