@@ -43,7 +43,7 @@ build-docker-docs:
 
 create-api-docs:
 	@rm -rf ${DOCS_API_DIR}
-	@python ./scripts/py2md.py ${DOCS_SRC}
+	@./scripts/py2md.py ${DOCS_SRC}
 
 build-python-package:
 	@rm -rf ./dist ./pymusas.egg-info

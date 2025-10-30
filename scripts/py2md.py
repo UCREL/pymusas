@@ -1,3 +1,16 @@
+#!/usr/bin/env -S uv run --no-project --script
+#
+# /// script
+# requires-python = "==3.11.*"
+# dependencies = [
+#   "pydoc-markdown ~=4.7",
+#   "docspec >=2.2.1, < 3.0",
+#   "docspec >=2.2.1, < 3.0",
+#   "docspec-python >=2.2.1, < 3.0",
+#   "databind.core >=4.4.2, < 5.0",
+#   "typing-extensions"]  
+# ///
+
 '''
 A lot of this code has been copied and inspired from the AllenNLP code base.
 Reference:

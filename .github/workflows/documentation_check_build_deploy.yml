@@ -20,24 +20,26 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v5
 
-      - name: Set up Python 3.10
+      - name: Set up Python 3.11
         uses: actions/setup-python@v6
         with:
-          python-version: '3.10'
-
-      - name: Cache PIP
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-${{ env.pythonLocation }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/dev_requirements.txt') }}
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade --upgrade-strategy eager -r requirements.txt
-          pip install --upgrade --upgrade-strategy eager -r dev_requirements.txt
-          pip install .[tests]
+          python-version: '3.11'
       
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          # Install a specific version of uv.
+          version: "0.9.6"
+          enable-cache: true
+          restore-cache: true
+          save-cache: true
+          prune-cache: true
+          cache-dependency-glob: "**/scripts/py2md.py.lock"
+      
+      - name: check uv cache is working
+        if: steps.setup-uv.outputs.cache-hit == 'true'
+        run: echo "uv cache was restored"
+
       - name: Check if the Python API documentation is up to date if not raise an error
         run: |
           make create-api-docs
