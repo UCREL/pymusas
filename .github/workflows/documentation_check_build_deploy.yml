@@ -27,6 +27,7 @@ jobs:
       
       - name: Install uv
         uses: astral-sh/setup-uv@v7
+        id: setup-uv
         with:
           # Install a specific version of uv.
           version: "0.9.6"
