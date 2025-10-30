@@ -7,6 +7,7 @@ coverage.json
 coverage.xml
 .mypy_cache
 .pytest_cache
+.venv
 pymusas.egg-info
 dist
 build
