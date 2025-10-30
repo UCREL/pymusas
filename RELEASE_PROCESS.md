@@ -30,8 +30,10 @@ to `git@github.com:UCREL/pymusas.git` (or the `HTTPS` equivalent).
 4. Update the `CITATION.cff` file to refer to the right version and date of release. Validate the changes against the [citation file format (cff) schema](https://github.com/citation-file-format/citation-file-format/blob/main/schema-guide.md) you can run the following docker command (the docker image is around 257MB in size):
 
 ``` bash
-docker run --rm -v $PWD:/app citationcff/cffconvert --validate
+docker run --rm -v ${PWD}:/app citationcff/cffconvert --validate
 ```
+
+GitHub also has a [guide on supported citation formats on GitHub.](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files)
 
 For more information about CITATION.cff files see the [Citation File Format website](https://citation-file-format.github.io/).
 
