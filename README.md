@@ -137,6 +137,15 @@ coverage run -m pytest --doctest-modules pymusas/ # Runs the doc tests
 coverage report # Produces a report on the doc tests coverage
 ```
 
+### Setting a different default python version
+
+The default or recommended Python version is shown in [.python-version](./.python-version, currently `3.12`, this can be changed using the [uv command](https://docs.astral.sh/uv/reference/cli/#uv-python-pin):
+
+``` bash
+uv python pin
+# uv python pin 3.13
+```
+
 ## Team
 
 PyMUSAS is an open-source project that has been created and funded by the [University Centre for Computer Corpus Research on Language](https://ucrel.lancs.ac.uk/) (UCREL) at [Lancaster University](https://www.lancaster.ac.uk/). For more information on who has contributed to this code base see the [contributions page.](https://github.com/UCREL/pymusas/graphs/contributors) 
