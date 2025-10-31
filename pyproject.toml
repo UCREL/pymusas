@@ -1,0 +1,45 @@
+[project]
+name = "pymusas"
+version = "0.3.0"
+description = "PYthon Multilingual Ucrel Semantic Analysis System"
+authors = [
+    { name = "UCREL Research Centre", email = "ucrel@lancaster.ac.uk" }
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = ["usas", "USAS", "UCREL", "ucrel", "semantics"]
+classifiers = [
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research"
+]
+requires-python = ">=3.10, <3.14"
+dependencies = []
+
+[project.urls]
+Homepage = "https://ucrel.github.io/pymusas/"
+Documentation = "https://ucrel.github.io/pymusas/api/base"
+Repository = "https://github.com/UCREL/pymusas"
+Issues = "https://github.com/UCREL/pymusas/issues"
+Changelog = "https://github.com/UCREL/pymusas/blob/main/CHANGELOG.md"
+
+[project.entry-points.'spacy_factories']
+"pymusas_rule_based_tagger" = "pymusas.spacy_api.taggers.rule_based:RuleBasedTagger"
+
+[build-system]
+requires = ["uv_build>=0.9.6,<0.10.0"]
+build-backend = "uv_build"
+
+
+[tool.uv.build-backend]
+module-name = "pymusas"
+module-root = ""
