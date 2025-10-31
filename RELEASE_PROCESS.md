@@ -27,10 +27,10 @@ to `git@github.com:UCREL/pymusas.git` (or the `HTTPS` equivalent).
 
 3. Update the `CHANGELOG.md` so that everything under the "Unreleased" section is now under a section corresponding to this release.
 
-4. Update the `CITATION.cff` file to refer to the right version and date of release. Validate the changes against the [citation file format (cff) schema](https://github.com/citation-file-format/citation-file-format/blob/main/schema-guide.md) you can run the following docker command (the docker image is around 257MB in size):
+4. Update the `CITATION.cff` file to refer to the right version and date of release. Validate the changes against the [citation file format (cff) schema](https://github.com/citation-file-format/citation-file-format/blob/main/schema-guide.md) using the following command:
 
 ``` bash
-docker run --rm -v ${PWD}:/app citationcff/cffconvert --validate
+uv tool run --from 'cffconvert>=2.0,<3.0' cffconvert --validate
 ```
 
 GitHub also has a [guide on supported citation formats on GitHub.](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-citation-files)
