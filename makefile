@@ -3,54 +3,61 @@ SHELL := /bin/bash
 
 SRC = pymusas
 
-WORKING_DIR = /home/node/website
-CONTAINER_NAME = pymusas-docs:latest
-
 DOCS_API_DIR = ./docs/docs/api
 DOCS_SRC_TMP = $(filter-out $(SRC)/__main__.py %/__init__.py ,$(shell find $(SRC) -type f -name '*.py'))
 DOCS_SRC = $(subst .py,,$(subst /,.,${DOCS_SRC_TMP}))
 
-create-docs: build-docker-docs
-	@docker run -it --name docusaurus ${CONTAINER_NAME} -c "npx create-docusaurus@latest docs classic --typescript"
-	@docker cp docusaurus:${WORKING_DIR}/docs ${PWD}/new_docs
-	@docker rm -f docusaurus
-	@rm -rf ${PWD}/new_docs/docs ${PWD}/new_docs/blog ${PWD}/new_docs/static/img ${PWD}/new_docs/src/pages
-	@mkdir ${PWD}/new_docs/static/img
-	@cp -r ${PWD}/docs/static/img/* ${PWD}/new_docs/static/img/.
-	@cp ${PWD}/docs/docusaurus.config.ts ${PWD}/new_docs/.
-	@cp ${PWD}/docs/sidebars.ts ${PWD}/new_docs/.
-	@cp -r ${PWD}/docs/docs ${PWD}/new_docs/.
-	@rm -rf ${PWD}/docs
-	@mv ${PWD}/new_docs ${PWD}/docs
 
+.PHONY: develop-docs
 develop-docs: install-package-for-docs
-	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME} -c "cd docs && yarn start -h 0.0.0.0"
+	@cd docs
+	@yarn start -h "0.0.0.0"
 
-build-docs: install-package-for-docs
-	@docker run --rm -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME} -c "cd docs && yarn build"
+.PHONY: remove-built-docs
+remove-built-docs:
+	@cd docs
+	@rm -rf build
 
-serve-built-docs: build-docs
-	@docker run -p 127.0.0.1:3000:3000 --rm -it -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME} -c " cd docs && yarn serve -h 0.0.0.0"
+docs/build: install-package-for-docs remove-built-docs
+	@cd docs
+	@rm -rf build
+	@yarn build
 
-install-package-for-docs: build-docker-docs
-	@docker run --rm -v ${PWD}/docs:${WORKING_DIR} ${CONTAINER_NAME} -c "cd docs && yarn install"
+.PHONY: serve-built-docs
+serve-built-docs: install-package-for-docs docs/build
+	@cd docs
+	@yarn serve -h 0.0.0.0
 
-interactive: build-docker-docs
-	@docker run -p 127.0.0.1:3000:3000 -it --rm --name docusaurus -v ${PWD}:${WORKING_DIR} ${CONTAINER_NAME}
+.PHONY: install-package-for-docs
+install-package-for-docs:
+	@cd docs
+	@yarn install
 
-build-docker-docs:
-	@docker build -t ${CONTAINER_NAME} -f Docs_Docker.dockerfile .
-
+.PHONY: create-api-docs
 create-api-docs:
 	@rm -rf ${DOCS_API_DIR}
 	@./scripts/py2md.py ${DOCS_SRC}
 
+.PHONY: create-docs
+create-docs:
+	@npx create-docusaurus@latest new_docs classic --typescript
+	@rm -rf ./new_docs/docs ./new_docs/blog ./new_docs/static/img ./new_docs/src/pages
+	@mkdir ./new_docs/static/img
+	@cp -r ./docs/static/img/* ./new_docs/static/img/.
+	@cp ./docs/docusaurus.config.ts ./new_docs/.
+	@cp ./docs/sidebars.ts ./new_docs/.
+	@cp -r ./docs/docs ./new_docs/.
+	@rm -rf ./docs
+	@mv ./new_docs ./docs
+
+.PHONY: build-python-package
 build-python-package:
 	@rm -rf ./dist ./pymusas.egg-info
 	@python -m pip install --upgrade pip
 	@pip install --upgrade build twine
 	@python -m build
 
+.PHONY: check-twine
 check-twine: build-python-package
 	@python -m twine check --strict dist/*
 
