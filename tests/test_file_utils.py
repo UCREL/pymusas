@@ -4,9 +4,9 @@ from pathlib import Path
 import tempfile
 
 import pytest
+from pytest import MonkeyPatch
 import requests
 import responses
-from pytest import MonkeyPatch
 
 from pymusas import config, file_utils
 

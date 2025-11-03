@@ -7,8 +7,8 @@ import tempfile
 from typing import Any, DefaultDict, Dict, List, Optional, Union
 
 import pytest
-import responses
 from pytest import MonkeyPatch
+import responses
 
 from pymusas import config
 from pymusas.lexicon_collection import LexiconMetaData, LexiconType, MWELexiconCollection

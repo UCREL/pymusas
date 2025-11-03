@@ -5,8 +5,8 @@ import tempfile
 from typing import Dict, List
 
 import pytest
-import responses
 from pytest import MonkeyPatch
+import responses
 
 from pymusas import config
 from pymusas.lexicon_collection import LexiconCollection, LexiconEntry
