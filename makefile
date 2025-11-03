@@ -76,6 +76,10 @@ tests:
 	@uv run coverage run
 	@uv run coverage report
 
+.PHONY: verbose-tests
+verbose-tests:
+	@uv run pytest tests/ -vvv
+
 .PHONY: doc-tests
 doc-tests:
 	@uv run coverage run -m pytest --doctest-modules pymusas/

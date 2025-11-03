@@ -1,7 +1,6 @@
 from collections.abc import MutableMapping
 from copy import deepcopy
 import importlib
-import os
 from pathlib import Path
 import re
 import tempfile
@@ -9,6 +8,7 @@ from typing import Any, DefaultDict, Dict, List, Optional, Union
 
 import pytest
 import responses
+from pytest import MonkeyPatch
 
 from pymusas import config
 from pymusas.lexicon_collection import LexiconMetaData, LexiconType, MWELexiconCollection
@@ -598,7 +598,7 @@ def test_to_from_bytes(pos_mapper: Optional[Dict[str, List[str]]]
     assert MWE_TEMPLATES == a_collection.to_dictionary()
 
 
-def test_mwe_lexicon_collection_from_tsv() -> None:
+def test_mwe_lexicon_collection_from_tsv(monkeypatch: MonkeyPatch) -> None:
 
     mwe_lexicon_collection = MWELexiconCollection.from_tsv(MWE_LEXICON_FILE_PATH)
     assert isinstance(mwe_lexicon_collection, dict)
@@ -628,7 +628,7 @@ def test_mwe_lexicon_collection_from_tsv() -> None:
     
     # Test using a URL
     with tempfile.TemporaryDirectory() as temp_dir:
-        os.environ['PYMUSAS_HOME'] = temp_dir
+        monkeypatch.setenv('PYMUSAS_HOME', temp_dir)
         importlib.reload(config)
         with responses.RequestsMock() as rsps:
             req_kwargs = {"stream": True}
