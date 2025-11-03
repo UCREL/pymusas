@@ -177,7 +177,7 @@ def test_to_from_bytes() -> None:
     empty_tagger = cast(RuleBasedTagger,
                         empty_nlp.get_pipe('pymusas_rule_based_tagger'))
     compare_initializer_taggers(empty_tagger, initialized_tagger, False)
-    empty_tagger._validate
+    empty_tagger._validate()
 
     # Test that it raises a ValueError if saving a model that cannot be
     # validated
@@ -199,7 +199,7 @@ def test_to_from_disk(tmp_path: Path) -> None:
     loaded_tagger = cast(RuleBasedTagger,
                          nlp_2.get_pipe('pymusas_rule_based_tagger'))
     compare_initializer_taggers(initialized_tagger, loaded_tagger, False)
-    loaded_tagger._validate
+    loaded_tagger._validate()
 
     # Test that it raises a ValueError if saving a model that cannot be
     # validated
@@ -219,4 +219,4 @@ def test_can_pickle() -> None:
     pickle_tagger = cast(RuleBasedTagger,
                          pickle.loads(pickle.dumps(initialized_tagger)))
     compare_initializer_taggers(initialized_tagger, pickle_tagger, False)
-    pickle_tagger._validate
+    pickle_tagger._validate()
