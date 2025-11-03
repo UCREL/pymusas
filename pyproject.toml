@@ -83,6 +83,7 @@ line_length = 119
 
 [tool.mypy]
 files = ["tests/", "pymusas/", "scripts/"]
+exclude = ["scripts/py2md.py"]
 disallow_untyped_calls = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
