@@ -5,3 +5,5 @@ select = B,C,E,F,W,T4,B9
 statistics = true
 count = true
 show_source = true
+exclude = 
+    *.lock

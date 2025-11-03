@@ -8,7 +8,7 @@
 #   "docspec >=2.2.1, < 3.0",
 #   "docspec-python >=2.2.1, < 3.0",
 #   "databind.core >=4.4.2, < 5.0",
-#   "typing-extensions"]  
+#   "typing-extensions"]
 # ///
 
 '''
@@ -458,19 +458,12 @@ class AllenNlpRenderer(MarkdownRenderer):
         if self.signature_python_help_style:
             code = self.dotted_name(cls) + ' = ' + code
         
-        
         for member in cls.members:
             if member.name == '__init__':
                 assert isinstance(member, docspec.Function)
                 code = self._format_function_signature(member, add_method_bar=True)
                 break
 
-        #if self.classdef_render_init_signature_if_needed:
-        #    for member in cls.members:
-        #        if member.name == '__init__':
-        #            assert isinstance(member, docspec.Function)
-        #            code = self._format_function_signature(member, add_method_bar=True)
-        #            break
         return code
 
     def _render_module_breadcrumbs(self, fp: TextIO, mod: docspec.Module) -> None:
@@ -568,7 +561,6 @@ class CustomCrossrefProcess(CrossrefProcessor):
     84712c04/src/pydoc_markdown/contrib/processors/crossref.py) and the
     [AllenNLP version](https://github.com/allenai/allennlp/blob/main/scripts/py2md.py#L174)
     '''
-    
 
     def process(self, modules: List[docspec.Module],
                 resolver: Optional[Resolver]) -> None:
