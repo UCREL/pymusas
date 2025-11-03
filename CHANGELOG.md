@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The documentation now has a `How-to` guide on `Tag CoNLL-U Files`.
 - The documentation now has a `How-to Tag Text` guide for Finnish and English.
+- Using [developer/dev containers](https://containers.dev/) of which the files for this can be found in the [.devcontainer folder](./.devcontainer). This will allow for easier on boarding and development consistency.
 
 ## Changed
 
@@ -18,10 +19,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [github/workflows/documentation_check_build_deploy.yml](./.github/workflows/documentation_check_build_deploy.yml) has been added but this is a change to the original documentation build and deploy workflow. This workflow now uses [uv](https://docs.astral.sh/uv/) for managing Python as it runs the `py2md.py` script. It only deploys the documentation website when there are push events to the `main` branch rather than pull requests. In addition during the build test we save the build artifact, when we want to deploy we use that build artifact to save processing time.
 - Removed the `Docs_Docker.dockerfile` as we have setup a DevContainer that encompasses all of the requirements that this Dockerfile provides. Therefore the [makefile](./makefile) commands that correspond to building/serving the documentation have been updated, along with the [documentation](./CONTRIBUTING.md).
 - Removed the requirement for a docker container to validate the [CITATION.cff file](./CITATION.cff), now we use `uv tool run`, of which this has been documentated in [RELEASE_PROCESS.md](./RELEASE_PROCESS.md).
+- Using [uv](https://docs.astral.sh/uv/) as the Python package manager and the package build front and back end replacing setup tools for the build backend.
+- Setting the new version of PyMUSAS is through the [uv tool](https://docs.astral.sh/uv/guides/package/#updating-your-version) and this uses the version set in [./pyproject.toml](./pyproject.toml) rather than [./pymusas/__init__.py](./pymusas/__init__.py)
 
 ## Removed
 
 - `Docs_Docker.dockerfile` - see the Changed section above for the reason.
+- `requirements.txt`, `dev_requirements.txt`, and `setup.cfg`. These files are no longer needed as we have moved to using [uv](https://docs.astral.sh/uv/) as the Python package manager, and using [./pyproject.toml](./pyproject.toml) to store all of the packages's requirements and build dependencies.
 
 ## [v0.3.0](https://github.com/UCREL/pymusas/releases/tag/v0.3.0) - 2022-05-04
 

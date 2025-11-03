@@ -21,18 +21,24 @@ The last part of any pull request is to update the [CHANGELOG](./CHANGELOG.md) w
 
 ### Changing / Updating Python requirements
 
-If you are changing the Python requirements, this needs to be done in a few different places:
+If you are changing/updating a core requirement i.e. a requirement needed to run `pymusas` see [#core](#core) else if it is only for development of the project see [#development](#development).
 
-1. If it is a development only requirement, not required to run the core code base within [./pymusas](./pymusas), then update:
-    * [./dev_requirements.txt](./dev_requirements.txt)
-    * [./binder/environment.yml](./binder/environment.yml)
-    * [The `tests` section of ./setup.cfg](./setup.cfg)
-2. If it is a requirement that is needed to run the core code base within [./pymusas](./pymusas), then update:
-    * [./requirements.txt](./requirements.txt)
-    * [./binder/environment.yml](./binder/environment.yml)
-    * [The `install_requires` section of ./setup.cfg](./setup.cfg)
+**Note**:
 
-In all cases you may need to add this requirement to the `tool.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml) 
+1. In all cases you may need to add this requirement to the `tool.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml).
+2. Add the requirement to [./binder/environment.yml](./binder/environment.yml)
+
+#### Core
+
+``` bash
+uv add REQUIREMENT
+```
+
+#### Development
+
+``` bash
+uv add --dev REQUIREMENT
+```
 
 ### Writing docstrings
 [A lot of this has been copied from the AllenNLP CONTRIBUTING guidelines, which I think are really great!](https://github.com/allenai/allennlp/blob/main/CONTRIBUTING.md)

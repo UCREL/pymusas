@@ -23,7 +23,7 @@ to `git@github.com:UCREL/pymusas.git` (or the `HTTPS` equivalent).
     set -x TAG 'v1.0.0'
     ```
 
-2. Update `pymusas/__init__.py` with the correct version and check that it matches the `TAG` environment variable you created in the first step.
+2. Use the uv tool to update the version within [./pyproject.toml](./pyproject.toml) and check that it matches the `TAG` environment variable you created in the first step. `uv version ${TAG}`
 
 3. Update the `CHANGELOG.md` so that everything under the "Unreleased" section is now under a section corresponding to this release.
 

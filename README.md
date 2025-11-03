@@ -104,37 +104,27 @@ To run locally first ensure you have the following tools installted locally:
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
 
 ```bash
-pip install -e .[tests]
-```
-
-For a `zsh` shell, which is the default shell for the new Macs you will need to escape with `\` the brackets:
-
-```zsh
-pip install -e .\[tests\]
+uv sync
 ```
 
 ### Running linters and tests
 
-This code base uses flake8 and mypy to ensure that the format of the code is consistent and contain type hints. The flake8 settings can be found in [./setup.cfg](./setup.cfg) and the mypy settings within [./pyproject.toml](./pyproject.toml). To run these linters:
+This code base uses isort, flake8 and mypy to ensure that the format of the code is consistent and contain type hints. ISort and mypy settings can be found within [./pyproject.toml](./pyproject.toml) and the flake8 settings can be found in [./.flake8](./.flake8). To run these linters:
 
 ``` bash
-isort pymusas tests scripts
-flake8
-mypy
+make lint
 ```
 
 To run the tests with code coverage (**NOTE** these are the code coverage tests that the Continuos Integration (CI) reports at the top of this README, the doc tests are not part of this report):
 
 ``` bash
-coverage run # Runs the tests (uses pytest)
-coverage report # Produces a report on the test coverage
+make tests
 ```
 
 To run the [doc tests](https://docs.python.org/3/library/doctest.html), these are tests to ensure that examples within the documentation run as expected:
 
 ``` bash
-coverage run -m pytest --doctest-modules pymusas/ # Runs the doc tests
-coverage report # Produces a report on the doc tests coverage
+make doc-tests
 ```
 
 ### Setting a different default python version

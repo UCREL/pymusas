@@ -61,4 +61,24 @@ build-python-package:
 check-twine: build-python-package
 	@python -m twine check --strict dist/*
 
+.PHONY: lint
+lint:
+	@echo "ISort:"
+	@uv run isort pymusas tests scripts
+	@echo "Falke 8:"
+	@uv run flake8 --config ./.flake8 pymusas/** tests/** scripts/**
+	@echo "MyPy:"
+	@uv run mypy
+	@echo "Linting finished"
+
+.PHONY: tests
+tests:
+	@uv run coverage run
+	@uv run coverage report
+
+.PHONY: doc-tests
+doc-tests:
+	@uv run coverage run -m pytest --doctest-modules pymusas/
+	@uv run coverage report
+
 	

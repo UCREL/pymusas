@@ -2,3 +2,5 @@
 ! docs/yarn.lock
 ! docs/package.json
 ! docs/.yarnrc.yml
+! uv.lock
+! pyproject.toml

@@ -1,9 +1,0 @@
-pytest>=6.0.0,!=7.1.0
-coverage[toml]>=6.0.0
-responses>=0.16.0
-mypy<1.5
-types-requests
-flake8>=3.8.0,<3.10.0
-pydoc-markdown
-isort>=5.5.4
-importlib-metadata<5.0.0
