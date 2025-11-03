@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from enum import Enum, unique
 from os import PathLike
 import re
-import typing
 from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union, cast
 from urllib.parse import urlparse
 import warnings
@@ -314,7 +313,7 @@ class LexiconCollection(MutableMapping):
         '''
         minimum_field_names = {'lemma', 'semantic_tags'}
         extra_field_names = ['pos']
-        field_names_to_extract = []
+        field_names_to_extract: Set[str] = set()
 
         collection_from_tsv = LexiconCollection()
 
@@ -331,7 +330,7 @@ class LexiconCollection(MutableMapping):
             if csv_reader.fieldnames:
                 file_field_names = set(csv_reader.fieldnames)
             if minimum_field_names.issubset(file_field_names):
-                field_names_to_extract.extend(list(minimum_field_names))
+                field_names_to_extract |= minimum_field_names
             else:
                 error_msg = ("The TSV file given should contain a header that"
                              " has at minimum the following fields "
@@ -341,16 +340,22 @@ class LexiconCollection(MutableMapping):
             
             for extra_field_name in extra_field_names:
                 if extra_field_name in file_field_names:
-                    field_names_to_extract.append(extra_field_name)
+                    field_names_to_extract.add(extra_field_name)
+
+            contains_pos = False
+            if 'pos' in field_names_to_extract:
+                contains_pos = True
             
             for row in csv_reader:
-                row_data: typing.MutableMapping[str, Union[str, List[str]]] = {}
-                for field_name in field_names_to_extract:
-                    if field_name == 'semantic_tags':
-                        row_data[field_name] = row[field_name].split()
-                    else:
-                        row_data[field_name] = row[field_name]
-                collection_from_tsv.add_lexicon_entry(LexiconEntry(**row_data),
+                semantic_tags: list[str] = row['semantic_tags'].split()
+                lemma: str = row['lemma']
+                pos: Optional[str] = None
+                
+                if include_pos and contains_pos:
+                    pos = row['pos']
+                 
+                row_as_lexicon_enrtry = LexiconEntry(lemma=lemma, semantic_tags=semantic_tags, pos=pos)
+                collection_from_tsv.add_lexicon_entry(row_as_lexicon_enrtry,
                                                       include_pos=include_pos)
         
         return collection_from_tsv.to_dictionary()
