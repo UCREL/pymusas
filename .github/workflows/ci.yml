@@ -1,7 +1,7 @@
 name: CI
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manually trigger a workflow run using the GitHub API, GitHub CLI, or the GitHub UI.
   push:
   pull_request:
   release:
@@ -12,32 +12,31 @@ jobs:
     runs-on: ubuntu-latest
     name: Validate CITATION.cff
 
-    env:
-      RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
-
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v5
 
-      - name: Install V8
-        run: sudo apt-get install -y libv8-dev
+      - name: Validate CITATION.cff
+        id: validate_cff
+        uses: dieghernan/cff-validator@v4
+        with:
+          citation-path: "CITATION.cff"
 
-      - name: cff-validator
-        uses: dieghernan/cff-validator@main
-
-      - name: Upload cff-validator error artifact
-        uses: actions/upload-artifact@v2.3.0
-        if: failure()
+      - name: Upload cff-validator error artifact if failed to validate
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() && steps.validate_cff.conclusion == 'failure' }}
         with:
           name: citation-cff-errors
-          path: citation_cff_errors.md
+          path: citation_cff.md
+          overwrite: true
+          if-no-files-found: warn
 
   checks:
     name: checks
     runs-on: ${{ matrix.os }}
-    needs: Validate-CITATION-cff
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.10, 3.11, 3.12, 3.13]
         os: [ubuntu-latest, macos-latest, windows-latest]
     
     steps:
