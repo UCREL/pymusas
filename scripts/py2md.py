@@ -1,4 +1,4 @@
-#!/usr/bin/env -S uv run --no-project --script
+#!/usr/bin/env -S uv run --no-project --script --python 3.11
 #
 # /// script
 # requires-python = "==3.11.*"
