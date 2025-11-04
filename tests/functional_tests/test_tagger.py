@@ -1,8 +1,9 @@
 import spacy
 
-from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas import lexicon_collection
-from pymusas.taggers.rules import single_word, mwe
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.taggers.rules import mwe, single_word
+
 
 TEST_TOKENS = ['Sporting', 'community', 'hack', 'had', '.', '49557282']
 TEST_POS = ['NOUN', 'NOUN', 'NOUN', 'DET', 'PUNCT', 'NUM']
@@ -11,10 +12,10 @@ TEST_SPACES = [True] * len(TEST_TOKENS)
 
 def test_single_and_mwe_spacy_tagger() -> None:
     """
-    Based off the PyMUSAS English MWE spaCy model test, this tests the spaCy 
+    Based off the PyMUSAS English MWE spaCy model test, this tests the spaCy
     API rule based tagger with both single and mwe English lexicons.
 
-    Reference: 
+    Reference:
     https://github.com/UCREL/pymusas-models/blob/
     90918461322281aa89e659c252c2999194bd03ab/
     model_function_tests/en/test_rule_based_tagger.py#L29C1-L47C83
@@ -30,16 +31,16 @@ def test_single_and_mwe_spacy_tagger() -> None:
     mwe_lexicon = lexicon_collection.MWELexiconCollection.from_tsv(en_mwe_lexicon_url)
 
     single_rule = single_word.SingleWordRule(single_lexicon, single_lemma_lexicon,
-                                       pos_mapper=None)
+                                             pos_mapper=None)
     mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None)
 
     rules = [single_rule, mwe_rule]
     ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
     tagger = nlp.add_pipe('pymusas_rule_based_tagger')
-    tagger.rules = rules
-    tagger.ranker = ranker
-    tagger.default_punctuation_tags = set(['PUNCT'])
-    tagger.default_number_tags = set(['NUM'])
+    tagger.rules = rules  # type: ignore
+    tagger.ranker = ranker  # type: ignore
+    tagger.default_punctuation_tags = set(['PUNCT'])  # type: ignore
+    tagger.default_number_tags = set(['NUM'])  # type: ignore
 
     doc = spacy.tokens.Doc(spacy.vocab.Vocab(), words=TEST_TOKENS,
                            spaces=TEST_SPACES, pos=TEST_POS)
