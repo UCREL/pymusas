@@ -78,7 +78,7 @@ jobs:
       - name: flake8 Window
         if: ${{ runner.os == 'Windows' }}
         run: |
-          uv run flake8 --config .\.flake8 pymusas\** tests\** scripts\**
+          uv run flake8 --config .\.flake8 pymusas/** tests/** scripts/**
 
       - name: Cache mypy
         uses: actions/cache@v4
