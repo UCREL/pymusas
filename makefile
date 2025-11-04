@@ -52,14 +52,14 @@ create-docs:
 
 .PHONY: build-python-package
 build-python-package:
-	@rm -rf ./dist ./pymusas.egg-info
-	@python -m pip install --upgrade pip
-	@pip install --upgrade build twine
-	@python -m build
+	@uv lock --check
+	@rm -rf ./dist
+	@uv build
 
-.PHONY: check-twine
-check-twine: build-python-package
-	@python -m twine check --strict dist/*
+.PHONY: functional-tests
+functional-tests:
+	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --no-project --isolated pytest --doctest-modules pymusas/
+	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --no-project --isolated pytest tests/functional_tests
 
 .PHONY: lint
 lint:

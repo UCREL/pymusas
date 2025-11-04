@@ -5,7 +5,7 @@
 This document describes the procedure for releasing new versions of the core library.
 
 > ❗️ This assumes you are using a clone of the main repo with the remote `origin` pointed
-to `git@github.com:UCREL/pymusas.git` (or the `HTTPS` equivalent).
+to `git@github.com:UCREL/pymusas.git` (or the `HTTPS` equivalent). To check: `git remote -v`
 
 ## Steps
 
