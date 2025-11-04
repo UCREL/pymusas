@@ -70,7 +70,7 @@ jobs:
       - name: isort
         run: uv run isort --check-only pymusas tests scripts
       
-      - name: flake8 Linux
+      - name: flake8 Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
           uv run flake8 --config ./.flake8 pymusas tests scripts
@@ -96,5 +96,25 @@ jobs:
       - name: Code coverage report
         run: |    
           uv run coverage report
+
+      - name: Set pymusas cache home directory for Ubuntu and Mac
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        run: |
+          echo "PYMUSAS_HOME=$HOME/.cache/doc_test_pymusas" >> "$GITHUB_ENV"
+      
+      - name: Set pymusas cache home directory for Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          echo "PYMUSAS_HOME=$HOME\.cache\doc_test_pymusas" >> $env:GITHUB_ENV
+
+      - name: Cache Doc Test download files
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PYMUSAS_HOME }}
+          key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ env.PYMUSAS_HOME }}
+      
+      - name: Doc Tests
+        run: |
+          uv run coverage run -m pytest --doctest-modules pymusas/
 
 
