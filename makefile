@@ -58,8 +58,8 @@ build-python-package:
 
 .PHONY: functional-tests
 functional-tests:
-	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --no-project --isolated pytest --doctest-modules pymusas/
-	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --no-project --isolated pytest tests/functional_tests
+	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest tests/functional_tests
 
 .PHONY: lint
 lint:
