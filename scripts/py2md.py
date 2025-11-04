@@ -75,7 +75,7 @@ class EnhancedParser(Parser):
 
 
 Parser.prepare_docstring = EnhancedParser.prepare_docstring  # type:ignore
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
