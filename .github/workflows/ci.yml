@@ -89,4 +89,12 @@ jobs:
       - name: mypy
         run: uv run mypy
 
+      - name: Code coverage testing
+        run: |
+          uv run coverage run
+
+      - name: Code coverage report
+        run: |    
+          uv run coverage report
+
 
