@@ -70,15 +70,21 @@ jobs:
       - name: isort
         run: uv run isort --check-only pymusas tests scripts
       
-      - name: flake8
+      - name: flake8 Linux
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
           uv run flake8 --config ./.flake8 pymusas/** tests/** scripts/**
+      
+      - name: flake8 Window
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          uv run flake8 --config .\.flake8 pymusas\** tests\** scripts\**
 
       - name: Cache mypy
         uses: actions/cache@v4
         with:
           path: ./.mypy_cache
-          key: ${{ runner.os }}-${{ hashFiles(steps.python-setup.outputs.python-version) }}-${{ hashFiles('uv.lock') }}
+          key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ hashFiles('uv.lock') }}
 
       - name: mypy
         run: uv run mypy
