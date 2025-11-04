@@ -100,3 +100,18 @@ class LexicalMatch(IntEnum):
 Machine readable string. When printed and run `eval()` over the string
 you should be able to recreate the object.
 
+<a id="pymusas.rankers.lexical_match.LexicalMatch.__str__"></a>
+
+### \_\_str\_\_
+
+```python
+class LexicalMatch(IntEnum):
+ | ...
+ | def __str__() -> str
+```
+
+Returns the `class_name.name`, e.g. `LexicalMatch.TOKEN`
+
+Overridden as from Python version 3.11 IntEnum.__str__  by default would
+return the integer as a string.
+
