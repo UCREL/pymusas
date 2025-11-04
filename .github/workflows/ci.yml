@@ -120,8 +120,8 @@ jobs:
       - name: Build and Functional Tests
         run: |
           uv build
-          uv run --with dist/pymusas-0.3.0-py3-none-any.whl --no-project --isolated pytest --doctest-modules pymusas/
-          uv run --with dist/pymusas-0.3.0-py3-none-any.whl --no-project --isolated pytest tests/functional_tests
+          uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+          uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest tests/functional_tests
 
   update-binder-requirements:
     name: update-binder-requirements
