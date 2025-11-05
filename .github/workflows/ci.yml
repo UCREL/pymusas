@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: read # required for code coverage
+  pull_requests: write
   
 jobs:
   Validate-CITATION-cff:
@@ -140,6 +141,8 @@ jobs:
 
   update-binder-requirements:
     name: update-binder-requirements
+    permissions:
+      contents: write # Reqired to write to the binder-main branch
     needs: checks
     if: github.ref == 'refs/heads/main' && github.repository == 'UCREL/pymusas'
     runs-on: ubuntu-latest
