@@ -9,7 +9,6 @@ on:
 
 permissions:
   contents: read # required for code coverage
-  pull-requests: write
   
 jobs:
   Validate-CITATION-cff:
