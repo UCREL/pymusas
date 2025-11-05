@@ -1,3 +1,16 @@
+#!/usr/bin/env -S uv run --no-project --script --python 3.11
+#
+# /// script
+# requires-python = "==3.11.*"
+# dependencies = [
+#   "pydoc-markdown ~=4.7",
+#   "docspec >=2.2.1, < 3.0",
+#   "docspec >=2.2.1, < 3.0",
+#   "docspec-python >=2.2.1, < 3.0",
+#   "databind.core >=4.4.2, < 5.0",
+#   "typing-extensions"]
+# ///
+
 '''
 A lot of this code has been copied and inspired from the AllenNLP code base.
 Reference:
@@ -17,7 +30,7 @@ import sys
 import textwrap
 from typing import Dict, List, Optional, TextIO, Tuple, Union
 
-import databind.core.annotations as A
+from databind.core import DeserializeAs
 import docspec
 from docspec_python.parser import Parser
 from pydoc_markdown import PydocMarkdown
@@ -25,7 +38,7 @@ from pydoc_markdown.contrib.loaders.python import PythonLoader
 from pydoc_markdown.contrib.processors.crossref import CrossrefProcessor
 from pydoc_markdown.contrib.renderers.docusaurus import CustomizedMarkdownRenderer, MarkdownRenderer
 from pydoc_markdown.interfaces import Processor, Renderer, Resolver
-from pydoc_markdown.util.docspec import format_function_signature, is_method
+from pydoc_markdown.util.docspec import ApiSuite, format_function_signature, is_method
 import typing_extensions as te
 
 
@@ -62,7 +75,7 @@ class EnhancedParser(Parser):
 
 
 Parser.prepare_docstring = EnhancedParser.prepare_docstring  # type:ignore
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
@@ -230,7 +243,7 @@ class AllenNlpDocstringProcessor(Processor):
 
         _docstring = ''
         if node.docstring is not None:
-            _docstring = node.docstring.content
+            _docstring = node.docstring.location
 
         # Standardize header syntax to use '#' instead of underscores.
         _docstring = self.UNDERSCORE_HEADER_RE.sub(r"# \g<1>", _docstring)
@@ -311,7 +324,7 @@ class AllenNlpRenderer(MarkdownRenderer):
         return '.'.join(x.name for x in obj.path)
 
     def _is_method(self, obj: docspec.ApiObject) -> bool:
-        return is_method(obj, self._resolver.reverse_map) # type: ignore  # noqa
+        return is_method(obj) # type: ignore  # noqa
 
     def _get_parent(self, obj: docspec.ApiObject) -> Optional[docspec.ApiObject]:
         '''
@@ -399,7 +412,7 @@ class AllenNlpRenderer(MarkdownRenderer):
                 result = f"{class_signature}:\n | ...\n{result}"
         return result
     
-    def _format_data_signature(self, data: docspec.Data) -> str:
+    def _format_data_signature(self, data: docspec.Variable) -> str:
         '''
         Format for anything that is not a function, module, or class e.g.
         Global variables.
@@ -444,13 +457,13 @@ class AllenNlpRenderer(MarkdownRenderer):
             code += f"class {cls.name}"
         if self.signature_python_help_style:
             code = self.dotted_name(cls) + ' = ' + code
+        
+        for member in cls.members:
+            if member.name == '__init__':
+                assert isinstance(member, docspec.Function)
+                code = self._format_function_signature(member, add_method_bar=True)
+                break
 
-        if self.classdef_render_init_signature_if_needed:
-            for member in cls.members:
-                if member.name == '__init__':
-                    assert isinstance(member, docspec.Function)
-                    code = self._format_function_signature(member, add_method_bar=True)
-                    break
         return code
 
     def _render_module_breadcrumbs(self, fp: TextIO, mod: docspec.Module) -> None:
@@ -490,7 +503,7 @@ class AllenNlpRenderer(MarkdownRenderer):
             self._render_module_breadcrumbs(fp, obj)
         self._render_signature_block(fp, obj)
         if obj.docstring:
-            lines = obj.docstring.split("\n")
+            lines = obj.docstring.content.split("\n")
             if self.docstrings_as_blockquote:
                 lines = ["> " + x for x in lines]
             fp.write("\n".join(lines))
@@ -506,7 +519,7 @@ class CustomDocusaurusRenderer(Renderer):
     """
 
     #: The #MarkdownRenderer configuration.
-    markdown: te.Annotated[MarkdownRenderer, A.typeinfo(deserialize_as=CustomizedMarkdownRenderer)] = \
+    markdown: te.Annotated[MarkdownRenderer, DeserializeAs(CustomizedMarkdownRenderer)] = \
         dataclasses.field(default_factory=CustomizedMarkdownRenderer)
 
     #: The path where the docusaurus docs content is. Defaults "docs" folder.
@@ -538,7 +551,7 @@ class CustomDocusaurusRenderer(Renderer):
 
             with filepath.open('w') as fp:
                 logger.info(f"Render file {filepath}")
-                self.markdown.render_to_stream([module], fp)
+                self.markdown._render_to_stream([module], fp)
 
 
 class CustomCrossrefProcess(CrossrefProcessor):
@@ -552,19 +565,16 @@ class CustomCrossrefProcess(CrossrefProcessor):
     def process(self, modules: List[docspec.Module],
                 resolver: Optional[Resolver]) -> None:
         if len(modules) > 0:
-            reverse = docspec.ReverseMap(modules)
             unresolved: Dict[str, List[str]] = {}
             resolver = None
-            docspec.visit(modules, lambda x: self._preprocess_refs(x, resolver, reverse, unresolved)) # type: ignore  # noqa
+            docspec.visit(modules, lambda x: self._preprocess_refs(x, resolver, ApiSuite(modules), unresolved)) # type: ignore  # noqa
 
     def _preprocess_refs(self, node: docspec.ApiObject, resolver: Resolver,
-                         reverse: docspec.ReverseMap,
+                         reverse: ApiSuite,
                          unresolved: Dict[str, List[str]]) -> None:
-    
         if not node.docstring:
             return None
-
-        doc_string = str(node.docstring)
+        doc_string = str(node.docstring.content)
         for match, ty, name in CROSS_REF_RE.findall(doc_string):
             if name.startswith(f"{BASE_MODULE}."):
                 path = name.split(".")
@@ -610,7 +620,7 @@ class CustomFilterProcessor(Processor):
     skip_empty_modules: bool = False
 
     SPECIAL_MEMBERS = ('__path__', '__annotations__', '__name__', '__all__',
-                       'logger')
+                       'logger', '__version__')
     INCLUDED_MEMBERS = ('__init__')
 
     def process(self, modules: List[docspec.Module], resolver: Optional[Resolver]) -> None:
@@ -632,7 +642,7 @@ class CustomFilterProcessor(Processor):
                 return False
             if isinstance(obj, docspec.Module) and obj.docstring:
                 return True
-            if isinstance(obj, docspec.Data):
+            if isinstance(obj, docspec.Variable):
                 return True
             if self.skip_empty_modules and isinstance(obj, docspec.Module) and not members:
                 return False
@@ -671,13 +681,13 @@ def py2md(module: str, out: Optional[str] = None) -> bool:
     pydocmd_renderer = CustomDocusaurusRenderer(custom_markdown_renderer,
                                                 docs_base_path='docs/docs',
                                                 relative_output_path='api',)
-    pydocmd = PydocMarkdown(loaders=[PythonLoader(modules=[module])],
+    current_working_directory = Path.cwd()
+    pydocmd = PydocMarkdown(loaders=[PythonLoader(modules=[module], search_path=[current_working_directory], packages=["pymusas"])],
                             processors=pydocmd_processors,
                             renderer=pydocmd_renderer,)
     if out:
         out_path = Path(out)
         os.makedirs(out_path.parent, exist_ok=True)
-
     modules = pydocmd.load_modules()
     try:
         pydocmd.process(modules)

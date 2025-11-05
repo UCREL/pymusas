@@ -1,4 +1,5 @@
 __pycache__
+env
 .vscode
 .DS_Store
 .coverage
@@ -6,6 +7,7 @@ coverage.json
 coverage.xml
 .mypy_cache
 .pytest_cache
+.venv
 pymusas.egg-info
 dist
 build

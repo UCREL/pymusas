@@ -1,3 +1,9 @@
+# /// script
+# requires-python = ">=3.10, <3.14"
+# dependencies = [
+#   "pymusas"]
+# ///
+
 '''
 Reference: This script has been adapted from the AllenNLP repository:
 https://github.com/allenai/allennlp/blob/2cdb8742c8c8c3c38ace4bdfadbdc750a1aa2475/scripts/release_notes.py
@@ -62,7 +68,10 @@ def get_commit_history() -> str:
 
 
 def main() -> None:
-    assert TAG == f"v{pymusas.__version__}"
+    if TAG != f"v{pymusas.__version__}":
+        raise ValueError(f"The environment variable `TAG` `{TAG}` "
+                         f"is not the same as `v{pymusas.__version__}` "
+                         "which it should be.")
     print(get_change_log_notes())
     print(get_commit_history())
 

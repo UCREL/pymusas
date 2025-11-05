@@ -1,0 +1,32 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/python
+{
+	"name": "Node+Python",
+	"remoteUser": "ubuntu",
+	"updateRemoteUserUID": true,
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": ".."
+	},
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+		// Add the IDs of extensions you want installed when the container is created.
+		"extensions": ["streetsidesoftware.code-spell-checker",
+	                   "ms-toolsai.jupyter",
+					   "ms-toolsai.jupyter-renderers",
+					   "ms-python.python",
+					   "ms-python.vscode-pylance",
+					   "ms-python.vscode-python-envs",
+					   "ms-vscode.makefile-tools",
+					   "redhat.vscode-yaml",
+					   "tamasfe.even-better-toml",
+					   "github.vscode-github-actions"],
+		"settings": {
+			"python-envs.defaultEnvManager": "ms-python.python:venv"
+		}
+		}
+  	},
+	"postStartCommand": "uv sync"
+}

@@ -1,11 +1,11 @@
 from collections.abc import MutableMapping
 import importlib
-import os
 from pathlib import Path
 import tempfile
 from typing import Dict, List
 
 import pytest
+from pytest import MonkeyPatch
 import responses
 
 from pymusas import config
@@ -177,7 +177,7 @@ def test_to_from_bytes() -> None:
     assert LEXICON_ENTRIES == a_collection.data
 
 
-def test_lexicon_collection_from_tsv() -> None:
+def test_lexicon_collection_from_tsv(monkeypatch: MonkeyPatch) -> None:
 
     lexicon_collection = LexiconCollection.from_tsv(LEXICON_FILE_PATH)
     assert isinstance(lexicon_collection, dict)
@@ -212,7 +212,7 @@ def test_lexicon_collection_from_tsv() -> None:
     
     # Test using a URL
     with tempfile.TemporaryDirectory() as temp_dir:
-        os.environ['PYMUSAS_HOME'] = temp_dir
+        monkeypatch.setenv('PYMUSAS_HOME', temp_dir)
         importlib.reload(config)
         with responses.RequestsMock() as rsps:
             req_kwargs = {"stream": True}

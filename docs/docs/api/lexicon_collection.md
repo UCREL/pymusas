@@ -12,7 +12,7 @@
 
 ```python
 @unique
-class LexiconType(str,  Enum)
+class LexiconType(str, Enum)
 ```
 
 Descriptions of the type associated to single and Multi Word Expression (MWE)
@@ -53,7 +53,7 @@ assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconTyp
 #### SINGLE\_NON\_SPECIAL
 
 ```python
-class LexiconType(str,  Enum):
+class LexiconType(str, Enum):
  | ...
  | SINGLE_NON_SPECIAL = 'Single Non Special'
 ```
@@ -63,7 +63,7 @@ class LexiconType(str,  Enum):
 #### MWE\_NON\_SPECIAL
 
 ```python
-class LexiconType(str,  Enum):
+class LexiconType(str, Enum):
  | ...
  | MWE_NON_SPECIAL = 'MWE Non Special'
 ```
@@ -73,7 +73,7 @@ class LexiconType(str,  Enum):
 #### MWE\_WILDCARD
 
 ```python
-class LexiconType(str,  Enum):
+class LexiconType(str, Enum):
  | ...
  | MWE_WILDCARD = 'MWE Wildcard'
 ```
@@ -83,7 +83,7 @@ class LexiconType(str,  Enum):
 #### MWE\_CURLY\_BRACES
 
 ```python
-class LexiconType(str,  Enum):
+class LexiconType(str, Enum):
  | ...
  | MWE_CURLY_BRACES = 'MWE Curly Braces'
 ```
@@ -93,7 +93,7 @@ class LexiconType(str,  Enum):
 ### \_\_repr\_\_
 
 ```python
-class LexiconType(str,  Enum):
+class LexiconType(str, Enum):
  | ...
  | def __repr__() -> str
 ```

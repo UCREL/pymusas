@@ -46,3 +46,14 @@ class LexicalMatch(IntEnum):
         you should be able to recreate the object.
         '''
         return self.__str__()
+    
+    def __str__(self) -> str:
+        '''
+        Returns the `class_name.name`, e.g. `LexicalMatch.TOKEN`
+
+        Overridden as from Python version 3.11 IntEnum.__str__  by default would
+        return the integer as a string.
+        '''
+
+        class_name = "LexicalMatch"
+        return f"{class_name}.{self.name}"

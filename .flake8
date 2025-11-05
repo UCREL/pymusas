@@ -1,0 +1,9 @@
+[flake8]
+ignore = E266, E501, W503, W293
+max-line-length = 200
+select = B,C,E,F,W,T4,B9
+statistics = true
+count = true
+show_source = true
+exclude = 
+    *.lock

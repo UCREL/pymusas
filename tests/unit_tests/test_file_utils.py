@@ -4,6 +4,7 @@ from pathlib import Path
 import tempfile
 
 import pytest
+from pytest import MonkeyPatch
 import requests
 import responses
 
@@ -23,11 +24,11 @@ def test_ensure_path() -> None:
 
 
 @pytest.mark.parametrize('dir_exists', [True, False])
-def test_download_url_file(dir_exists: bool) -> None:
+def test_download_url_file(monkeypatch: MonkeyPatch, dir_exists: bool) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
         if not dir_exists:
             temp_dir = os.path.join(temp_dir, 'temp_dir')
-        os.environ['PYMUSAS_HOME'] = temp_dir
+        monkeypatch.setenv('PYMUSAS_HOME', temp_dir)
         importlib.reload(config)
         
         with responses.RequestsMock() as rsps:

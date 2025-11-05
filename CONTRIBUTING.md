@@ -21,18 +21,24 @@ The last part of any pull request is to update the [CHANGELOG](./CHANGELOG.md) w
 
 ### Changing / Updating Python requirements
 
-If you are changing the Python requirements, this needs to be done in a few different places:
+If you are changing/updating a core requirement i.e. a requirement needed to run `pymusas` see [#core](#core) else if it is only for development of the project see [#development](#development).
 
-1. If it is a development only requirement, not required to run the core code base within [./pymusas](./pymusas), then update:
-    * [./dev_requirements.txt](./dev_requirements.txt)
-    * [./binder/environment.yml](./binder/environment.yml)
-    * [The `tests` section of ./setup.cfg](./setup.cfg)
-2. If it is a requirement that is needed to run the core code base within [./pymusas](./pymusas), then update:
-    * [./requirements.txt](./requirements.txt)
-    * [./binder/environment.yml](./binder/environment.yml)
-    * [The `install_requires` section of ./setup.cfg](./setup.cfg)
+**Note**:
 
-In all cases you may need to add this requirement to the `tool.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml) 
+1. In all cases you may need to add this requirement to the `tool.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml).
+2. Add the requirement to [./binder/environment.yml](./binder/environment.yml)
+
+#### Core
+
+``` bash
+uv add REQUIREMENT
+```
+
+#### Development
+
+``` bash
+uv add --dev REQUIREMENT
+```
 
 ### Writing docstrings
 [A lot of this has been copied from the AllenNLP CONTRIBUTING guidelines, which I think are really great!](https://github.com/allenai/allennlp/blob/main/CONTRIBUTING.md)
@@ -164,23 +170,27 @@ TO DO.
 
 ## Website
 
-The documentation is built with [docusaurus v2](https://docusaurus.io/), a static site generator that is based on the [Jamstack](https://jamstack.org/) with pages generated through markup and can be enhanced using Javascript e.g. React components.
+The documentation is built with [docusaurus v3.9.2](https://docusaurus.io/), a static site generator that is based on the [Jamstack](https://jamstack.org/) with pages generated through markup and can be enhanced using Javascript e.g. React components.
 
 The only part of the website that is automatically generated are the API pages, this is done through the: `make create-api-docs` command. These API pages are stored in the [./docs/docs/api folder](./docs/docs/api)
 
-The pages that can be added too are the documentation pages of which these should be something like a guide or usage example page to help the user's better understand and get started using the code base. These can be written using markdown with or without React components (for more details on how to write a documentation [page](https://docusaurus.io/docs/create-doc), a link to a more [advance guide](https://docusaurus.io/docs/markdown-features)). The documentation pages should be stored in the [./docs/docs/documentation folder](./docs/docs/documentation).
+The pages that can be added too are the usage pages of which these should be something like a guide or use case example page to help the users better understand and get started using the code base. These can be written using markdown with or without React components (for more details on how to write a documentation [page](https://docusaurus.io/docs/create-doc), a link to a more [advance guide](https://docusaurus.io/docs/markdown-features)). The usage pages should be stored in the [./docs/docs/usage](./docs/docs/usage/).
 
 ### Commands
 
-**Note**: all of the commands require docker.
+**Note**: we are assuming that you are running these commands either within the dev container or have installed locally yarn. For more information on how to setup either of these see the development setup part of the README.
 
 By default when running the documentation website locally it is hosted at: [http://localhost:3000/pymusas/](http://localhost:3000/pymusas/)
 
-The website is ran using a node based docker container, dockerfile that is used can be found at [./Docs_Docker.dockerfile](./Docs_Docker.dockerfile)
-
-
 * To run the docs locally in development mode: `make develop-docs`
-* To build the documentation files: `make build-docs`
+* To build the documentation files: `make docs/build`
 * To build the static documentation files and serve them locally: `make serve-built-docs`
 * To generate the API pages from the code base: `make create-api-docs`
-* To create the documentation website from scratch (this should never be needed but just in case it does): `make create-docs`
+
+
+To update to the latest docusaurs version, the easiest way is to (before doing this ensure that any changes you have not committed to git within `./docs` have been committed.):
+
+(Does require you to enter `y` to proceed when creating the docusaurus website directory)
+```
+make create-docs
+```

@@ -1,1 +1,4 @@
-__version__ = '0.3.0'
+import importlib.metadata
+
+
+__version__ = importlib.metadata.version("pymusas")

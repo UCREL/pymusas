@@ -1,179 +1,159 @@
 name: CI
 
 on:
-  workflow_dispatch:
+  workflow_dispatch: # Manually trigger a workflow run using the GitHub API, GitHub CLI, or the GitHub UI.
   push:
   pull_request:
   release:
     types: [published]
+
+permissions:
+  contents: read # required for code coverage
   
 jobs:
   Validate-CITATION-cff:
     runs-on: ubuntu-latest
     name: Validate CITATION.cff
 
-    env:
-      RSPM: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"
-
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Repository
+        uses: actions/checkout@v5
 
-      - name: Install V8
-        run: sudo apt-get install -y libv8-dev
+      - name: Validate CITATION.cff
+        id: validate_cff
+        uses: dieghernan/cff-validator@v4
+        with:
+          citation-path: "CITATION.cff"
 
-      - name: cff-validator
-        uses: dieghernan/cff-validator@main
-
-      - name: Upload cff-validator error artifact
-        uses: actions/upload-artifact@v2.3.0
-        if: failure()
+      - name: Upload cff-validator error artifact if failed to validate
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() && steps.validate_cff.conclusion == 'failure' }}
         with:
           name: citation-cff-errors
-          path: citation_cff_errors.md
+          path: citation_cff.md
+          overwrite: true
+          if-no-files-found: warn
 
   checks:
     name: checks
     runs-on: ${{ matrix.os }}
-    needs: Validate-CITATION-cff
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
         os: [ubuntu-latest, macos-latest, windows-latest]
     
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v5
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
+        id: python-setup
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Setting Python and OS environment variables on Linux and Mac
-        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
-        run: |
-          echo "PYTHON=${{ matrix.python-version }}" >> $GITHUB_ENV
-          echo "OS=${{ runner.os }}" >> $GITHUB_ENV
-
-      - name: Setting Python and OS environment variables on Windows
-        if: ${{ runner.os == 'Windows' }}
-        run: |
-          echo "PYTHON=${{ matrix.python-version }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
-          echo "OS=${{ runner.os }}" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
       
-      - name: Python location
-        run: echo "Python location ${{ env.pythonLocation }}"
-
-      - name: Cache pip
-        uses: actions/cache@v2
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        id: setup-uv
         with:
-          path: ${{ env.pythonLocation }}
-          key: ${{ runner.os }}-${{ env.pythonLocation }}-pip-${{ hashFiles('**/requirements.txt') }}-${{ hashFiles('**/dev_requirements.txt') }}
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade --upgrade-strategy eager -r requirements.txt -r dev_requirements.txt
+          # Install a specific version of uv.
+          version: "0.9.6"
+          enable-cache: true
+          restore-cache: true
+          save-cache: true
+          prune-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: uv sync --locked
+
+      - name: check uv cache is working
+        if: steps.setup-uv.outputs.cache-hit == 'true'
+        run: echo "uv cache was restored"
 
       - name: isort
-        run: isort --check-only pymusas tests scripts
+        run: uv run isort --check-only pymusas tests scripts
       
-      - name: flake8
+      - name: flake8 Ubuntu and Mac
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
-          pip list
-          flake8
+          uv run flake8 --config ./.flake8 pymusas tests scripts
+      
+      - name: flake8 Window
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          uv run flake8 --config .\.flake8 pymusas tests scripts
 
       - name: Cache mypy
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ./.mypy_cache
-          key: ${{ runner.os }}-${{ env.pythonLocation }}
+          key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ hashFiles('uv.lock') }}
 
       - name: mypy
-        run: mypy
+        run: uv run mypy
 
       - name: Code coverage testing
         run: |
-          coverage run
-          
+          uv run coverage run
+
       - name: Code coverage report
         run: |    
-          coverage report
-          coverage xml
+          uv run coverage
 
-      - name: CodeCov
-        uses: codecov/codecov-action@v2
-        with:
-          env_vars: OS,PYTHON
-          fail_ci_if_error: false 
-
-      - name: Set pymusas cache home directory for ubuntu and mac
+      - name: Set pymusas cache home directory for Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
-          echo "PYMUSAS_HOME=$HOME/.cache/doc_test_pymusas" >> $GITHUB_ENV
+          echo "PYMUSAS_HOME=$HOME/.cache/doc_test_pymusas" >> "$GITHUB_ENV"
       
-      - name: Set pymusas cache home directory for windows
+      - name: Set pymusas cache home directory for Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
-          echo "PYMUSAS_HOME=$HOME\.cache\doc_test_pymusas" | Out-File -FilePath $Env:GITHUB_ENV -Encoding utf-8 -Append
+          echo "PYMUSAS_HOME=$HOME\.cache\doc_test_pymusas" >> $env:GITHUB_ENV
 
       - name: Cache Doc Test download files
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ${{ env.PYMUSAS_HOME }}
-          key: ${{ runner.os }}-${{ env.PYMUSAS_HOME }}
-
+          key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ env.PYMUSAS_HOME }}
+      
       - name: Doc Tests
         run: |
-          coverage run -m pytest --doctest-modules pymusas/
-          coverage report
-  
+          uv run coverage run -m pytest --doctest-modules pymusas/
+
+      - name: Build and Functional Tests Ubuntu and Mac
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        run: |
+          uv build
+          PYMUSAS_VERSION=$(uv run scripts/get_version.py ./pyproject.toml)
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
+            --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
+            --with pytest --no-project --isolated pytest tests/functional_tests
+      
+      - name: Build and Functional Tests Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          uv build
+          $PYMUSAS_VERSION = & { uv run scripts/get_version.py ./pyproject.toml }
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" --with pytest --no-project --isolated pytest tests/functional_tests
+
   update-binder-requirements:
     name: update-binder-requirements
     needs: checks
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && github.repository == 'UCREL/pymusas'
     runs-on: ubuntu-latest
     steps:
       - name: update env checkout
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v5
       - name: update env commits
         run: |
           git branch
-          git checkout binder-main
+          git fetch --depth=1 origin binder-main
+          git checkout -b binder-main origin/binder-main
           git checkout main binder/environment.yml
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
           if [ $(git diff-index binder-main | wc -l) -gt 0 ]; then git commit -m "update"; git push origin binder-main; fi
 
-  publish:
-    name: Publish to PyPI
-    needs: checks
-    runs-on: ubuntu-latest
-    if: github.repository == 'UCREL/pymusas' && github.event_name == 'release'
-    steps:
-      - uses: actions/checkout@v2
 
-      - name: Set up Python 3.9
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.9
-      
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade build twine
-      
-      - name: Build package
-        run: |
-          python -m build
-
-      - name: Twine check
-        run: python -m twine check --strict dist/*
-      
-      - name: Upload to twine
-        run: |
-          python -m twine upload --repository pypi dist/*
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}

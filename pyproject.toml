@@ -1,36 +1,65 @@
+[project]
+name = "pymusas"
+version = "0.3.0"
+description = "PYthon Multilingual Ucrel Semantic Analysis System"
+authors = [
+    { name = "UCREL Research Centre", email = "ucrel@lancaster.ac.uk" }
+]
+readme = {file = "README.md", content-type = "text/markdown"}
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = ["usas", "USAS", "UCREL", "ucrel", "semantics"]
+classifiers = [
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research"
+]
+requires-python = ">=3.10, <3.14"
+dependencies = [
+    "requests>=2.13.0,<3.0",
+    "spacy>=3.1.4",
+    "srsly>=2.4.1,<3.0",
+    "tqdm>=4.50.0,<5.0",
+]
+
+[project.urls]
+Homepage = "https://ucrel.github.io/pymusas/"
+Documentation = "https://ucrel.github.io/pymusas/api/base"
+Repository = "https://github.com/UCREL/pymusas"
+Issues = "https://github.com/UCREL/pymusas/issues"
+Changelog = "https://github.com/UCREL/pymusas/blob/main/CHANGELOG.md"
+
+[project.entry-points.'spacy_factories']
+"pymusas_rule_based_tagger" = "pymusas.spacy_api.taggers.rule_based:RuleBasedTagger"
+
 [build-system]
-requires = [
-    "setuptools>=42",
-    "wheel"
-]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.9.6,<0.10.0"]
+build-backend = "uv_build"
 
-[tool.mypy]
-files = ["tests/", "pymusas/", "scripts/"]
-disallow_untyped_calls = true
-disallow_untyped_defs = true
-disallow_incomplete_defs = true
-disallow_untyped_decorators = false
-no_implicit_optional = true
-no_strict_optional = false
-warn_redundant_casts = true
-warn_unused_ignores = true
-warn_return_any = true
-warn_unreachable = true
-allow_untyped_globals = false
-allow_redefinition = false
-local_partial_types = true
-strict_equality = true
 
-[[tool.mypy.overrides]]
-module = [
-    'urllib3.*', 
-    'tqdm.*',
-    'pydoc_markdown.*',
-    'spacy.vocab',
-    'srsly.*'
+[tool.uv.build-backend]
+module-name = "pymusas"
+module-root = ""
+
+[dependency-groups]
+dev = [
+    "coverage[toml]>=6.0.0",
+    "flake8>=3.8",
+    "isort>=6.0",
+    "mypy>=1.12",
+    "pytest>=6.0,!=7.1.0,!=8.1.0",
+    "responses>=0.25.7",
+    "types-requests>=2.32.4.20250913",
 ]
-ignore_missing_imports = true
+
 
 [tool.isort]
 known_first_party = "pymusas"
@@ -51,10 +80,38 @@ include_trailing_comma = true
 lines_after_imports = 2
 line_length = 119
 
+
+[tool.mypy]
+files = ["tests/", "pymusas/", "scripts/"]
+exclude = ["scripts/py2md.py"]
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_decorators = false
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_return_any = true
+warn_unreachable = true
+allow_untyped_globals = false
+allow_redefinition = false
+local_partial_types = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    'urllib3.*', 
+    'tqdm.*',
+    'pydoc_markdown.*',
+    'spacy.vocab',
+    'srsly.*'
+]
+ignore_missing_imports = true
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = [
-    "tests"
+    "tests/unit_tests"
 ]
 
 [tool.coverage.run]
