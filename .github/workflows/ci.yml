@@ -6,6 +6,10 @@ on:
   pull_request:
   release:
     types: [published]
+
+permissions:
+  #contents: write # required for code coverage
+  pull-requests: write # required for code coverage
   
 jobs:
   Validate-CITATION-cff:
