@@ -8,7 +8,7 @@ on:
     types: [published]
 
 permissions:
-  contents: write # required for code coverage
+  contents: read # required for code coverage
   pull-requests: write # required for code coverage
   
 jobs:
