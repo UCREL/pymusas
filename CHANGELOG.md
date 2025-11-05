@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The documentation now has a `How-to` guide on `Tag CoNLL-U Files`.
 - The documentation now has a `How-to Tag Text` guide for Finnish and English.
 - Using [developer/dev containers](https://containers.dev/) of which the files for this can be found in the [.devcontainer folder](./.devcontainer). This will allow for easier on boarding and development consistency.
+- Functional tests have been added and can be found in the following directory: [./tests/functional_tests/](./tests/functional_tests/)
 
 ### Changed
 
@@ -23,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setting the new version of PyMUSAS is through the [uv tool](https://docs.astral.sh/uv/guides/package/#updating-your-version) and this uses the version set in [./pyproject.toml](./pyproject.toml) rather than [./pymusas/__init__.py](./pymusas/__init__.py)
 - [./scripts/release_notes.py script](./scripts/release_notes.py) has been updated so that it is isolated with respect to python packages that are required to be installed. This has been doing through the makefile, CI commands in the GitHub action, and the script itself containing it's own dependencies.
 - The publishing and release process now uses `uv`. The version of PyMUSAS is fully determined by the `TAG` environment variable. 
+- The unit tests have been moved to [./tests/unit_tests/](./tests/unit_tests/) from `./tests`
 
 ### Removed
 
