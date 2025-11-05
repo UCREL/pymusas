@@ -186,8 +186,11 @@ class LexiconCollection(MutableMapping):
         The lemma and pos are combined as follows: `{lemma}|{pos}`, e.g.
         `Car|Noun`
 
-        If the pos value is None then then only the lemma is used: `{lemma}`,
+        If the pos value is None then only the lemma is used: `{lemma}`,
         e.g. `Car`
+
+        **Note** If the key already exists then the most recent entry will
+        overwrite the existing entry.
 
         # Parameters
 
