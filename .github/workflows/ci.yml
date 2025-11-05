@@ -131,7 +131,7 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         run: |
           uv build
-          PYMUSAS_VERSION = & uv run scripts/get_version.py ./pyproject.toml)
+          PYMUSAS_VERSION = & uv run scripts/get_version.py ./pyproject.toml
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
             --with pytest --no-project --isolated pytest --doctest-modules pymusas/
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl"\
