@@ -117,11 +117,25 @@ jobs:
         run: |
           uv run coverage run -m pytest --doctest-modules pymusas/
 
-      - name: Build and Functional Tests
+      - name: Build and Functional Tests Ubuntu and Mac
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
           uv build
-          uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest --doctest-modules pymusas/
-          uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest tests/functional_tests
+          PYMUSAS_VERSION=$(uv run scripts/get_version.py ./pyproject.toml)
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
+            --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
+            --with pytest --no-project --isolated pytest tests/functional_tests
+      
+      - name: Build and Functional Tests Windows
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          uv build
+          PYMUSAS_VERSION = & uv run scripts/get_version.py ./pyproject.toml)
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
+            --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl"\
+            --with pytest --no-project --isolated pytest tests/functional_tests
 
   update-binder-requirements:
     name: update-binder-requirements

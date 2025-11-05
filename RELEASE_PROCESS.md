@@ -25,7 +25,7 @@ to `git@github.com:UCREL/pymusas.git` (or the `HTTPS` equivalent). To check: `gi
 
 2. Use the uv tool to update the version within [./pyproject.toml](./pyproject.toml) and check that it matches the `TAG` environment variable you created in the first step. `uv version ${TAG}`
 
-3. Update the `CHANGELOG.md` so that everything under the "Unreleased" section is now under a section corresponding to this release.
+3. Update the `CHANGELOG.md` so that everything under the "Unreleased" section is now under a section corresponding to this release, e.g. `v0.3.1`.
 
 4. Update the `CITATION.cff` file to refer to the right version and date of release. Validate the changes against the [citation file format (cff) schema](https://github.com/citation-file-format/citation-file-format/blob/main/schema-guide.md) using the following command:
 
@@ -37,10 +37,10 @@ GitHub also has a [guide on supported citation formats on GitHub.](https://docs.
 
 For more information about CITATION.cff files see the [Citation File Format website](https://citation-file-format.github.io/).
 
-5. Check it with [twine](https://twine.readthedocs.io/en/latest/#twine-check). There is a make command that can do this, this command will install `build`, `twine`, and the latest version of `pip`:
+5. Publish with [uv](https://docs.astral.sh/uv/guides/package/#publishing-your-package):
 
     ``` bash
-    make check-twine
+    uv publish
     ```
 
 6. Add these changes using Git manually (`git add`), then commit and push these changes with:
@@ -57,8 +57,8 @@ For more information about CITATION.cff files see the [Citation File Format webs
 
 8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click the "..." to the right of the "Verified" badge, and then click "Create release". Set the title of the release to "v{VERSION}" and copy the output from the following script into the markdown text box:
 
-    ```
-    python scripts/release_notes.py
+    ``` bash
+    make release-notes
     ```
 
 9. Click "Publish release". GitHub Actions will then handle the rest, including publishing the package to PyPI.

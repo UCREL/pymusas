@@ -6,6 +6,7 @@ SRC = pymusas
 DOCS_API_DIR = ./docs/docs/api
 DOCS_SRC_TMP = $(filter-out $(SRC)/__main__.py %/__init__.py ,$(shell find $(SRC) -type f -name '*.py'))
 DOCS_SRC = $(subst .py,,$(subst /,.,${DOCS_SRC_TMP}))
+VERSION_CMD = "uv run scripts/get_version.py ./pyproject.toml"
 
 
 .PHONY: develop-docs
@@ -58,8 +59,16 @@ build-python-package:
 
 .PHONY: functional-tests
 functional-tests:
-	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest --doctest-modules pymusas/
-	@uv run --with dist/pymusas-0.3.0-py3-none-any.whl --with pytest --no-project --isolated pytest tests/functional_tests
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
+	--with pytest --no-project --isolated pytest --doctest-modules pymusas/
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
+	--with pytest --no-project --isolated pytest tests/functional_tests
+
+.PHONY: release-notes
+release-notes:
+	@uv run --no-project --script \
+	--with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
+	./scripts/release_notes.py
 
 .PHONY: lint
 lint:
