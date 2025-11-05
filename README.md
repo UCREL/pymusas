@@ -11,9 +11,6 @@
     <a href="https://github.com/UCREL/pymusas/blob/main/LICENSE">
         <img alt="License" src="https://img.shields.io/pypi/l/pymusas"/>
     </a>
-    <a href="https://codecov.io/gh/UCREL/pymusas">
-        <img alt="Code coverage" src="https://codecov.io/gh/UCREL/pymusas/branch/main/graph/badge.svg" />
-    </a>
 
 </p>
 <p align="center">
