@@ -1,5 +1,6 @@
 from collections.abc import MutableMapping
 import importlib
+from os import PathLike
 from pathlib import Path
 import tempfile
 from typing import Dict, List
@@ -19,6 +20,8 @@ EXTRA_FIELDS_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'extra_fields_lexicon.ts
 MINIMUM_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'minimum_lexicon.tsv')
 ERROR_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'error_lexicon.tsv')
 NO_HEADER_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'no_header_lexicon.tsv')
+DOMAIN_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'domain_lexicon.tsv')
+CUSTOM_TAGS_FILE_PATH = Path(LEXICON_DATA_DIR, 'custom_tags_lexicon.tsv')
 
 LEXICON_ENTRY = LexiconEntry('London', ['Z2'], 'noun')
 LEXICON_ENTRY_MULTI_SEM = LexiconEntry('Laptop', ['Z3', 'Z0'], 'noun')
@@ -224,3 +227,53 @@ def test_lexicon_collection_from_tsv(monkeypatch: MonkeyPatch) -> None:
             url_lexicon_collection = LexiconCollection.from_tsv(lexicon_url)
             assert 1 == len(url_lexicon_collection)
             url_lexicon_collection['hello'] == ['Z5', 'Z2']
+
+
+def test_lexicon_collection_merge() -> None:
+
+    lexicon_collection_data = LexiconCollection.from_tsv(LEXICON_FILE_PATH,
+                                                         include_pos=True)
+    lexicon_collection = LexiconCollection(data=lexicon_collection_data)
+    assert 19 == len(lexicon_collection)
+    assert lexicon_collection["London|noun"] == ["Z2"]
+
+    domain_lexicon_collection = LexiconCollection(data={"London|noun": ["Z3"],
+                                                        "West|noun": ["Z2"]})
+    assert domain_lexicon_collection["London|noun"] == ["Z3"]
+    lexicon_collections: list[LexiconCollection] = [lexicon_collection,
+                                                    domain_lexicon_collection]
+    combined_lexicon_collection = LexiconCollection.merge(*lexicon_collections)
+    assert 20 == len(combined_lexicon_collection)
+    assert combined_lexicon_collection["London|noun"] == ["Z3"]
+
+    # Custom non-USAS tags test
+    custom_tags_lexicon_collection_data = LexiconCollection.from_tsv(CUSTOM_TAGS_FILE_PATH)
+    custom_tags_lexicon_collection = LexiconCollection(data=custom_tags_lexicon_collection_data)
+    lexicon_collections = [lexicon_collection, custom_tags_lexicon_collection]
+    combined_lexicon_collection = LexiconCollection.merge(*lexicon_collections)
+    assert 21 == len(combined_lexicon_collection)
+    assert combined_lexicon_collection["Paris|noun"] == ["R5"]
+
+
+@pytest.mark.parametrize("include_pos", [False, True])
+def test_lexicon_collection_tsv_merge(include_pos: bool) -> None:
+    tsv_files_paths: list[PathLike] = [LEXICON_FILE_PATH, DOMAIN_LEXICON_FILE_PATH]
+    combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_files_paths,
+                                                              include_pos=include_pos)
+    if include_pos:
+        assert 20 == len(combined_lexicon_collection)
+        assert combined_lexicon_collection["London|noun"] == ["Z3"]
+    else:
+        assert 18 == len(combined_lexicon_collection)
+        assert combined_lexicon_collection["London"] == ["Z3"]
+
+    # Custom non-USAS tags test
+    tsv_files_paths.append(CUSTOM_TAGS_FILE_PATH)
+    combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_files_paths,
+                                                              include_pos=include_pos)
+    if include_pos:
+        assert 22 == len(combined_lexicon_collection)
+        assert combined_lexicon_collection["Paris|noun"] == ["R5"]
+    else:
+        assert 20 == len(combined_lexicon_collection)
+        assert combined_lexicon_collection["Paris"] == ["R5"]

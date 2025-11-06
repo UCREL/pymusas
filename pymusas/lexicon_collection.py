@@ -362,6 +362,112 @@ class LexiconCollection(MutableMapping):
                                                       include_pos=include_pos)
         
         return collection_from_tsv.to_dictionary()
+    
+    @staticmethod
+    def merge(*lexicon_collections: "LexiconCollection") -> "LexiconCollection":
+        """
+        Given more than one lexicon collection it will create a single lexicon
+        collection whereby the lexicon data from each will be combined.
+
+        **Note** the data is loaded in list order therefore the last lexicon
+        collection will take precedence, i.e. if the last contains `London`: [`Z3`]
+        and the first contains `London`: [`Z2`] then the returned
+        LexiconCollection will only contain the one entry; `London`: [`Z3`].
+
+        # Parameters
+
+        *lexicon_collections: class:`LexiconCollection`
+            More than one lexicon collections that are to be merged.
+
+        # Returns
+        
+        class:`LexiconCollection`
+
+        # Examples
+
+        ``` python
+        >>> from pymusas.lexicon_collection import LexiconCollection
+        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv"
+        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
+        >>> welsh_lexicon_data = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+        >>> welsh_lexicon = LexiconCollection(welsh_lexicon_data)
+        >>> english_lexicon_data = LexiconCollection.from_tsv(english_lexicon_url, include_pos=True)
+        >>> english_lexicon = LexiconCollection(english_lexicon_data)
+        >>> combined_lexicon_collection = LexiconCollection.merge(welsh_lexicon, english_lexicon)
+        >>> assert combined_lexicon_collection["Aber-lash|pnoun"] == ["Z2"]
+        >>> assert combined_lexicon_collection["Aqua|PROPN"] == ["Z3c"]
+
+        ```
+        """
+        combined_lexicon_data: dict[str, list[str]] = {}
+        for lexicon_collection in lexicon_collections:
+            for lemma_pos in lexicon_collection:
+                semantic_tags = lexicon_collection[lemma_pos]
+                combined_lexicon_data[lemma_pos] = semantic_tags
+        merged_lexicon_collection = LexiconCollection(combined_lexicon_data)
+        return merged_lexicon_collection
+    
+    @staticmethod
+    def tsv_merge(*tsv_file_paths: PathLike, include_pos: bool = True) -> "LexiconCollection":
+        """
+        Given one or more TSV files it will create a single lexicon collection
+        whereby the lexicon data from each TSV file will be combined.
+
+        For more information on how the TSV data is loaded see :func:`from_tsv`.
+
+        **Note** the data is loaded in list order therefore the last TSV file
+        will take precedence, i.e. if the last TSV file contains `London`: [`Z3`]
+        and the first TSV file contains `London`: [`Z2`] then the returned
+        LexiconCollection will only contain the one entry; `London`: [`Z3`].
+
+        # Parameters
+
+        *tsv_file_paths: `PathLike`
+            File paths and/or URLs to a TSV file that contains at least two
+            fields, with an optional third, with the following headings:
+            
+            1. `lemma`,
+            2. `semantic_tags`
+            3. `pos` (Optional)
+            
+            All other fields will be ignored.
+        include_pos: `bool`, optional (default = `True`)
+            Whether to include the POS information, if the information is available,
+            or not. See :func:`add_lexicon_entry` for more information on this
+            parameter.
+
+        # Returns
+
+        :class:`LexiconCollection`
+
+        # Raises
+        
+        `ValueError`
+            If the minimum field headings, `lemma` and `semantic_tags`, do not
+            exist in the given TSV files.
+
+        # Examples
+
+        ``` python
+        >>> from pymusas.lexicon_collection import LexiconCollection
+        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv"
+        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
+        >>> tsv_urls = [welsh_lexicon_url, english_lexicon_url]
+        >>> combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_urls, include_pos=True)
+        >>> assert combined_lexicon_collection["Aber-lash|pnoun"] == ["Z2"]
+        >>> assert combined_lexicon_collection["Aqua|PROPN"] == ["Z3c"]
+
+        ```
+        """
+        combined_lexicon_data: dict[str, list[str]] = {}
+        for tsv_file_path in tsv_file_paths:
+            lexicon_data = LexiconCollection.from_tsv(tsv_file_path,
+                                                      include_pos=include_pos)
+            for lemma_pos, semantic_tags in lexicon_data.items():
+                combined_lexicon_data[lemma_pos] = semantic_tags
+
+        combined_lexicon_collection = LexiconCollection(combined_lexicon_data)
+        return combined_lexicon_collection
 
     def __setitem__(self, key: str, value: List[str]) -> None:
         self.data[key] = value
