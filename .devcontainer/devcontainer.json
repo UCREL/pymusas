@@ -22,7 +22,8 @@
 					   "ms-vscode.makefile-tools",
 					   "redhat.vscode-yaml",
 					   "tamasfe.even-better-toml",
-					   "github.vscode-github-actions"],
+					   "github.vscode-github-actions",
+					   "mechatroner.rainbow-csv"],
 		"settings": {
 			"python-envs.defaultEnvManager": "ms-python.python:venv"
 		}
