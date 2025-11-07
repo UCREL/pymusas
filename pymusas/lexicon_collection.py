@@ -398,6 +398,7 @@ class LexiconCollection(MutableMapping):
         >>> english_lexicon_data = LexiconCollection.from_tsv(english_lexicon_url, include_pos=True)
         >>> english_lexicon = LexiconCollection(english_lexicon_data)
         >>> combined_lexicon_collection = LexiconCollection.merge(welsh_lexicon, english_lexicon)
+        >>> assert isinstance(combined_lexicon_collection, LexiconCollection)
         >>> assert combined_lexicon_collection["Aber-lash|pnoun"] == ["Z2"]
         >>> assert combined_lexicon_collection["Aqua|PROPN"] == ["Z3c"]
 
@@ -412,17 +413,18 @@ class LexiconCollection(MutableMapping):
         return merged_lexicon_collection
     
     @staticmethod
-    def tsv_merge(*tsv_file_paths: PathLike, include_pos: bool = True) -> "LexiconCollection":
+    def tsv_merge(*tsv_file_paths: PathLike, include_pos: bool = True) -> dict[str, list[str]]:
         """
-        Given one or more TSV files it will create a single lexicon collection
-        whereby the lexicon data from each TSV file will be combined.
+        Given one or more TSV files it will create a single dictionary object
+        with the combination of all the lexicon data in each TSV, this dictionary
+        object can then be used to create a :class:`LexiconCollection`.
 
         For more information on how the TSV data is loaded see :func:`from_tsv`.
 
         **Note** the data is loaded in list order therefore the last TSV file
         will take precedence, i.e. if the last TSV file contains `London`: [`Z3`]
         and the first TSV file contains `London`: [`Z2`] then the returned
-        LexiconCollection will only contain the one entry; `London`: [`Z3`].
+        dictionary will only contain the one entry; `London`: [`Z3`].
 
         **Note** if the TSV files contain POS information we assume that all
         of the TSV files use the same POS tagset, if they do not this could
@@ -446,7 +448,7 @@ class LexiconCollection(MutableMapping):
 
         # Returns
 
-        :class:`LexiconCollection`
+        `dict[str, list[str]]`
 
         # Raises
         
@@ -462,6 +464,7 @@ class LexiconCollection(MutableMapping):
         >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
         >>> tsv_urls = [welsh_lexicon_url, english_lexicon_url]
         >>> combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_urls, include_pos=True)
+        >>> assert isinstance(combined_lexicon_collection, dict)
         >>> assert combined_lexicon_collection["Aber-lash|pnoun"] == ["Z2"]
         >>> assert combined_lexicon_collection["Aqua|PROPN"] == ["Z3c"]
 
@@ -474,8 +477,7 @@ class LexiconCollection(MutableMapping):
             for lemma_pos, semantic_tags in lexicon_data.items():
                 combined_lexicon_data[lemma_pos] = semantic_tags
 
-        combined_lexicon_collection = LexiconCollection(combined_lexicon_data)
-        return combined_lexicon_collection
+        return combined_lexicon_data
 
     def __setitem__(self, key: str, value: List[str]) -> None:
         self.data[key] = value
@@ -968,6 +970,7 @@ class MWELexiconCollection(MutableMapping):
         >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/mwe-en.tsv"
         >>> tsv_urls = [welsh_lexicon_url, english_lexicon_url]
         >>> combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_urls)
+        >>> assert isinstance(combined_lexicon_data, dict)
         >>> assert combined_lexicon_data["Academy_NOUN Award_NOUN"] == ["A5.1+/K1"]
         >>> assert combined_lexicon_data["Ffwrnais_* Dyfi_*"] == ["Z2"]
 

@@ -649,8 +649,11 @@ def test_mwe_lexicon_collection_tsv_merge() -> None:
     tsv_file_paths: list[PathLike] = [MWE_LEXICON_FILE_PATH,
                                       DOMAIN_LEXICON_FILE_PATH]
     combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_file_paths)
+    assert isinstance(combined_lexicon_data, dict)
     assert 10 == len(combined_lexicon_data)
     assert combined_lexicon_data["East_noun London_noun"] == ["Z3"]
+    # Ensure it is possible to create a MWELexiconCollection instance with the data
+    MWELexiconCollection(data=combined_lexicon_data)
 
     # Custom non-USAS tags test
     tsv_file_paths.append(CUSTOM_LEXICON_FILE_PATH)

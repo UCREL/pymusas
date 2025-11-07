@@ -243,6 +243,7 @@ def test_lexicon_collection_merge() -> None:
     lexicon_collections: list[LexiconCollection] = [lexicon_collection,
                                                     domain_lexicon_collection]
     combined_lexicon_collection = LexiconCollection.merge(*lexicon_collections)
+    assert isinstance(combined_lexicon_collection, LexiconCollection)
     assert 20 == len(combined_lexicon_collection)
     assert combined_lexicon_collection["London|noun"] == ["Z3"]
 
@@ -258,22 +259,25 @@ def test_lexicon_collection_merge() -> None:
 @pytest.mark.parametrize("include_pos", [False, True])
 def test_lexicon_collection_tsv_merge(include_pos: bool) -> None:
     tsv_files_paths: list[PathLike] = [LEXICON_FILE_PATH, DOMAIN_LEXICON_FILE_PATH]
-    combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_files_paths,
-                                                              include_pos=include_pos)
+    combined_lexicon_data = LexiconCollection.tsv_merge(*tsv_files_paths,
+                                                        include_pos=include_pos)
+    assert isinstance(combined_lexicon_data, dict)
     if include_pos:
-        assert 20 == len(combined_lexicon_collection)
-        assert combined_lexicon_collection["London|noun"] == ["Z3"]
+        assert 20 == len(combined_lexicon_data)
+        assert combined_lexicon_data["London|noun"] == ["Z3"]
     else:
-        assert 18 == len(combined_lexicon_collection)
-        assert combined_lexicon_collection["London"] == ["Z3"]
+        assert 18 == len(combined_lexicon_data)
+        assert combined_lexicon_data["London"] == ["Z3"]
+    # Ensure it is possible to create a LexiconCollection instance with the data
+    LexiconCollection(data=combined_lexicon_data)
 
     # Custom non-USAS tags test
     tsv_files_paths.append(CUSTOM_TAGS_FILE_PATH)
-    combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_files_paths,
-                                                              include_pos=include_pos)
+    combined_lexicon_data = LexiconCollection.tsv_merge(*tsv_files_paths,
+                                                        include_pos=include_pos)
     if include_pos:
-        assert 22 == len(combined_lexicon_collection)
-        assert combined_lexicon_collection["Paris|noun"] == ["R5"]
+        assert 22 == len(combined_lexicon_data)
+        assert combined_lexicon_data["Paris|noun"] == ["R5"]
     else:
-        assert 20 == len(combined_lexicon_collection)
-        assert combined_lexicon_collection["Paris"] == ["R5"]
+        assert 20 == len(combined_lexicon_data)
+        assert combined_lexicon_data["Paris"] == ["R5"]
