@@ -380,12 +380,12 @@ class LexiconCollection(MutableMapping):
 
         # Parameters
 
-        *lexicon_collections: class:`LexiconCollection`
+        *lexicon_collections: `LexiconCollection`
             More than one lexicon collections that are to be merged.
 
         # Returns
         
-        class:`LexiconCollection`
+        :class:`LexiconCollection`
 
         # Examples
 
@@ -954,7 +954,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
 
-        dict[str, list[str]]
+        `dict[str, list[str]]`
 
         # Raises
         
