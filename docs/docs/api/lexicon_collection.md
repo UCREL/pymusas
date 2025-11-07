@@ -312,8 +312,11 @@ combination of the lemma and pos and the value are the semantic tags.
 The lemma and pos are combined as follows: `{lemma}|{pos}`, e.g.
 `Car|Noun`
 
-If the pos value is None then then only the lemma is used: `{lemma}`,
+If the pos value is None then only the lemma is used: `{lemma}`,
 e.g. `Car`
+
+**Note** If the key already exists then the most recent entry will
+overwrite the existing entry.
 
 <h4 id="add_lexicon_entry.parameters">Parameters<a className="headerlink" href="#add_lexicon_entry.parameters" title="Permanent link">&para;</a></h4>
 
@@ -466,6 +469,132 @@ welsh_lexicon_collection = LexiconCollection(welsh_lexicon_dict)
 assert welsh_lexicon_dict['ceir'][0] == 'M3fn'
 ```
 
+<a id="pymusas.lexicon_collection.LexiconCollection.merge"></a>
+
+### merge
+
+```python
+class LexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def merge(
+ |     *lexicon_collections: "LexiconCollection"
+ | ) -> "LexiconCollection"
+```
+
+Given more than one lexicon collection it will create a single lexicon
+collection whereby the lexicon data from each will be combined.
+
+**Note** the data is loaded in list order therefore the last lexicon
+collection will take precedence, i.e. if the last contains `London`: [`Z3`]
+and the first contains `London`: [`Z2`] then the returned
+LexiconCollection will only contain the one entry; `London`: [`Z3`].
+
+**Note** if the lexicon collections contain POS information we assume
+that all of the lexicon collections use the same POS tagset,
+if they do not this could cause issues during tag time.
+
+<h4 id="merge.parameters">Parameters<a className="headerlink" href="#merge.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __*lexicon\_collections__ : `LexiconCollection` <br/>
+    More than one lexicon collections that are to be merged.
+
+<h4 id="merge.returns">Returns<a className="headerlink" href="#merge.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`LexiconCollection`](#lexiconcollection) <br/>
+
+<h4 id="merge.examples">Examples<a className="headerlink" href="#merge.examples" title="Permanent link">&para;</a></h4>
+
+
+``` python
+from pymusas.lexicon_collection import LexiconCollection
+welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv"
+english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
+welsh_lexicon_data = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
+welsh_lexicon = LexiconCollection(welsh_lexicon_data)
+english_lexicon_data = LexiconCollection.from_tsv(english_lexicon_url, include_pos=True)
+english_lexicon = LexiconCollection(english_lexicon_data)
+combined_lexicon_collection = LexiconCollection.merge(welsh_lexicon, english_lexicon)
+assert isinstance(combined_lexicon_collection, LexiconCollection)
+assert combined_lexicon_collection["Aber-lash|pnoun"] == ["Z2"]
+assert combined_lexicon_collection["Aqua|PROPN"] == ["Z3c"]
+```
+
+<a id="pymusas.lexicon_collection.LexiconCollection.tsv_merge"></a>
+
+### tsv\_merge
+
+```python
+class LexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def tsv_merge(
+ |     *tsv_file_paths: PathLike,
+ |     *,
+ |     include_pos: bool = True
+ | ) -> dict[str, list[str]]
+```
+
+Given one or more TSV files it will create a single dictionary object
+with the combination of all the lexicon data in each TSV, this dictionary
+object can then be used to create a [`LexiconCollection`](#lexiconcollection).
+
+For more information on how the TSV data is loaded see [`from_tsv`](#from_tsv).
+
+**Note** the data is loaded in list order therefore the last TSV file
+will take precedence, i.e. if the last TSV file contains `London`: [`Z3`]
+and the first TSV file contains `London`: [`Z2`] then the returned
+dictionary will only contain the one entry; `London`: [`Z3`].
+
+**Note** if the TSV files contain POS information we assume that all
+of the TSV files use the same POS tagset, if they do not this could
+cause issues during tag time.
+
+<h4 id="tsv_merge.parameters">Parameters<a className="headerlink" href="#tsv_merge.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __*tsv\_file\_paths__ : `PathLike` <br/>
+    File paths and/or URLs to a TSV file that contains at least two
+    fields, with an optional third, with the following headings:
+
+    1. `lemma`,
+    2. `semantic_tags`
+    3. `pos` (Optional)
+
+    All other fields will be ignored.
+- __include\_pos__ : `bool`, optional (default = `True`) <br/>
+    Whether to include the POS information, if the information is available,
+    or not. See [`add_lexicon_entry`](#add_lexicon_entry) for more information on this
+    parameter.
+
+<h4 id="tsv_merge.returns">Returns<a className="headerlink" href="#tsv_merge.returns" title="Permanent link">&para;</a></h4>
+
+
+- `dict[str, list[str]]` <br/>
+
+<h4 id="tsv_merge.raises">Raises<a className="headerlink" href="#tsv_merge.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the minimum field headings, `lemma` and `semantic_tags`, do not
+    exist in the given TSV files.
+
+<h4 id="tsv_merge.examples">Examples<a className="headerlink" href="#tsv_merge.examples" title="Permanent link">&para;</a></h4>
+
+
+``` python
+from pymusas.lexicon_collection import LexiconCollection
+welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv"
+english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
+tsv_urls = [welsh_lexicon_url, english_lexicon_url]
+combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_urls, include_pos=True)
+assert isinstance(combined_lexicon_collection, dict)
+assert combined_lexicon_collection["Aber-lash|pnoun"] == ["Z2"]
+assert combined_lexicon_collection["Aqua|PROPN"] == ["Z3c"]
+```
+
 <a id="pymusas.lexicon_collection.LexiconCollection.__str__"></a>
 
 ### \_\_str\_\_
@@ -565,7 +694,7 @@ this.
     If not `None`, maps from the lexicon's POS tagset to the desired
     POS tagset, whereby the mapping is a `List` of tags, at the moment there
     is no preference order in this list of POS tags. The POS mapping is
-    useful in situtation whereby the leixcon's POS tagset is different to
+    useful in situations whereby the lexicon's POS tagset is different to
     the token's. **Note** that the longer the `List[str]` for each POS
     mapping the longer it will take to match MWE templates. A one to one
     mapping will have no speed impact on the tagger. A selection of POS
@@ -823,6 +952,69 @@ mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
 mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
 assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
 assert mwe_lexicon_dict['arco_noun e_conj flecha_noun'][0] == 'K5.1'
+```
+
+<a id="pymusas.lexicon_collection.MWELexiconCollection.tsv_merge"></a>
+
+### tsv\_merge
+
+```python
+class MWELexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def tsv_merge(*tsv_file_paths: PathLike) -> dict[str, list[str]]
+```
+
+Given one or more TSV files it will create a dictionary
+object that can be used to create a [`MWELexiconCollection`](#mwelexiconcollection) whereby
+this dictionary is the combination of all of the lexicon information
+in the TSV files.
+
+**Note** the data is loaded in list order therefore the last TSV file
+will take precedence, i.e. if the last TSV file contains
+`London_* city_*`: [`Z3`] and the first TSV file contains
+`London_* city_*`: [`Z2`] then the returned dictionary will only
+contain the one entry; `London_* city_*`: [`Z3`].
+
+**Note** if the POS tagset used in the TSV files are different this
+could cause issues during tag time.
+
+<h4 id="tsv_merge.parameters">Parameters<a className="headerlink" href="#tsv_merge.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __*tsv\_file\_paths__ : `Union[PathLike, str]` <br/>
+    File paths or URLs to a TSV file that contains at least these two
+    fields:
+
+    1. `mwe_template`,
+    2. `semantic_tags`
+
+    All other fields will be ignored.
+
+<h4 id="tsv_merge.returns">Returns<a className="headerlink" href="#tsv_merge.returns" title="Permanent link">&para;</a></h4>
+
+
+- `dict[str, list[str]]` <br/>
+
+<h4 id="tsv_merge.raises">Raises<a className="headerlink" href="#tsv_merge.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the minimum field headings, `mwe_template` and `semantic_tags`,
+    do not exist in the given TSV file.
+
+<h4 id="tsv_merge.examples">Examples<a className="headerlink" href="#tsv_merge.examples" title="Permanent link">&para;</a></h4>
+
+
+``` python
+from pymusas.lexicon_collection import LexiconCollection
+welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/mwe-welsh.tsv"
+english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/mwe-en.tsv"
+tsv_urls = [welsh_lexicon_url, english_lexicon_url]
+combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_urls)
+assert isinstance(combined_lexicon_data, dict)
+assert combined_lexicon_data["Academy_NOUN Award_NOUN"] == ["A5.1+/K1"]
+assert combined_lexicon_data["Ffwrnais_* Dyfi_*"] == ["Z2"]
 ```
 
 <a id="pymusas.lexicon_collection.MWELexiconCollection.escape_mwe"></a>

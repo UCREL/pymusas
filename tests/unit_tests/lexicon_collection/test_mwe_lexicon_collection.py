@@ -1,6 +1,7 @@
 from collections.abc import MutableMapping
 from copy import deepcopy
 import importlib
+from os import PathLike
 from pathlib import Path
 import re
 import tempfile
@@ -70,6 +71,8 @@ EXTRA_FIELDS_MWE_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'extra_fields_lexico
 ERROR_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'error_lexicon.tsv')
 NO_HEADER_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'no_header_lexicon.tsv')
 DUPLICATE_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, 'duplicate_key_lexicon.tsv')
+DOMAIN_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, "domain_lexicon.tsv")
+CUSTOM_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, "custom_tags_lexicon.tsv")
 
 
 def compare_nested_dictionaries(dict_1: Dict[Any, Any],
@@ -640,3 +643,20 @@ def test_mwe_lexicon_collection_from_tsv(monkeypatch: MonkeyPatch) -> None:
             url_lexicon_collection = MWELexiconCollection.from_tsv(lexicon_url)
             assert 1 == len(url_lexicon_collection)
             url_lexicon_collection['a_det contragosto_noun'] == ['X7-', 'X5.2-']
+
+
+def test_mwe_lexicon_collection_tsv_merge() -> None:
+    tsv_file_paths: list[PathLike] = [MWE_LEXICON_FILE_PATH,
+                                      DOMAIN_LEXICON_FILE_PATH]
+    combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_file_paths)
+    assert isinstance(combined_lexicon_data, dict)
+    assert 10 == len(combined_lexicon_data)
+    assert combined_lexicon_data["East_noun London_noun"] == ["Z3"]
+    # Ensure it is possible to create a MWELexiconCollection instance with the data
+    MWELexiconCollection(data=combined_lexicon_data)
+
+    # Custom non-USAS tags test
+    tsv_file_paths.append(CUSTOM_LEXICON_FILE_PATH)
+    combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_file_paths)
+    assert 11 == len(combined_lexicon_data)
+    assert combined_lexicon_data["South_noun Wales_noun"] == ["R2"]
