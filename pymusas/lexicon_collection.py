@@ -374,6 +374,10 @@ class LexiconCollection(MutableMapping):
         and the first contains `London`: [`Z2`] then the returned
         LexiconCollection will only contain the one entry; `London`: [`Z3`].
 
+        **Note** if the lexicon collections contain POS information we assume
+        that all of the lexicon collections use the same POS tagset,
+        if they do not this could cause issues during tag time.
+
         # Parameters
 
         *lexicon_collections: class:`LexiconCollection`
@@ -419,6 +423,10 @@ class LexiconCollection(MutableMapping):
         will take precedence, i.e. if the last TSV file contains `London`: [`Z3`]
         and the first TSV file contains `London`: [`Z2`] then the returned
         LexiconCollection will only contain the one entry; `London`: [`Z3`].
+
+        **Note** if the TSV files contain POS information we assume that all
+        of the TSV files use the same POS tagset, if they do not this could
+        cause issues during tag time.
 
         # Parameters
 
@@ -568,7 +576,7 @@ class MWELexiconCollection(MutableMapping):
         If not `None`, maps from the lexicon's POS tagset to the desired
         POS tagset, whereby the mapping is a `List` of tags, at the moment there
         is no preference order in this list of POS tags. The POS mapping is
-        useful in situtation whereby the leixcon's POS tagset is different to
+        useful in situations whereby the lexicon's POS tagset is different to
         the token's. **Note** that the longer the `List[str]` for each POS
         mapping the longer it will take to match MWE templates. A one to one
         mapping will have no speed impact on the tagger. A selection of POS
@@ -913,6 +921,64 @@ class MWELexiconCollection(MutableMapping):
                 collection_from_tsv[mwe_template] = semantic_tags
         
         return collection_from_tsv.to_dictionary()
+
+    @staticmethod
+    def tsv_merge(*tsv_file_paths: PathLike) -> dict[str, list[str]]:
+        """
+        Given one or more TSV files it will create a dictionary
+        object that can be used to create a :class:`MWELexiconCollection` whereby
+        this dictionary is the combination of all of the lexicon information
+        in the TSV files.
+
+        **Note** the data is loaded in list order therefore the last TSV file
+        will take precedence, i.e. if the last TSV file contains
+        `London_* city_*`: [`Z3`] and the first TSV file contains
+        `London_* city_*`: [`Z2`] then the returned dictionary will only
+        contain the one entry; `London_* city_*`: [`Z3`].
+
+        **Note** if the POS tagset used in the TSV files are different this
+        could cause issues during tag time.
+
+        # Parameters
+
+        *tsv_file_paths: `Union[PathLike, str]`
+            File paths or URLs to a TSV file that contains at least these two
+            fields:
+            
+            1. `mwe_template`,
+            2. `semantic_tags`
+            
+            All other fields will be ignored.
+
+        # Returns
+
+        dict[str, list[str]]
+
+        # Raises
+        
+        `ValueError`
+            If the minimum field headings, `mwe_template` and `semantic_tags`,
+            do not exist in the given TSV file.
+
+        # Examples
+
+        ``` python
+        >>> from pymusas.lexicon_collection import LexiconCollection
+        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/mwe-welsh.tsv"
+        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/mwe-en.tsv"
+        >>> tsv_urls = [welsh_lexicon_url, english_lexicon_url]
+        >>> combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_urls)
+        >>> assert combined_lexicon_data["Academy_NOUN Award_NOUN"] == ["A5.1+/K1"]
+        >>> assert combined_lexicon_data["Ffwrnais_* Dyfi_*"] == ["Z2"]
+
+        ```
+        """
+        combined_lexicon_data: dict[str, list[str]] = {}
+        for tsv_file_path in tsv_file_paths:
+            for mwe_template, semantic_tags in MWELexiconCollection.from_tsv(tsv_file_path).items():
+                combined_lexicon_data[mwe_template] = semantic_tags
+
+        return combined_lexicon_data
 
     @staticmethod
     def escape_mwe(mwe_template: str) -> str:

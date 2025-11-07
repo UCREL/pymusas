@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Using [developer/dev containers](https://containers.dev/) of which the files for this can be found in the [.devcontainer folder](./.devcontainer). This will allow for easier on boarding and development consistency.
 - Functional tests have been added and can be found in the following directory: [./tests/functional_tests/](./tests/functional_tests/)
 - The ability to merge `LexiconCollection`s either through a list of file paths to TSV files using `pymusas.lexicon_collection.LexiconCollection.tsv_merge` or merging `LexiconCollection` themselves using `pymusas.lexicon_collection.LexiconCollection.merge`.
+- The ability to merge `MWELexiconCollection` data through a list of file paths to TSV files using `pymusas.lexicon_collection.MWELexiconCollection.tsv_merge`, which when merged will allow the creation of a combined `MWELexiconCollection` instance.
 
 ### Changed
 
