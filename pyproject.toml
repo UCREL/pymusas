@@ -30,6 +30,23 @@ dependencies = [
     "tqdm>=4.50.0,<5.0",
 ]
 
+[dependency-groups]
+dev = [
+    "coverage[toml]>=6.0.0",
+    "flake8>=3.8",
+    "isort>=6.0",
+    "mypy>=1.12",
+    "pytest>=6.0,!=7.1.0,!=8.1.0",
+    "responses>=0.25.7",
+    "types-requests>=2.32.4.20250913",
+]
+
+[project.optional-dependencies]
+neural = [
+    "torch>=2.2,<3.0",
+    "transformers>=4.0,<5.0"
+]
+
 [project.urls]
 Homepage = "https://ucrel.github.io/pymusas/"
 Documentation = "https://ucrel.github.io/pymusas/api/base"
@@ -44,22 +61,22 @@ Changelog = "https://github.com/UCREL/pymusas/blob/main/CHANGELOG.md"
 requires = ["uv_build>=0.9.6,<0.10.0"]
 build-backend = "uv_build"
 
+[tool.uv]
+default-groups = "all"
 
 [tool.uv.build-backend]
 module-name = "pymusas"
 module-root = ""
 
-[dependency-groups]
-dev = [
-    "coverage[toml]>=6.0.0",
-    "flake8>=3.8",
-    "isort>=6.0",
-    "mypy>=1.12",
-    "pytest>=6.0,!=7.1.0,!=8.1.0",
-    "responses>=0.25.7",
-    "types-requests>=2.32.4.20250913",
+[tool.uv.sources]
+torch = [
+  { index = "torch-linux-cpu", marker = "platform_system == 'Linux'"},
 ]
 
+[[tool.uv.index]]
+name = "torch-linux-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
 
 [tool.isort]
 known_first_party = "pymusas"

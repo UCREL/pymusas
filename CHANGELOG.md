@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The ability to merge `LexiconCollection` data through a list of file paths to TSV files using `pymusas.lexicon_collection.LexiconCollection.tsv_merge`, which when merged will allow the creation of a combined `LexiconCollection` instance.
 - The ability to merge `MWELexiconCollection` data through a list of file paths to TSV files using `pymusas.lexicon_collection.MWELexiconCollection.tsv_merge`, which when merged will allow the creation of a combined `MWELexiconCollection` instance.
 - Added a usage example to the documentation showing how to combine/merge lexicon collections together and add them to a PyMUSAS rule based tagger.
+- Added the extra group `neural` to the [pyproject.toml](./pyproject.toml) so that the required `torch` and `transformers` libraries are installed allowing the neural models to run.
 
 ### Changed
 
