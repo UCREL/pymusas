@@ -1079,6 +1079,7 @@ neural = [
     { name = "torch", version = "2.9.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'linux'" },
     { name = "torch", version = "2.9.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'linux'" },
     { name = "transformers" },
+    { name = "wsd-torch-models" },
 ]
 
 [package.dev-dependencies]
@@ -1101,6 +1102,7 @@ requires-dist = [
     { name = "torch", marker = "sys_platform != 'linux' and extra == 'neural'", specifier = ">=2.2,<3.0" },
     { name = "tqdm", specifier = ">=4.50.0,<5.0" },
     { name = "transformers", marker = "extra == 'neural'", specifier = ">=4.0,<5.0" },
+    { name = "wsd-torch-models", marker = "extra == 'neural'", specifier = "<1.0" },
 ]
 provides-extras = ["neural"]
 
@@ -1842,4 +1844,24 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/b1/ad812b1fe1cd85f6498dc3a3c9809a1e880d6108283b1735119bec217041/wrapt-2.0.0-cp313-cp313t-win_amd64.whl", hash = "sha256:c16f6d4eea98080f6659a8a7fc559d4a0a337ee66960659265cad2c8a40f7c0f", size = 63170, upload-time = "2025-10-19T23:46:46.87Z" },
     { url = "https://files.pythonhosted.org/packages/7f/29/c105b1e76650c82823c491952a7a8eafe09b78944f7a43f22d37ed860229/wrapt-2.0.0-cp313-cp313t-win_arm64.whl", hash = "sha256:52878edc13dc151c58a9966621d67163a80654bc6cff4b2e1c79fa62d0352b26", size = 60339, upload-time = "2025-10-19T23:46:47.862Z" },
     { url = "https://files.pythonhosted.org/packages/00/5c/c34575f96a0a038579683c7f10fca943c15c7946037d1d254ab9db1536ec/wrapt-2.0.0-py3-none-any.whl", hash = "sha256:02482fb0df89857e35427dfb844319417e14fae05878f295ee43fa3bf3b15502", size = 43998, upload-time = "2025-10-19T23:47:52.858Z" },
+]
+
+[[package]]
+name = "wsd-torch-models"
+version = "0.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "huggingface-hub" },
+    { name = "numpy", version = "2.2.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "numpy", version = "2.3.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
+    { name = "pyyaml" },
+    { name = "safetensors" },
+    { name = "torch", version = "2.9.0", source = { registry = "https://pypi.org/simple" }, marker = "sys_platform != 'linux'" },
+    { name = "torch", version = "2.9.0+cpu", source = { registry = "https://download.pytorch.org/whl/cpu" }, marker = "sys_platform == 'linux'" },
+    { name = "transformers" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/af/e8/2f9265d9337b63f3200df15affd6ca215b658ff5dba794e4e88b4c3982dc/wsd_torch_models-0.1.0.tar.gz", hash = "sha256:c3d4ac70839c219ee459bef030a03dfa25c4cc833a3f565470d80643f0619d0d", size = 32457, upload-time = "2025-12-02T11:44:04.718Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1a/09/4734efbb2b328d51105e9e0fde24c0d1758e71d31a00adcdc3c3bf3d5699/wsd_torch_models-0.1.0-py3-none-any.whl", hash = "sha256:c8f4ab556432e29a4187669aee36baeca6d4a703d140a8b347f3f82ecc80e76a", size = 34692, upload-time = "2025-12-02T11:44:03.405Z" },
 ]
