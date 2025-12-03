@@ -64,6 +64,20 @@ If using [uv](https://docs.astral.sh/uv/):
 uv add pymusas
 ```
 
+### With neural models
+
+If you want to use the Neural Network / Transformer models then you will need to install the `neural` extra like so:
+
+``` bash
+pip install pymusas[neural]
+```
+
+or for `uv`:
+
+``` bash
+uv add pymusas[neural]
+```
+
 ## Development
 
 ### Setup
@@ -101,7 +115,7 @@ To run locally first ensure you have the following tools installted locally:
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
 
 ```bash
-uv sync
+uv sync --all-extras
 ```
 
 ### Running linters and tests
