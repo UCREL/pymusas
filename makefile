@@ -58,11 +58,11 @@ build-python-package:
 	@uv build
 
 .PHONY: functional-tests
-functional-tests:
-	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
-	--with pytest --no-project --isolated pytest --doctest-modules pymusas/
+functional-tests: build-python-package
 	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
 	--with pytest --no-project --isolated pytest tests/functional_tests
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural] \
+	--with pytest --no-project --isolated pytest --doctest-modules pymusas/
 
 .PHONY: release-notes
 release-notes:
