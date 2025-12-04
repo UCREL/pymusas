@@ -85,9 +85,13 @@ tests:
 	@uv run coverage run
 	@uv run coverage report
 
+.PHONY: failed-tests
+failed-tests:
+	@uv run pytest --last-failed -vvv
+
 .PHONY: verbose-tests
 verbose-tests:
-	@uv run pytest tests/ -vvv
+	@uv run pytest -vvv
 
 .PHONY: doc-tests
 doc-tests:
