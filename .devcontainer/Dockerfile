@@ -45,4 +45,5 @@ RUN uv python install 3.11
 
 RUN --mount=type=bind,source=uv.lock,target=uv.lock \
     --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    --mount=type=bind,source=.python-version,target=.python-version \
     uv sync --python=3.12 --no-install-project --no-install-workspace --all-extras
