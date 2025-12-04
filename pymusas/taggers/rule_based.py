@@ -58,7 +58,7 @@ class RuleBasedTagger():
     >>> from pymusas.taggers.rules.single_word import SingleWordRule
     >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
     >>> from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE
-    >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+    >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
     >>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
     >>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
     >>> single_word_rule = SingleWordRule(lexicon_lookup, lemma_lexicon_lookup,

@@ -21,6 +21,7 @@ XDG_CACHE_HOME: str = os.getenv("XDG_CACHE_HOME", DEFAULT_XDG_CACHE_HOME)
 DEFAULT_PYMUSAS_CACHE_HOME: str = os.path.join(XDG_CACHE_HOME, "pymusas")
 PYMUSAS_CACHE_HOME: str = os.path.expanduser(os.getenv("PYMUSAS_HOME", DEFAULT_PYMUSAS_CACHE_HOME))
 
+# ToDo check if this is still needed
 LANG_LEXICON_RESOUCRE_MAPPER = {
     'fr': {'lexicon': 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.usas',
            'lexicon_lemma': 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/French/semantic_lexicon_fr.usas'},

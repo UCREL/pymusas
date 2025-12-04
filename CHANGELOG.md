@@ -33,6 +33,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The publishing and release process now uses `uv`. The version of PyMUSAS is fully determined by the `TAG` environment variable. 
 - The unit tests have been moved to [./tests/unit_tests/](./tests/unit_tests/) from `./tests`
 
+### Fixed
+
+- All of the semantic lexicon resources that are referenced in the code base as documentation strings or tests and the documentation itself are now linked to a commit hash, e.g. for the Welsh semantic lexicons rather than it being originally linked to the head reference; https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv it is now linked to a commit hash; https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv. This makes the tests, documentation tests, and the documentation itself more reproducible and reliable.
+
 ### Removed
 
 - `Docs_Docker.dockerfile` - see the Changed section above for the reason.

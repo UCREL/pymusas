@@ -238,7 +238,7 @@ this function can then be used as the arguments to the constructor of
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.taggers.rules.mwe import MWERule
 from pymusas.lexicon_collection import MWELexiconCollection
-pt_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv"
+pt_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Portuguese/mwe-pt.tsv"
 mwe_dict = MWELexiconCollection.from_tsv(pt_mwe_lexicon_url)
 mwe_rule = MWERule(mwe_dict)
 ranker_construction_arguments = ContextualRuleBasedRanker.get_construction_arguments([mwe_rule])

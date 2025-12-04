@@ -21,11 +21,10 @@ def test_single_and_mwe_spacy_tagger() -> None:
     model_function_tests/en/test_rule_based_tagger.py#L29C1-L47C83
     """
     nlp = spacy.blank('en')
-    en_single_lexicon_url = ("https://raw.githubusercontent.com/UCREL/"
-                             "Multilingual-USAS/refs/heads/master/"
-                             "English/semantic_lexicon_en.tsv")
-    en_mwe_lexicon_url = ("https://raw.githubusercontent.com/UCREL/"
-                          "Multilingual-USAS/refs/heads/master/English/mwe-en.tsv")
+    en_single_lexicon_url = ("https://raw.githubusercontent.com/UCREL/Multilingual-USAS/"
+                             "7ccc8baaea36f3fd249e77671db5638c1cba6136/English/semantic_lexicon_en.tsv")
+    en_mwe_lexicon_url = ("https://raw.githubusercontent.com/UCREL/Multilingual-USAS/"
+                          "7ccc8baaea36f3fd249e77671db5638c1cba6136/English/mwe-en.tsv")
     single_lexicon = lexicon_collection.LexiconCollection.from_tsv(en_single_lexicon_url, include_pos=True)
     single_lemma_lexicon = lexicon_collection.LexiconCollection.from_tsv(en_single_lexicon_url, include_pos=False)
     mwe_lexicon = lexicon_collection.MWELexiconCollection.from_tsv(en_mwe_lexicon_url)

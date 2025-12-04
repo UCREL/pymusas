@@ -153,7 +153,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
     >>> # Construction via spaCy pipeline
     >>> nlp = spacy.blank('en')
     >>> # Using default config
-    >>> single_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+    >>> single_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
     >>> single_lexicon = LexiconCollection.from_tsv(single_lexicon_url)
     >>> single_lemma_lexicon = LexiconCollection.from_tsv(single_lexicon_url,
     ...                                                   include_pos=False)
