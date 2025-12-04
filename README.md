@@ -52,7 +52,7 @@ PyMUSAS currently support 10 different languages with pre-configured spaCy compo
 
 ## Install PyMUSAS
 
-Can be installed on all operating systems and supports Python version >= `3.10` < `3.14`, to install run:
+Can be installed on all operating systems and supports Python version >= `3.10` < `3.15`, to install run:
 
 ``` bash
 pip install pymusas
