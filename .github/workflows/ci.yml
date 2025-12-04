@@ -89,6 +89,8 @@ jobs:
   checks:
     name: checks
     runs-on: ${{ matrix.os }}
+    needs:
+      - download-test-model
     strategy:
       matrix:
         python-version: ["3.10", "3.11", "3.12", "3.13"]
