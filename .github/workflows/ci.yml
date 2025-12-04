@@ -4,13 +4,12 @@ on:
   workflow_dispatch: # Manually trigger a workflow run using the GitHub API, GitHub CLI, or the GitHub UI.
   push:
   pull_request:
-  release:
-    types: [published]
 
 permissions:
   contents: read # required for code coverage
   
 jobs:
+
   Validate-CITATION-cff:
     runs-on: ubuntu-latest
     name: Validate CITATION.cff
@@ -34,6 +33,59 @@ jobs:
           overwrite: true
           if-no-files-found: warn
 
+  download-test-model:
+    name: download-test-model
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        id: python-setup
+        with:
+          python-version: 3.13
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        id: setup-uv
+        with:
+          # Install a specific version of uv.
+          version: "0.9.15"
+          enable-cache: true
+          restore-cache: true
+          save-cache: true
+          prune-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Install the project
+        run: uv sync --locked --all-extras
+
+      - name: check uv cache is working
+        if: steps.setup-uv.outputs.cache-hit == 'true'
+        run: echo "uv cache was restored"
+
+      - name: Check HF model cache
+        uses: actions/cache/restore@v4
+        id: cache
+        with:
+          path: ~/hf_test_model_cache
+          key: ucrelnlp-pymusas-neural-english-small-bem-${{ runner.os }}
+
+      - name: Download HuggingFace WSD Test Model
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: uv run tests/model_download.py $HOME/hf_test_model_cache
+
+      - name: Saving HuggingFace WSD Test Model
+        uses: actions/cache/save@v4
+        if: steps.cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/hf_test_model_cache
+          key: ucrelnlp-pymusas-neural-english-small-bem-${{ runner.os }}
+
   checks:
     name: checks
     runs-on: ${{ matrix.os }}
@@ -56,7 +108,7 @@ jobs:
         id: setup-uv
         with:
           # Install a specific version of uv.
-          version: "0.9.6"
+          version: "0.9.15"
           enable-cache: true
           restore-cache: true
           save-cache: true
@@ -64,7 +116,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
-        run: uv sync --locked
+        run: uv sync --locked --all-extras
 
       - name: check uv cache is working
         if: steps.setup-uv.outputs.cache-hit == 'true'
@@ -91,6 +143,30 @@ jobs:
 
       - name: mypy
         run: uv run mypy
+
+      - name: Windows create HuggingFace Hub cache directory
+        if: ${{ runner.os == 'Windows' }}
+        run: |
+          mkdir "$HOME\.cache"
+          mkdir "$HOME\.cache\huggingface"
+          mkdir "$HOME\.cache\huggingface\hub"
+          echo "HF_HOME=$HOME\.cache\huggingface" >> $env:GITHUB_ENV
+      
+      - name: Linux create HuggingFace Hub cache directory
+        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
+        run: |
+          mkdir -p $HOME/.cache/huggingface/hub
+          echo "HF_HOME=$HOME/.cache/huggingface" >> "$GITHUB_ENV"
+
+      - name: Get HF model cache
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/hf_test_model_cache
+          key: ucrelnlp-pymusas-neural-english-small-bem-${{ runner.os }}
+          lookup-only: false
+
+      - name: Move cached files
+        run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
 
       - name: Code coverage testing
         run: |

@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a usage example to the documentation showing how to combine/merge lexicon collections together and add them to a PyMUSAS rule based tagger.
 - Added the extra group `neural` to the [pyproject.toml](./pyproject.toml) so that the required `torch`, `transformers`, and `wsd-torch-models` libraries are installed allowing the neural models to run.
 - Added `pymusas.taggers.neural` module that includes the first Neural based tagger using the taggers from [WSD-Torch-Models](https://github.com/UCREL/WSD-Torch-Models).
+- The CI pipeline `.github/workflows/ci.yml` now caches the Neural based tagger that we test so that it does not get downloaded each time the tests are ran for each Python version for each Operating System.
 
 ### Changed
 
