@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The documentation now has a `How-to` guide on `Tag CoNLL-U Files`.
 - The documentation now has a `How-to Tag Text` guide for Finnish and English.
+- The documentation now has a `How to Combine/Merge Lexicons` guide.
 - Using [developer/dev containers](https://containers.dev/) of which the files for this can be found in the [.devcontainer folder](./.devcontainer). This will allow for easier on boarding and development consistency.
 - Functional tests have been added and can be found in the following directory: [./tests/functional_tests/](./tests/functional_tests/)
 - The ability to merge `LexiconCollection`s either through `pymusas.lexicon_collection.LexiconCollection.merge`.
