@@ -1,6 +1,6 @@
 from typing import List, Optional, Set, Tuple
 
-from pymusas.rankers.lexicon_entry import LexiconEntryRanker, RankingMetaData
+from pymusas.rankers.lexicon_entry import LexiconEntryRanker
 from pymusas.taggers.neural import NeuralTagger
 from pymusas.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.rule import Rule
@@ -171,6 +171,5 @@ class HybridTagger(RuleBasedTagger):
             neural_tags_indexes = self.neural_tagger(tokens)
             for token_index in unknown_token_indexes:
                 hybrid_tags_indexes[token_index] = neural_tags_indexes[token_index]
-
 
         return hybrid_tags_indexes

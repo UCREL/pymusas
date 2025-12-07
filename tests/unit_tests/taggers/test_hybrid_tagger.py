@@ -12,13 +12,15 @@ from pymusas.taggers.rules.single_word import SingleWordRule
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()
 TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'rule_based')
 
+
 @pytest.fixture
 def neural_tagger() -> NeuralTagger:
     return NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
                         device="cpu",
                         top_n=2)
 
-def test_hybrid_based_tagger__init__(neural_tagger) -> None:
+
+def test_hybrid_based_tagger__init__(neural_tagger: NeuralTagger) -> None:
     single_word_rule = SingleWordRule({}, {})
     ranker = ContextualRuleBasedRanker(1, 0)
     tagger = HybridTagger([single_word_rule], ranker, neural_tagger)
@@ -29,7 +31,7 @@ def test_hybrid_based_tagger__init__(neural_tagger) -> None:
     assert isinstance(tagger.neural_tagger, NeuralTagger)
 
 
-def test_rule_based_tagger__call__(neural_tagger) -> None:
+def test_rule_based_tagger__call__(neural_tagger: NeuralTagger) -> None:
 
     # Test the first case where we have no rules and it should tag everything as
     # Z99
