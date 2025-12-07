@@ -29,7 +29,7 @@ class RuleBasedTagger():
 
     rules : `List[pymusas.taggers.rules.rule.Rule]`
         A list of rules to apply to the sequence of tokens in the
-        :func:`__call__`. The output from each rule is concatendated and given
+        :func:`__call__`. The output from each rule is concatenated and given
         to the `ranker`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
         A ranker to rank the output from all of the `rules`.
@@ -103,7 +103,7 @@ class RuleBasedTagger():
         to this model.
 
         **NOTE** this tagger has been designed to be flexible with the amount of
-        resources avaliable, if you do not have POS or lemma information assign
+        resources available, if you do not have POS or lemma information assign
         them a `List` of empty strings.
         
         # Parameters
@@ -123,7 +123,7 @@ class RuleBasedTagger():
 
         `ValueError`
             If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
-            the same legnth.
+            the same length.
         '''
 
         tokens_length = len(tokens)

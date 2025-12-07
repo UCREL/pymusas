@@ -46,7 +46,7 @@ tag `PUNCT`.
 
 - __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
     A list of rules to apply to the sequence of tokens in the
-    [`__call__`](#__call__). The output from each rule is concatendated and given
+    [`__call__`](#__call__). The output from each rule is concatenated and given
     to the `ranker`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     A ranker to rank the output from all of the `rules`.
@@ -117,7 +117,7 @@ All the generated tags and MWEs are based on the rules and ranker given
 to this model.
 
 **NOTE** this tagger has been designed to be flexible with the amount of
-resources avaliable, if you do not have POS or lemma information assign
+resources available, if you do not have POS or lemma information assign
 them a `List` of empty strings.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
@@ -140,5 +140,5 @@ them a `List` of empty strings.
 
 - `ValueError` <br/>
     If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
-    the same legnth.
+    the same length.
 
