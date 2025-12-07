@@ -1,3 +1,5 @@
+import pytest
+
 from pymusas.taggers.neural import NeuralTagger
 
 
@@ -15,12 +17,36 @@ EXPECTED_TAG_INDICIES: list[list[tuple[int, int]]] = [
 ]
 
 
-def test_neural_tagger__call__() -> None:
+def test_neural_tagger__init__() -> None:
+    tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
+    # Tests that the model is in eval mode
+    assert not tagger.wsd_model.training
+    assert tagger.device.type == "cpu"
+    assert tagger.tokenizer.add_prefix_space
 
-    tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM", device="cpu", top_n=5)
+    tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
+                          device="meta",
+                          tokenizer_kwargs={"add_prefix_space": False})
+    # Tests that the model is in eval mode
+    assert not tagger.wsd_model.training
+    # Test that we can change device
+    assert tagger.device.type == "meta"
+    # Test that we can change the tokenizer kwargs
+    assert not tagger.tokenizer.add_prefix_space
+
+    with pytest.raises(ValueError):
+        NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM", top_n=0)
+    with pytest.raises(ValueError):
+        NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM", top_n=-2)
+
+
+@pytest.mark.parametrize("top_n", [1, 2, 3, 4, 5])
+def test_neural_tagger__call__(top_n: int) -> None:
+
+    tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM", device="cpu", top_n=top_n)
     for index, tags_and_indicies in enumerate(tagger(TEST_TOKENS)):
         tags, tag_indicies = tags_and_indicies
-        assert EXPECTED_TAG_OUTPUT[index] == tags
+        assert EXPECTED_TAG_OUTPUT[index][:top_n] == tags
         assert EXPECTED_TAG_INDICIES[index] == tag_indicies
 
     # Test empty whitespace tokens
