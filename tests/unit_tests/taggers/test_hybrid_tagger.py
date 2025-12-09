@@ -1,12 +1,13 @@
 from pathlib import Path
 
 import pytest
-from test_rule_based import generate_test_data, mwe_word_rule, single_word_rule
 
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.taggers.hybrid import HybridTagger
 from pymusas.taggers.neural import NeuralTagger
 from pymusas.taggers.rules.single_word import SingleWordRule
+
+from .test_rule_based import generate_test_data, mwe_word_rule, single_word_rule
 
 
 DATA_DIR = Path(__file__, '..', '..', 'data').resolve()

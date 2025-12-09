@@ -6,6 +6,22 @@
 
 ---
 
+This module contains various helper functions that are used in other modules.
+
+<h4 id="pymusas.utils.attributes">Attributes<a className="headerlink" href="#pymusas.utils.attributes" title="Permanent link">&para;</a></h4>
+
+
+- __NEURAL\_EXTRA\_PACKAGES__ : `list[str]` <br/>
+    The Python packages that are required for the `pymusas[neural]` extra.
+
+<a id="pymusas.utils.NEURAL_EXTRA_PACKAGES"></a>
+
+#### NEURAL\_EXTRA\_PACKAGES
+
+```python
+NEURAL_EXTRA_PACKAGES: list[str] = ['transformers', 'wsd_torch_models', 'torch']
+```
+
 <a id="pymusas.utils.token_pos_tags_in_lexicon_entry"></a>
 
 ### token\_pos\_tags\_in\_lexicon\_entry
@@ -98,4 +114,42 @@ assert ({'noun', 'adj', 'det'}
 single_word_lexicon = 'East_noun'
 assert {'noun'} == unique_pos_tags_in_lexicon_entry(single_word_lexicon)
 ```
+
+<a id="pymusas.utils.are_packages_installed"></a>
+
+### are\_packages\_installed
+
+```python
+def are_packages_installed(packages: list[str]) -> bool
+```
+
+Returns True if all packages are installed, False otherwise.
+
+<h4 id="are_packages_installed.parameters">Parameters<a className="headerlink" href="#are_packages_installed.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __packages__ : `list[str]` <br/>
+    A list of package names to check if they are installed.
+
+<h4 id="are_packages_installed.returns">Returns<a className="headerlink" href="#are_packages_installed.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bool` <br/>
+
+<a id="pymusas.utils.neural_extra_installed"></a>
+
+### neural\_extra\_installed
+
+```python
+def neural_extra_installed() -> None
+```
+
+Checks if the `pymusas[neural]` extra is installed by checking if the
+packages required for the `neural` extra are installed.
+
+<h4 id="neural_extra_installed.raises">Raises<a className="headerlink" href="#neural_extra_installed.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ImportError` <br/>
+    If `pymusas[neural]` is not installed.
 

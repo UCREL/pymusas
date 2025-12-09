@@ -126,17 +126,25 @@ This code base uses isort, flake8 and mypy to ensure that the format of the code
 make lint
 ```
 
-To run the tests with code coverage (**NOTE** these are the code coverage tests that the Continuos Integration (CI) reports at the top of this README, the doc tests are not part of this report):
+To run the unit tests with code coverage of the unit tests:
 
 ``` bash
 make tests
 ```
 
-To run the [doc tests](https://docs.python.org/3/library/doctest.html), these are tests to ensure that examples within the documentation run as expected:
+To run the [doc tests](https://docs.python.org/3/library/doctest.html), these are tests to ensure that examples within the documentation run as expected, the coverage results of these tests will also be reported:
 
 ``` bash
 make doc-tests
 ```
+
+To run the all the tests (unit, documentation, and [functional tests](https://www.pyopensci.org/python-package-guide/tests/test-types.html#end-to-end-functional-tests)) with coverage that takes all of these tests into account:
+
+``` bash
+make full-coverage-tests
+```
+
+To note the functional tests that are ran within this `make` command are the tests that build the `pymusas` package and then use the built package to test that the output of the taggers are what is to be expected.
 
 ### Setting a different default python version
 

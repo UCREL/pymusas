@@ -13,6 +13,8 @@ from pymusas.taggers.rules.mwe import MWERule
 from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
+from ..utils import compare_output, remove_extension
+
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()
 TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'rule_based')
@@ -87,26 +89,6 @@ def generate_test_data(test_data_file: Path,
     return doc, expected_output
 
 
-def compare_output(expected_output: List[Tuple[List[str], List[Tuple[int, int]]]],
-                   doc: Doc, pymusas_tags_token_attr: str,
-                   pymusas_mwe_indexes_attr: str) -> None:
-    '''
-    Compares the `expected_output` with the output from the tagger which is
-    stored in the `doc` within the token attributes `pymusas_tags_token_attr`
-    and `pymusas_mwe_indexes_attr`.
-    '''
-    assert len(expected_output) == len(doc)
-    for token_index, token in enumerate(doc):
-        predicted_tags = getattr(token._, pymusas_tags_token_attr)
-        predicted_mwe_indexes = getattr(token._, pymusas_mwe_indexes_attr)
-
-        expected_tags = expected_output[token_index][0]
-        expected_mwe_indexes = expected_output[token_index][1]
-
-        assert expected_tags == predicted_tags
-        assert expected_mwe_indexes == predicted_mwe_indexes
-
-
 def empty_word_rule() -> SingleWordRule:
     '''An empty rule'''
     return SingleWordRule({'ignore': ['']}, {'ignore': ['']})
@@ -133,6 +115,8 @@ def create_tagger(pymusas_tags_token_attr: str,
                   rules: List[Rule],
                   pos_attribute: str = 'tag_'
                   ) -> RuleBasedTagger:
+    remove_extension(pymusas_tags_token_attr)
+    remove_extension(pymusas_mwe_indexes_attr)
     ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
     
     tagger = RuleBasedTagger(pymusas_tags_token_attr=pymusas_tags_token_attr,
@@ -146,6 +130,8 @@ def create_tagger(pymusas_tags_token_attr: str,
 
 def create_non_valid_tagger(pymusas_tags_token_attr: str,
                             pymusas_mwe_indexes_attr: str,) -> RuleBasedTagger:
+    remove_extension(pymusas_tags_token_attr)
+    remove_extension(pymusas_mwe_indexes_attr)
     tagger = RuleBasedTagger(pymusas_tags_token_attr=pymusas_tags_token_attr,
                              pymusas_mwe_indexes_attr=pymusas_mwe_indexes_attr,
                              pos_attribute='tag_')
@@ -153,14 +139,11 @@ def create_non_valid_tagger(pymusas_tags_token_attr: str,
 
 
 @pytest.mark.parametrize("pymusas_tags_token_attr,pymusas_mwe_indexes_attr",
-                         [('pymusas_tags', 'pymusas_mwe_indexes')])
-def test_rule_based_tagger__call__(pymusas_tags_token_attr: Optional[str],
-                                   pymusas_mwe_indexes_attr: Optional[str]
+                         [('pymusas_tags', 'pymusas_mwe_indexes'),
+                          ('pym_tags', 'mwe_indexes')])
+def test_rule_based_tagger__call__(pymusas_tags_token_attr: str,
+                                   pymusas_mwe_indexes_attr: str
                                    ) -> None:
-    if pymusas_tags_token_attr is None:
-        pymusas_tags_token_attr = 'pymusas_tags'
-    if pymusas_mwe_indexes_attr is None:
-        pymusas_mwe_indexes_attr = 'pymusas_mwe_indexes'
     # Test the first case where we have no rules and it should tag everything as
     # Z99
     tagger = create_tagger(pymusas_tags_token_attr, pymusas_mwe_indexes_attr,
@@ -173,7 +156,7 @@ def test_rule_based_tagger__call__(pymusas_tags_token_attr: Optional[str],
     compare_output(expected_output, tagger(empty_doc),
                    pymusas_tags_token_attr, pymusas_mwe_indexes_attr)
 
-    # Test the default punctutation and number POS tags
+    # Test the default punctuation and number POS tags
     expected_output = [
         (['PUNCT'], [(0, 1)]),
         (['N1'], [(1, 2)])
@@ -183,7 +166,7 @@ def test_rule_based_tagger__call__(pymusas_tags_token_attr: Optional[str],
     compare_output(expected_output, tagger(punctuation_doc),
                    pymusas_tags_token_attr, pymusas_mwe_indexes_attr)
     
-    # Test the punctutation and number POS tags when set by the user
+    # Test the punctuation and number POS tags when set by the user
     tagger = create_tagger(pymusas_tags_token_attr, pymusas_mwe_indexes_attr,
                            ['grammer'], ['digit'], [empty_word_rule()])
     punctuation_doc = Doc(Vocab(), words=[' ', ' '], spaces=[True, True],

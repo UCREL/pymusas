@@ -1,9 +1,15 @@
 from typing import List, Optional, Set, Tuple
 
 from pymusas.rankers.lexicon_entry import LexiconEntryRanker
-from pymusas.taggers.neural import NeuralTagger
 from pymusas.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.rule import Rule
+
+
+try:
+    from pymusas.taggers.neural import NeuralTagger
+except ImportError:
+    from pymusas.utils import neural_extra_installed
+    neural_extra_installed()
 
 
 class HybridTagger(RuleBasedTagger):

@@ -170,14 +170,6 @@ jobs:
       - name: Move cached files
         run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
 
-      - name: Code coverage testing
-        run: |
-          uv run coverage run
-
-      - name: Code coverage report
-        run: |    
-          uv run coverage
-
       - name: Set pymusas cache home directory for Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
@@ -188,33 +180,51 @@ jobs:
         run: |
           echo "PYMUSAS_HOME=$HOME\.cache\doc_test_pymusas" >> $env:GITHUB_ENV
 
+      - name: Code coverage unit testing
+        run: |
+          uv run coverage run --append
+
       - name: Cache Doc Test download files
         uses: actions/cache@v4
         with:
           path: ${{ env.PYMUSAS_HOME }}
           key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ env.PYMUSAS_HOME }}
       
-      - name: Doc Tests
+      - name: Code coverage doc testing
         run: |
-          uv run coverage run -m pytest --doctest-modules pymusas/
+          uv run coverage run --append -m pytest --doctest-modules pymusas/
 
-      - name: Build and Functional Tests Ubuntu and Mac
+      - name: Build and Code Coverage Functional Tests Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
+          uv run scripts/create_temporary_version.py ./pyproject.toml ./temp_pyproject.toml
           uv build
           PYMUSAS_VERSION=$(uv run scripts/get_version.py ./pyproject.toml)
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" \
-            --with pytest --no-project --isolated pytest tests/functional_tests
+            --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
+            coverage run --append -m pytest tests/functional_tests
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" \
-            --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+            --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
+            coverage run --append -m pytest tests/functional_tests
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" \
+            --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
+            coverage run --append -m pytest --doctest-modules pymusas/
+          mv ./temp_pyproject.toml ./pyproject.toml
       
-      - name: Build and Functional Tests Windows
+      - name: Build and Code Coverage Functional Tests Windows
         if: ${{ runner.os == 'Windows' }}
         run: |
+          uv run scripts/create_temporary_version.py ./pyproject.toml ./temp_pyproject.toml
           uv build
           $PYMUSAS_VERSION = & { uv run scripts/get_version.py ./pyproject.toml }
-          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" --with pytest --no-project --isolated pytest tests/functional_tests
-          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with pytest --no-project --isolated pytest --doctest-modules pymusas/
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest --doctest-modules pymusas/
+          mv ./temp_pyproject.toml ./pyproject.toml
+
+      - name: Code coverage report
+        run: |    
+          uv run coverage report
           
 
   update-binder-requirements:

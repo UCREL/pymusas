@@ -1,9 +1,14 @@
 from pathlib import Path
 from typing import Any, List, Tuple
 
-import torch
-from transformers import AutoTokenizer, PreTrainedTokenizerBase
-from wsd_torch_models.bem import BEM
+
+try:
+    import torch
+    from transformers import AutoTokenizer, PreTrainedTokenizerBase
+    from wsd_torch_models.bem import BEM
+except ImportError:
+    from pymusas.utils import neural_extra_installed
+    neural_extra_installed()
 
 
 class NeuralTagger():

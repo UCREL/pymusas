@@ -17,7 +17,7 @@ base.
 def set_custom_token_extension(extension_name: str) -> None
 ```
 
-Defines a custom attribute of the spaCy Token which becomes avaliable
+Defines a custom attribute of the spaCy Token which becomes available
 via `Token._.{extension_name}`. The difference between this and using the
 spaCy [Token.set_extension method](https://spacy.io/api/token#set_extension)
 is this method will check if the extension exists already and if so will force it
@@ -27,7 +27,7 @@ through and output an UserWarning message that it has had to force this through.
 
 
 - __extension\_name__ : `str` <br/>
-    Name of the custom attribute that will become avaliable through
+    Name of the custom attribute that will become available through
     `Token._.{extension_name}`.
 
 <a id="pymusas.spacy_api.utils.update_factory_attributes"></a>

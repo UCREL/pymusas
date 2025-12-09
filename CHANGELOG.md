@@ -20,9 +20,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added a usage example to the documentation showing how to combine/merge lexicon collections together and add them to a PyMUSAS rule based tagger.
 - Added the extra group `neural` to the [pyproject.toml](./pyproject.toml) so that the required `torch`, `transformers`, and `wsd-torch-models` libraries are installed allowing the neural models to run.
 - Added `pymusas.taggers.neural` module that includes the first Neural based tagger using the taggers from [WSD-Torch-Models](https://github.com/UCREL/WSD-Torch-Models).
+- Added `pymusas.spacy_api.taggers.neural` module that includes the Neural based tagger that can be used as a spacy pipeline.
 - Added `pymusas.taggers.hybrid` module that includes the first Hybrid based tagger, `pymusas.taggers.hybrid.HybridTagger`, which inherits from the `pymusas.taggers.rule-based.RuleBasedTagger` and uses the Neural tagger, `pymusas.taggers.neural.NeuralTagger`, when the rule based tagger does not know what to predict, i.e. when it usually predicts `Z99` it will now use the neural tagger.
 - The CI pipeline `.github/workflows/ci.yml` now caches the Neural based tagger that we test (`ucrelnlp/PyMUSAS-Neural-English-Small-BEM`) so that it does not get downloaded each time the tests are ran for each Python version for each Operating System.
 - Supports `Python 3.14`.
+- `typer` Python package, this is a requirement from `spacy`, since version `3.8.7` (26th of May 2025) it had dropped the requirement for `typer` but instead used `typer-slim`, however `typer-slim` does not appear to work when imported `import typer` and it raises an error when we import `spacy`, thus the need to add `typer` as a requirement.
+- `scripts/create_temporary_version.py` - this creates a temporary `pyproject.toml` with a unique version of the project so that functional testing through `make functional-tests` does not use a cached/out-dated version of the codebase once the code base has been built while still using cached Python packages for the packages `pymusas` depends on.
+- `makefile` the target `functional-tests` has been removed and replaced with `full-coverage-tests`. The difference being that it will also run the unit tests and report coverage that uses the results from all of the tests, unit, functional, and documentation tests while using an install that has come a the built distribution. This code is also now used in the CI pipeline so that the coverage results are more representative.
 
 ### Changed
 
@@ -35,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [./scripts/release_notes.py script](./scripts/release_notes.py) has been updated so that it is isolated with respect to python packages that are required to be installed. This has been doing through the makefile, CI commands in the GitHub action, and the script itself containing it's own dependencies.
 - The publishing and release process now uses `uv`. The version of PyMUSAS is fully determined by the `TAG` environment variable. 
 - The unit tests have been moved to [./tests/unit_tests/](./tests/unit_tests/) from `./tests`
+- `pyproject.toml` - we do not support `pytest` version `9.0.2` it appears to generate an error when testing entry points.
 
 ### Fixed
 

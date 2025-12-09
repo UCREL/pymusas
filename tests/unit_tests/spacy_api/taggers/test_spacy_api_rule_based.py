@@ -7,11 +7,12 @@ import spacy
 from spacy import registry
 from spacy.lang.en import English
 from spacy.language import Language
-from spacy.tokens import Token
 
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.single_word import SingleWordRule
+
+from ..utils import remove_extension
 
 
 def non_standard_config() -> Dict[str, str]:
@@ -23,7 +24,13 @@ def non_standard_config() -> Dict[str, str]:
     }
 
 
-def create_non_valid_tagger() -> Language:
+def create_non_valid_tagger(remove_extension_if_exists: bool = True,
+                            pymusas_tags_token_attr: str = 'pymusas_tags',
+                            pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes'
+                            ) -> Language:
+    if remove_extension_if_exists:
+        remove_extension(pymusas_tags_token_attr)
+        remove_extension(pymusas_mwe_indexes_attr)
     nlp = English()
     return nlp
 
@@ -38,7 +45,13 @@ def rankers() -> ContextualRuleBasedRanker:
     return ContextualRuleBasedRanker(0, 0)
 
 
-def create_non_valid_no_ranker_tagger() -> Language:
+def create_non_valid_no_ranker_tagger(remove_extension_if_exists: bool = True,
+                                      pymusas_tags_token_attr: str = 'pymusas_tags',
+                                      pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes'
+                                      ) -> Language:
+    if remove_extension_if_exists:
+        remove_extension(pymusas_tags_token_attr)
+        remove_extension(pymusas_mwe_indexes_attr)
     nlp = English()
     nlp.config["initialize"]["components"]["pymusas_rule_based_tagger"] = {
         "rules": {"@misc": "rules"}
@@ -46,7 +59,13 @@ def create_non_valid_no_ranker_tagger() -> Language:
     return nlp
 
 
-def create_tagger() -> Language:
+def create_tagger(remove_extension_if_exists: bool = True,
+                  pymusas_tags_token_attr: str = 'pymusas_tags',
+                  pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes'
+                  ) -> Language:
+    if remove_extension_if_exists:
+        remove_extension(pymusas_tags_token_attr)
+        remove_extension(pymusas_mwe_indexes_attr)
     nlp = English()
     nlp.config["initialize"]["components"]["pymusas_rule_based_tagger"] = {
         "rules": {"@misc": "rules"},
@@ -61,11 +80,13 @@ def create_tagger() -> Language:
 @pytest.mark.parametrize("config", [{}, non_standard_config()])
 @pytest.mark.parametrize("nlp_callable", [create_non_valid_tagger,
                                           create_tagger])
-def test_rule_based_tagger__init__(nlp_callable: Callable[[], Language],
+def test_rule_based_tagger__init__(nlp_callable: Callable[[bool, str, str], Language],
                                    config: Dict[str, str],
                                    name: Optional[str]
                                    ) -> None:
-    nlp = nlp_callable()
+    nlp = nlp_callable(True,
+                       config.get("pymusas_tags_token_attr", "pymusas_tags"),
+                       config.get("pymusas_mwe_indexes_attr", "pymusas_mwe_indexes"))
     tagger = cast(RuleBasedTagger,
                   nlp.add_pipe('pymusas_rule_based_tagger', name=name,
                                config=config))
@@ -94,8 +115,6 @@ def test_rule_based_tagger__init__(nlp_callable: Callable[[], Language],
                                                    'token.pos'])
     assert set(factory_meta_data.assigns) == set(['token._.pymusas_tags',
                                                   'token._.pymusas_mwe_indexes'])
-    Token.remove_extension(pymusas_tags_token_attr)
-    Token.remove_extension(pymusas_mwe_indexes_attr)
 
 
 def test_rule_based_tagger_token_extension_warning() -> None:
@@ -104,24 +123,24 @@ def test_rule_based_tagger_token_extension_warning() -> None:
     `pymusas_rule_based_tagger`s are added to a spaCy pipeline, as they will use
     the same Token extensions.
     '''
-    nlp = create_tagger()
+    nlp = create_tagger(False)
     nlp.add_pipe('pymusas_rule_based_tagger', name='test_1')
     with pytest.warns(UserWarning):
         nlp.add_pipe('pymusas_rule_based_tagger', name='test_2')
-    Token.remove_extension('pymusas_tags')
-    Token.remove_extension('pymusas_mwe_indexes')
+    remove_extension('pymusas_tags')
+    remove_extension('pymusas_mwe_indexes')
 
     # If we use a different `pymusas_tags_token_attr` and
-    # `pymusas_mwe_indexes_attr` in the config the warning should be raised.
-    nlp = create_tagger()
+    # `pymusas_mwe_indexes_attr` in the config the warning should not be raised.
+    nlp = create_tagger(False)
     nlp.add_pipe('pymusas_rule_based_tagger', name='test_1')
     nlp.add_pipe('pymusas_rule_based_tagger', name='test_2',
                  config={'pymusas_tags_token_attr': 'usas_tags',
                          'pymusas_mwe_indexes_attr': 'mwe_indexes'})
-    Token.remove_extension('pymusas_tags')
-    Token.remove_extension('pymusas_mwe_indexes')
-    Token.remove_extension('usas_tags')
-    Token.remove_extension('mwe_indexes')
+    remove_extension('pymusas_tags')
+    remove_extension('pymusas_mwe_indexes')
+    remove_extension('usas_tags')
+    remove_extension('mwe_indexes')
 
 
 def test_rule_based_tagger_initializer() -> None:
@@ -129,8 +148,6 @@ def test_rule_based_tagger_initializer() -> None:
                              create_non_valid_no_ranker_tagger()]:
         with pytest.raises(ValueError):
             non_valid_tagger.add_pipe('pymusas_rule_based_tagger')
-            Token.remove_extension('pymusas_tags')
-            Token.remove_extension('pymusas_mwe_indexes')
             non_valid_tagger.initialize()
     
     nlp = create_tagger()
@@ -144,9 +161,6 @@ def test_rule_based_tagger_initializer() -> None:
     assert isinstance(tagger.ranker, ContextualRuleBasedRanker)
     assert set(['digits']) == tagger.default_number_tags
     assert set(['grammar']) == tagger.default_punctuation_tags
-
-    Token.remove_extension('pymusas_tags')
-    Token.remove_extension('pymusas_mwe_indexes')
 
 
 def compare_initializer_taggers(tagger_1: RuleBasedTagger,
