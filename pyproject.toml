@@ -37,7 +37,7 @@ dev = [
     "flake8>=3.8",
     "isort>=6.0",
     "mypy>=1.12",
-    "pytest>=6.0,!=7.1.0,!=8.1.0",
+    "pytest>=6.0,!=7.1.0,!=8.1.0,<9.0.2",
     "responses>=0.25.7",
     "types-requests>=2.32.4.20250913",
 ]
@@ -58,6 +58,7 @@ Changelog = "https://github.com/UCREL/pymusas/blob/main/CHANGELOG.md"
 
 [project.entry-points.'spacy_factories']
 "pymusas_rule_based_tagger" = "pymusas.spacy_api.taggers.rule_based:RuleBasedTagger"
+"pymusas_neural_tagger" = "pymusas.spacy_api.taggers.neural:NeuralTagger"
 
 [build-system]
 requires = ["uv_build>=0.9.6,<0.10.0"]
