@@ -170,10 +170,6 @@ jobs:
       - name: Move cached files
         run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
 
-      - name: Code coverage unit testing
-        run: |
-          uv run coverage run --append
-
       - name: Set pymusas cache home directory for Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
@@ -189,6 +185,10 @@ jobs:
         with:
           path: ${{ env.PYMUSAS_HOME }}
           key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ env.PYMUSAS_HOME }}
+
+      - name: Code coverage unit testing
+        run: |
+          uv run coverage run --append
       
       - name: Code coverage doc testing
         run: |
@@ -220,6 +220,7 @@ jobs:
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest --doctest-modules pymusas/
+          rm ./pyproject.toml
           mv ./temp_pyproject.toml ./pyproject.toml
 
       - name: Code coverage report
