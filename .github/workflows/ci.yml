@@ -170,6 +170,10 @@ jobs:
       - name: Move cached files
         run: mv $HOME/hf_test_model_cache/* $HOME/.cache/huggingface/hub/.
 
+      - name: Code coverage unit testing
+        run: |
+          uv run coverage run --append
+
       - name: Set pymusas cache home directory for Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
@@ -179,10 +183,6 @@ jobs:
         if: ${{ runner.os == 'Windows' }}
         run: |
           echo "PYMUSAS_HOME=$HOME\.cache\doc_test_pymusas" >> $env:GITHUB_ENV
-
-      - name: Code coverage unit testing
-        run: |
-          uv run coverage run --append
 
       - name: Cache Doc Test download files
         uses: actions/cache@v4
