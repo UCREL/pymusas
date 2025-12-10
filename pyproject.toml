@@ -81,18 +81,10 @@ build-backend = "uv_build"
 
 [tool.uv]
 default-groups = "all"
-index = [
-    { name = "torch-linux-cpu", url = "https://download.pytorch.org/whl/cpu", explicit = true },
-]
 
 [tool.uv.build-backend]
 module-name = "pymusas"
 module-root = ""
-
-[tool.uv.sources]
-torch = [
-    { index = "torch-linux-cpu", marker = "platform_system == 'Linux'" },
-]
 
 [tool.isort]
 known_first_party = "pymusas"

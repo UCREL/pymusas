@@ -29,5 +29,5 @@
 		}
 		}
   	},
-	"postStartCommand": "uv sync --all-extras"
+	"postStartCommand": "uv sync --index=https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match --all-extras"
 }

@@ -78,11 +78,15 @@ or for `uv`:
 uv add pymusas[neural]
 ```
 
+#### Custom accelerator (torch)
+
+When installing the `neural` extra we use the default version of [pytorch](https://pytorch.org/) for your Operating System (OS), in the case for `Linux` this is likely to be the `cuda` version and for all other OSs this will be `cpu`. If you would like to use a different version of torch please either install it before install `pymusas` or add the package index like so `uv add --index-strategy unsafe-best-match --index https://download.pytorch.org/whl/cu130 pymusas[neural]`.
+
 ## Development
 
 ### Setup
 
-You can either use the dev container with your favourite editor, e.g. VSCode. Or you can create your setup locally below we demonstrate both.
+You can either use the dev container with your favourite editor, e.g. VSCode. Or you can create your setup locally below we demonstrate both. To note in both cases we will be installing the `CPU` version and not the `GPU` version.
 
 In both cases they share the same tools, of which these tools are:
 * [uv](https://docs.astral.sh/uv/) for Python packaging and development
@@ -115,7 +119,7 @@ To run locally first ensure you have the following tools installted locally:
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
 
 ```bash
-uv sync --all-extras
+uv sync --all-extras --index=https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match 
 ```
 
 ### Running linters and tests

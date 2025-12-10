@@ -102,12 +102,15 @@ full-coverage-tests:
 	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
 	coverage run --append -m pytest tests/functional_tests
 	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural] \
+	--index https://download.pytorch.org/whl/cpu \
 	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
 	coverage run --append -m pytest tests/functional_tests
 	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural] \
+	--index https://download.pytorch.org/whl/cpu \
 	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
 	coverage run --append -m pytest --doctest-modules pymusas/
 	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural,dev] \
+	--index https://download.pytorch.org/whl/cpu \
 	--no-project --isolated coverage run --append
 	@uv run coverage report
 	@mv ./temp_pyproject.toml ./pyproject.toml
