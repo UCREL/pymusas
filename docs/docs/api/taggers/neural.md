@@ -25,6 +25,8 @@ class NeuralTagger:
 The tagger when called, through [`__call__`](#__call__), and given a sequence of
 tokens, to create a list of possible candidate tags for each token in the sequence.
 
+**NOTE** at the moment only single word expressions are supported.
+
 The number of possible candidate tags for each token is determined by the
 `top_n` parameter, of which this is then stored in the `top_n` attribute.
 
@@ -59,6 +61,10 @@ The number of possible candidate tags for each token is determined by the
     The device to load the model on. e.g. `'cpu'`, it has to be a string
     that can be passed to
     [`torch.device`](https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device).
+- __tokenizer\_kwargs__ : `dict[str, Any] | None`, optional (default = `None`) <br/>
+    Keyword arguments to pass to the tokenizer's
+    `transformers.AutoTokenizer.from_pretrained` method.
+    These keyword arguments are only passed to the tokenizer on initialization.
 
 <h4 id="neuraltagger.instance_attributes">Instance Attributes<a className="headerlink" href="#neuraltagger.instance_attributes" title="Permanent link">&para;</a></h4>
 
