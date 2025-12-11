@@ -47,7 +47,7 @@ content-type = "text/markdown"
 neural = [
     "torch>=2.2,<3.0",
     "transformers>=4.0,<5.0",
-    "wsd-torch-models<1.0",
+    "wsd-torch-models>0.1.1,<1.0",
 ]
 
 [project.urls]

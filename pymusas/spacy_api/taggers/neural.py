@@ -10,6 +10,7 @@ from spacy.util import SimpleFrozenList
 
 
 try:
+    import torch
     from transformers import AutoTokenizer, PreTrainedTokenizerBase
     from wsd_torch_models.bem import BEM
 except ImportError:
@@ -78,6 +79,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
     | pymusas_tags_token_attr  | See parameters section below |
     | pymusas_mwe_indexes_attr | See parameters section below |
     | top_n                    | See parameters section below |
+    | device                   | See parameters section below |
     | tokenizer_kwargs         | See parameters section below |
 
     # Parameters
@@ -94,6 +96,10 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
     top_n : `int`, optional (default = `5`)
         The number of tags to predict. If -1 all tags will be predicted.
         If 0 or less than 0 will raise a ValueError.
+    device : `str`, optional (default = `'cpu'`)
+        The device to load the model, `wsd_model`, on. e.g. `'cpu'`, it has to
+        be a string that can be passed to
+        [`torch.device`](https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device).
     tokenizer_kwargs : `dict[str, Any] | None` (default = `None`)
         Keyword arguments to pass to the tokenizer's
         `transformers.AutoTokenizer.from_pretrained` method.
@@ -115,6 +121,8 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
     top_n : `int`, optional (default = `5`)
         The number of tags to predict. If -1 all tags will be predicted.
         If 0 or less than 0 will raise a ValueError.
+    device : `torch.device`
+        The device that the `wsd_model` will be loaded on. e.g. `torch.device`
     wsd_model : `wsd_torch_models.bem.BEM | None` (default = `None`)
         The neural Word Sense Disambiguation (WSD) model. This is `None` until
         the component is initialized or has been loaded from disk or bytes.
@@ -176,6 +184,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
                  pymusas_tags_token_attr: str = 'pymusas_tags',
                  pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes',
                  top_n: int = 5,
+                 device: str = 'cpu',
                  tokenizer_kwargs: dict[str, Any] | None = None
                  ) -> None:
         neural_extra_installed()
@@ -193,6 +202,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
         
         self._tokenizer_kwargs = tokenizer_kwargs
         self.top_n = top_n
+        self.device = torch.device(device)
 
         self.wsd_model: BEM | None = None
         self.tokenizer: PreTrainedTokenizerBase | None = None
@@ -201,7 +211,10 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
 
     def _validate(self) -> None:
         '''
-        Checks that `self.wsd_model` and `self.tokenizer` are not `None`
+        Checks that `self.wsd_model` and `self.tokenizer` are not `None`.
+
+        In addition if the `self.wsd_model` is not loaded onto `self.device`,
+        the model is loaded onto `self.device`.
 
         # Raises
 
@@ -215,6 +228,10 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
         
         if self.tokenizer is None:
             raise ValueError(error_msg.format('tokenizer'))
+        
+        self.wsd_model = cast(BEM, self.wsd_model)
+        if self.wsd_model.base_model.device != self.device:
+            self.wsd_model.to(self.device)
 
         self._validated = True
     
@@ -444,16 +461,19 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
                   default_config={'pymusas_tags_token_attr': 'pymusas_tags',
                                   'pymusas_mwe_indexes_attr': 'pymusas_mwe_indexes',
                                   'top_n': 5,
+                                  'device': 'cpu',
                                   'tokenizer_kwargs': None})
 def make_usas_neural_tagger(nlp: Language,
                             name: str,
                             pymusas_tags_token_attr: str,
                             pymusas_mwe_indexes_attr: str,
                             top_n: int,
+                            device: str,
                             tokenizer_kwargs: None | dict[str, Any]
                             ) -> NeuralTagger:
     return NeuralTagger(name,
                         pymusas_tags_token_attr,
                         pymusas_mwe_indexes_attr,
                         top_n,
+                        device,
                         tokenizer_kwargs)

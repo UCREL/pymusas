@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `typer` Python package, this is a requirement from `spacy`, since version `3.8.7` (26th of May 2025) it had dropped the requirement for `typer` but instead used `typer-slim`, however `typer-slim` does not appear to work when imported `import typer` and it raises an error when we import `spacy`, thus the need to add `typer` as a requirement.
 - `scripts/create_temporary_version.py` - this creates a temporary `pyproject.toml` with a unique version of the project so that functional testing through `make functional-tests` does not use a cached/out-dated version of the codebase once the code base has been built while still using cached Python packages for the packages `pymusas` depends on.
 - `makefile` the target `functional-tests` has been removed and replaced with `full-coverage-tests`. The difference being that it will also run the unit tests and report coverage that uses the results from all of the tests, unit, functional, and documentation tests while using an install that has come a the built distribution. This code is also now used in the CI pipeline so that the coverage results are more representative.
+- GPU functional testing - this is done through the script `tests/docker_gpu_run_script.sh` and the docker image `tests/gpu-docker.dockerfile`
 
 ### Changed
 
@@ -40,6 +41,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The publishing and release process now uses `uv`. The version of PyMUSAS is fully determined by the `TAG` environment variable. 
 - The unit tests have been moved to [./tests/unit_tests/](./tests/unit_tests/) from `./tests`
 - `pyproject.toml` - we do not support `pytest` version `9.0.2` it appears to generate an error when testing entry points.
+- `pyproject.toml` - so that we support GPU/accelerator installation for `torch`.
 
 ### Fixed
 

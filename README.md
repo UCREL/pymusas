@@ -78,9 +78,12 @@ or for `uv`:
 uv add pymusas[neural]
 ```
 
-#### Custom accelerator (torch)
+#### Custom accelerator (torch and spaCy)
 
-When installing the `neural` extra we use the default version of [pytorch](https://pytorch.org/) for your Operating System (OS), in the case for `Linux` this is likely to be the `cuda` version and for all other OSs this will be `cpu`. If you would like to use a different version of torch please either install it before install `pymusas` or add the package index like so `uv add --index-strategy unsafe-best-match --index https://download.pytorch.org/whl/cu130 pymusas[neural]`.
+When installing the `neural` extra we use the default version of [pytorch](https://pytorch.org/) for your Operating System (OS), in the case for `Linux` this is likely to be the `cuda` version and for all other OSs this will be `cpu`. If you would like to use a different version of torch please either install it before install `pymusas` or add the package index like so `uv add --index-strategy unsafe-best-match --index https://download.pytorch.org/whl/cu130 pymusas[neural]` in this example we are downloading `torch` for `cuda` version 13.
+
+
+**Note** we do not require the GPU version of spaCy `spacy[cuda12x]` to run `pymusas` with a custom accelerator like `cuda` but `pymusas` does support the GPU version of spaCy in case you are using it, but `pymusas` does not require it.
 
 ## Development
 
@@ -119,7 +122,7 @@ To run locally first ensure you have the following tools installted locally:
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
 
 ```bash
-uv sync --all-extras --index=https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match 
+uv sync --all-extras
 ```
 
 ### Running linters and tests
@@ -149,6 +152,25 @@ make full-coverage-tests
 ```
 
 To note the functional tests that are ran within this `make` command are the tests that build the `pymusas` package and then use the built package to test that the output of the taggers are what is to be expected.
+
+#### Running GPU tests
+
+The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have this docker image. The image if you run it assumes you have an Nvidia GPU and a Nvidia driver that supports CUDA 12.
+
+As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker container (to note the `0.1.0` version number of the container is not meaningful at the moment):
+
+``` bash
+docker build -t pymusas-gpu:0.1.0 -f ./tests/gpu-docker.dockerfile .
+```
+
+And then we can run the tests like so:
+
+``` bash
+docker run --gpus all --shm-size 4g --rm pymusas-gpu:0.1.0
+```
+
+**Note** at the moment when running these tests only 2 errors should occur: `tests/unit_tests/spacy_api/test_spacy_api_utils.py ..EE` this at the moment is expected and we hope to resolve this in the future, all other tests should and are expected to pass.
+
 
 ### Setting a different default python version
 

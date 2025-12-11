@@ -20,6 +20,20 @@ EXPECTED_NEURAL_TAG_OUTPUT: list[list[str]] = [
     ['N1', 'N3.2', 'T1.2', 'T1.3', 'T3']
 ]
 
+def cuda_available() -> bool:
+    """
+    Check if CUDA is available.
+    
+    # Returns
+
+    `bool`
+    """
+    try:
+        import torch
+        return torch.cuda.is_available()
+    except:
+        return False
+
 
 def test_rule_base_single_and_mwe_spacy_tagger() -> None:
     """
@@ -75,14 +89,27 @@ def test_rule_base_single_and_mwe_spacy_tagger() -> None:
             assert [(token_index, token_index + 1)] == token._.pymusas_mwe_indexes
 
 
-def test_neural_spacy_tagger() -> None:
+@pytest.mark.parametrize("with_spacy_gpu", [True, False])
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+@pytest.mark.parametrize("with_gpu", [True, False])
+def test_neural_spacy_tagger(with_gpu: bool, device: str, with_spacy_gpu: bool) -> None:
     """
     Test the spaCy neural tagger.
     """
+    
+    if not cuda_available() and (with_gpu or device == "cuda"):
+        pytest.skip("CUDA not available")
+
+    if cuda_available():
+        # GPU should work with or without spacy gpu enabled
+        if with_spacy_gpu:
+            spacy.prefer_gpu()
+
     nlp = spacy.blank('en')
     config = {
         "top_n": 5,
-        "tokenizer_kwargs": {"add_prefix_space": True}
+        "tokenizer_kwargs": {"add_prefix_space": True},
+        "device": device
     }
     if not are_packages_installed(NEURAL_EXTRA_PACKAGES):
         with pytest.raises(ImportError):
@@ -97,10 +124,14 @@ def test_neural_spacy_tagger() -> None:
             assert [(token_index, token_index + 1)] == token._.pymusas_mwe_indexes
 
 
-def test_neural_tagger() -> None:
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_neural_tagger(device: str) -> None:
     """
     Test the neural tagger.
     """
+    if not cuda_available() and device == "cuda":
+        pytest.skip("CUDA not available")
+
     if not are_packages_installed(NEURAL_EXTRA_PACKAGES):
         with pytest.raises(ImportError):
             from pymusas.taggers.neural import NeuralTagger
@@ -108,7 +139,8 @@ def test_neural_tagger() -> None:
         from pymusas.taggers.neural import NeuralTagger
         tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
                               top_n=5,
-                              tokenizer_kwargs={"add_prefix_space": True})
+                              tokenizer_kwargs={"add_prefix_space": True},
+                              device=device)
         output_tag_indicies = tagger(TEST_TOKENS)
         assert len(output_tag_indicies) == len(TEST_TOKENS)
         for token_index, tag_indicies in enumerate(output_tag_indicies):
@@ -118,10 +150,14 @@ def test_neural_tagger() -> None:
             assert [(token_index, token_index + 1)] == indicies
 
 
-def test_hybrid_tagger() -> None:
+@pytest.mark.parametrize("device", ["cpu", "cuda"])
+def test_hybrid_tagger(device: str) -> None:
     """
     Test the hybrid tagger.
     """
+    if not cuda_available() and device == "cuda":
+        pytest.skip("CUDA not available")
+
     if not are_packages_installed(NEURAL_EXTRA_PACKAGES):
         with pytest.raises(ImportError):
             from pymusas.taggers.hybrid import HybridTagger
@@ -144,7 +180,8 @@ def test_hybrid_tagger() -> None:
         ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
         neural_tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
                                      top_n=5,
-                                     tokenizer_kwargs={"add_prefix_space": True})
+                                     tokenizer_kwargs={"add_prefix_space": True},
+                                     device=device)
         tagger = HybridTagger(rules, ranker, neural_tagger, set(), set())
         output_tag_indicies = tagger(tokens=TEST_TOKENS, lemmas=TEST_TOKENS, pos_tags=TEST_POS)
         assert len(output_tag_indicies) == len(TEST_TOKENS)

@@ -62,7 +62,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
-        run: uv sync --locked --all-extras --index=https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match
+        run: uv sync --locked --all-extras
 
       - name: check uv cache is working
         if: steps.setup-uv.outputs.cache-hit == 'true'
@@ -118,7 +118,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
-        run: uv sync --locked --all-extras --index=https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match
+        run: uv sync --locked
 
       - name: check uv cache is working
         if: steps.setup-uv.outputs.cache-hit == 'true'
@@ -204,11 +204,9 @@ jobs:
             --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
             coverage run --append -m pytest tests/functional_tests
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" \
-            --index https://download.pytorch.org/whl/cpu \
             --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
             coverage run --append -m pytest tests/functional_tests
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" \
-            --index https://download.pytorch.org/whl/cpu \
             --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
             coverage run --append -m pytest --doctest-modules pymusas/
           mv ./temp_pyproject.toml ./pyproject.toml
@@ -220,8 +218,8 @@ jobs:
           uv build
           $PYMUSAS_VERSION = & { uv run scripts/get_version.py ./pyproject.toml }
           uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
-          uv run --index https://download.pytorch.org/whl/cpu --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
-          uv run --index https://download.pytorch.org/whl/cpu --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest --doctest-modules pymusas/
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest tests/functional_tests
+          uv run --with "dist/pymusas-${PYMUSAS_VERSION}-py3-none-any.whl[neural]" --with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated coverage run --append -m pytest --doctest-modules pymusas/
           rm ./pyproject.toml
           mv ./temp_pyproject.toml ./pyproject.toml
 

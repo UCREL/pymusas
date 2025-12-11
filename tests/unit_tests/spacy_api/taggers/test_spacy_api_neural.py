@@ -7,6 +7,7 @@ from spacy.lang.en import English
 from spacy.language import Language
 from spacy.tokens import Doc
 from spacy.vocab import Vocab
+import torch
 from transformers import AutoTokenizer, PreTrainedTokenizerBase
 from wsd_torch_models.bem import BEM
 
@@ -89,6 +90,8 @@ def test_to_from_disk(tmp_path: Path) -> None:
     # Test that if we change the tokenizer_kwargs the model is
     # loaded with these changed tokenizer kwargs, by default the
     # add_prefix_space is True here we will load it with False
+    # This is more of a side affect in that the tokenizer should be saved with
+    # these kwargs.
     nlp = create_tagger()
 
     config = {
@@ -106,6 +109,19 @@ def test_to_from_disk(tmp_path: Path) -> None:
     assert isinstance(empty_tagger.tokenizer, PreTrainedTokenizerBase)
     assert empty_tagger.tokenizer.add_prefix_space == config["tokenizer_kwargs"]["add_prefix_space"]
     empty_tagger._validate()
+
+    # Want to ensure that when loading a model from disk that it loads the model
+    # to the correct device.
+    empty_nlp = spacy.load(tmp_path / "test_2", config={"components.pymusas_neural_tagger.device":  "meta"})
+    empty_tagger = cast(NeuralTagger,
+                        empty_nlp.get_pipe('pymusas_neural_tagger'))
+    assert isinstance(empty_tagger.wsd_model, BEM)
+    assert isinstance(empty_tagger.tokenizer, PreTrainedTokenizerBase)
+    assert empty_tagger.tokenizer.add_prefix_space == config["tokenizer_kwargs"]["add_prefix_space"]
+    assert empty_tagger.device.type == "meta"
+    assert empty_tagger.wsd_model.base_model.device.type == "meta"
+    empty_tagger._validate()
+
 
 
 @pytest.mark.parametrize("pymusas_tags_token_attr,pymusas_mwe_indexes_attr",
@@ -158,20 +174,27 @@ def test__init__() -> None:
     assert tagger._pymusas_mwe_indexes_attr == 'pymusas_mwe_indexes'
     assert tagger.top_n == 5
     assert tagger._tokenizer_kwargs is None
+    assert isinstance(tagger.device, torch.device)
+    assert tagger.device.type == "cpu"
 
     test_doc = Doc(Vocab(), words=TEST_TOKENS, spaces=[True] * len(TEST_TOKENS))
     with pytest.raises(ValueError):
         tagger.initialize()
     with pytest.raises(ValueError):
         tagger(test_doc)
+
     tagger.wsd_model = BEM.from_pretrained("ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
+
     with pytest.raises(ValueError):
         tagger.initialize()
     with pytest.raises(ValueError):
         tagger(test_doc)
+ 
     tagger.tokenizer = cast(PreTrainedTokenizerBase,
                             AutoTokenizer.from_pretrained("ucrelnlp/PyMUSAS-Neural-English-Small-BEM"))  # type: ignore[no-untyped-call]
     tagger.initialize()
+    assert tagger.wsd_model.base_model.device.type == "cpu"
+    assert tagger.device.type == "cpu"
 
     # Testing valid values of top-n
     with pytest.raises(ValueError):
@@ -179,3 +202,19 @@ def test__init__() -> None:
     NeuralTagger(top_n=-1)
     with pytest.raises(ValueError):
         NeuralTagger(top_n=-2)
+
+    # Testing with a non-default device
+    tagger = NeuralTagger(device="meta")
+    assert tagger.device.type == "meta"
+    tagger.initialize(pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
+    tagger_wsd_model = cast(BEM, tagger.wsd_model)
+    assert tagger_wsd_model.base_model.device.type == "meta"
+
+    # Testing that validate will move the wsd_model to the correct device
+    tagger = NeuralTagger(device="cpu")
+    tagger.initialize(pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
+    tagger_wsd_model = cast(BEM, tagger.wsd_model)
+    assert tagger_wsd_model.base_model.device.type == "cpu"
+    tagger.device = torch.device("meta")
+    tagger._validate()
+    assert tagger_wsd_model.base_model.device.type == "meta"

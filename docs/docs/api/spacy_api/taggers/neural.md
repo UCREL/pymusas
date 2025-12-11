@@ -19,6 +19,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
  |     pymusas_tags_token_attr: str = 'pymusas_tags',
  |     pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes',
  |     top_n: int = 5,
+ |     device: str = 'cpu',
  |     tokenizer_kwargs: dict[str, Any] | None = None
  | ) -> None
 ```
@@ -81,6 +82,7 @@ argument on [nlp.add_pipe](https://spacy.io/api/language#add_pipe) or in your
 | pymusas_tags_token_attr  | See parameters section below |
 | pymusas_mwe_indexes_attr | See parameters section below |
 | top_n                    | See parameters section below |
+| device                   | See parameters section below |
 | tokenizer_kwargs         | See parameters section below |
 
 <h4 id="neuraltagger.parameters">Parameters<a className="headerlink" href="#neuraltagger.parameters" title="Permanent link">&para;</a></h4>
@@ -98,6 +100,10 @@ argument on [nlp.add_pipe](https://spacy.io/api/language#add_pipe) or in your
 - __top\_n__ : `int`, optional (default = `5`) <br/>
     The number of tags to predict. If -1 all tags will be predicted.
     If 0 or less than 0 will raise a ValueError.
+- __device__ : `str`, optional (default = `'cpu'`) <br/>
+    The device to load the model, `wsd_model`, on. e.g. `'cpu'`, it has to
+    be a string that can be passed to
+    [`torch.device`](https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device).
 - __tokenizer\_kwargs__ : `dict[str, Any] | None`, optional (default = `None`) <br/>
     Keyword arguments to pass to the tokenizer's
     `transformers.AutoTokenizer.from_pretrained` method.
@@ -120,6 +126,8 @@ argument on [nlp.add_pipe](https://spacy.io/api/language#add_pipe) or in your
 - __top\_n__ : `int`, optional (default = `5`) <br/>
     The number of tags to predict. If -1 all tags will be predicted.
     If 0 or less than 0 will raise a ValueError.
+- __device__ : `torch.device` <br/>
+    The device that the `wsd_model` will be loaded on. e.g. `torch.device`
 - __wsd\_model__ : `wsd_torch_models.bem.BEM | None`, optional (default = `None`) <br/>
     The neural Word Sense Disambiguation (WSD) model. This is `None` until
     the component is initialized or has been loaded from disk or bytes.
