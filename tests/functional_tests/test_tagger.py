@@ -20,6 +20,7 @@ EXPECTED_NEURAL_TAG_OUTPUT: list[list[str]] = [
     ['N1', 'N3.2', 'T1.2', 'T1.3', 'T3']
 ]
 
+
 def cuda_available() -> bool:
     """
     Check if CUDA is available.
@@ -31,7 +32,7 @@ def cuda_available() -> bool:
     try:
         import torch
         return torch.cuda.is_available()
-    except:
+    except ImportError:
         return False
 
 

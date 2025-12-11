@@ -228,8 +228,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
         
         if self.tokenizer is None:
             raise ValueError(error_msg.format('tokenizer'))
-        
-        self.wsd_model = cast(BEM, self.wsd_model)
+
         if self.wsd_model.base_model.device != self.device:
             self.wsd_model.to(self.device)
 

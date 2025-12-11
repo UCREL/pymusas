@@ -112,7 +112,7 @@ def test_to_from_disk(tmp_path: Path) -> None:
 
     # Want to ensure that when loading a model from disk that it loads the model
     # to the correct device.
-    empty_nlp = spacy.load(tmp_path / "test_2", config={"components.pymusas_neural_tagger.device":  "meta"})
+    empty_nlp = spacy.load(tmp_path / "test_2", config={"components.pymusas_neural_tagger.device": "meta"})
     empty_tagger = cast(NeuralTagger,
                         empty_nlp.get_pipe('pymusas_neural_tagger'))
     assert isinstance(empty_tagger.wsd_model, BEM)
@@ -121,7 +121,6 @@ def test_to_from_disk(tmp_path: Path) -> None:
     assert empty_tagger.device.type == "meta"
     assert empty_tagger.wsd_model.base_model.device.type == "meta"
     empty_tagger._validate()
-
 
 
 @pytest.mark.parametrize("pymusas_tags_token_attr,pymusas_mwe_indexes_attr",
