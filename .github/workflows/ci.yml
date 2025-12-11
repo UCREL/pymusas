@@ -118,7 +118,7 @@ jobs:
           cache-dependency-glob: "uv.lock"
 
       - name: Install the project
-        run: uv sync --locked
+        run: uv sync --locked --all-extras
 
       - name: check uv cache is working
         if: steps.setup-uv.outputs.cache-hit == 'true'
