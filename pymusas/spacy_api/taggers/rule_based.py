@@ -211,6 +211,11 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
     def _validate(self) -> None:
         '''
         Checks that `rules` and `ranker` are not `None`
+
+        # Raises
+
+        `ValueError`
+            If `self.rules` or `self.ranker` are `None`
         '''
         error_msg = ('The `{}` attribute cannot be `None`, this '
                      'attribute can be set through the `initialize` method.')
@@ -244,7 +249,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         
         rules : `List[pymusas.taggers.rules.rule.Rule]`
             A list of rules to apply to the sequence of tokens in the
-            :func:`__call__`. The output from each rule is concatendated and given
+            :func:`__call__`. The output from each rule is concatenated and given
             to the `ranker`.
         ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
             A ranker to rank the output from all of the `rules`.

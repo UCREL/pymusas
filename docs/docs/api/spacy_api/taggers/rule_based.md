@@ -233,7 +233,7 @@ typically before training. At runtime, all data is load from disk.
 
 - __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
     A list of rules to apply to the sequence of tokens in the
-    [`__call__`](#__call__). The output from each rule is concatendated and given
+    [`__call__`](#__call__). The output from each rule is concatenated and given
     to the `ranker`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     A ranker to rank the output from all of the `rules`.
