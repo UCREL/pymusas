@@ -1,0 +1,41 @@
+name: Publishing Python Package
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release-build:
+    if: github.repository == 'UCREL/pymusas'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v6
+        id: python-setup
+        with:
+          python-version: 3.13
+      
+      - name: Install uv
+        uses: astral-sh/setup-uv@v7
+        id: setup-uv
+        with:
+          # Install a specific version of uv.
+          version: "0.9.15"
+          enable-cache: false
+          restore-cache: false
+          save-cache: false
+
+      - name: Build release distributions
+        run: |
+          uv build
+
+      - name: Publish release distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@ed0c53931b1dc9bd32cbe73a98c7f6766f8a527e

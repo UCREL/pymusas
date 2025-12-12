@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.4.0]() - 2025-12-12
+## Unreleased
 
 ### Added
 
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `scripts/create_temporary_version.py` - this creates a temporary `pyproject.toml` with a unique version of the project so that functional testing through `make functional-tests` does not use a cached/out-dated version of the codebase once the code base has been built while still using cached Python packages for the packages `pymusas` depends on.
 - `makefile` the target `functional-tests` has been removed and replaced with `full-coverage-tests`. The difference being that it will also run the unit tests and report coverage that uses the results from all of the tests, unit, functional, and documentation tests while using an install that has come a the built distribution. This code is also now used in the CI pipeline so that the coverage results are more representative.
 - GPU functional testing - this is done through the script `tests/docker_gpu_run_script.sh` and the docker image `tests/gpu-docker.dockerfile`
+- `.github/workflows/publish.yml` - A publishing specific workflow, that publishes the python package to PYPI through OpenID Connect (OIDC). The python package used to be published in the `ci.yml` workflow using tokens, this has now been removed in favour of using the more secure OIDC method. 
 
 ### Changed
 
