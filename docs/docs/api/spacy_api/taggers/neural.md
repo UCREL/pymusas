@@ -357,5 +357,6 @@ with TemporaryDirectory() as temp_dir:
     _ = tagger.to_disk(temp_dir)
     _ = tagger_2.from_disk(temp_dir)
 
+assert tagger_2.wsd_model.base_model_name == tagger.wsd_model.base_model_name
 ```
 
