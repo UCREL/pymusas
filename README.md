@@ -155,6 +155,8 @@ To note the functional tests that are ran within this `make` command are the tes
 
 #### Running GPU tests
 
+**NOTE** We do not expect contributors to run these tests, the UCREL team can run these tests as part of the pull request before we merge into the main branch.
+
 The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have this docker image. The image if you run it assumes you have an Nvidia GPU and a Nvidia driver that supports CUDA 12.
 
 As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker container (to note the `0.1.0` version number of the container is not meaningful at the moment):

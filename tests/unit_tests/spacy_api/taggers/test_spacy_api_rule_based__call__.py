@@ -9,11 +9,12 @@ from spacy.vocab import Vocab
 from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
+from pymusas.spacy_api.utils import remove_custom_token_extension as remove_extension
 from pymusas.taggers.rules.mwe import MWERule
 from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
-from ..utils import compare_output, remove_extension
+from ..utils import compare_output
 
 
 DATA_DIR = Path(__file__, '..', '..', '..', 'data').resolve()

@@ -40,6 +40,25 @@ def set_custom_token_extension(extension_name: str) -> None:
         Token.set_extension(extension_name, default=None)
 
 
+def remove_custom_token_extension(extension_name: str) -> None:
+    """
+    Removes a custom attribute of the spaCy Token if it exists already. This
+    custom attribute would be accessed via `Token._.{extension_name}`.
+
+    # Parameters
+
+    extension_name : `str`
+        Name of the custom attribute to remove from the spaCy Token if it
+        exists already.
+
+    # Returns
+
+    `None`
+    """
+    if Token.has_extension(extension_name):
+        Token.remove_extension(extension_name)
+
+
 def update_factory_attributes(meta_information_to_update: str,
                               factory_name: str,
                               new_attribute_name: str,

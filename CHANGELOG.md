@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [v0.4.0]() - 2025-12-12
 
 ### Added
 
@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `pymusas.taggers.neural` module that includes the first Neural based tagger using the taggers from [WSD-Torch-Models](https://github.com/UCREL/WSD-Torch-Models).
 - Added `pymusas.spacy_api.taggers.neural` module that includes the Neural based tagger that can be used as a spacy pipeline.
 - Added `pymusas.taggers.hybrid` module that includes the first Hybrid based tagger, `pymusas.taggers.hybrid.HybridTagger`, which inherits from the `pymusas.taggers.rule-based.RuleBasedTagger` and uses the Neural tagger, `pymusas.taggers.neural.NeuralTagger`, when the rule based tagger does not know what to predict, i.e. when it usually predicts `Z99` it will now use the neural tagger.
+- Added `pymusas.spacy_api.taggers.hybrid` module that includes the Hybrid tagger that can be used as a spacy pipeline.
 - The CI pipeline `.github/workflows/ci.yml` now caches the Neural based tagger that we test (`ucrelnlp/PyMUSAS-Neural-English-Small-BEM`) so that it does not get downloaded each time the tests are ran for each Python version for each Operating System.
 - Supports `Python 3.14`.
 - `typer` Python package, this is a requirement from `spacy`, since version `3.8.7` (26th of May 2025) it had dropped the requirement for `typer` but instead used `typer-slim`, however `typer-slim` does not appear to work when imported `import typer` and it raises an error when we import `spacy`, thus the need to add `typer` as a requirement.

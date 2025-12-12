@@ -60,6 +60,7 @@ Changelog = "https://github.com/UCREL/pymusas/blob/main/CHANGELOG.md"
 [project.entry-points.spacy_factories]
 pymusas_rule_based_tagger = "pymusas.spacy_api.taggers.rule_based:RuleBasedTagger"
 pymusas_neural_tagger = "pymusas.spacy_api.taggers.neural:NeuralTagger"
+pymusas_hybrid_tagger = "pymusas.spacy_api.taggers.hybrid:HybridTagger"
 
 [dependency-groups]
 dev = [

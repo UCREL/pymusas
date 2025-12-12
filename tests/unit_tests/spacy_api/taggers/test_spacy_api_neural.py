@@ -12,9 +12,10 @@ from transformers import AutoTokenizer, PreTrainedTokenizerBase
 from wsd_torch_models.bem import BEM
 
 from pymusas.spacy_api.taggers.neural import NeuralTagger
+from pymusas.spacy_api.utils import remove_custom_token_extension as remove_extension
 
 from ...taggers.test_neural_tagger import EXPECTED_TAG_INDICIES, EXPECTED_TAG_OUTPUT, TEST_TOKENS
-from ..utils import compare_output, remove_extension
+from ..utils import compare_output
 
 
 def create_empty_tagger() -> Language:

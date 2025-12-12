@@ -1,22 +1,4 @@
-from spacy.tokens import Doc, Token
-
-
-def remove_extension(extension_name: str) -> None:
-    """
-    Removes a custom extension from the spaCy Token if it exists already.
-
-    # Parameters
-
-    extension_name : `str`
-        Name of the custom extension to remove from the spaCy Token if it
-        exists already.
-
-    # Returns
-
-    `None`
-    """
-    if Token.has_extension(extension_name):
-        Token.remove_extension(extension_name)
+from spacy.tokens import Doc
 
 
 def compare_output(expected_output: list[tuple[list[str], list[tuple[int, int]]]],

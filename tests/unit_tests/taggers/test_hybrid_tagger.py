@@ -32,7 +32,7 @@ def test_hybrid_based_tagger__init__(neural_tagger: NeuralTagger) -> None:
     assert isinstance(tagger.neural_tagger, NeuralTagger)
 
 
-def test_rule_based_tagger__call__(neural_tagger: NeuralTagger) -> None:
+def test_hybrid_tagger__call__(neural_tagger: NeuralTagger) -> None:
 
     # Test the first case where we have no rules and it should tag everything as
     # Z99
