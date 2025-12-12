@@ -109,7 +109,7 @@ if __name__ == "__main__":
     
     current_memory = getrusage(RUSAGE_SELF).ru_maxrss
     
-    lexicon = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+    lexicon = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
     lexicon_lookup = LexiconCollection.from_tsv(lexicon, include_pos=True)
     lemma_lexicon_lookup = LexiconCollection.from_tsv(lexicon, include_pos=False)
     tagger = USASRuleBasedTagger(lexicon_lookup=lexicon_lookup,

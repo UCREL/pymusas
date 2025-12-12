@@ -57,13 +57,6 @@ build-python-package:
 	@rm -rf ./dist
 	@uv build
 
-.PHONY: functional-tests
-functional-tests:
-	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
-	--with pytest --no-project --isolated pytest --doctest-modules pymusas/
-	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
-	--with pytest --no-project --isolated pytest tests/functional_tests
-
 .PHONY: release-notes
 release-notes:
 	@uv run --no-project --script \
@@ -85,13 +78,42 @@ tests:
 	@uv run coverage run
 	@uv run coverage report
 
+.PHONY: failed-tests
+failed-tests:
+	@uv run pytest --last-failed -vvv
+
 .PHONY: verbose-tests
 verbose-tests:
-	@uv run pytest tests/ -vvv
+	@uv run pytest -vvv
 
 .PHONY: doc-tests
 doc-tests:
 	@uv run coverage run -m pytest --doctest-modules pymusas/
 	@uv run coverage report
+
+.PHONY: full-coverage-tests
+full-coverage-tests:
+	@uv run scripts/create_temporary_version.py ./pyproject.toml ./temp_pyproject.toml
+	@uv lock --check
+	@rm -rf ./dist
+	@uv build
+	@uv run coverage erase
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
+	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
+	coverage run --append -m pytest tests/functional_tests
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural] \
+	--index https://download.pytorch.org/whl/cpu \
+	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
+	coverage run --append -m pytest tests/functional_tests
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural] \
+	--index https://download.pytorch.org/whl/cpu \
+	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
+	coverage run --append -m pytest --doctest-modules pymusas/
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural,dev] \
+	--index https://download.pytorch.org/whl/cpu \
+	--no-project --isolated coverage run --append
+	@uv run coverage report
+	@mv ./temp_pyproject.toml ./pyproject.toml
+	@rm -rf ./dist
 
 	

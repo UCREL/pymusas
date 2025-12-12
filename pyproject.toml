@@ -3,12 +3,19 @@ name = "pymusas"
 version = "0.3.0"
 description = "PYthon Multilingual Ucrel Semantic Analysis System"
 authors = [
-    { name = "UCREL Research Centre", email = "ucrel@lancaster.ac.uk" }
+    { name = "UCREL Research Centre", email = "ucrel@lancaster.ac.uk" },
 ]
-readme = {file = "README.md", content-type = "text/markdown"}
 license = "Apache-2.0"
-license-files = ["LICENSE"]
-keywords = ["usas", "USAS", "UCREL", "ucrel", "semantics"]
+license-files = [
+    "LICENSE",
+]
+keywords = [
+    "usas",
+    "USAS",
+    "UCREL",
+    "ucrel",
+    "semantics",
+]
 classifiers = [
     "Operating System :: POSIX :: Linux",
     "Operating System :: MacOS :: MacOS X",
@@ -18,16 +25,29 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Topic :: Scientific/Engineering",
     "Intended Audience :: Developers",
-    "Intended Audience :: Science/Research"
+    "Intended Audience :: Science/Research",
 ]
-requires-python = ">=3.10, <3.14"
+requires-python = ">=3.10, <3.15"
 dependencies = [
     "requests>=2.13.0,<3.0",
     "spacy>=3.1.4",
     "srsly>=2.4.1,<3.0",
     "tqdm>=4.50.0,<5.0",
+    "typer>=0.3.0,<1.0.0",
+]
+
+[project.readme]
+file = "README.md"
+content-type = "text/markdown"
+
+[project.optional-dependencies]
+neural = [
+    "torch>=2.2,<3.0",
+    "transformers>=4.0,<5.0",
+    "wsd-torch-models>0.1.1,<1.0",
 ]
 
 [project.urls]
@@ -37,17 +57,10 @@ Repository = "https://github.com/UCREL/pymusas"
 Issues = "https://github.com/UCREL/pymusas/issues"
 Changelog = "https://github.com/UCREL/pymusas/blob/main/CHANGELOG.md"
 
-[project.entry-points.'spacy_factories']
-"pymusas_rule_based_tagger" = "pymusas.spacy_api.taggers.rule_based:RuleBasedTagger"
-
-[build-system]
-requires = ["uv_build>=0.9.6,<0.10.0"]
-build-backend = "uv_build"
-
-
-[tool.uv.build-backend]
-module-name = "pymusas"
-module-root = ""
+[project.entry-points.spacy_factories]
+pymusas_rule_based_tagger = "pymusas.spacy_api.taggers.rule_based:RuleBasedTagger"
+pymusas_neural_tagger = "pymusas.spacy_api.taggers.neural:NeuralTagger"
+pymusas_hybrid_tagger = "pymusas.spacy_api.taggers.hybrid:HybridTagger"
 
 [dependency-groups]
 dev = [
@@ -55,11 +68,24 @@ dev = [
     "flake8>=3.8",
     "isort>=6.0",
     "mypy>=1.12",
-    "pytest>=6.0,!=7.1.0,!=8.1.0",
+    "pytest>=6.0,!=7.1.0,!=8.1.0,<9.0.2",
     "responses>=0.25.7",
+    "tomli-w>=1.2.0",
     "types-requests>=2.32.4.20250913",
 ]
 
+[build-system]
+requires = [
+    "uv_build>=0.9.6,<0.10.0",
+]
+build-backend = "uv_build"
+
+[tool.uv]
+default-groups = "all"
+
+[tool.uv.build-backend]
+module-name = "pymusas"
+module-root = ""
 
 [tool.isort]
 known_first_party = "pymusas"
@@ -70,7 +96,11 @@ known_third_party = [
     "requests",
     "pytest",
     "responses",
-    "pydoc_markdown"
+    "pydoc_markdown",
+    "transformers",
+    "torch",
+    "wsd_torch_models",
+    "tomli_w",
 ]
 force_sort_within_sections = true
 multi_line_output = 3
@@ -80,10 +110,15 @@ include_trailing_comma = true
 lines_after_imports = 2
 line_length = 119
 
-
 [tool.mypy]
-files = ["tests/", "pymusas/", "scripts/"]
-exclude = ["scripts/py2md.py"]
+files = [
+    "tests/",
+    "pymusas/",
+    "scripts/",
+]
+exclude = [
+    "scripts/py2md.py",
+]
 disallow_untyped_calls = true
 disallow_untyped_defs = true
 disallow_incomplete_defs = true
@@ -100,24 +135,24 @@ strict_equality = true
 
 [[tool.mypy.overrides]]
 module = [
-    'urllib3.*', 
-    'tqdm.*',
-    'pydoc_markdown.*',
-    'spacy.vocab',
-    'srsly.*'
+    "urllib3.*",
+    "tqdm.*",
+    "pydoc_markdown.*",
+    "spacy.vocab",
+    "srsly.*",
 ]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
 testpaths = [
-    "tests/unit_tests"
+    "tests/unit_tests",
 ]
 
 [tool.coverage.run]
 branch = true
 source = [
-    "pymusas"
+    "pymusas",
 ]
 command_line = "-m pytest"
 

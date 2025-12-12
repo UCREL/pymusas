@@ -1,4 +1,17 @@
+"""
+This module contains various helper functions that are used in other modules.
+
+# Attributes
+
+NEURAL_EXTRA_PACKAGES: `list[str]`
+    The Python packages that are required for the `pymusas[neural]` extra.
+"""
+
+import importlib.util
 from typing import Iterable, Set, Tuple
+
+
+NEURAL_EXTRA_PACKAGES: list[str] = ['transformers', 'wsd_torch_models', 'torch']
 
 
 def token_pos_tags_in_lexicon_entry(lexicon_entry: str
@@ -88,3 +101,55 @@ def unique_pos_tags_in_lexicon_entry(lexicon_entry: str) -> Set[str]:
     for _, pos_tag in token_pos_tags_in_lexicon_entry(lexicon_entry):
         unique_pos_tags.add(pos_tag)
     return unique_pos_tags
+
+
+def are_packages_installed(packages: list[str]) -> bool:
+    """
+    Returns True if all packages are installed, False otherwise.
+
+    # Parameters
+
+    packages : `list[str]`
+        A list of package names to check if they are installed.
+
+    # Returns
+
+    `bool`
+    """
+    def is_package_installed(package_name: str) -> bool:
+        """
+        Returns True if the package is installed, False otherwise.
+
+        # Parameters
+
+        package_name : `str`
+            The name of the package to check if it is installed.
+        
+        # Returns
+
+        `bool`
+        """
+        return importlib.util.find_spec(package_name) is not None
+    
+    are_installed = [is_package_installed(package) for package in packages]
+    return all(are_installed)
+
+
+def neural_extra_installed() -> None:
+    """
+    Checks if the `pymusas[neural]` extra is installed by checking if the
+    packages required for the `neural` extra are installed.
+
+    # Raises
+
+    `ImportError`
+        If `pymusas[neural]` is not installed.
+    """
+
+    if not are_packages_installed(NEURAL_EXTRA_PACKAGES):
+        import_error_message = (
+            "To use the NeuralTagger you need to install the "
+            "pymusas package with the `neural` extra installed, like so "
+            "pip install pymusas[neural] or uv add pymusas[neural]"
+        )
+        raise ImportError(import_error_message)

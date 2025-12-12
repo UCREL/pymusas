@@ -296,7 +296,7 @@ class LexiconCollection(MutableMapping):
         `include_pos` = `True`
         ``` python
         >>> from pymusas.lexicon_collection import LexiconCollection
-        >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+        >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
         >>> welsh_lexicon_dict = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
         >>> welsh_lexicon_collection = LexiconCollection(welsh_lexicon_dict)
         >>> assert welsh_lexicon_dict['ceir|noun'][0] == 'M3fn'
@@ -307,10 +307,10 @@ class LexiconCollection(MutableMapping):
         `include_pos` = `False`
         ``` python
         >>> from pymusas.lexicon_collection import LexiconCollection
-        >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+        >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
         >>> welsh_lexicon_dict = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
         >>> welsh_lexicon_collection = LexiconCollection(welsh_lexicon_dict)
-        >>> assert welsh_lexicon_dict['ceir'][0] == 'M3fn'
+        >>> assert welsh_lexicon_dict['ceir'][0] == 'A9+'
 
         ```
         '''
@@ -391,8 +391,8 @@ class LexiconCollection(MutableMapping):
 
         ``` python
         >>> from pymusas.lexicon_collection import LexiconCollection
-        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv"
-        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
+        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv"
+        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/7ccc8baaea36f3fd249e77671db5638c1cba6136/English/semantic_lexicon_en.tsv"
         >>> welsh_lexicon_data = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
         >>> welsh_lexicon = LexiconCollection(welsh_lexicon_data)
         >>> english_lexicon_data = LexiconCollection.from_tsv(english_lexicon_url, include_pos=True)
@@ -460,8 +460,8 @@ class LexiconCollection(MutableMapping):
 
         ``` python
         >>> from pymusas.lexicon_collection import LexiconCollection
-        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv"
-        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/semantic_lexicon_en.tsv"
+        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv"
+        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/7ccc8baaea36f3fd249e77671db5638c1cba6136/English/semantic_lexicon_en.tsv"
         >>> tsv_urls = [welsh_lexicon_url, english_lexicon_url]
         >>> combined_lexicon_collection = LexiconCollection.tsv_merge(*tsv_urls, include_pos=True)
         >>> assert isinstance(combined_lexicon_collection, dict)
@@ -879,7 +879,7 @@ class MWELexiconCollection(MutableMapping):
 
         ``` python
         >>> from pymusas.lexicon_collection import MWELexiconCollection
-        >>> portuguese_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv'
+        >>> portuguese_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Portuguese/mwe-pt.tsv'
         >>> mwe_lexicon_dict = MWELexiconCollection.from_tsv(portuguese_lexicon_url)
         >>> mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_dict)
         >>> assert mwe_lexicon_dict['abaixo_adv de_prep'][0] == 'M6'
@@ -966,8 +966,8 @@ class MWELexiconCollection(MutableMapping):
 
         ``` python
         >>> from pymusas.lexicon_collection import LexiconCollection
-        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/mwe-welsh.tsv"
-        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/English/mwe-en.tsv"
+        >>> welsh_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/mwe-welsh.tsv"
+        >>> english_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/7ccc8baaea36f3fd249e77671db5638c1cba6136/English/mwe-en.tsv"
         >>> tsv_urls = [welsh_lexicon_url, english_lexicon_url]
         >>> combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_urls)
         >>> assert isinstance(combined_lexicon_data, dict)

@@ -7,3 +7,5 @@ count = true
 show_source = true
 exclude = 
     *.lock
+    tests/*.sh
+    tests/*.dockerfile

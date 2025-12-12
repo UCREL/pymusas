@@ -25,8 +25,8 @@ def dataset_statistics(dataset: datasets.arrow_dataset.Dataset,
     return statistics
 
 
-single_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Italian/semantic_lexicon_ita.tsv"
-mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Italian/mwe-ita.tsv"
+single_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Italian/semantic_lexicon_ita.tsv"
+mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Italian/mwe-ita.tsv"
 
 single_lexicon = LexiconCollection.from_tsv(single_lexicon_url)
 single_lemma_lexicon = LexiconCollection.from_tsv(single_lexicon_url,

@@ -9,9 +9,10 @@ from pymusas import config
 
 def test_cache_home(monkeypatch: MonkeyPatch) -> None:
     with tempfile.TemporaryDirectory() as temp_dir:
-        reload(config)
         home_dir = str(Path.home())
         # Test default home dir
+        monkeypatch.delenv("PYMUSAS_HOME", raising=False)
+        reload(config)
         assert str(Path(f'{home_dir}', '.cache', 'pymusas')) == config.PYMUSAS_CACHE_HOME
         # Test default home dir when the `XDG_CACHE_HOME` environment variable is set.
         monkeypatch.setenv("XDG_CACHE_HOME", str(Path(f'{temp_dir}', '.test_data')))

@@ -17,7 +17,7 @@ base.
 def set_custom_token_extension(extension_name: str) -> None
 ```
 
-Defines a custom attribute of the spaCy Token which becomes avaliable
+Defines a custom attribute of the spaCy Token which becomes available
 via `Token._.{extension_name}`. The difference between this and using the
 spaCy [Token.set_extension method](https://spacy.io/api/token#set_extension)
 is this method will check if the extension exists already and if so will force it
@@ -27,8 +27,31 @@ through and output an UserWarning message that it has had to force this through.
 
 
 - __extension\_name__ : `str` <br/>
-    Name of the custom attribute that will become avaliable through
+    Name of the custom attribute that will become available through
     `Token._.{extension_name}`.
+
+<a id="pymusas.spacy_api.utils.remove_custom_token_extension"></a>
+
+### remove\_custom\_token\_extension
+
+```python
+def remove_custom_token_extension(extension_name: str) -> None
+```
+
+Removes a custom attribute of the spaCy Token if it exists already. This
+custom attribute would be accessed via `Token._.{extension_name}`.
+
+<h4 id="remove_custom_token_extension.parameters">Parameters<a className="headerlink" href="#remove_custom_token_extension.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __extension\_name__ : `str` <br/>
+    Name of the custom attribute to remove from the spaCy Token if it
+    exists already.
+
+<h4 id="remove_custom_token_extension.returns">Returns<a className="headerlink" href="#remove_custom_token_extension.returns" title="Permanent link">&para;</a></h4>
+
+
+- `None` <br/>
 
 <a id="pymusas.spacy_api.utils.update_factory_attributes"></a>
 

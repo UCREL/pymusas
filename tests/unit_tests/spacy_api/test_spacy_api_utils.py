@@ -2,7 +2,11 @@ import pytest
 from spacy.language import Language
 from spacy.tokens import Doc, Token
 
-from pymusas.spacy_api.utils import set_custom_token_extension, update_factory_attributes
+from pymusas.spacy_api.utils import (
+    remove_custom_token_extension,
+    set_custom_token_extension,
+    update_factory_attributes,
+)
 
 
 @pytest.fixture
@@ -27,6 +31,15 @@ def test_set_custom_token_extension() -> None:
 
     with pytest.warns(UserWarning):
         set_custom_token_extension('tags')
+
+
+def test_remove_custom_token_extension() -> None:
+    set_custom_token_extension('tags')
+    assert Token.has_extension('tags')
+    remove_custom_token_extension('tags')
+    assert not Token.has_extension('tags')
+    # check that we can remove an extension that doesn't exist
+    remove_custom_token_extension('tags')
 
 
 @pytest.mark.parametrize("meta_information_to_update",

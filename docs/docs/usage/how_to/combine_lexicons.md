@@ -124,8 +124,8 @@ In the code below we show that we first need to create a combined/merged single 
 
 ``` python
 # Get the existing single word lexicon from the Multilingual USAS repository
-existing_single_lexicon_url = ("https://raw.githubusercontent.com/UCREL/"
-                               "Multilingual-USAS/refs/heads/master/"
+existing_single_lexicon_url = ("https://raw.githubusercontent.com/UCREL/Multilingual-USAS/"
+                               "7ccc8baaea36f3fd249e77671db5638c1cba6136/"
                                "English/semantic_lexicon_en.tsv")
 custom_single_lexicon_path = Path("/workspaces/pymusas/scripts/combine_lexicon_example/custom_semantic_lexicon.tsv")
 
@@ -144,9 +144,8 @@ Then do the same for MWE lexicon:
 
 ``` python
 # Get the existing MWE lexicon from the Multilingual USAS repository
-existing_mwe_lexicon_url = ("https://raw.githubusercontent.com/UCREL/"
-                            "Multilingual-USAS/refs/heads/master/"
-                            "English/mwe-en.tsv")
+existing_mwe_lexicon_url = ("https://raw.githubusercontent.com/UCREL/Multilingual-USAS/"
+                            "7ccc8baaea36f3fd249e77671db5638c1cba6136/English/mwe-en.tsv")
 custom_mwe_lexicon_path = Path("/workspaces/pymusas/scripts/combine_lexicon_example/custom_mwe.tsv")
 combined_mwe_lexicon_data = MWELexiconCollection.tsv_merge(*[existing_mwe_lexicon_url,
                                                              custom_mwe_lexicon_path])
@@ -167,8 +166,8 @@ from pymusas.taggers.rules.single_word import SingleWordRule
 from pymusas.taggers.rules.mwe import MWERule
 
 # Get the existing single word lexicon from the Multilingual USAS repository
-existing_single_lexicon_url = ("https://raw.githubusercontent.com/UCREL/"
-                               "Multilingual-USAS/refs/heads/master/"
+existing_single_lexicon_url = ("https://raw.githubusercontent.com/UCREL/Multilingual-USAS/"
+                               "7ccc8baaea36f3fd249e77671db5638c1cba6136/"
                                "English/semantic_lexicon_en.tsv")
 custom_single_lexicon_path = Path("custom_semantic_lexicon.tsv")
 
@@ -183,9 +182,8 @@ combined_single_pos_lexicon_data = LexiconCollection.tsv_merge(*[existing_single
                                                                include_pos=True)
 
 # Get the existing MWE lexicon from the Multilingual USAS repository
-existing_mwe_lexicon_url = ("https://raw.githubusercontent.com/UCREL/"
-                               "Multilingual-USAS/refs/heads/master/"
-                               "English/mwe-en.tsv")
+existing_mwe_lexicon_url = ("https://raw.githubusercontent.com/UCREL/Multilingual-USAS/"
+                            "7ccc8baaea36f3fd249e77671db5638c1cba6136/English/mwe-en.tsv")
 custom_mwe_lexicon_path = Path("custom_mwe.tsv")
 combined_mwe_lexicon_data = MWELexiconCollection.tsv_merge(*[existing_mwe_lexicon_url,
                                                              custom_mwe_lexicon_path])

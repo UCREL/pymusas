@@ -636,7 +636,7 @@ def test_mwe_lexicon_collection_from_tsv(monkeypatch: MonkeyPatch) -> None:
         with responses.RequestsMock() as rsps:
             req_kwargs = {"stream": True}
             expected_response = 'mwe_template\tsemantic_tags\na_det contragosto_noun\tX7- X5.2-\n'
-            lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv'
+            lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Portuguese/mwe-pt.tsv'
             rsps.add(responses.GET, lexicon_url, status=200,
                      body=expected_response,
                      match=[responses.matchers.request_kwargs_matcher(req_kwargs)])

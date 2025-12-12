@@ -165,7 +165,7 @@ from pymusas.spacy_api.taggers.rule_based import RuleBasedTagger
 # Construction via spaCy pipeline
 nlp = spacy.blank('en')
 # Using default config
-single_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+single_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
 single_lexicon = LexiconCollection.from_tsv(single_lexicon_url)
 single_lemma_lexicon = LexiconCollection.from_tsv(single_lexicon_url,
                                                   include_pos=False)
@@ -233,7 +233,7 @@ typically before training. At runtime, all data is load from disk.
 
 - __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
     A list of rules to apply to the sequence of tokens in the
-    [`__call__`](#__call__). The output from each rule is concatendated and given
+    [`__call__`](#__call__). The output from each rule is concatenated and given
     to the `ranker`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     A ranker to rank the output from all of the `rules`.
