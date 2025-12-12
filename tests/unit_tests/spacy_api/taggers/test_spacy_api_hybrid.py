@@ -77,6 +77,17 @@ def test_hybrid_tagger_token_extension_warning() -> None:
     remove_extension('mwe_indexes')
 
 
+def test_to_from_bytes() -> None:
+    nlp = create_tagger()
+
+    initialized_tagger = cast(HybridTagger,
+                              nlp.add_pipe('pymusas_hybrid_tagger'))
+    with pytest.raises(NotImplementedError):
+        initialized_tagger.to_bytes()
+    with pytest.raises(NotImplementedError):
+        initialized_tagger.from_bytes(b"")
+
+
 def test_to_from_disk(tmp_path: Path) -> None:
     nlp = create_tagger()
 
