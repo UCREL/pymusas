@@ -30,7 +30,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
 
     This is a hybrid tagger which uses both the
     :class:`pymusas.spacy_api.taggers.rule_based.RuleBasedTagger`
-    and the :class:`pymusas.taggers.spacy_api.neural.NeuralTagger` taggers. This tagger
+    and the :class:`pymusas.spacy_api.taggers.neural.NeuralTagger` taggers. This tagger
     inherits from the `RuleBasedTagger` and `NeuralTagger`.
     The difference between this and the
     `RuleBasedTagger` is that this tagger will use the `NeuralTagger` to

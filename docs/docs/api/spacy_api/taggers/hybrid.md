@@ -31,7 +31,7 @@ of the [`pymusas.taggers.hybrid.HybridTagger`](/pymusas/api/taggers/hybrid/#hybr
 
 This is a hybrid tagger which uses both the
 [`pymusas.spacy_api.taggers.rule_based.RuleBasedTagger`](/pymusas/api/spacy_api/taggers/rule_based/#rulebasedtagger)
-and the [`pymusas.taggers.spacy_api.neural.NeuralTagger`](/pymusas/api/taggers/spacy_api/neural/#neuraltagger) taggers. This tagger
+and the [`pymusas.spacy_api.taggers.neural.NeuralTagger`](/pymusas/api/spacy_api/taggers/neural/#neuraltagger) taggers. This tagger
 inherits from the `RuleBasedTagger` and `NeuralTagger`.
 The difference between this and the
 `RuleBasedTagger` is that this tagger will use the `NeuralTagger` to

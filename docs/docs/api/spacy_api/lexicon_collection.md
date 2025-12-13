@@ -40,9 +40,9 @@ dictionary object that can be used to create a
 
     All other fields will be ignored.
 - __include\_pos__ : `bool`, optional (default = `True`) <br/>
-    Whether to include the POS information, if the information is avaliable,
-    or not. See [`add_lexicon_entry`](#add_lexicon_entry) for more information on this
-    parameter.
+    Whether to include the POS information, if the information is available,
+    or not. See [`pymusas.lexicon_collection.add_lexicon_entry`](/pymusas/api/lexicon_collection/#add_lexicon_entry)
+    for more information on this parameter.
 
 <h4 id="lexicon_collection_from_tsv.returns">Returns<a className="headerlink" href="#lexicon_collection_from_tsv.returns" title="Permanent link">&para;</a></h4>
 

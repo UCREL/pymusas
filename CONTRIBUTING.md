@@ -164,6 +164,8 @@ If the within project reference is within the same file you do not have to inclu
 - :func:\`download_url_file\`
 - :var:\`PYMUSAS_CACHE_HOME\`
 
+**To note** in some cases if you are trying to link to a method, you can do this using `:func:` but sometimes it requires you to remove the class name, this is not perfect as you can have two classes in a module with 2 identical naming methods, of which I do not know how to solve this issue yet but we have not had a need yet to solve this.
+
 #### Example docstrings
 
 TO DO.
