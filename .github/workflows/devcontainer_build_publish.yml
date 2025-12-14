@@ -27,6 +27,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Lower case image name
+        run: |
+          LOWER_IMAGE_NAME=$(echo "${{ env.IMAGE_NAME }}" | tr '[:upper:]' '[:lower:]')
+          echo "LOWER_IMAGE_NAME=$LOWER_IMAGE_NAME" >> $GITHUB_ENV
       - uses: actions/checkout@v5
 
       - name: Login to GitHub Container Registry
@@ -39,6 +43,6 @@ jobs:
       - name: Pre-build dev container image
         uses: devcontainers/ci@8bf61b26e9c3a98f69cb6ce2f88d24ff59b785c6
         with:
-          imageName: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          cacheFrom: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          imageName: ${{ env.REGISTRY }}/${{ env.LOWER_IMAGE_NAME }}
+          cacheFrom: ${{ env.REGISTRY }}/${{ env.LOWER_IMAGE_NAME }}
           push: always
