@@ -1,6 +1,6 @@
 [project]
 name = "pymusas"
-version = "0.3.0"
+version = "0.4.0"
 description = "PYthon Multilingual Ucrel Semantic Analysis System"
 authors = [
     { name = "UCREL Research Centre", email = "ucrel@lancaster.ac.uk" },
