@@ -45,4 +45,4 @@ RUN uv python install 3.11
 
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=.python-version,target=.python-version \
-    uv sync --index=https://download.pytorch.org/whl/cpu --index-strategy unsafe-best-match --python=3.12 --no-install-project --no-install-workspace --all-extras
+    uv sync --python=3.12 --no-install-project --no-install-workspace --all-extras
