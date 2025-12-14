@@ -34,9 +34,9 @@ def lexicon_collection_from_tsv(tsv_file_path: Union[PathLike, str],
         
         All other fields will be ignored.
     include_pos: `bool`, optional (default = `True`)
-        Whether to include the POS information, if the information is avaliable,
-        or not. See :func:`add_lexicon_entry` for more information on this
-        parameter.
+        Whether to include the POS information, if the information is available,
+        or not. See :func:`pymusas.lexicon_collection.add_lexicon_entry`
+        for more information on this parameter.
 
     # Returns
     

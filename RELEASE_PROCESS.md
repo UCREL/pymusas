@@ -37,31 +37,26 @@ GitHub also has a [guide on supported citation formats on GitHub.](https://docs.
 
 For more information about CITATION.cff files see the [Citation File Format website](https://citation-file-format.github.io/).
 
-5. Publish with [uv](https://docs.astral.sh/uv/guides/package/#publishing-your-package):
 
-    ``` bash
-    uv publish
-    ```
-
-6. Add these changes using Git manually (`git add`), then commit and push these changes with:
+5. Add these changes using Git manually (`git add`), then commit and push these changes with:
 
     ```
     git commit -m "Prepare for release $TAG" && git push origin main
     ```
     
-7. Then add the tag in git to mark the release (When prompted for a tag message use "Release v{VERSION}"):
+6. Then add the tag in git to mark the release (When prompted for a tag message use "Release v{VERSION}"):
 
     ```
     git tag -s $TAG && git push origin main --tags
     ```
 
-8. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click the "..." to the right of the "Verified" badge, and then click "Create release". Set the title of the release to "v{VERSION}" and copy the output from the following script into the markdown text box:
+7. Find the tag you just pushed [on GitHub](https://github.com/UCREL/pymusas/tags), click the "..." to the right of the "Verified" badge, and then click "Create release". Set the title of the release to "v{VERSION}" and copy the output from the following script into the markdown text box:
 
     ``` bash
     make release-notes
     ```
 
-9. Click "Publish release". GitHub Actions will then handle the rest, including publishing the package to PyPI.
+8. Click "Publish release". GitHub Actions will then handle the rest, including publishing the package to PyPI.
 
 
 ## Fixing a failed release

@@ -76,7 +76,7 @@ if __name__ == '__main__':
     number_repeats = args.number_repeats
     number_runs = args.number_runs
     
-    spanish_mwe_lexicon = MWELexiconCollection.from_tsv('https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Spanish/mwe-es.tsv')
+    spanish_mwe_lexicon = MWELexiconCollection.from_tsv('https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Spanish/mwe-es.tsv')
     
     half_spanish_mwe_lexicon: OrderedDict[str, List[str]] = collections.OrderedDict()
     for mwe_template, semantic_tags in spanish_mwe_lexicon.items():

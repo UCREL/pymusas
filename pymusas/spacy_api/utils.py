@@ -13,7 +13,7 @@ from spacy.tokens import Token
 
 def set_custom_token_extension(extension_name: str) -> None:
     '''
-    Defines a custom attribute of the spaCy Token which becomes avaliable
+    Defines a custom attribute of the spaCy Token which becomes available
     via `Token._.{extension_name}`. The difference between this and using the
     spaCy [Token.set_extension method](https://spacy.io/api/token#set_extension)
     is this method will check if the extension exists already and if so will force it
@@ -22,7 +22,7 @@ def set_custom_token_extension(extension_name: str) -> None:
     # Parameters
 
     extension_name : `str`
-        Name of the custom attribute that will become avaliable through
+        Name of the custom attribute that will become available through
         `Token._.{extension_name}`.
     '''
     if Token.has_extension(extension_name):
@@ -38,6 +38,25 @@ def set_custom_token_extension(extension_name: str) -> None:
         warnings.warn(message)
     else:
         Token.set_extension(extension_name, default=None)
+
+
+def remove_custom_token_extension(extension_name: str) -> None:
+    """
+    Removes a custom attribute of the spaCy Token if it exists already. This
+    custom attribute would be accessed via `Token._.{extension_name}`.
+
+    # Parameters
+
+    extension_name : `str`
+        Name of the custom attribute to remove from the spaCy Token if it
+        exists already.
+
+    # Returns
+
+    `None`
+    """
+    if Token.has_extension(extension_name):
+        Token.remove_extension(extension_name)
 
 
 def update_factory_attributes(meta_information_to_update: str,

@@ -52,7 +52,7 @@ PyMUSAS currently support 10 different languages with pre-configured spaCy compo
 
 ## Install PyMUSAS
 
-Can be installed on all operating systems and supports Python version >= `3.10` < `3.14`, to install run:
+Can be installed on all operating systems and supports Python version >= `3.10` < `3.15`, to install run:
 
 ``` bash
 pip install pymusas
@@ -64,11 +64,32 @@ If using [uv](https://docs.astral.sh/uv/):
 uv add pymusas
 ```
 
+### With neural models
+
+If you want to use the Neural Network / Transformer models then you will need to install the `neural` extra like so:
+
+``` bash
+pip install pymusas[neural]
+```
+
+or for `uv`:
+
+``` bash
+uv add pymusas[neural]
+```
+
+#### Custom accelerator (torch and spaCy)
+
+When installing the `neural` extra we use the default version of [pytorch](https://pytorch.org/) for your Operating System (OS), in the case for `Linux` this is likely to be the `cuda` version and for all other OSs this will be `cpu`. If you would like to use a different version of torch please either install it before install `pymusas` or add the package index like so `uv add --index-strategy unsafe-best-match --index https://download.pytorch.org/whl/cu130 pymusas[neural]` in this example we are downloading `torch` for `cuda` version 13.
+
+
+**Note** we do not require the GPU version of spaCy `spacy[cuda12x]` to run `pymusas` with a custom accelerator like `cuda` but `pymusas` does support the GPU version of spaCy in case you are using it, but `pymusas` does not require it.
+
 ## Development
 
 ### Setup
 
-You can either use the dev container with your favourite editor, e.g. VSCode. Or you can create your setup locally below we demonstrate both.
+You can either use the dev container with your favourite editor, e.g. VSCode. Or you can create your setup locally below we demonstrate both. To note in both cases we will be installing the `CPU` version and not the `GPU` version.
 
 In both cases they share the same tools, of which these tools are:
 * [uv](https://docs.astral.sh/uv/) for Python packaging and development
@@ -101,7 +122,7 @@ To run locally first ensure you have the following tools installted locally:
 When developing on the project you will want to install the Python package locally in editable format with all the extra requirements, this can be done like so:
 
 ```bash
-uv sync
+uv sync --all-extras
 ```
 
 ### Running linters and tests
@@ -112,17 +133,48 @@ This code base uses isort, flake8 and mypy to ensure that the format of the code
 make lint
 ```
 
-To run the tests with code coverage (**NOTE** these are the code coverage tests that the Continuos Integration (CI) reports at the top of this README, the doc tests are not part of this report):
+To run the unit tests with code coverage of the unit tests:
 
 ``` bash
 make tests
 ```
 
-To run the [doc tests](https://docs.python.org/3/library/doctest.html), these are tests to ensure that examples within the documentation run as expected:
+To run the [doc tests](https://docs.python.org/3/library/doctest.html), these are tests to ensure that examples within the documentation run as expected, the coverage results of these tests will also be reported:
 
 ``` bash
 make doc-tests
 ```
+
+To run the all the tests (unit, documentation, and [functional tests](https://www.pyopensci.org/python-package-guide/tests/test-types.html#end-to-end-functional-tests)) with coverage that takes all of these tests into account:
+
+``` bash
+make full-coverage-tests
+```
+
+To note the functional tests that are ran within this `make` command are the tests that build the `pymusas` package and then use the built package to test that the output of the taggers are what is to be expected.
+
+#### Running GPU tests
+
+**NOTE** We do not expect contributors to run these tests, the UCREL team can run these tests as part of the pull request before we merge into the main branch.
+
+The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have this docker image. The image if you run it assumes you have an Nvidia GPU and a Nvidia driver that supports CUDA 12.
+
+These tests also allow us to test that the codebase can be used with the GPU version of spaCy `spacy[cuda12x]`.
+
+As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker container (to note the `0.1.0` version number of the container is not meaningful at the moment):
+
+``` bash
+docker build -t pymusas-gpu:0.1.0 -f ./tests/gpu-docker.dockerfile .
+```
+
+And then we can run the tests like so:
+
+``` bash
+docker run --gpus all --shm-size 4g --rm pymusas-gpu:0.1.0
+```
+
+**Note** at the moment when running these tests only 2 errors should occur: `tests/unit_tests/spacy_api/test_spacy_api_utils.py ..EE` this at the moment is expected and we hope to resolve this in the future, all other tests should and are expected to pass.
+
 
 ### Setting a different default python version
 

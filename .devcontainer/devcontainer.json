@@ -23,11 +23,12 @@
 					   "redhat.vscode-yaml",
 					   "tamasfe.even-better-toml",
 					   "github.vscode-github-actions",
-					   "mechatroner.rainbow-csv"],
+					   "mechatroner.rainbow-csv",
+					   "ms-azuretools.vscode-docker"],
 		"settings": {
 			"python-envs.defaultEnvManager": "ms-python.python:venv"
 		}
 		}
   	},
-	"postStartCommand": "uv sync"
+	"postStartCommand": "uv sync --all-extras"
 }

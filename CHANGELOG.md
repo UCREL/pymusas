@@ -11,12 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - The documentation now has a `How-to` guide on `Tag CoNLL-U Files`.
 - The documentation now has a `How-to Tag Text` guide for Finnish and English.
+- The documentation now has a `How to Combine/Merge Lexicons` guide.
 - Using [developer/dev containers](https://containers.dev/) of which the files for this can be found in the [.devcontainer folder](./.devcontainer). This will allow for easier on boarding and development consistency.
 - Functional tests have been added and can be found in the following directory: [./tests/functional_tests/](./tests/functional_tests/)
 - The ability to merge `LexiconCollection`s either through `pymusas.lexicon_collection.LexiconCollection.merge`.
 - The ability to merge `LexiconCollection` data through a list of file paths to TSV files using `pymusas.lexicon_collection.LexiconCollection.tsv_merge`, which when merged will allow the creation of a combined `LexiconCollection` instance.
 - The ability to merge `MWELexiconCollection` data through a list of file paths to TSV files using `pymusas.lexicon_collection.MWELexiconCollection.tsv_merge`, which when merged will allow the creation of a combined `MWELexiconCollection` instance.
 - Added a usage example to the documentation showing how to combine/merge lexicon collections together and add them to a PyMUSAS rule based tagger.
+- Added the extra group `neural` to the [pyproject.toml](./pyproject.toml) so that the required `torch`, `transformers`, and `wsd-torch-models` libraries are installed allowing the neural models to run.
+- Added `pymusas.taggers.neural` module that includes the first Neural based tagger using the taggers from [WSD-Torch-Models](https://github.com/UCREL/WSD-Torch-Models).
+- Added `pymusas.spacy_api.taggers.neural` module that includes the Neural based tagger that can be used as a spacy pipeline.
+- Added `pymusas.taggers.hybrid` module that includes the first Hybrid based tagger, `pymusas.taggers.hybrid.HybridTagger`, which inherits from the `pymusas.taggers.rule-based.RuleBasedTagger` and uses the Neural tagger, `pymusas.taggers.neural.NeuralTagger`, when the rule based tagger does not know what to predict, i.e. when it usually predicts `Z99` it will now use the neural tagger.
+- Added `pymusas.spacy_api.taggers.hybrid` module that includes the Hybrid tagger that can be used as a spacy pipeline.
+- The CI pipeline `.github/workflows/ci.yml` now caches the Neural based tagger that we test (`ucrelnlp/PyMUSAS-Neural-English-Small-BEM`) so that it does not get downloaded each time the tests are ran for each Python version for each Operating System.
+- Supports `Python 3.14`.
+- `typer` Python package, this is a requirement from `spacy`, since version `3.8.7` (26th of May 2025) it had dropped the requirement for `typer` but instead used `typer-slim`, however `typer-slim` does not appear to work when imported `import typer` and it raises an error when we import `spacy`, thus the need to add `typer` as a requirement.
+- `scripts/create_temporary_version.py` - this creates a temporary `pyproject.toml` with a unique version of the project so that functional testing through `make functional-tests` does not use a cached/out-dated version of the codebase once the code base has been built while still using cached Python packages for the packages `pymusas` depends on.
+- `makefile` the target `functional-tests` has been removed and replaced with `full-coverage-tests`. The difference being that it will also run the unit tests and report coverage that uses the results from all of the tests, unit, functional, and documentation tests while using an install that has come a the built distribution. This code is also now used in the CI pipeline so that the coverage results are more representative.
+- GPU functional testing - this is done through the script `tests/docker_gpu_run_script.sh` and the docker image `tests/gpu-docker.dockerfile`
+- `.github/workflows/publish.yml` - A publishing specific workflow, that publishes the python package to PYPI through OpenID Connect (OIDC). The python package used to be published in the `ci.yml` workflow using tokens, this has now been removed in favour of using the more secure OIDC method.
+- Dev-container image build and publish GitHub action workflow to pre-build the dev container to reduce the time required for starting to develop using dev containers. The workflow can be found at: `./.github/workflows/devcontainer_build_and_publish.yml`.
 
 ### Changed
 
@@ -29,6 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [./scripts/release_notes.py script](./scripts/release_notes.py) has been updated so that it is isolated with respect to python packages that are required to be installed. This has been doing through the makefile, CI commands in the GitHub action, and the script itself containing it's own dependencies.
 - The publishing and release process now uses `uv`. The version of PyMUSAS is fully determined by the `TAG` environment variable. 
 - The unit tests have been moved to [./tests/unit_tests/](./tests/unit_tests/) from `./tests`
+- `pyproject.toml` - we do not support `pytest` version `9.0.2` it appears to generate an error when testing entry points.
+- `pyproject.toml` - so that we support GPU/accelerator installation for `torch`.
+
+### Fixed
+
+- All of the semantic lexicon resources that are referenced in the code base as documentation strings or tests and the documentation itself are now linked to a commit hash, e.g. for the Welsh semantic lexicons rather than it being originally linked to the head reference; https://raw.githubusercontent.com/UCREL/Multilingual-USAS/refs/heads/master/Welsh/semantic_lexicon_cy.tsv it is now linked to a commit hash; https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv. This makes the tests, documentation tests, and the documentation itself more reproducible and reliable.
 
 ### Removed
 

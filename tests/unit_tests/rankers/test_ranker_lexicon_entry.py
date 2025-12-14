@@ -468,20 +468,20 @@ def test_contextual_rule_based_ranker_get_construction_arguments() -> None:
     assert (0, 0) == ContextualRuleBasedRanker.get_construction_arguments(rules)
 
     # Single Word Rules
-    pt_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/semantic_lexicon_pt.tsv"
+    pt_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Portuguese/semantic_lexicon_pt.tsv"
     single_lexicon = LexiconCollection.from_tsv(pt_lexicon_url)
     single_lemma_lexicon = LexiconCollection.from_tsv(pt_lexicon_url, False)
     single_word_rule = SingleWordRule(single_lexicon, single_lemma_lexicon)
     rules.append(single_word_rule)
     assert (1, 0) == ContextualRuleBasedRanker.get_construction_arguments(rules)
 
-    pt_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Portuguese/mwe-pt.tsv"
+    pt_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Portuguese/mwe-pt.tsv"
     mwe_lexicon = MWELexiconCollection.from_tsv(pt_mwe_lexicon_url)
     mwe_word_rule = MWERule(mwe_lexicon)
     rules.append(mwe_word_rule)
     assert (9, 4) == ContextualRuleBasedRanker.get_construction_arguments(rules)
 
-    es_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/master/Spanish/mwe-es.tsv"
+    es_mwe_lexicon_url = "https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Spanish/mwe-es.tsv"
     es_mwe_lexicon = MWELexiconCollection.from_tsv(es_mwe_lexicon_url)
     es_mwe_word_rule = MWERule(es_mwe_lexicon)
     rules.append(es_mwe_word_rule)

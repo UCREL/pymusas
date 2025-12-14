@@ -1,5 +1,4 @@
-FROM ubuntu:latest
-
+FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends \
@@ -25,24 +24,18 @@ SHELL ["/bin/bash", "-c"]
 RUN set -o pipefail \
     && wget -qO- https://astral.sh/uv/install.sh \
     | sh
-RUN set -o pipefail \
-    && wget -qO- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh \
-    | bash
-# Required as when using a mount with write permissions in a RUN command 
-# it fails because of permission reasons.
-COPY --chown=ubuntu:ubuntu docs docs
-RUN source .nvm/nvm.sh \
-    && nvm install 24 \
-    && corepack enable yarn \
-    && cd docs \
-    && corepack use yarn \
-    && cd .. \
-    && rm -rf docs
 
 ENV PATH="/home/$USERNAME/.local/bin/:$PATH"
-
-RUN uv python install 3.11
 
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=.python-version,target=.python-version \
     uv sync --python=3.12 --no-install-project --no-install-workspace --all-extras
+RUN uv pip install --python=3.12 spacy[cuda12x]
+COPY --chown=ubuntu:ubuntu pymusas ./pymusas
+COPY --chown=ubuntu:ubuntu tests ./tests
+COPY --chown=ubuntu:ubuntu pyproject.toml pyproject.toml
+COPY --chown=ubuntu:ubuntu .python-version .python-version
+RUN touch README.md LICENSE
+RUN uv version --bump patch
+
+ENTRYPOINT ["./tests/docker_gpu_run_script.sh"]

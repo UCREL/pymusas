@@ -18,7 +18,7 @@ class RankingMetaData
 
 A RankingMetaData object contains all of the meta data about a lexicon
 entry match during the tagging process. This meta data can then be used
-to determine the ranking of the match comapred to other matches within the
+to determine the ranking of the match compared to other matches within the
 same text/sentence that is being tagged.
 
 <h4 id="rankingmetadata.instance_attributes">Instance Attributes<a className="headerlink" href="#rankingmetadata.instance_attributes" title="Permanent link">&para;</a></h4>
@@ -38,7 +38,8 @@ same text/sentence that is being tagged.
     This is always `False` when used in a Multi Word Expression (MWE) lexicon
     entry match.
 - __lexical\_match__ : `LexicalMatch` <br/>
-    What [`LexicalMatch`](#lexicalmatch) the lexicon entry matched on.
+    What [`pymusas.rankers.lexical_match.LexicalMatch`](/pymusas/api/rankers/lexical_match/#lexicalmatch) the lexicon
+    entry matched on.
 - __token\_match\_start\_index__ : `int` <br/>
     Index of the first token in the lexicon entry match.
 - __token\_match\_end\_index__ : `int` <br/>

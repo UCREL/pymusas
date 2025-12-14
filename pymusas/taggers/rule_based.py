@@ -29,7 +29,7 @@ class RuleBasedTagger():
 
     rules : `List[pymusas.taggers.rules.rule.Rule]`
         A list of rules to apply to the sequence of tokens in the
-        :func:`__call__`. The output from each rule is concatendated and given
+        :func:`__call__`. The output from each rule is concatenated and given
         to the `ranker`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
         A ranker to rank the output from all of the `rules`.
@@ -58,7 +58,7 @@ class RuleBasedTagger():
     >>> from pymusas.taggers.rules.single_word import SingleWordRule
     >>> from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
     >>> from pymusas.pos_mapper import BASIC_CORCENCC_TO_USAS_CORE
-    >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/apmoore1/Multilingual-USAS/master/Welsh/semantic_lexicon_cy.tsv'
+    >>> welsh_lexicon_url = 'https://raw.githubusercontent.com/UCREL/Multilingual-USAS/64dbdf19d8d090c6f4183984ff16529d09f77b02/Welsh/semantic_lexicon_cy.tsv'
     >>> lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=True)
     >>> lemma_lexicon_lookup = LexiconCollection.from_tsv(welsh_lexicon_url, include_pos=False)
     >>> single_word_rule = SingleWordRule(lexicon_lookup, lemma_lexicon_lookup,
@@ -103,7 +103,7 @@ class RuleBasedTagger():
         to this model.
 
         **NOTE** this tagger has been designed to be flexible with the amount of
-        resources avaliable, if you do not have POS or lemma information assign
+        resources available, if you do not have POS or lemma information assign
         them a `List` of empty strings.
         
         # Parameters
@@ -123,7 +123,7 @@ class RuleBasedTagger():
 
         `ValueError`
             If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
-            the same legnth.
+            the same length.
         '''
 
         tokens_length = len(tokens)
