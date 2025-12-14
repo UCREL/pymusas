@@ -5,7 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [v0.4.0]() - 2025-12-14
+## Unreleased
+
+### Added
+
+- Documentation to the README stating the use case of My-Binder and how to install pymusas within the My-Binder cloud environment.
+
+## [v0.4.0](https://github.com/UCREL/pymusas/releases/tag/v0.4.0) - 2025-12-14
 
 ### Added
 

@@ -185,6 +185,10 @@ uv python pin
 # uv python pin 3.13
 ```
 
+## My-Binder
+
+If you would like to develop/test the code within this repository in a cloud hosted environment, this can be done through my-binder for free. This environment is designed to try out the code in the repository rather than for contributing to the code base. To get to this environment click on the "launch binder" badge at the top of this README. It will create a Jupyterlab environment for you on [My-Binder](https://mybinder.org/) where you can run and change the code in this repository. **Note** when in this environment please install an editable version of pymusas by opening a terminal and running the following command `pip install -e .`
+
 ## Team
 
 PyMUSAS is an open-source project that has been created and funded by the [University Centre for Computer Corpus Research on Language](https://ucrel.lancs.ac.uk/) (UCREL) at [Lancaster University](https://www.lancaster.ac.uk/). For more information on who has contributed to this code base see the [contributions page.](https://github.com/UCREL/pymusas/graphs/contributors) 
