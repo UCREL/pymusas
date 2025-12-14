@@ -40,6 +40,18 @@ uv add REQUIREMENT
 uv add --dev REQUIREMENT
 ```
 
+#### Extra
+
+``` bash
+uv add --optional EXTRA_NAME REQUIREMENT
+```
+
+For example to add a requirement to the extra `neural`
+
+``` bash
+uv add --optional neural REQUIREMENT
+```
+
 ### Writing docstrings
 [A lot of this has been copied from the AllenNLP CONTRIBUTING guidelines, which I think are really great!](https://github.com/allenai/allennlp/blob/main/CONTRIBUTING.md)
 
