@@ -58,7 +58,7 @@ build-python-package:
 	@uv build
 
 .PHONY: release-notes
-release-notes:
+release-notes: build-python-package
 	@uv run --no-project --script \
 	--with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
 	./scripts/release_notes.py
