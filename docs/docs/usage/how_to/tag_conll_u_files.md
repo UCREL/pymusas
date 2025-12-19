@@ -3,7 +3,7 @@ title: Tag CoNLL-U Files
 sidebar_position: 2
 ---
 
-In this guide we will show how to tag text that is in [CoNLL-U formatted files](https://universaldependencies.org/format.html) and save the output to a TSV file. To make this guide as simple as possible we are going to base it on one language, **French**, and we are going to tag the [French GSD Universal Dependencies version 2.10 development treebank](https://raw.githubusercontent.com/UniversalDependencies/UD_French-GSD/r2.10/fr_gsd-ud-dev.conllu). As we are tagging a treebank that contains gold standard tokens, lemmas, and Part Of Speech tags we will not need any other NLP tools other than the [rule based pre-configured French PyMUSAS spaCy pipeline](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.1) which will output [USAS](https://ucrel.lancs.ac.uk/usas/) semantic tags.
+In this guide we will show how to tag text that is in [CoNLL-U formatted files](https://universaldependencies.org/format.html) and save the output to a TSV file. To make this guide as simple as possible we are going to base it on one language, **French**, and we are going to tag the [French GSD Universal Dependencies version 2.10 development treebank](https://raw.githubusercontent.com/UniversalDependencies/UD_French-GSD/r2.10/fr_gsd-ud-dev.conllu). As we are tagging a treebank that contains gold standard tokens, lemmas, and Part Of Speech tags we will not need any other NLP tools other than the [rule based pre-configured French PyMUSAS spaCy pipeline](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual_none-0.4.0) which will output [USAS](https://ucrel.lancs.ac.uk/usas/) semantic tags.
 
 ## Download the data
 
@@ -28,14 +28,14 @@ The first 5 lines of the file should contain the following:
 
 :::note
 
-We assume for this guide that you have Python version >= `3.7` already installed.
+We assume for this guide that you have Python version >= `3.10` and < `3.15` already installed.
 
 :::
 
-Now that we have the data we need to download the [French PyMUSAS spaCy pipeline](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual-0.3.1):
+Now that we have the data we need to download the [French PyMUSAS spaCy pipeline](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual_none-0.4.0):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual-0.3.1/fr_single_upos2usas_contextual-0.3.1-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/fr_single_upos2usas_contextual_none-0.4.0/fr_single_upos2usas_contextual_none-0.4.0-py3-none-any.whl
 ```
 
 And to easily parse the ConLL-U file we are going to use the Python package [conllu](https://pypi.org/project/conllu/):
@@ -57,7 +57,7 @@ from conllu import parse_incr
 import spacy
 
 # Load the French PyMUSAS rule based tagger
-nlp = spacy.load("fr_single_upos2usas_contextual")
+nlp = spacy.load("fr_single_upos2usas_contextual_none")
 ```
 
 Then we are going to create the TSV file, `french_gsd_dev_2_10.tsv`, and the TSV writer so that we can save the tagged:
@@ -164,7 +164,7 @@ from conllu import parse_incr
 import spacy
 
 # Load the French PyMUSAS rule based tagger
-nlp = spacy.load("fr_single_upos2usas_contextual")
+nlp = spacy.load("fr_single_upos2usas_contextual_none")
 
 french_gsd_file = Path('french_gsd_dev_2_10.conllu').resolve()
 french_output_tsv_file = Path('french_gsd_dev_2_10.tsv').resolve()

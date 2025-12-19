@@ -19,10 +19,10 @@ This guide is going to show how to create a PyMUSAS [RuleBasedTagger](/api/spacy
 
 ## Setup
 
-Download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual-0.3.3) and the [small English spaCy model](https://spacy.io/models/en):
+Download both the [English PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/en_dual_none_contextual_none-0.4.0) and the [small English spaCy model](https://spacy.io/models/en):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual-0.3.3/en_dual_none_contextual-0.3.3-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual_none-0.4.0/en_dual_none_contextual_none-0.4.0-py3-none-any.whl
 python -m spacy download en_core_web_sm
 ```
 
@@ -105,7 +105,7 @@ sentence = ("While drinking my flat white I was reading about the "
 # We exclude the following components as we do not need them. 
 nlp = spacy.load('en_core_web_sm', exclude=['parser', 'ner'])
 # Load the English PyMUSAS rule-based tagger in a separate spaCy pipeline
-english_tagger_pipeline = spacy.load('en_dual_none_contextual')
+english_tagger_pipeline = spacy.load('en_dual_none_contextual_none')
 # Adds the English PyMUSAS rule-based tagger to the main spaCy pipeline
 nlp.add_pipe('pymusas_rule_based_tagger', source=english_tagger_pipeline)
 

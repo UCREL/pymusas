@@ -6,22 +6,33 @@ sidebar_position: 1
 
 # PyMUSAS
 
-**Py**thon **M**ultilingual **U**crel **S**emantic **A**nalysis **S**ystem, is a rule based token and Multi Word Expression (MWE) semantic tagger. The tagger can support any semantic tagset, however the tagset we have concentrated on and released pre-configured spaCy components for is the [Ucrel Semantic Analysis System (USAS)](https://ucrel.lancs.ac.uk/usas/).
+**Py**thon **M**ultilingual **U**crel **S**emantic **A**nalysis **S**ystem, is a semantic tagging framework that contains various different semantic taggers; rule based, neural network, and a hybrid of the two, of which all but the neural network can identify and tag Multi Word Expressions (MWE). The taggers can support any semantic tagset, however the tagset we have concentrated on and released pre-configured spaCy components for is the [Ucrel Semantic Analysis System (USAS)](https://ucrel.lancs.ac.uk/usas/).
 
-PyMUSAS currently support 10 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text using PyMUSAS](/usage/how_to/tag_text). Below we show the languages supported, if the model for that language supports MWE identification and tagging (all languages support token level tagging by default), and size of the model:
+Below we describe the different semantic taggers we supported and the pre-configured models we have released for each semantic tagger, as well how to read and navigate the documentation website.
+
+## Semantic Taggers
+
+As mentioned we have 3 different taggers; rule based, neural network (neural), and hybrid.
+
+### Rule Based
+
+The rule based tagger supports both single token and MWE and is a re-implementation of the USAS rule based tagger that has been developed in C and then Java programming languages by [Paul Rayson](https://www.lancaster.ac.uk/sci-tech/about-us/people/paul-rayson) and [Scott Piao](https://www.lancaster.ac.uk/sci-tech/about-us/people/scott-piao), of which it is heavily based on the rules from [Extracting Multiword Expressions with A Semantic Tagger by Scott Piao et al. 2003](https://aclanthology.org/W03-1807.pdf). For more information on exactly how the tagger works please read the API documentation specifically the [RuleBasedTagger class](/api/spacy_api/taggers/rule_based#rulebasedtagger) and the [Contextual Ranker class](/api/rankers/lexicon_entry#contextualrulebasedranker).
+
+PyMUSAS currently support 11 different languages for the rule based tagger with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text using PyMUSAS](/usage/how_to/tag_text). Below we show the languages supported, if the model for that language supports MWE identification and tagging (all languages support single token level tagging by default), and size of the model:
 
 | Language (BCP 47 language code) | MWE Support | Size |
 | --- | --- | --- |
 | Mandarin Chinese (cmn) | :heavy_check_mark: | 1.28MB |
-| Welsh (cy) | :heavy_check_mark: | 1.09MB |
-| Spanish, Castilian (es) | :heavy_check_mark: | 0.20MB |
-| Finnish (fi) | :x: | 0.63MB |
+| Danish (da) | :heavy_check_mark: | 0.85MB |
+| Dutch, Flemish (nl) | :x: | 0.15MB |
+| English (en) | :heavy_check_mark: | 0.86MB |
+| Finnish (fi) | :x: | 0.64MB |
 | French (fr) | :x: | 0.08MB |
 | Indonesian (id) | :x: | 0.24MB |
 | Italian (it) | :heavy_check_mark: | 0.50MB |
-| Dutch, Flemish (nl) | :x: | 0.15MB |
 | Portuguese (pt) | :heavy_check_mark: | 0.27MB |
-| English (en) | :heavy_check_mark: | 0.88MB |
+| Spanish, Castilian (es) | :heavy_check_mark: | 0.26MB |
+| Welsh (cy) | :heavy_check_mark: | 1.10MB |
 
 ## Reading the documentation
 
