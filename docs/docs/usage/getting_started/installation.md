@@ -13,9 +13,9 @@ pip install pymusas
 ```
 
 
-## Install for Neural or Hybrid models
+## Install for Neural or Hybrid Taggers
 
-If you would like to use the Neural or Hybrid models the `neural` extra is required:
+If you would like to use the Neural or Hybrid taggers the `neural` extra is required:
 
 :::note
 this will install the default version of [PyTorch](https://pytorch.org/) for your operating system if you would like to use a specific version of PyTorch, e.g. CUDA, AMD GPU, etc please install the specific version of `torch` first and then `pymusas[neural]`.
