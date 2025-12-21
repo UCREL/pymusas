@@ -3,7 +3,7 @@ title: Combine/Merge Lexicons
 sidebar_position: 3
 ---
 
-In this guide we will show how to combine two lexicons together, both for single word and Multi Word Expression (MWE), so that the combined lexicon can be used in a single PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based#rulebasedtagger).
+In this guide we will show how to combine two lexicons together, both for single word and Multi Word Expression (MWE), so that the combined lexicon can be used in a single PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger).
 
 This approach is useful if you want the coverage of the existing lexicons that are available for the given language but you want to customize them. You might want to customize them because;
 * Want to add domain specific language to the lexicons, e.g. `flat_* white_*` = `F2/Z3` (type of coffee)
@@ -11,7 +11,7 @@ This approach is useful if you want the coverage of the existing lexicons that a
 
 All of the existing lexicons for different language can be found at the [Multilingual-USAS repository](https://github.com/UCREL/Multilingual-USAS/tree/master), in this guide we will only use the [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English).
 
-This guide is going to show how to create a PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based#rulebasedtagger) that uses the existing [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English) with additional custom lexicons that both extend the existing as well as override them. The guide will be broken down into:
+This guide is going to show how to create a PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger) that uses the existing [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English) with additional custom lexicons that both extend the existing as well as override them. The guide will be broken down into:
 
 1. Setup
 2. How the existing tagger performs
@@ -120,7 +120,7 @@ for token in output_doc:
 
 ## How to customize the tagger through combining the existing lexicon with a custom lexicon
 
-In the code below we show that we first need to create a combined/merged single word lexicon from the existing single word lexicon in the Multilingual USAS GitHub repository, this is done through the [RuleBasedTagger](/api/spacy_api/taggers/rule_based#rulebasedtagger) function which downloads/loads the TSV files and then merges them whereby the last TSV file in the list overrides any lexicon entries that come before it thus the custom lexicon(s) should come after the existing/general lexicon:
+In the code below we show that we first need to create a combined/merged single word lexicon from the existing single word lexicon in the Multilingual USAS GitHub repository, this is done through the [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger) function which downloads/loads the TSV files and then merges them whereby the last TSV file in the list overrides any lexicon entries that come before it thus the custom lexicon(s) should come after the existing/general lexicon:
 
 ``` python
 # Get the existing single word lexicon from the Multilingual USAS repository

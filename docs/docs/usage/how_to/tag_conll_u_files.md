@@ -113,7 +113,7 @@ For more information on this see the [words, tokens and empty nodes section of t
 
 :::note
 
-In this example we use the UPOS tag for the POS tag, but some languages like [Welsh](https://ucrel.github.io/pymusas/usage/how_to/tag_text#welsh) require the POS tag to be from a different POS tagset other than the UPOS tagset that the UPOS tag comes from.
+In this example we use the UPOS tag for the POS tag, but some languages like [Welsh](tag_text_with/rule_based_tagger.md#welsh) require the POS tag to be from a different POS tagset other than the UPOS tagset that the UPOS tag comes from.
 
 To know which POS tagset a PyMUSAS model requires the POS data to come from see the [overview of the models table from the PyMUSAS models repository](https://github.com/UCREL/pymusas-models#overview-of-the-models).
 
