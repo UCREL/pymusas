@@ -1,5 +1,5 @@
 ---
-title: Tag Text
+title: Rule Based Tagger
 sidebar_position: 1
 ---
 

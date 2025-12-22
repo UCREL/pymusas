@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Documentation to the README stating the use case of My-Binder and how to install pymusas within the My-Binder cloud environment.
+- `How-to` guide for the `neural` and `hybrid` taggers within `docs/docs/usage/how_to/tag_text_with` as well introduced these taggers and how they compare to one another in `docs/docs/usage/getting_started/intro.md`.
+
+### Changed
+
+- Moved the `How-to` `Rule Based Tagger` usage documentation page from the directory `docs/docs/usage/how_to` to `docs/docs/usage/how_to/tag_text_with` so that all the tagger how to guides are within their own folder.
 
 ## [v0.4.0](https://github.com/UCREL/pymusas/releases/tag/v0.4.0) - 2025-12-14
 
