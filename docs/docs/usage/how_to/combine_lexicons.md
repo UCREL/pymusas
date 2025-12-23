@@ -9,7 +9,7 @@ This approach is useful if you want the coverage of the existing lexicons that a
 * Want to add domain specific language to the lexicons, e.g. `flat_* white_*` = `F2/Z3` (type of coffee)
 * Want to override/change an existing lexicon with a different semantic tag, e.g. in the [English semantic lexicon](https://github.com/UCREL/Multilingual-USAS/blob/6b305509016b21cd9062c5f77c1f29313ca9cc53/English/semantic_lexicon_en.tsv#L586C1-L586C18) `Amazon PROPN` is associated with `Z2 M7` a semantic tag associated with *Geographical names* and *Places* but perhaps in your corpus you would like it to be associated with the company therefore change the semantic tag to `Z3`.
 
-All of the existing lexicons for different language can be found at the [Multilingual-USAS repository](https://github.com/UCREL/Multilingual-USAS/tree/master), in this guide we will only use the [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English).
+All of the existing lexicons for different languages can be found at the [Multilingual-USAS repository](https://github.com/UCREL/Multilingual-USAS/tree/master), in this guide we will only use the [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English).
 
 This guide is going to show how to create a PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger) that uses the existing [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English) with additional custom lexicons that both extend the existing as well as override them. The guide will be broken down into:
 
