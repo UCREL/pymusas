@@ -18,6 +18,12 @@ Below we describe the different semantic taggers we supported and the pre-config
 
 As mentioned we have 3 different taggers; rule based, neural network (neural), and hybrid. A guide on how to choose the right tagger for you can be found in the [tagger comparison section below,](#tagger-comparison) of which in these section we also compare the taggers based on performance across various languages.
 
+:::tip
+The USAS special tags;
+* `Z99` - tagger does not know how to tag that word. Only the Rule Based taggers can generate this tag.
+* `PUNCT` - tagger believes the word to be punctuation and therefore does not have any further semantic meaning.
+:::
+
 ### Rule Based
 
 The rule based tagger supports both single token and MWE and is a re-implementation of the USAS rule based tagger that has been developed in C and then Java programming languages by [Paul Rayson](https://www.lancaster.ac.uk/sci-tech/about-us/people/paul-rayson) and [Scott Piao](https://www.lancaster.ac.uk/sci-tech/about-us/people/scott-piao), of which it is heavily based on the rules from [Extracting Multiword Expressions with A Semantic Tagger by Scott Piao et al. 2003](https://aclanthology.org/W03-1807.pdf). For more information on exactly how the tagger works please read the API documentation specifically the [RuleBasedTagger class](/api/spacy_api/taggers/rule_based.md#rulebasedtagger) and the [Contextual Ranker class](/api/rankers/lexicon_entry.md#contextualrulebasedranker).
