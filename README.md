@@ -1,6 +1,6 @@
 # PyMUSAS 
 
-**Py**thon **M**ultilingual **U**crel **S**emantic **A**nalysis **S**ystem, is a rule based token and Multi Word Expression semantic tagger. The tagger can support any semantic tagset, however the tagset we have concentrated on and released pre-configured spaCy components for is the [Ucrel Semantic Analysis System (USAS)](https://ucrel.lancs.ac.uk/usas/).
+**Py**thon **M**ultilingual **U**crel **S**emantic **A**nalysis **S**ystem, is a semantic tagging framework that contains various different semantic taggers; rule based, neural network, and a hybrid of the two, of which all but the neural network can identify and tag Multi Word Expressions (MWE). The taggers can support any semantic tagset, however the tagset we have concentrated on and released pre-configured spaCy components for is the [Ucrel Semantic Analysis System (USAS)](https://ucrel.lancs.ac.uk/usas/).
 
 <hr/>
 
@@ -35,20 +35,25 @@
 
 ## Language support
 
-PyMUSAS currently support 10 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text using PyMUSAS](https://ucrel.github.io/pymusas/usage/how_to/tag_text). Below we show the languages supported, if the model for that language supports Multi Word Expression (MWE) identification and tagging (all languages support token level tagging by default), and size of the model:
+PyMUSAS rule based taggers currently support 11 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text with the rule based tagger using PyMUSAS](https://ucrel.github.io/pymusas/usage/how_to/tag_text_with/rule_based_tagger). Below we show the languages supported, if the model for that language supports Multi Word Expression (MWE) identification and tagging (all languages support token level tagging by default), and size of the model:
 
-| Language (BCP 47 language code) | MWE Support | Size |
+| Language (BCP 47 language code) | MWE Support | Disk Space (MB) |
 | --- | --- | --- |
-| Mandarin Chinese (cmn) | :heavy_check_mark: | 1.28MB |
-| Welsh (cy) | :heavy_check_mark: | 1.09MB |
-| Spanish, Castilian (es) | :heavy_check_mark: | 0.20MB |
-| Finnish (fi) | :x: | 0.63MB |
-| French (fr) | :x: | 0.08MB |
-| Indonesian (id) | :x: | 0.24MB |
-| Italian (it) | :heavy_check_mark: | 0.50MB |
-| Dutch, Flemish (nl) | :x: | 0.15MB |
-| Portuguese (pt) | :heavy_check_mark: | 0.27MB |
-| English (en) | :heavy_check_mark: | 0.88MB |
+| Mandarin Chinese (cmn) | :heavy_check_mark: | 1.28 |
+| Danish (da) | :heavy_check_mark: | 0.85 |
+| Dutch, Flemish (nl) | :x: | 0.15 |
+| English (en) | :heavy_check_mark: | 0.86 |
+| Finnish (fi) | :x: | 0.64 |
+| French (fr) | :x: | 0.08 |
+| Indonesian (id) | :x: | 0.24 |
+| Italian (it) | :heavy_check_mark: | 0.50 |
+| Portuguese (pt) | :heavy_check_mark: | 0.27 |
+| Spanish, Castilian (es) | :heavy_check_mark: | 0.26 |
+| Welsh (cy) | :heavy_check_mark: | 1.10 |
+
+We also have 4 different neural taggers 2 support English only and the other 2 are highly multilingual. Lastly we have the hybrid taggers that require both rule based and neural tagger resources therefore they support all languages the rule based taggers support.
+
+**For more information** on the different taggers and there language support see the [introduction documentation page](https://ucrel.github.io/pymusas/).
 
 ## Install PyMUSAS
 
