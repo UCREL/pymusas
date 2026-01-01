@@ -25,6 +25,12 @@ python -m spacy download en_core_web_sm
 
 Then setup the English spaCy pipeline for lemmatizing and POS tagging:
 ``` python
+from pymusas.taggers.rules.single_word import SingleWordRule
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
+from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 import spacy
 
 # We exclude the following components as we do not need them. 
