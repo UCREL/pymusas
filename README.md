@@ -180,6 +180,9 @@ docker run --gpus all --shm-size 4g --rm pymusas-gpu:0.1.0
 
 **Note** at the moment when running these tests only 2 errors should occur: `tests/unit_tests/spacy_api/test_spacy_api_utils.py ..EE` this at the moment is expected and we hope to resolve this in the future, all other tests should and are expected to pass.
 
+### Benchmarking
+
+See [benchmarks directory](./benchmarks/) for the different benchmarking that we currently run.
 
 ### Setting a different default python version
 

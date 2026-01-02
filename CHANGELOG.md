@@ -11,10 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Documentation to the README stating the use case of My-Binder and how to install pymusas within the My-Binder cloud environment.
 - `How-to` guide for the `neural` and `hybrid` taggers within `docs/docs/usage/how_to/tag_text_with` as well introduced these taggers and how they compare to one another in `docs/docs/usage/getting_started/intro.md`.
+- Added resource requirement benchmarking code that can be found in the directory `benchmarks/resource_benchmarking`. This code creates a markdown table with statistics on how much memory is required to run the different taggers for both RAM and GPU memory as well as how fast the taggers are using either the CPU or GPU. These resource requirement statistics have also been added to the documentation within the `Introduction` usage page (`docs/docs/usage/getting_started/intro.md`).
 
 ### Changed
 
 - Moved the `How-to` `Rule Based Tagger` usage documentation page from the directory `docs/docs/usage/how_to` to `docs/docs/usage/how_to/tag_text_with` so that all the tagger how to guides are within their own folder.
+
+### Removed
+
+- Removed old README (`old_readme_information.md`) and the benchmarking code within `benchmarks` that used a pre version `0.3.0` of `pymusas`, this benchmarking code has now been replaced with the code within `benchmarks/resource_benchmarking`.
 
 ## [v0.4.0](https://github.com/UCREL/pymusas/releases/tag/v0.4.0) - 2025-12-14
 

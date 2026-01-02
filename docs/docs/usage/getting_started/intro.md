@@ -64,8 +64,10 @@ Hybrid is a combination of a rule based and neural tagger. This tagger in essenc
 
 ### Tagger Comparison
 
-We have 3 different types of taggers; rule based, neural, and hybrid, of which below we state the advantages and dis-advantages of each tagger as well as their evaluation results on 4 different languages;
-
+We have 3 different types of taggers; rule based, neural, and hybrid, of which below;
+* We state the advantages and dis-advantages of each tagger.
+* The evaluation results on 4 different languages for all taggers.
+* The resources required to run the taggers on different size texts as well as how fast in tokens per second the taggers are.
 
 <Tabs
 defaultValue="rule-based"
@@ -93,7 +95,7 @@ values={[
             * Can be configured to generate a list of semantic tag prediction per word in most likely order. For instance you can pre-configure the tagger to generate the 4 or *N* most likely semantic tags for all words.
         </PositiveArea>
         <NegativeArea>
-            * Slowest of the 3 taggers.
+            * Slower than the rule based tagger, in general.
             * Can only generate single USAS/semantic tag categories, i.e. cannot generate tags with affixed symbols like `+`, `-`, `%`, `@`, etc or multi membership tags that are denoted through the use of a slash `/`, e.g. `F2/O2`.
             * All neural taggers have been fine tuned on English data, which makes it less accurate for non-English data.
             * Speed, quality, memory, and size depend on the tagger size, the bigger the tagger the more accurate the prediction, but the slower it is, the more disk space required to store it, and the more RAM/VRAM required to run the model.
@@ -102,12 +104,12 @@ values={[
     <TabItem value="hybrid">
         <PositiveArea>
             * Out of the 3 taggers it is typically the most accurate.
-            * Can be faster than the neural tagger as for some texts the neural tagger is not required.
             * Can make a prediction for all words, unlike the rule based tagger, as for words the rule based tagger does not know the neural tagger is used.
             * For words that the neural tagger is used for it can be configured to generate a list of semantic tag prediction per word in most likely order. For instance you can pre-configure the tagger to generate the 4 or *N* most likely semantic tags for all words.
             * For words the the rule based tagger is used for it can generate USAS tags that contain affixed symbols like `+`, `-`, `%`, `@`, etc and multi membership tags that are denoted through the use of a slash `/`, e.g. `F2/O2`. For these words it can also identify and tag Multi Word Expressions. It is therefore also an explainable tagger for these words.
         </PositiveArea>
         <NegativeArea>
+            * As on most texts it requires to run both the rule based and neural tagger it is the slowest of the three taggers.
             * As it requires both rule based and neural taggers, it requires the most resources, i.e. requires at least a lexicon for the rule based tagger, and a trained neural tagger.
             * As it uses the neural tagger requires additional disk space, memory (RAM/VRAM), and more processing time of which this is also dependent on the neural tagger size, the larger it is the more disk space, memory, and time required.
             * All neural taggers have been fine tuned on English data, which makes it less accurate for non-English data.
@@ -116,7 +118,7 @@ values={[
 </Tabs>
 
 
-We also have performance metrics for the 3 types of taggers for 4 different languages, these performance metrics reinforce the benefits and disadvanytag using Top-N accuracy as the evaluation metric, whereby higher is better (100 is best);
+The performance metrics for the 3 types of taggers for 4 different languages, these performance metrics reinforce the benefits and disadvantages using Top-N accuracy as the evaluation metric, whereby higher is better (100 is best);
 
 
 <Tabs
@@ -154,7 +156,6 @@ values={[
 | Hybrid-M-140M  | 82.0 | 55.6 | 65.8 | 75.5 |
 | Hybrid-M-307M  | 82.0 | 56.3 | 67.3 | 75.9 |
 
-
     </TabItem>
 </Tabs>
 
@@ -174,6 +175,96 @@ This naming convention is the same for the Hybrid models. For the Hybrid models 
 <summary>Top-N evaluation explanation</summary>
 
 Top-1 and top-5 evaluation is a top-N accuracy based evaluation whereby if one of the tagger's top `N` predictions is the correct prediction then it is correct else it is not, of which this is performed on each token that a human has annotated with a semantic tag in the given datasets.
+</details>
+
+Below you can find in the drop down box, a large table detailing the resource requirements of the taggers when ran/benchmarked using either the CPU or GPU on Wikipedia texts, specifically from the [HuggingFaceFW/finewiki dataset repository](https://huggingface.co/datasets/HuggingFaceFW/finewiki), we used Wikipedia as it has an open license and covers all of the languages that our taggers support. All of the memory statistics are in Mega Bytes (MB).
+
+In general, from the table you can see that;
+* The rule based taggers are the quickest and require the least memory
+* The rule based taggers with MWE support are slower than the non-MWE taggers, e.g. Chinese (`cmn`) compared to French (`fr`). The larger the MWE lexicon that also has broad coverage the slower it is, e.g. English (`en`) compared to Chinese (`cmn`).
+* The Chinese spaCy model requires more RAM than the other languages.
+* The smallest English neural model (Neural-E-17M) is quicker than English rule based tagger.
+* Using a GPU compared to CPU is quicker for Hybrid and Neural models.
+* The Neural and Hybrid taggers require a lot of memory when processing a text that is very long, thus we advise to split a text up, e.g. using a sentence splitter, before running these taggers.
+
+<details>
+<summary>Resource requirements statistics</summary>
+
+<Tabs
+defaultValue="cpu"
+values={[
+    {label: 'CPU', value: 'cpu'},
+    {label: 'GPU', value: 'gpu'}
+]}>
+    <TabItem value="cpu" label="CPU">
+
+| Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| en| Rule Based| 167.98| 239.27| 210.25| 3,427.61| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| cmn| Rule Based| 447.89| 617.99| 561.73| 14,304.23| 103,015| 3,004| 0.00| 0.00| 0.00 |
+| da| Rule Based| 135.69| 260.24| 116.89| 13,167.87| 100,003| 3,098| 0.00| 0.00| 0.00 |
+| nl| Rule Based| 118.55| 227.26| 99.14| 31,501.24| 100,010| 3,015| 0.00| 0.00| 0.00 |
+| fr| Rule Based| 252.42| 361.15| 364.08| 31,048.27| 100,119| 3,017| 0.00| 0.00| 0.00 |
+| it| Rule Based| 133.99| 202.28| 132.24| 14,101.95| 101,134| 3,004| 0.00| 0.00| 0.00 |
+| pt| Rule Based| 124.75| 136.16| 101.21| 14,699.95| 101,692| 3,006| 0.00| 0.00| 0.00 |
+| es| Rule Based| 63.01| 116.35| 109.56| 13,901.97| 105,769| 3,044| 0.00| 0.00| 0.00 |
+| fi| Rule Based| 146.83| 295.49| 145.79| 26,946.75| 100,368| 3,042| 0.00| 0.00| 0.00 |
+| en| Neural-E-17M| 289.43| 1,264.57| 426.98| 3,962.53| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| en| Neural-E-68M| 481.97| 1,387.83| 809.92| 1,050.49| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| xx| Neural-M-140M| 1,101.14| 1,889.09| 1,884.47| 836.75| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| xx| Neural-M-304M| 955.84| 1,495.19| 1,604.79| 515.12| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| en| Hybrid-E-17M| 437.93| 1,090.82| 487.28 | 841.58| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| en| Hybrid-E-68M| 745.68| 1,598.41| 1,033.88 | 607.98| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| xx| Hybrid-M-140M| 1,480.70| 1,528.64| 2,298.70 | 793.95| 100,866| 3,049| 0.00| 0.00| 0.00 |
+| xx| Hybrid-M-304M| 1,057.04| 1,849.71| 1,673.90 | 450.71 | 100,866| 3,049| 0.00| 0.00| 0.00 |
+
+    </TabItem>
+    <TabItem value="gpu" label="GPU">
+
+| Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| en| Rule Based| 138.02| 125.20| 163.24| 3,419.45| 100,866| 1,533| 0.00| 0.00| 0.00 |
+| cmn| Rule Based| 442.97| 540.37| 542.18| 13,837.79| 103,015| 1,502| 0.00| 0.00| 0.00 |
+| da| Rule Based| 130.89| 176.18| 120.14| 13,004.09| 100,003| 1,570| 0.00| 0.00| 0.00 |
+| nl| Rule Based| 133.16| 215.50| 114.63| 30,469.75| 100,010| 1,500| 0.00| 0.00| 0.00 |
+| fr| Rule Based| 281.89| 310.44| 398.62| 30,963.86| 100,119| 1,523| 0.00| 0.00| 0.00 |
+| it| Rule Based| 134.57| 154.14| 158.64| 13,963.39| 101,134| 1,521| 0.00| 0.00| 0.00 |
+| pt| Rule Based| 110.93| 184.75| 121.99| 14,480.34| 101,692| 1,571| 0.00| 0.00| 0.00 |
+| es| Rule Based| 119.37| 54.38| 149.06| 13,809.63| 105,769| 1,575| 0.00| 0.00| 0.00 |
+| fi| Rule Based| 150.54| 307.13| 164.95| 26,633.59| 100,368| 1,500| 0.00| 0.00| 0.00 |
+| en| Neural-E-17M| 289.43| 1,264.57| 426.98| 4,161.57| 100,866| 1,533| 65.11| 347.54| 2,910.08 |
+| en| Neural-E-68M| 481.97| 1,387.83| 809.92| 1,993.60| 100,866| 1,533| 264.02| 1,005.18| 6,596.55 |
+| xx| Neural-M-140M| 1,101.14| 1,889.09| 1,884.47| 1,713.40| 100,866| 1,533| 537.28| 1,324.89| 7,208.70 |
+| xx| Neural-M-304M| 955.84| 1,495.19| 1,604.79| 1,720.66| 100,866| 1,533| 1,190.79| 2,544.10| 13,360.71 |
+| en| Hybrid-E-17M| 437.93| 1,090.82| 487.28| 2,374.30| 100,866| 1,533| 65.11| 347.54| 2,909.96 |
+| en| Hybrid-E-68M| 745.68| 1,598.41| 1,033.88| 1,829.27| 100,866| 1,533| 264.02| 1,007.17| 6,597.07 |
+| xx| Hybrid-M-140M| 1,480.70| 1,528.64| 2,298.70| 1,679.67| 100,866| 1,533| 537.28| 1,324.40| 7,210.01 |
+| xx| Hybrid-M-304M| 1,057.04| 1,849.71| 1,673.90| 1,678.30| 100,866| 1,533| 1,190.79| 2,544.10| 13,360.71 |
+
+    </TabItem>
+
+</Tabs>
+
+Here we detail the meaning of each header in the markdown table;
+
+* Language - The language code ([BCP 47 language code](https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes)) of the Wikipedia data the tagger was processing, language codes are . **Note** for `xx` we use English.
+* Tagger - The name of tagger type.
+* Load Model Memory Requirements - The RAM/memory requirements to load the model.
+* Average Memory Requirements - The RAM/memory requirements to load and run the model on the Wikipedia texts separated by new lines (not sentences therefore will be made up of multiple sentences, typically these represent paragraphs).
+* Large Text Memory Requirements - The RAM/memory requirements to load and run the model on a single Wikipedia text that has been joined together from multiple Wikipedia texts to ensure the text is at least `--large-text-token-limit`.
+* Tokens Per Second - Number of tokens the tagger processed per second.
+* Number of Tokens Processed - Number of tokens processed to generate the `Tokens Per Second` metric, these tokens are from processing the Wikipedia texts separated by new lines, of which this is the same data that is used for `Average Memory Requirements`.
+* Large Text Tokens Processed - The length in tokens of the large text that was processed to generate `Large Text Memory Requirements` metric.
+* Load Model GPU Memory Requirements - The VRAM/GPU memory requirements to load the model.
+* Average GPU Memory Requirements - The VRAM/GPU memory requirements to load and run the model on the Wikipedia texts separated by new lines (not sentences therefore will be made up of multiple sentences, typically these represent paragraphs).
+* Large Text GPU Memory Requirements - The VRAM/GPU memory requirements to load and run the model on a single Wikipedia text that has been joined together from multiple Wikipedia texts to ensure the text is at least `--large-text-token-limit`.
+
+:::note
+The RAM/memory requirements are only estimates, but are a good guide. The reason they are only estimates as we cannot get the peak memory usage but rather the memory usage before and after a process has been completed, to get memory usage during the tagging process this would require running an external memory profiler, like [Scalene](https://github.com/plasma-umass/scalene) which we did not do here as it is difficult to get the memory requirement programmatically. For more accurate estimates you could run the [Scalene](https://github.com/plasma-umass/scalene) profile on an individual tagger benchmarking script, e.g. `scalene run benchmark_rule_based_tagger.py` (once you have installed `scalene`).
+:::
+
+These statistics were generated on a computer with an Nvidia 5070ti (16GB), 64GB DDR5 RAM, Intel Core Ultra 7 20 core 20 thread CPU, and 2TB PCIe Gen 5 SSD.
+
 </details>
 
 

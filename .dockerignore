@@ -6,3 +6,5 @@
 ! .python-version
 ! pymusas
 ! tests
+! benchmarks
+__pycache__

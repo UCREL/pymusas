@@ -14,3 +14,5 @@ build
 resources/welsh/output
 resources/welsh/cytag_output.xml
 resources/welsh/txt_gold_standard_data.txt
+benchmarks/resource_benchmarking/gpu_benchmarks.md
+benchmarks/resource_benchmarking/cpu_benchmarks.md
