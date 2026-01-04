@@ -9,3 +9,4 @@ exclude =
     *.lock
     tests/*.sh
     tests/*.dockerfile
+    *.md

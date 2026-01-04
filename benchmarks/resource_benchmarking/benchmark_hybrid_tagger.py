@@ -1,10 +1,10 @@
-import tempfile
 from pathlib import Path
+import tempfile
 import timeit
 
+import benchmarking_utils
 import typer
 
-import benchmarking_utils
 
 language_code_help = (
     "The language code of the hybrid tagger to benchmark. "
@@ -37,6 +37,7 @@ device_help = (
     "The device to use for the neural tagger model within the hybrid tagger. This should be a "
     "[torch device string like cpu or cuda](https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.device)."
 )
+
 
 def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=language_code_help),
          tagger_size: benchmarking_utils.NeuralTaggerSizes = typer.Argument(help=tagger_size_help),
@@ -117,9 +118,9 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
 
         total_times: list[float] = []
         with benchmarking_utils.track_memory_usage(average_memory_required_key, average_gpu_memory_required_key, output_statistics, device):
-            total_times = timeit.repeat(stmt='benchmarking_utils.tagger_speed_test(hybrid_spacy_tagger, Path(temp_dir), temp_file_prefix)', 
+            total_times = timeit.repeat(stmt='benchmarking_utils.tagger_speed_test(hybrid_spacy_tagger, Path(temp_dir), temp_file_prefix)',
                                         setup='hybrid_spacy_tagger = benchmarking_utils.load_hybrid_tagger(language_code, tagger_size, device)',
-                                        number=number_of_repeat_calls, 
+                                        number=number_of_repeat_calls,
                                         repeat=number_repeats,
                                         globals={**globals(), **locals()})
         average_time = min(total_times) / number_repeats
@@ -146,4 +147,3 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
 
 if __name__ == "__main__":
     typer.run(main)
-

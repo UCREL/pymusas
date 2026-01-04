@@ -125,17 +125,17 @@ jobs:
         run: echo "uv cache was restored"
 
       - name: isort
-        run: uv run isort --check-only pymusas tests scripts
+        run: uv run isort --check-only pymusas tests scripts benchmarks
       
       - name: flake8 Ubuntu and Mac
         if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
         run: |
-          uv run flake8 --config ./.flake8 pymusas tests scripts
+          uv run flake8 --config ./.flake8 pymusas tests scripts benchmarks
       
       - name: flake8 Window
         if: ${{ runner.os == 'Windows' }}
         run: |
-          uv run flake8 --config .\.flake8 pymusas tests scripts
+          uv run flake8 --config .\.flake8 pymusas tests scripts benchmarks
 
       - name: Cache mypy
         uses: actions/cache@v4

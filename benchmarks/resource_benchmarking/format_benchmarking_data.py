@@ -1,16 +1,19 @@
-from pathlib import Path
 import json
+from pathlib import Path
 
 import typer
+
 
 def load_json_file(file_path: Path) -> dict[str, int | float | str]:
     with file_path.open("r", encoding="utf-8") as file:
         return json.load(file)
 
+
 benchmarking_data_file_help = (
     "The file that contains the benchmarking data that will be formatted into "
     "a markdown table and printed to the console."
 )
+
 
 def main(benchmarking_data_file: Path = typer.Argument(help=benchmarking_data_file_help)) -> None:
     """
@@ -75,6 +78,7 @@ def main(benchmarking_data_file: Path = typer.Argument(help=benchmarking_data_fi
         benchmarking_row_markdown_format = "| ".join(benchmarking_row_data)
         benchmarking_row_markdown_format = f"| {benchmarking_row_markdown_format} |"
         print(benchmarking_row_markdown_format)
+
 
 if __name__ == "__main__":
     typer.run(main)

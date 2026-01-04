@@ -1,10 +1,10 @@
-import tempfile
 from pathlib import Path
+import tempfile
 import timeit
 
+import benchmarking_utils
 import typer
 
-import benchmarking_utils
 
 language_code_help = (
     "The language code of the rule based tagger to benchmark."
@@ -28,6 +28,7 @@ large_text_token_limit_help = (
     "The tokens come from the Wikipedia articles, once this token limit is reached "
     "no more tokens are added to the large text that will be processed as one text."
 )
+
 
 def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=language_code_help),
          output_file: Path = typer.Argument(help="The file to which the output will be written."),
@@ -106,9 +107,9 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
 
         total_times: list[float] = []
         with benchmarking_utils.track_memory_usage(average_memory_required_key, average_gpu_memory_required_key, output_statistics, device="cpu"):
-            total_times = timeit.repeat(stmt='benchmarking_utils.tagger_speed_test(rule_based_spacy_tagger, Path(temp_dir), temp_file_prefix)', 
+            total_times = timeit.repeat(stmt='benchmarking_utils.tagger_speed_test(rule_based_spacy_tagger, Path(temp_dir), temp_file_prefix)',
                                         setup='rule_based_spacy_tagger = benchmarking_utils.load_rule_based_tagger(language_code)',
-                                        number=number_of_repeat_calls, 
+                                        number=number_of_repeat_calls,
                                         repeat=number_repeats,
                                         globals={**globals(), **locals()})
         average_time = min(total_times) / number_repeats
@@ -135,4 +136,3 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
 
 if __name__ == "__main__":
     typer.run(main)
-

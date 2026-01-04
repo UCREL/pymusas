@@ -1,22 +1,22 @@
-from pathlib import Path
-from typing import Iterable
-import warnings
 from contextlib import contextmanager
 from enum import Enum
 import json
 import os
+from pathlib import Path
+from typing import Iterable
+import warnings
 
-import spacy
 import datasets
 import psutil
+import spacy
 import torch
 
-from pymusas.taggers.rules.single_word import SingleWordRule
-from pymusas.taggers.rules.mwe import MWERule
-from pymusas.taggers.rules.rule import Rule
-from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
+from pymusas.taggers.rules.single_word import SingleWordRule
+
 
 class LanguageCodes(str, Enum):
     en = "en"
@@ -30,9 +30,11 @@ class LanguageCodes(str, Enum):
     fi = "fi"
     xx = "xx"
 
+
 class NeuralTaggerSizes(str, Enum):
     small = "small"
     base = "base"
+
 
 LANGUAGE_CODE_TO_SPACY_MODEL = {
     "en": "en_core_web_sm",
@@ -75,26 +77,28 @@ language_code_to_pymusas_rule_based_model = {
     "fi": "fi_single_upos2usas_contextual_none"
 }
 
+
 language_code_to_pymusas_neural_model = {
-    "en": 
+    "en":
     {
         "small": "en_none_none_none_englishsmallbem",
         "base": "en_none_none_none_englishbasebem"
     },
-    "xx": 
+    "xx":
     {
         "small": "xx_none_none_none_multilingualsmallbem",
         "base": "xx_none_none_none_multilingualbasebem"
     }
 }
 
+
 language_code_to_neural_model_huggingface_id = {
-    "en": 
+    "en":
     {
         "small": "ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
         "base": "ucrelnlp/PyMUSAS-Neural-English-Base-BEM"
     },
-    "xx": 
+    "xx":
     {
         "small": "ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM",
         "base": "ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM"
@@ -115,6 +119,7 @@ language_code_to_wiki = {
     "fi": "fi",
     "xx": "en"
 }
+
 
 @contextmanager
 def track_memory_usage(memory_statistic_name: str,
@@ -203,11 +208,12 @@ def to_json_file(path: Path,
                 additional_data = json.load(json_fp)
                 if additional_data.keys() != data.keys():
                     raise KeyError(f"The keys of the existing JSON data in {path} "
-                                "does not match the keys of the new data.")
+                                   "does not match the keys of the new data.")
                 for key, value in additional_data.items():
                     data_with_list_values[key] = value + [data[key]]
     with path.open("w", encoding="utf-8") as json_fp:
         json.dump(data_with_list_values, json_fp)
+
 
 def wikipedia_dataset_to_directory(huggingface_dataset_id: str,
                                    directory: str,
@@ -254,7 +260,7 @@ def wikipedia_dataset_to_directory(huggingface_dataset_id: str,
         # Removes markdown headers
         text = text.replace("#", "")
         # Tried to remove markdown lists, but I think this creates a worse format
-        #text = re.sub(r"\s*-\s+", "", text)
+        # text = re.sub(r"\s*-\s+", "", text)
         token_count += len(spacy_model(text))
         article_count += 1
 
@@ -264,7 +270,6 @@ def wikipedia_dataset_to_directory(huggingface_dataset_id: str,
         if token_count > number_tokens:
             break
     return token_count
-
 
 
 def text_from_files(file_directory: Path,
@@ -334,7 +339,8 @@ def load_neural_tagger(language_code: str, size: str, device: str) -> spacy.Lang
                                   config={"components.pymusas_neural_tagger.device": device})
         spacy_model.add_pipe('pymusas_neural_tagger', source=neural_model)
         return spacy_model
-    
+
+
 def get_hybrid_tagger_initializer_kwargs(language_code: str, size: str
                                          ) -> dict[str, set[str] | ContextualRuleBasedRanker | list[Rule] | str]:
     """
@@ -380,7 +386,8 @@ def get_hybrid_tagger_initializer_kwargs(language_code: str, size: str
             "default_number_tags": default_number_tags,
             "pretrained_model_name_or_path": pretrained_model_name
             }
-    
+
+
 def load_hybrid_tagger(language_code: str, size: str, device: str) -> spacy.Language:
     """
     Loads a spaCy model with the hybrid tagger for the given language code and size
@@ -405,10 +412,11 @@ def load_hybrid_tagger(language_code: str, size: str, device: str) -> spacy.Lang
         hybrid_tagger.initialize(**get_hybrid_tagger_initializer_kwargs(language_code, size))
         return spacy_model
 
+
 def tagger_speed_test(spacy_model: spacy.Language,
-                                 wikipedia_data_directory: Path,
-                                 file_prefix: str,
-                                 max_texts: int = -1) -> None:
+                      wikipedia_data_directory: Path,
+                      file_prefix: str,
+                      max_texts: int = -1) -> None:
     """
     Tests the speed of a given spaCy pipeline, which includes the rule-based tagger.
     The speed test is performed on the given Wikipedia dataset text files, whereby the
