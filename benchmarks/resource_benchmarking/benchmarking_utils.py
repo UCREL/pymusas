@@ -3,16 +3,17 @@ from enum import Enum
 import json
 import os
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Iterator, cast
 import warnings
 
-import datasets
+from datasets import get_dataset_config_names, get_dataset_split_names, load_dataset
 import psutil
 import spacy
 import torch
 
 from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
+from pymusas.spacy_api.taggers.hybrid import HybridTagger
 from pymusas.taggers.rules.mwe import MWERule
 from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
@@ -124,8 +125,8 @@ language_code_to_wiki = {
 @contextmanager
 def track_memory_usage(memory_statistic_name: str,
                        gpu_memory_statistic_name: str,
-                       memory_statistics: dict[str, float],
-                       device: str) -> Iterable[None]:
+                       memory_statistics: dict[str, float | int | str],
+                       device: str) -> Iterator[None]:
     """
     Context manager to track memory usage of the enclosed code.
 
@@ -139,7 +140,7 @@ def track_memory_usage(memory_statistic_name: str,
             too in the memory_statistics dictionary.
         gpu_memory_statistic_name (str): name of the key to store the GPU memory statistic
             too in the memory_statistics dictionary.
-        memory_statistics (dict[str, float]]): dictionary to store the memory statistics
+        memory_statistics (dict[str, float | int | str]]): dictionary to store the memory statistics
         device (str): If `cuda` then GPU memory will also be tracked else the
             reported value will be 0.0 for `gpu_memory_statistic_name`.
 
@@ -179,7 +180,7 @@ def load_spacy_pipeline_as_tokenizer(language_code: str) -> spacy.Language:
 
 
 def to_json_file(path: Path,
-                 data: dict[str, int | float]
+                 data: dict[str, int | float | str]
                  ) -> None:
     """
     Writes data to a JSON file, whereby the values of the data will be saved in
@@ -190,7 +191,7 @@ def to_json_file(path: Path,
 
     Args:
         path (Path): The path to the JSON file.
-        data (dict[str, int | float]): The data to write to the JSON file.
+        data (dict[str, int | float | str]): The data to write to the JSON file.
 
     Returns:
         None
@@ -239,17 +240,17 @@ def wikipedia_dataset_to_directory(huggingface_dataset_id: str,
         int: The number of tokens saved.
     """
     wikipedia_language_code = language_code_to_wiki[language_code]
-    wikipedia_languages = datasets.get_dataset_config_names(huggingface_dataset_id)
+    wikipedia_languages = get_dataset_config_names(huggingface_dataset_id)
     if wikipedia_language_code not in wikipedia_languages:
         raise ValueError(f"Language {wikipedia_language_code} not found in dataset {huggingface_dataset_id}")
     split = "train"
-    assert split in datasets.get_dataset_split_names(huggingface_dataset_id)
+    assert split in get_dataset_split_names(huggingface_dataset_id)
 
-    wikipedia_language_dataset = datasets.load_dataset(huggingface_dataset_id,
-                                                       wikipedia_language_code,
-                                                       split=split,
-                                                       streaming=True,
-                                                       columns=["text"])
+    wikipedia_language_dataset = load_dataset(huggingface_dataset_id,
+                                              wikipedia_language_code,
+                                              split=split,
+                                              streaming=True,
+                                              columns=["text"])
     article_count = 0
     token_count = 0
     for object in wikipedia_language_dataset:
@@ -409,7 +410,8 @@ def load_hybrid_tagger(language_code: str, size: str, device: str) -> spacy.Lang
         hybrid_tagger = spacy_model.add_pipe("pymusas_hybrid_tagger",
                                              config={"top_n": 5,
                                                      "device": device})
-        hybrid_tagger.initialize(**get_hybrid_tagger_initializer_kwargs(language_code, size))
+        hybrid_tagger = cast(HybridTagger, hybrid_tagger)
+        hybrid_tagger.initialize(**get_hybrid_tagger_initializer_kwargs(language_code, size))  # type: ignore[arg-type]
         return spacy_model
 
 

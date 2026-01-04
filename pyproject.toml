@@ -73,6 +73,7 @@ dev = [
     "pytest>=6.0,!=7.1.0,!=8.1.0,<9.0.2",
     "responses>=0.25.7",
     "tomli-w>=1.2.0",
+    "types-psutil>=7.2.1.20251231",
     "types-requests>=2.32.4.20250913",
 ]
 
@@ -142,9 +143,13 @@ module = [
     "tqdm.*",
     "pydoc_markdown.*",
     "spacy.vocab",
-    "srsly.*",
+    "srsly.*"
 ]
 ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["datasets.*"]
+follow_untyped_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"

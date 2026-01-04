@@ -4,9 +4,19 @@ from pathlib import Path
 import typer
 
 
-def load_json_file(file_path: Path) -> dict[str, int | float | str]:
+def load_json_file(file_path: Path) -> dict[str, list[int | float | str]]:
+    """
+    Loads a JSON file from the given file path and returns the data as a
+    dictionary where the values are lists of int, float, or str.
+
+    Args:
+        file_path (Path): The path to the JSON file.
+
+    Returns:
+        dict[str, list[int | float | str]]: The data from the JSON file.
+    """
     with file_path.open("r", encoding="utf-8") as file:
-        return json.load(file)
+        return json.load(file)  # type: ignore[no-any-return]
 
 
 benchmarking_data_file_help = (
@@ -19,12 +29,14 @@ def main(benchmarking_data_file: Path = typer.Argument(help=benchmarking_data_fi
     """
     Creates a markdown table from the benchmarking data in the specified file.
     The benchmarking data should come from the output files of the following scripts:
+    
     * benchmark_rule_based_tagger.py
     * benchmark_neural_tagger.py
     * benchmark_hybrid_tagger.py
 
     An example markdown table that will be printed to the console is as follows:
-    | Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
+    
+| Language | Tagger | Load Model Memory Requirements | Average Memory Requirements | Large Text Memory Requirements | Tokens Per Second | Number of Tokens Processed | Large Text Tokens Processed | Load Model GPU Memory Requirements | Average GPU Memory Requirements | Large Text GPU Memory Requirements |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | en| Rule Based| 161.40| 204.74| 160.91| 2698.62| 1,643| 1,084| 0.00| 0.00| 0.00 |
     """

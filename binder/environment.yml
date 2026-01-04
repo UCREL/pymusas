@@ -24,3 +24,4 @@ dependencies:
     - "responses>=0.25.7"
     - "tomli-w>=1.2.0"
     - "types-requests>=2.32.4.20250913"
+    - "types-psutil>=7.2.1.20251231"

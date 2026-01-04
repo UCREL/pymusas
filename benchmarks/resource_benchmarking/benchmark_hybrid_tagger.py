@@ -89,7 +89,7 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
     load_gpu_requirements_key = "Load Model GPU Memory Requirements"
     average_gpu_memory_required_key = "Average GPU Memory Requirements"
     large_gpu_memory_requirements_key = "Large Text GPU Memory Requirements"
-    output_statistics = {
+    output_statistics: dict[str, int | float | str] = {
         language_code_key: language_code,
         tagger_name_key: benchmarking_utils.LANGUAGE_CODE_SIZE_TO_HYBRID_MODEL_NAME[language_code + "_" + tagger_size],
         load_memory_requirements_key: 0.0,
@@ -131,17 +131,17 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
         for line in benchmarking_utils.text_from_files(Path(temp_dir), temp_file_prefix):
             large_text += line
             spacy_doc = spacy_nlp(line)
-            output_statistics[large_text_tokens_processed_key] += len(spacy_doc)
+            output_statistics[large_text_tokens_processed_key] += len(spacy_doc)  # type: ignore[operator]
 
-            if output_statistics[large_text_tokens_processed_key] >= large_text_token_limit:
+            if output_statistics[large_text_tokens_processed_key] >= large_text_token_limit:  # type: ignore[operator]
                 break
         
         with benchmarking_utils.track_memory_usage(large_text_memory_requirements_key, large_gpu_memory_requirements_key, output_statistics, device):
             tagger = benchmarking_utils.load_hybrid_tagger(language_code, tagger_size, device)
             tagger(large_text)
 
-    output_statistics[average_memory_required_key] += output_statistics[load_memory_requirements_key]
-    output_statistics[large_text_memory_requirements_key] += output_statistics[load_memory_requirements_key]
+    output_statistics[average_memory_required_key] += output_statistics[load_memory_requirements_key]  # type: ignore[operator]
+    output_statistics[large_text_memory_requirements_key] += output_statistics[load_memory_requirements_key]  # type: ignore[operator]
     benchmarking_utils.to_json_file(output_file, output_statistics)
 
 
