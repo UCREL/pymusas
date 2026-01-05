@@ -185,7 +185,7 @@ In general, from the table you can see that;
 * The Chinese spaCy model requires more RAM than the other languages.
 * The smallest English neural model (Neural-E-17M) is quicker than English rule based tagger.
 * Using a GPU compared to CPU is quicker for Hybrid and Neural models.
-* The Neural and Hybrid taggers require a lot of memory when processing a text that is very long, thus we advise to split a text up, e.g. using a sentence splitter, before running these taggers.
+* The Neural and Hybrid taggers require a lot of memory when processing a text that is very long, thus we advise to split a text up, e.g. using a sentence splitter, before running these taggers as shown in the [neural tagger how to tag text guide](../how_to/tag_text_with/neural_tagger.md#how-to-efficiently-process-long-or-large-texts), in doing so this will make the memory requirements consistently lower.
 
 <details>
 <summary>Resource requirements statistics</summary>

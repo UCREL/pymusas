@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Documentation to the README stating the use case of My-Binder and how to install pymusas within the My-Binder cloud environment.
 - `How-to` guide for the `neural` and `hybrid` taggers within `docs/docs/usage/how_to/tag_text_with` as well introduced these taggers and how they compare to one another in `docs/docs/usage/getting_started/intro.md`.
 - Added resource requirement benchmarking code that can be found in the directory `benchmarks/resource_benchmarking`. This code creates a markdown table with statistics on how much memory is required to run the different taggers for both RAM and GPU memory as well as how fast the taggers are using either the CPU or GPU. These resource requirement statistics have also been added to the documentation within the `Introduction` usage page (`docs/docs/usage/getting_started/intro.md`).
+- Added documentation to the documentation website (`docs/docs/usage/how_to/tag_text_with/neural_tagger.md`) on how to efficiently process texts with the neural and hybrid taggers.
 
 ### Changed
 

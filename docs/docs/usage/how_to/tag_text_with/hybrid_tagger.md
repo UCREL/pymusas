@@ -9,6 +9,8 @@ The hybrid tagger requires PyMUSAS with the neural extra installed as shown in t
 
 In this guide we are going to show you how to tag text with the PyMUSAS [HybridTagger](/api/spacy_api/taggers/hybrid#hybridtagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide will take you through how to construct the tagger, add it to an existing spaCy pipeline, and then tag text with it. This guide is best read after following the [Rule Based Tagger](./rule_based_tagger.md) and [Neural Tagger](./neural_tagger.md) how to tag text guides as the hybrid tagger is a combination of both taggers.
 
+**To efficiently tag long or large texts** please follow the guidance from the neural tagger guide in the section [How to efficiently process long or large texts](neural_tagger.md#how-to-efficiently-process-long-or-large-texts), this guidance applies also to the hybrid tagger, whereby in that guide you will need to replace the neural tagger with a hybrid tagger.
+
 ## Construct the hybrid tagger
 
 The hybrid tagger has no pre-configured spaCy components, it has to be created. The hybrid tagger requires the following resources;
@@ -76,6 +78,8 @@ tagger.initialize(rules=word_rules,
                   pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
 ```
 Whereby `pretrained_model_name_or_path` is the HuggingFace model id ([ucrelnlp/PyMUSAS-Neural-English-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Small-BEM)). For more information on the arguments to pass to the Hybrid Tagger see the [HybridTagger class initialize method arguments.](/api/spacy_api/taggers/hybrid#initialize)
+
+## Tagging with the hybrid tagger
 
 We can now run the tagger, we are going to use a sample of text taken from the English Wikipedia page on the topic of [`The Nile River`](https://en.wikipedia.org/wiki/Nile):
 

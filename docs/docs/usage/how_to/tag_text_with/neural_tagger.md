@@ -3,7 +3,13 @@ title: Neural Tagger
 sidebar_position: 2
 ---
 
-In this guide we are going to show you how to tag text with the PyMUSAS [NeuralTagger](/api/spacy_api/taggers/neural.md#neuraltagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide will first state the available neural taggers that can be used, then introduce the Neural Tagger by using the smallest English Neural Tagger as part of a spaCy pipeline, then we will introduce how to use the multilingual tagger, and finally how to use the Neural tagger outside of a spaCy pipeline.
+In this guide we are going to show you how to tag text with the PyMUSAS [NeuralTagger](/api/spacy_api/taggers/neural.md#neuraltagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide will;
+
+* State the available neural taggers that can be used.
+* Introduce the Neural Tagger by using the smallest English Neural Tagger as part of a spaCy pipeline.
+* Introduce how to use the multilingual tagger.
+* How to use the Neural tagger outside of a spaCy pipeline.
+* How to efficient use the Neural tagger when processing long and or large amounts of text.
 
 ## Available taggers
 
@@ -257,6 +263,358 @@ Africa.        [(9, 10)]                     ['Z2', 'Z3']
 ```
 </details>
 
-:::note
+:::tip
 If you would like to use the Neural Tagger without requiring `pymusas` python package, this is possible through following the `usage` guide on the relevant Neural Tagger HuggingFace model card, like this [usage guide for the small English Neural Tagger](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-English-Small-BEM#usage). `pymusas` is a convenient wrapper around the code given in the `usage` example.
 :::
+
+## How to efficiently process long or large texts
+
+:::note
+This section applies to any tagger that uses a neural tagger, i.e. the Hybrid Tagger.
+:::
+
+The neural tagger is very memory intensive when processing long sequences due to the neural network model that is used (transformer based model, specifically [ModernBERT](https://aclanthology.org/2025.acl-long.127.pdf)), it has a quadratic memory cost based on the length of the text, therefore when using the neural tagger it is advised to process at most sentence length texts rather than paragraph, document, or multi-document, in doing so it will keep the memory requirements consistent.
+
+We will show how to tag at least 10,000 tokens of English Wikipedia articles from the [HuggingFaceFW/finewiki](https://huggingface.co/datasets/HuggingFaceFW/finewiki) dataset using the [larger 68 million parameter English Neural Tagger model](https://github.com/UCREL/pymusas-models/releases/tag/en_none_none_none_englishbasebem-0.4.0) by sentence splitting the text as we process the Wikipedia articles.
+
+### Setup
+
+We need:
+* `pymusas[neural]` with the neural extra for tagging.
+* `datasets` the HuggingFace datasets library to download the Wikipedia data.
+* `en_core_web_sm` the small spaCy English pipeline to sentence split the data. This could be any sentence splitter but we have chosen spaCy, to note we are going to use the default sentence splitter that requires a dependency parser, but with spaCy, at least for English, you do have other options that are quicker and do not require a dependency parser, [see here for more details.](https://spacy.io/usage/linguistic-features#sbd)
+* `en_none_none_none_englishbasebem` the [larger 68 million parameter English Neural Tagger model.](https://github.com/UCREL/pymusas-models/releases/tag/en_none_none_none_englishbasebem-0.4.0)
+
+To download these run the following:
+``` bash
+pip install pymusas[neural] datasets
+# small spaCy English pipeline
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# PyMUSAS neural tagger
+pip install https://github.com/UCREL/pymusas-models/releases/download/en_none_none_none_englishbasebem-0.4.0/en_none_none_none_englishbasebem-0.4.0-py3-none-any.whl
+```
+
+### Tagging long or large texts
+
+First we import the relevant libraries, create a few helper functions that will download and process the Wikipedia articles, and then use these functions to download *N* English Wikipedia articles to a temporary directory (so that after the script has ran they will be deleted to save disk space), whereby the number of articles we download will contain at least 10,000 tokens/words after we have got to this token limit we will not download anymore Wikipedia articles;
+
+``` python
+from pathlib import Path
+import tempfile
+from typing import Iterable
+
+from datasets import get_dataset_config_names, get_dataset_split_names, load_dataset
+import spacy
+
+
+def wikipedia_dataset_to_directory(huggingface_dataset_id: str,
+                                   directory: str,
+                                   file_prefix: str,
+                                   spacy_model: spacy.Language,
+                                   number_tokens: int,
+                                   language_code: str) -> int:
+    """
+    Saves a subset of Wikipedia articles from the given language code to the
+    specified directory, whereby the number of articles saved is based on
+    the number of tokens.
+
+    Args:
+        huggingface_dataset_id (str): The Hugging Face dataset ID of the Wikipedia dataset, e.g. HuggingFaceFW/finewiki
+        directory (str): The directory to which the files should be saved.
+        file_prefix (str): The prefix of the file names. Each prefix is appended with a unique article number.
+        spacy_model (spacy.Language): The Spacy language model that should be used to tokenize the text.
+        number_tokens (int): The minimum number of tokens to be saved. Once the
+            number of tokens is reached no more articles are saved.
+        language_code (str): The language code of the dataset to be saved.
+
+    Returns:
+        int: The number of tokens saved.
+    """
+    wikipedia_languages = get_dataset_config_names(huggingface_dataset_id)
+    if language_code not in wikipedia_languages:
+        raise ValueError(f"Language {language_code} not found in dataset {huggingface_dataset_id}")
+    split = "train"
+    assert split in get_dataset_split_names(huggingface_dataset_id)
+
+    wikipedia_language_dataset = load_dataset(huggingface_dataset_id,
+                                              language_code,
+                                              split=split,
+                                              streaming=True,
+                                              columns=["text"])
+    article_count = 0
+    token_count = 0
+    for object in wikipedia_language_dataset:
+        text = object["text"]
+        # We skip any article that contains a table
+        if "| -" in text:
+            continue
+        # Removes markdown headers
+        text = text.replace("#", "")
+        # Tried to remove markdown lists, but I think this creates a worse format
+        # text = re.sub(r"\s*-\s+", "", text)
+        token_count += len(spacy_model(text))
+        article_count += 1
+
+        temp_file = Path(directory, f"{file_prefix}{article_count}")
+        with temp_file.open("w", encoding="utf-8") as f:
+            f.write(text)
+        if token_count > number_tokens:
+            break
+    return token_count
+
+
+def text_from_files(file_directory: Path,
+                    file_prefix: str) -> Iterable[str]:
+    """
+    Yields lines of non empty text from files in a directory whereby the file
+    names start with the given file prefix.
+
+    All lines of text are stripped of leading and trailing whitespace.
+
+    Args:
+        file_directory (Path): The directory to read files from.
+        file_prefix (str): The prefix of the file names to read.
+
+    Yields:
+        An iterable of strings, where each string is a non-empty line from
+        one of the files with leading and trailing whitespace stripped.
+    """
+    for file in file_directory.iterdir():
+        if file.name.startswith(file_prefix):
+            with file.open("r", encoding="utf-8") as file_fp:
+                for line in file_fp:
+                    line = line.strip()
+                    if line:
+                        yield line
+
+
+def sentences_from_texts(text_iterator: Iterable[str],
+                         spacy_model: spacy.Language) -> Iterable[str]:
+    """
+    Given an iterable of texts, it returns the texts split into sentences by the
+    given spaCy model.
+
+    Args:
+        text_iterator (Iterable[str]): The iterable of texts to be sentence split.
+        spacy_model (spacy.Language): The spaCy language model to be used to sentence split the text.
+
+    Yields:
+        Sentences from the text iterator.
+    """
+    for spacy_doc in spacy_model.pipe(text_iterator):
+        for sentence in spacy_doc.sents:
+            yield sentence.text
+
+# Temporary directory that we are storing the Wikipedia articles too
+with tempfile.TemporaryDirectory() as temp_dir:
+    # spaCy pipeline for sentence splitting, for a choice of sentence splitters
+    # see https://spacy.io/usage/linguistic-features#sbd
+    spacy_sentence_splitter_pipeline = spacy.load("en_core_web_sm")
+    # Each Wikipedia article we download will be saved to a file with this prefix
+    # and a unique article number appended, of which these articles will be within
+    # the temp_dir
+    data_file_prefix = "wikipedia_article_"
+    # HuggingFace dataset ID for Wikipedia dataset: https://huggingface.co/datasets/HuggingFaceFW/finewiki
+    wikipedia_dataset_id = "HuggingFaceFW/finewiki"
+    # We are going to download enough Wikipedia articles so that we have at least 10,000 tokens
+    # of text.
+    minimum_number_tokens = 10_000
+    # Downloads the Wikipedia articles
+    wikipedia_dataset_to_directory(wikipedia_dataset_id,
+                                   temp_dir,
+                                   data_file_prefix,
+                                   spacy_sentence_splitter_pipeline, minimum_number_tokens,
+                                   "en")
+```
+
+Now that we have the Wikipedia articles in a temporary directory we can use the `text_from_files` and `sentences_from_texts` functions to create an iterable that will efficently get each line of text from a file and then per line sentence split it, by using an iterable we only store the current line in memory rather than the whole text (for Wikipedia the line of text can be a whole paragraph).
+
+``` python
+    # We read the Wikipedia article one text at a time
+    wikipedia_texts = text_from_files(Path(temp_dir), data_file_prefix)
+    # For each line of text in the Wikipedia article we sentence split it
+    wikipedia_texts_sentence_split = sentences_from_texts(wikipedia_texts,
+                                                          spacy_sentence_splitter_pipeline)
+```
+
+Currently we have not processed any of the Wikipedia text as these are [generators](https://www.w3schools.com/python/python_generators.asp) whereby until we loop over them with a for loop they will not do anything.
+
+We now create the English neural tagger using the pre-configured spaCy pipeline, as shown in the [earlier section](#introduction-with-the-english-neural-tagger) but this time with a larger neural tagger model.
+
+``` python
+    # We create the spaCy neural tagger pipeline which uses the CPU rather than the GPU/CUDA
+    pymusas_neural_nlp = spacy.blank("en")
+    device = "cpu"
+    pymusas_neural_tagger_pipeline = spacy.load("en_none_none_none_englishbasebem",
+                                                config={"components.pymusas_neural_tagger.device": device})
+    pymusas_neural_nlp.add_pipe("pymusas_neural_tagger", source=pymusas_neural_tagger_pipeline)
+```
+
+We can now efficently process the 10,000 tokens of English text like so, whereby the neural tagger will be given a sentence at a time to process from the `wikipedia_texts_sentence_split` generator.
+
+``` python
+    # We now efficient process each sentence in all of the Wikipedia articles
+    for doc in pymusas_neural_nlp.pipe(wikipedia_texts_sentence_split,
+                                       n_process=1):
+        for token in doc:
+            token_text = token.text
+            # USAS tags
+            usas_tags = token._.pymusas_tags
+```
+
+:::note
+We set `n_process=1` as the neural tagger model will be using as many CPU processors as possible therefore we do not want to assign any processors away from this.
+:::
+
+For the full python script see the drop down below;
+
+<details>
+<summary>Full Python Script</summary>
+
+``` python
+from pathlib import Path
+import tempfile
+from typing import Iterable
+
+from datasets import get_dataset_config_names, get_dataset_split_names, load_dataset
+import spacy
+
+
+def wikipedia_dataset_to_directory(huggingface_dataset_id: str,
+                                   directory: str,
+                                   file_prefix: str,
+                                   spacy_model: spacy.Language,
+                                   number_tokens: int,
+                                   language_code: str) -> int:
+    """
+    Saves a subset of Wikipedia articles from the given language code to the
+    specified directory, whereby the number of articles saved is based on
+    the number of tokens.
+
+    Args:
+        huggingface_dataset_id (str): The Hugging Face dataset ID of the Wikipedia dataset, e.g. HuggingFaceFW/finewiki
+        directory (str): The directory to which the files should be saved.
+        file_prefix (str): The prefix of the file names. Each prefix is appended with a unique article number.
+        spacy_model (spacy.Language): The Spacy language model that should be used to tokenize the text.
+        number_tokens (int): The minimum number of tokens to be saved. Once the
+            number of tokens is reached no more articles are saved.
+        language_code (str): The language code of the dataset to be saved.
+
+    Returns:
+        int: The number of tokens saved.
+    """
+    wikipedia_languages = get_dataset_config_names(huggingface_dataset_id)
+    if language_code not in wikipedia_languages:
+        raise ValueError(f"Language {language_code} not found in dataset {huggingface_dataset_id}")
+    split = "train"
+    assert split in get_dataset_split_names(huggingface_dataset_id)
+
+    wikipedia_language_dataset = load_dataset(huggingface_dataset_id,
+                                              language_code,
+                                              split=split,
+                                              streaming=True,
+                                              columns=["text"])
+    article_count = 0
+    token_count = 0
+    for object in wikipedia_language_dataset:
+        text = object["text"]
+        # We skip any article that contains a table
+        if "| -" in text:
+            continue
+        # Removes markdown headers
+        text = text.replace("#", "")
+        # Tried to remove markdown lists, but I think this creates a worse format
+        # text = re.sub(r"\s*-\s+", "", text)
+        token_count += len(spacy_model(text))
+        article_count += 1
+
+        temp_file = Path(directory, f"{file_prefix}{article_count}")
+        with temp_file.open("w", encoding="utf-8") as f:
+            f.write(text)
+        if token_count > number_tokens:
+            break
+    return token_count
+
+
+def text_from_files(file_directory: Path,
+                    file_prefix: str) -> Iterable[str]:
+    """
+    Yields lines of non empty text from files in a directory whereby the file
+    names start with the given file prefix.
+
+    All lines of text are stripped of leading and trailing whitespace.
+
+    Args:
+        file_directory (Path): The directory to read files from.
+        file_prefix (str): The prefix of the file names to read.
+
+    Yields:
+        An iterable of strings, where each string is a non-empty line from
+        one of the files with leading and trailing whitespace stripped.
+    """
+    for file in file_directory.iterdir():
+        if file.name.startswith(file_prefix):
+            with file.open("r", encoding="utf-8") as file_fp:
+                for line in file_fp:
+                    line = line.strip()
+                    if line:
+                        yield line
+
+
+def sentences_from_texts(text_iterator: Iterable[str],
+                         spacy_model: spacy.Language) -> Iterable[str]:
+    """
+    Given an iterable of texts, it returns the texts split into sentences by the
+    given spaCy model.
+
+    Args:
+        text_iterator (Iterable[str]): The iterable of texts to be sentence split.
+        spacy_model (spacy.Language): The spaCy language model to be used to sentence split the text.
+
+    Yields:
+        Sentences from the text iterator.
+    """
+    for spacy_doc in spacy_model.pipe(text_iterator):
+        for sentence in spacy_doc.sents:
+            yield sentence.text
+
+
+# Temporary directory that we are storing the Wikipedia articles too
+with tempfile.TemporaryDirectory() as temp_dir:
+    # spaCy pipeline for sentence splitting, for a choice of sentence splitters
+    # see https://spacy.io/usage/linguistic-features#sbd
+    spacy_sentence_splitter_pipeline = spacy.load("en_core_web_sm")
+    # Each Wikipedia article we download will be saved to a file with this prefix
+    # and a unique article number appended, of which these articles will be within
+    # the temp_dir
+    data_file_prefix = "wikipedia_article_"
+    # HuggingFace dataset ID for Wikipedia dataset: https://huggingface.co/datasets/HuggingFaceFW/finewiki
+    wikipedia_dataset_id = "HuggingFaceFW/finewiki"
+    # We are going to download enough Wikipedia articles so that we have at least 10,000 tokens
+    # of text.
+    minimum_number_tokens = 10_000
+    # Downloads the Wikipedia articles
+    wikipedia_dataset_to_directory(wikipedia_dataset_id, temp_dir, data_file_prefix, spacy_sentence_splitter_pipeline, minimum_number_tokens, "en")
+    
+    # We read the Wikipedia article one text at a time
+    wikipedia_texts = text_from_files(Path(temp_dir), data_file_prefix)
+    # For each line of text in the Wikipedia article we sentence split it
+    wikipedia_texts_sentence_split = sentences_from_texts(wikipedia_texts, spacy_sentence_splitter_pipeline)
+    
+    # We create the spaCy neural tagger pipeline which uses the CPU rather than the GPU/CUDA
+    pymusas_neural_nlp = spacy.blank("en")
+    device = "cpu"
+    pymusas_neural_tagger_pipeline = spacy.load("en_none_none_none_englishbasebem",
+                                                config={"components.pymusas_neural_tagger.device": device})
+    pymusas_neural_nlp.add_pipe("pymusas_neural_tagger", source=pymusas_neural_tagger_pipeline)
+
+    # We now efficient process each sentence in all of the Wikipedia articles
+    for doc in pymusas_neural_nlp.pipe(wikipedia_texts_sentence_split,
+                                       n_process=1):
+        for token in doc:
+            token_text = token.text
+            # USAS tags
+            usas_tags = token._.pymusas_tags
+```
+</details>
+
