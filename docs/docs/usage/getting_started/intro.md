@@ -16,7 +16,7 @@ Below we describe the different semantic taggers we supported and the pre-config
 
 ## Semantic Taggers
 
-As mentioned we have 3 different taggers; rule based, neural network (neural), and hybrid. A guide on how to choose the right tagger for you can be found in the [tagger comparison section below,](#tagger-comparison) of which in these section we also compare the taggers based on performance across various languages.
+As mentioned we have 3 different taggers; rule based, neural network (neural), and hybrid, these taggers are described in their respective sections below. A guide on how to choose the right tagger for you can be found in the [tagger comparison section below,](#tagger-comparison) of which in that section we also compare the taggers based on performance across various languages.
 
 :::tip
 The USAS special tags;
@@ -58,16 +58,22 @@ Currently we have 4 trained neural taggers, 2 for English and 2 that are highly 
 | Multilingual | [ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Small-BEM) | 140 | 501 |
 | Multilingual | [ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM](https://huggingface.co/ucrelnlp/PyMUSAS-Neural-Multilingual-Base-BEM) | 307 | 1,060 |
 
+For more details on the neural tagger and these trained neural taggers please refer to the paper [Creating a Hybrid Rule and Neural Network Based Semantic Tagger using Silver Standard Data: the PyMUSAS framework for Multilingual Semantic Annotation.](https://arxiv.org/pdf/2601.09648).
+
 ### Hybrid
 
 Hybrid is a combination of a rule based and neural tagger. This tagger in essence runs the configured rule based tagger on a given text and if it has one or more unknown words in the text it cannot tag then it uses the neural tagger to assign a tag to those words, more details can be found in the API documentation of the [HybridTagger class.](/api/spacy_api/taggers/hybrid.md#hybridtagger). The hybrid tagger does not come with any pre-configured spaCy components, all hybrid tagger must be configured for your own use case, but we have a detailed how to guide on this at [how to tag text with hybrid tagger.](../how_to/tag_text_with/hybrid_tagger.md)
+
+For more details on the hybrid tagger please refer to the paper [Creating a Hybrid Rule and Neural Network Based Semantic Tagger using Silver Standard Data: the PyMUSAS framework for Multilingual Semantic Annotation.](https://arxiv.org/pdf/2601.09648).
 
 ### Tagger Comparison
 
 We have 3 different types of taggers; rule based, neural, and hybrid, of which below;
 * We state the advantages and dis-advantages of each tagger.
-* The evaluation results on 4 different languages for all taggers.
+* The evaluation results on 5 different languages for all taggers.
 * The resources required to run the taggers on different size texts as well as how fast in tokens per second the taggers are.
+
+The evaluation results came from the paper [Creating a Hybrid Rule and Neural Network Based Semantic Tagger using Silver Standard Data: the PyMUSAS framework for Multilingual Semantic Annotation](https://arxiv.org/pdf/2601.09648) for more information on how the evaluation was setup please refer to that paper.
 
 <Tabs
 defaultValue="rule-based"
@@ -129,17 +135,17 @@ values={[
 ]}>
     <TabItem value="top-1" label="Top-1">
 
-| Models | English | Chinese | Finnish | Welsh |
-|----|----------|----|----|----|
-| Rule Based  | 72.4 | 32.6 | 58.4 | 70.6 |
-| Neural-E-17M  | 66.4 | - | - | - |
-| Neural-E-68M  | 70.1 | - | - | - |
-| Neural-M-140M  | 66.0 | 42.2 | 15.8 | 21.7 |
-| Neural-M-307M  | 70.2 | 47.9 | 25.9 | 42.0 |
-| Hybrid-E-17M  | 72.5 | - | - | - |
-| Hybrid-E-68M  | 72.5 | - | - | - |
-| Hybrid-M-140M  | 72.5 | 39.8 | 59.1 | 71.3 |
-| Hybrid-M-307M  | 72.5 | 39.8 | 60.3 | 72.4 |
+| Models | English | Chinese | Finnish | Welsh | Irish |
+|----|----------|----|----|----|----|
+| Rule Based  | 72.4 | 32.6 | 58.4 | 70.6 | 56.6 |
+| Neural-E-17M  | 66.4 | - | - | - | - |
+| Neural-E-68M  | 70.1 | - | - | - | - |
+| Neural-M-140M  | 66.0 | 42.2 | 15.8 | 21.7 | 28.5 |
+| Neural-M-307M  | 70.2 | 47.9 | 25.9 | 42.0 | 35.6 |
+| Hybrid-E-17M  | 72.5 | - | - | - | - |
+| Hybrid-E-68M  | 72.5 | - | - | - | - |
+| Hybrid-M-140M  | 72.5 | 39.8 | 59.1 | 71.3 | 57.1 |
+| Hybrid-M-307M  | 72.5 | 39.8 | 60.3 | 72.4 | 57.1 |
 
     </TabItem>
     <TabItem value="top-5" label="Top-5">
@@ -147,14 +153,14 @@ values={[
 | Models | English | Chinese | Finnish | Welsh |
 |----|----------|----|----|----|
 | Rule Based  | 81.8 | 43.6 | 64.0 | 73.2 |
-| Neural-E-17M  | 87.6 | - | - | - |
-| Neural-E-68M  | 90.0 | - | - | - |
-| Neural-M-140M  | 88.9 | 66.3 | 32.8 | 40.8 |
-| Neural-M-307M  | 90.1 | 70.4 | 42.4 | 56.4 |
-| Hybrid-E-17M  | 81.9 | - | - | - |
-| Hybrid-E-68M  | 82.0 | - | - | - |
-| Hybrid-M-140M  | 82.0 | 55.6 | 65.8 | 75.5 |
-| Hybrid-M-307M  | 82.0 | 56.3 | 67.3 | 75.9 |
+| Neural-E-17M  | 87.6 | - | - | - | - |
+| Neural-E-68M  | 90.0 | - | - | - | - |
+| Neural-M-140M  | 88.9 | 66.3 | 32.8 | 40.8 | 47.6 |
+| Neural-M-307M  | 90.1 | 70.4 | 42.4 | 56.4 | 51.6 |
+| Hybrid-E-17M  | 81.9 | - | - | - | - |
+| Hybrid-E-68M  | 82.0 | - | - | - | - |
+| Hybrid-M-140M  | 82.0 | 55.6 | 65.8 | 75.5 | 63.3 |
+| Hybrid-M-307M  | 82.0 | 56.3 | 67.3 | 75.9 | 63.3 |
 
     </TabItem>
 </Tabs>
