@@ -27,5 +27,5 @@ this will install the default version of [PyTorch](https://pytorch.org/) for you
 :::
 
 ``` bash
-pip install pymusas[neural]
+pip install 'pymusas[neural]'
 ```
