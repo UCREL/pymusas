@@ -3,6 +3,9 @@ title: Neural Tagger
 sidebar_position: 2
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 In this guide we are going to show you how to tag text with the PyMUSAS [NeuralTagger](/api/spacy_api/taggers/neural.md#neuraltagger) so that you can extract token level [USAS semantic tags](https://ucrel.lancs.ac.uk/usas/) from the tagged text. The guide will;
 
 * State the available neural taggers that can be used.
@@ -286,6 +289,11 @@ We need:
 * `en_none_none_none_englishbasebem` the [larger 68 million parameter English Neural Tagger model.](https://github.com/UCREL/pymusas-models/releases/tag/en_none_none_none_englishbasebem-0.4.0)
 
 To download these run the following:
+
+
+<Tabs groupId="shell-choice">
+<TabItem value="bash" label="bash">
+
 ``` bash
 pip install pymusas[neural] datasets
 # small spaCy English pipeline
@@ -293,6 +301,20 @@ pip install https://github.com/explosion/spacy-models/releases/download/en_core_
 # PyMUSAS neural tagger
 pip install https://github.com/UCREL/pymusas-models/releases/download/en_none_none_none_englishbasebem-0.4.0/en_none_none_none_englishbasebem-0.4.0-py3-none-any.whl
 ```
+
+</TabItem>
+<TabItem value="zsh" label="zsh">
+
+``` bash
+pip install 'pymusas[neural]' datasets
+# small spaCy English pipeline
+pip install https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+# PyMUSAS neural tagger
+pip install https://github.com/UCREL/pymusas-models/releases/download/en_none_none_none_englishbasebem-0.4.0/en_none_none_none_englishbasebem-0.4.0-py3-none-any.whl
+```
+
+</TabItem>
+</Tabs>
 
 ### Tagging long or large texts
 
