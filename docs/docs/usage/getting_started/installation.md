@@ -4,6 +4,9 @@ title: Installation
 sidebar_position: 2
 ---
 
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
 # Install PyMUSAS
 
 Can be installed on all operating systems and supports Python version >= `3.10` and < `3.14`, to install run:
@@ -26,6 +29,19 @@ this will install the default version of [PyTorch](https://pytorch.org/) for you
 
 :::
 
+<Tabs groupId="shell-choice">
+<TabItem value="bash" label="bash">
+
 ``` bash
 pip install pymusas[neural]
 ```
+
+</TabItem>
+<TabItem value="zsh" label="zsh">
+
+``` bash
+pip install 'pymusas[neural]'
+```
+
+</TabItem>
+</Tabs>
