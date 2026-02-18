@@ -33,7 +33,7 @@ PyMUSAS currently support 11 different languages for the rule based tagger with 
 | Language (BCP 47 language code) | MWE Support | Disk Space (MB) |
 | --- | --- | --- |
 | Mandarin Chinese (cmn) | :heavy_check_mark: | 1.28 |
-| Danish (da) | :heavy_check_mark: | 0.85 |
+| Danish (da) | :heavy_check_mark: | 0.82 |
 | Dutch, Flemish (nl) | :x: | 0.15 |
 | English (en) | :heavy_check_mark: | 0.86 |
 | Finnish (fi) | :x: | 0.64 |

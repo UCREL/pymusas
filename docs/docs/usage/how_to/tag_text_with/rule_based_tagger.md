@@ -125,18 +125,14 @@ Text    POS    MWE start and end index    USAS Tags
 <details>
 <summary>Expand</summary>
 
-First download both the [Danish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/da_dual_none_contextual_none-0.4.0) and the [small Danish spaCy model](https://spacy.io/models/da):
+First download both the [Danish PyMUSAS `RuleBasedTagger` spaCy component](https://github.com/UCREL/pymusas-models/releases/tag/da_dual_none_contextual_none-0.4.1) and the [small Danish spaCy model](https://spacy.io/models/da):
 
 ``` bash
-pip install https://github.com/UCREL/pymusas-models/releases/download/da_dual_none_contextual_none-0.4.0/da_dual_none_contextual_none-0.4.0-py3-none-any.whl
+pip install https://github.com/UCREL/pymusas-models/releases/download/da_dual_none_contextual_none-0.4.1/da_dual_none_contextual_none-0.4.1-py3-none-any.whl
 python -m spacy download da_core_news_sm
 ```
 
 Then create the tagger, in a Python script:
-
-:::note
-Currently, there is no lemmatization component in the spaCy pipeline for Chinese.
-:::
 
 ``` python
 import spacy
@@ -156,35 +152,35 @@ text = "Mindst 65% af Nilens vand kommer fra Den Blå Nil, som udspringer ved Ta
 
 output_doc = nlp(text)
 
-print(f'Text\tPOS\tUSAS Tags')
+print(f'{"Text":<20}{"Lemma":<20}{"POS":<8}USAS Tags')
 for token in output_doc:
-    print(f'{token.text}\t{token.pos_}\t{token._.pymusas_tags}')
+    print(f'{token.text:<20}{token.lemma_:<20}{token.pos_:<8}{token._.pymusas_tags}')
 ```
 
 <details>
 <summary>Output:</summary>
 
 ``` tsv
-Text    POS     USAS Tags
-Mindst  ADV     ['A13.7']
-65      NUM     ['N1']
-%       SYM     ['Z99']
-af      ADP     ['Z5', 'E2-']
-Nilens  PROPN   ['Z2']
-vand    NOUN    ['O1.2', 'W3/M4', 'B1', 'C1%']
-kommer  VERB    ['K2']
-fra     ADP     ['K2']
-Den     DET     ['Z99']
-Blå     ADJ     ['O4.3', 'S1.2.4-', 'G1.2']
-Nil     NOUN    ['Z99']
-,       PUNCT   ['PUNCT']
-som     PRON    ['A13']
-udspringer      VERB    ['Z99']
-ved     ADP     ['Z5']
-Tanasøen        PROPN   ['Z99']
-i       ADP     ['Z5']
-Etiopien        PROPN   ['Z2']
-.       PUNCT   ['PUNCT']
+Text                Lemma               POS     USAS Tags
+Mindst              mindst              ADV     ['A13.7']
+65                  65                  NUM     ['N1']
+%                   %                   SYM     ['Z99']
+af                  af                  ADP     ['Z5']
+Nilens              Nilen               PROPN   ['Z2']
+vand                vand                NOUN    ['O1.2', 'W3/M4', 'B1', 'C1%']
+kommer              komme               VERB    ['K2']
+fra                 fra                 ADP     ['K2']
+Den                 den                 DET     ['Z99']
+Blå                 Blå                 ADJ     ['O4.3', 'S1.2.4-', 'G1.2']
+Nil                 Nil                 NOUN    ['Z99']
+,                   ,                   PUNCT   ['PUNCT']
+som                 som                 PRON    ['A13']
+udspringer          udspringe           VERB    ['Z99']
+ved                 ved                 ADP     ['Z5']
+Tanasøen            Tanasøen            PROPN   ['Z99']
+i                   i                   ADP     ['Z5']
+Etiopien            Etiopien            PROPN   ['Z2']
+.                   .                   PUNCT   ['PUNCT']
 ```
 
 </details>
@@ -192,19 +188,19 @@ Etiopien        PROPN   ['Z2']
 For Danish the tagger also identifies and tags Multi-Word Expressions (MWE), to find these MWE's you can run the following:
 
 ``` python
-print(f'Text\tPOS\tMWE start and end index\tUSAS Tags')
+print(f'{"Text":<20}{"POS":<8}{"MWE start and end index":<30}{"USAS Tags"}')
 for token in output_doc:
     start, end = token._.pymusas_mwe_indexes[0]
     if (end - start) > 1:
-        print(f'{token.text}\t{token.pos_}\t{(start, end)}\t{token._.pymusas_tags}')
+        print(f'{token.text:<20}{token.tag_:<8}{str((start, end)):<30}{token._.pymusas_tags}')
 ```
 
 Which will output the following:
 
 ``` tsv
-Text    POS    MWE start and end index    USAS Tags
-kommer  VERB    (6, 8)  ['K2']
-fra     ADP     (6, 8)  ['K2']
+Text                POS     MWE start and end index       USAS Tags
+kommer              VERB    (6, 8)                        ['K2']
+fra                 ADP     (6, 8)                        ['K2']
 ```
 
 
