@@ -1,9 +1,15 @@
 import argparse
 from pathlib import Path
 import random
+import sys
 import time
-import tomllib
 from typing import cast
+
+
+if sys.version_info >= (3, 11):
+    import tomllib
+else:
+    import tomli as tomllib
 
 import tomli_w
 
