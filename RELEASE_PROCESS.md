@@ -38,10 +38,10 @@ GitHub also has a [guide on supported citation formats on GitHub.](https://docs.
 For more information about CITATION.cff files see the [Citation File Format website](https://citation-file-format.github.io/).
 
 
-5. Add these changes using Git manually (`git add`), then commit and push these changes with:
+5. Add these changes using Git manually (`git add`), then commit:
 
     ```
-    git commit -m "Prepare for release $TAG" && git push origin main
+    git commit -m "Prepare for release $TAG"
     ```
     
 6. Then add the tag in git to mark the release (When prompted for a tag message use "Release v{VERSION}"):
