@@ -30,8 +30,6 @@ RUN uv python install 3.13
 RUN uv venv --python=3.13 --no-project \
     && uv pip install torch --index-url https://download.pytorch.org/whl/cu128
 
-
-RUN 
 COPY --chown=ubuntu:ubuntu pymusas ./pymusas
 COPY --chown=ubuntu:ubuntu tests ./tests
 COPY --chown=ubuntu:ubuntu pyproject.toml pyproject.toml
