@@ -205,6 +205,6 @@ By default when running the documentation website locally it is hosted at: [http
 To update to the latest docusaurs version, the easiest way is to (before doing this ensure that any changes you have not committed to git within `./docs` have been committed.):
 
 (Does require you to enter `y` to proceed when creating the docusaurus website directory)
-```
+``` bash
 make create-docs
 ```

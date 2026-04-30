@@ -17,6 +17,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Moved the `How-to` `Rule Based Tagger` usage documentation page from the directory `docs/docs/usage/how_to` to `docs/docs/usage/how_to/tag_text_with` so that all the tagger how to guides are within their own folder.
+- Support both transformers v4 and v5.
+- Support for Python 3.14 should be resolved by pinning the version of spaCy to `>=3.8.13` this fixes [Issue 57](https://github.com/UCREL/pymusas/issues/57).
+- Updated the [GitHub Workflows](./.github/workflows/) so that they use a tagged version of each action and that the actions are the most recent versions.
+- The version of PyTorch that is used in the code base when developing is set to the CPU version saving Linux users from downloading CUDA libraries.
+- The [GPU docker image used for testing](./tests/gpu-docker.dockerfile) has been updated so that it uses the correct version of PyTorch.
+- Corrected how to install `pymusas` for users in the [./README.md](./README.md).
+- Changed the default version of Python to version `3.13`.
 
 ### Removed
 

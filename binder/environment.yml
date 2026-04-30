@@ -12,7 +12,7 @@ dependencies:
     - "tqdm>=4.50.0,<5.0"
     - "typer>=0.3.0,<1.0.0"
     - "torch>=2.2,<3.0"
-    - "transformers>=4.0,<5.0"
+    - "transformers>=4.0,<6.0"
     - "wsd-torch-models>0.1.1,<1.0"
     - "coverage[toml]>=6.0.0"
     - "datasets>=4.4.2"

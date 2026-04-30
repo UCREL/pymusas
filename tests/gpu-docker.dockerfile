@@ -2,8 +2,6 @@ FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
 
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends \
-    python3.12 \
-    python3.12-dev \
     git \
     make \
     wget \
@@ -27,15 +25,18 @@ RUN set -o pipefail \
 
 ENV PATH="/home/$USERNAME/.local/bin/:$PATH"
 
-RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
-    --mount=type=bind,source=.python-version,target=.python-version \
-    uv sync --python=3.12 --no-install-project --no-install-workspace --all-extras
-RUN uv pip install --python=3.12 spacy[cuda12x]
+RUN uv self update
+RUN uv python install 3.13
+RUN uv venv --python=3.13 --no-project \
+    && uv pip install torch --index-url https://download.pytorch.org/whl/cu128
+
+
+RUN 
 COPY --chown=ubuntu:ubuntu pymusas ./pymusas
 COPY --chown=ubuntu:ubuntu tests ./tests
 COPY --chown=ubuntu:ubuntu pyproject.toml pyproject.toml
-COPY --chown=ubuntu:ubuntu .python-version .python-version
 RUN touch README.md LICENSE
-RUN uv version --bump patch
+RUN uv pip install .[neural] --group dev
+RUN uv pip install spacy[cuda12x]
 
 ENTRYPOINT ["./tests/docker_gpu_run_script.sh"]

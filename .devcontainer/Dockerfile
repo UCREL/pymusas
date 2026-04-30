@@ -3,8 +3,6 @@ FROM ubuntu:latest
 
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends \
-    python3.12 \
-    python3.12-dev \
     git \
     make \
     wget \
@@ -41,8 +39,9 @@ RUN source .nvm/nvm.sh \
 
 ENV PATH="/home/$USERNAME/.local/bin/:$PATH"
 
-RUN uv python install 3.11
+RUN uv python install 3.11 \
+    && uv python install 3.13
 
 RUN --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
     --mount=type=bind,source=.python-version,target=.python-version \
-    uv sync --python=3.12 --no-install-project --no-install-workspace --all-extras
+    uv sync --no-install-project --no-install-workspace --all-extras
