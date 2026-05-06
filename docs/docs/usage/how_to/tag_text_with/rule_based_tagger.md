@@ -746,6 +746,169 @@ luotonantoa         luotonanto          NOUN    ['Z99']
 
 </details>
 
+## Malay
+<details>
+<summary>Expand</summary>
+
+
+:::note
+
+If you are using `pymusas[neural]` it has to be version `>=0.4.1` if you are using the [malaya-tagging-pipeline wrapper](https://github.com/UCREL/malaya-tagging-pipeline) for tokenization, lemmatization, and POS tagging.
+
+:::
+
+In this example, we will **not be using spaCy** for sentence splitting, tokenization, lemmatization, and POS tagging, as we will be using the [malaya package](https://github.com/malaysia-ai/malaya) and a wrapper we have created called [malaya-tagging-pipeline](https://github.com/UCREL/malaya-tagging-pipeline). Therefore we will first need to install [malaya-tagging-pipeline](https://github.com/UCREL/malaya-tagging-pipeline) like so (this will also install the *malaya package*):
+
+:::note
+
+*malaya* uses small PyTorch models to lemmatize and POS tag therefore if you want to use a specific version of [PyTorch](https://pytorch.org/) please install that before install *malaya-tagging-pipeline*
+
+:::
+
+``` bash
+pip install "malaya-tagging-pipeline @ git+https://github.com/UCREL/malaya-tagging-pipeline.git@2065edaff138da861136a27e08080da75fc9a108"
+```
+
+We also need to install the [Malay PyMUSAS `RuleBasedTagger`](https://github.com/UCREL/pymusas-models/releases/tag/zsm_single_none_contextual_none-0.4.0), like so:
+
+``` bash
+pip install https://github.com/UCREL/pymusas-models/releases/download/zsm_single_none_contextual_none-0.4.0/zsm_single_none_contextual_none-0.4.0-py3-none-any.whl
+```
+
+:::info
+
+The rule based Malay tagger is based off the following [lexicon](https://github.com/UCREL/Multilingual-USAS/blob/master/Malay/semantic_lexicon_ms.tsv) which does not require POS information. The PyMUSAS tagger itself only uses the POS tags to identify **numbers** and **punctuation**.
+
+:::
+
+The text that we are going to use in this example is about the Nile river taken from the [Malay Wikipedia article about the Nile river](https://ms.wikipedia.org/wiki/Sungai_Nil), the text is shown below:
+
+``` txt
+Sungai Nil mempunyai dua cawangan yang utama, iaitu Sungai Nil Biru dan Sungai Nil Putih. Sungai Nil Biru ialah punca untuk kebanyakan air dan tanah subur Sungai Nil, tetapi Sungai Nil Putih ialah cawang yang lebih panjang antara kedua-dua cawang ini.
+```
+
+You can then sentence split, tokenize, lemmatize, POS tag, and semantically tag the text like so (this will download a lemmatizer and POS tagger from HuggingFace when you first run the code):
+
+``` python
+import malaya
+from malaya.torch_model.huggingface import Tagging as MalayaTagging
+from malaya.torch_model.rnn import Stem as MalayaStem
+from malaya_tagging_pipeline import stem_tokens, tag_tokens, word_tokenize
+import spacy
+from spacy.tokens import Doc
+
+
+def load_malay_tools() -> tuple[malaya.tokenizer.Tokenizer, malaya.tokenizer.SentenceTokenizer, MalayaStem, MalayaTagging]:
+    """
+    Downloads (if not already downloaded) the tokenizer, sentence splitter,
+    lemmatizer and pos tagger for Malay and returns them.
+    """
+    tokenizer = malaya.tokenizer.Tokenizer()
+    sentence_splitter = malaya.tokenizer.SentenceTokenizer()
+    lemmatizer = malaya.stem.huggingface('mesolitica/stem-lstm-512', force_check=True)
+    pos_tagger = malaya.pos.huggingface("mesolitica/pos-t5-small-standard-bahasa-cased", force_check=True)
+    return (tokenizer, sentence_splitter, lemmatizer, pos_tagger)
+
+    
+nile_text = ("Sungai Nil mempunyai dua cawangan yang utama, iaitu Sungai Nil "
+             "Biru dan Sungai Nil Putih. Sungai Nil Biru ialah punca untuk "
+             "kebanyakan air dan tanah subur Sungai Nil, tetapi Sungai Nil "
+             "Putih ialah cawang yang lebih panjang antara kedua-dua cawang ini.")
+
+# Load the Malay PyMUSAS rule-based tagger
+malay_tagger_pipeline = spacy.load('zsm_single_none_contextual_none')
+
+# Load the Malay tokenizer, sentence splitter, lemmatizer and pos tagger
+tokenizer, sentence_splitter, lemmatizer, pos_tagger = load_malay_tools()
+
+# Sentence split the text
+for sentence_index, sentence in enumerate(sentence_splitter.tokenize(nile_text)):
+    print(f"Sentence: {sentence_index}")
+
+    tokens = word_tokenize(tokenizer, sentence, lowercase=False)
+    lemmas  = stem_tokens(lemmatizer, tokens)
+    pos_tags = tag_tokens(pos_tagger, tokens)
+    spaces = [True] * len(tokens)
+    spacy_doc = Doc(vocab=malay_tagger_pipeline.vocab, words=tokens, spaces=spaces, pos=pos_tags, lemmas=lemmas)
+    pymusas_doc = malay_tagger_pipeline(spacy_doc)
+
+    print(f'{"Text":<20}{"Lemma":<20}{"POS":<8}USAS Tags')
+    for token in pymusas_doc:
+        print(f'{token.text:<20}{token.lemma_:<20}{token.pos_:<8}{token._.pymusas_tags}')
+    print("\n-----------\n")
+```
+
+:::info
+
+The POS tagset of the Malay POS tagger is the [Universal POS tagset](https://universaldependencies.org/u/pos/), without the interjection tag (*INTJ*). 
+
+:::
+
+<details>
+<summary>Output:</summary>
+
+```
+Sentence: 0
+Text                Lemma               POS     USAS Tags
+Sungai              Sungai              PROPN   ['W3/M4', 'N5+']
+Nil                 Nil                 PROPN   ['Z99']
+mempunyai           mempunyai           VERB    ['X3', 'A1.1.1']
+dua                 dua                 NUM     ['N5+/A2.1']
+cawangan            cawangan            NOUN    ['O4.4', 'M6']
+yang                yang                PRON    ['Z3']
+utama               utama               ADJ     ['X9.1+']
+,                   ,                   PUNCT   ['PUNCT']
+iaitu               iaitu               ADV     ['Z5']
+Sungai              Sungai              PROPN   ['W3/M4', 'N5+']
+Nil                 Nil                 PROPN   ['Z99']
+Biru                Biru                PROPN   ['O4.3', 'O4.1']
+dan                 dan                 CCONJ   ['Z99']
+Sungai              Sungai              PROPN   ['W3/M4', 'N5+']
+Nil                 Nil                 PROPN   ['Z99']
+Putih               Tuhip               PROPN   ['Z1mf']
+.                   .                   PUNCT   ['PUNCT']
+
+-----------
+
+Sentence: 1
+Text                Lemma               POS     USAS Tags
+Sungai              Sungai              PROPN   ['W3/M4', 'N5+']
+Nil                 Nil                 PROPN   ['Z99']
+Biru                Biru                PROPN   ['O4.3', 'O4.1']
+ialah               ialah               AUX     ['T2+', 'X6+']
+punca               punca               NOUN    ['W3/M4']
+untuk               untuk               ADP     ['Z99']
+kebanyakan          banyak              NOUN    ['N5+++c']
+air                 air                 NOUN    ['O1.2']
+dan                 dan                 CCONJ   ['Z99']
+tanah               tanah               NOUN    ['O4.2-']
+subur               subur               ADJ     ['X9.2+']
+Sungai              Sungai              PROPN   ['W3/M4', 'N5+']
+Nil                 Nil                 PROPN   ['Z99']
+,                   ,                   PUNCT   ['PUNCT']
+tetapi              tetapi              SCONJ   ['T1.1.2']
+Sungai              Sungai              PROPN   ['W3/M4', 'N5+']
+Nil                 Nil                 PROPN   ['Z99']
+Putih               Tuhip               PROPN   ['Z1mf']
+ialah               ialah               AUX     ['T2+', 'X6+']
+cawang              cawang              NOUN    ['W3/M4']
+yang                yang                PRON    ['Z3']
+lebih               lebih               ADV     ['N5.2+']
+panjang             panjang             ADJ     ['X7+']
+antara              antara              ADP     ['T1.3']
+kedua-dua           kedua-dua           NUM     ['M6']
+cawang              cawang              NOUN    ['W3/M4']
+ini                 ini                 DET     ['Z99']
+.                   .                   PUNCT   ['PUNCT']
+
+-----------
+```
+
+</details>
+
+
+</details>
+
 ## Welsh
 <details>
 <summary>Expand</summary>
