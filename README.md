@@ -35,12 +35,12 @@
 
 ## Language support
 
-PyMUSAS rule based taggers currently support 11 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text with the rule based tagger using PyMUSAS](https://ucrel.github.io/pymusas/usage/how_to/tag_text_with/rule_based_tagger). Below we show the languages supported, if the model for that language supports Multi Word Expression (MWE) identification and tagging (all languages support token level tagging by default), and size of the model:
+PyMUSAS rule based taggers currently supports 12 different languages with pre-configured spaCy components that can be downloaded, each language has it's own [guide on how to tag text with the rule based tagger using PyMUSAS](https://ucrel.github.io/pymusas/usage/how_to/tag_text_with/rule_based_tagger). Below we show the languages supported, if the model for that language supports Multi Word Expression (MWE) identification and tagging (all languages support token level tagging by default), and size of the model:
 
 | Language (BCP 47 language code) | MWE Support | Disk Space (MB) |
 | --- | --- | --- |
 | Mandarin Chinese (cmn) | :heavy_check_mark: | 1.28 |
-| Danish (da) | :heavy_check_mark: | 0.85 |
+| Danish (da) | :heavy_check_mark: | 0.82 |
 | Dutch, Flemish (nl) | :x: | 0.15 |
 | English (en) | :heavy_check_mark: | 0.86 |
 | Finnish (fi) | :x: | 0.64 |
@@ -50,6 +50,7 @@ PyMUSAS rule based taggers currently support 11 different languages with pre-con
 | Portuguese (pt) | :heavy_check_mark: | 0.27 |
 | Spanish, Castilian (es) | :heavy_check_mark: | 0.26 |
 | Welsh (cy) | :heavy_check_mark: | 1.10 |
+| Malay (zsm) | :x: | 0.31 |
 
 We also have 4 different neural taggers 2 support English only and the other 2 are highly multilingual. Lastly we have the hybrid taggers that require both rule based and neural tagger resources therefore they support all languages the rule based taggers support.
 
