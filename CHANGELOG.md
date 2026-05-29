@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Documentation for tagging with Malay.
+- Added "click" as a dependency to resolve [issue 60](https://github.com/UCREL/pymusas/issues/60)
 
 ## [v0.4.1](https://github.com/UCREL/pymusas/releases/tag/v0.4.1) - 2026-04-30
 

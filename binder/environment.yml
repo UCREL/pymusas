@@ -8,6 +8,7 @@ dependencies:
     - nbgitpuller # This is a special Binder requirement
     - "requests>=2.13.0,<3.0"
     - "spacy>=3.1.4"
+    - "click>=8.2.1"
     - "srsly>=2.4.1,<3.0"
     - "tqdm>=4.50.0,<5.0"
     - "typer>=0.3.0,<1.0.0"
