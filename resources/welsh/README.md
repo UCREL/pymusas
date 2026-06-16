@@ -34,7 +34,8 @@ The enhanced gold standard dataset, [./enhanced_gold_standard_data.txt](./enhanc
 3. `core POS tag` - The core POS tag that is used by the USAS multilingual lexicon, this is found through the mapping of basic CorCenCC POS tags to core USAS POS tags, see the [Mapper of basic CorCenCC POS tags to core USAS POS tags section below for more details.](#mapper-of-basic-corcencc-pos-tags-to-core-usas-pos-tags)
 4. `basic POS tag` - same as before, but was called the `POS tag`
 5. `enriched POS tag` - this has come from running the [CyTag tagger](https://github.com/CorCenCC/CyTag). As this tag has been predicted it may be different to the `basic POS tag`, as the basic tag is gold standard.
-6. `USAS tag` - same as before
+6. `predicted basic POS tag` = this has come from running the [CyTag tagger](https://github.com/CorCenCC/CyTag). As this tag has been predicted it may be different to the `basic POS tag`, as the basic tag is gold standard. This is useful to have to evaluate the semantic tagger with predicted POS tags rather than gold tags which is closer to how the tagger will be used in production settings. Note that all basic POS tags that are predicted with `unk` are mapped to the basic POS tag `Gw` which is then mapped to the core USAS POS tag `xx` which stands for `unrecognized token`.
+7. `USAS tag` - same as before
 
 To re-create this dataset run the following:
 
