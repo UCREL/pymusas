@@ -21,7 +21,7 @@ You may think to yourself that you might want to combine standard lexicons we al
 
 ## Setup
 
-Download the [small English spaCy model](), this will be used in [How to create a custom tagger section](#how-to-create-a-custom-tagger) to tokenize, lemmatize, and POS tag the data.
+Download the [small English spaCy model](https://spacy.io/models/en), this will be used in [How to create a custom tagger section](#how-to-create-a-custom-tagger) to tokenize, lemmatize, and POS tag the data.
 
 ``` bash
 python -m spacy download en_core_web_sm

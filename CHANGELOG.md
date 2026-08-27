@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md).
+
+### Changed
+
+- The [./.devcontainer/devcontainer.json](./.devcontainer/devcontainer.json) so that on the container being built the git config globally states that this working directory is safe. This is required so that documentation website can be built `make docs/build`.
+
 ## [v0.4.2](https://github.com/UCREL/pymusas/releases/tag/v0.4.2) - 2026-05-29
 
 ### Added
