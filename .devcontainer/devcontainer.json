@@ -28,5 +28,6 @@
 		}
 		}
   	},
+	"postCreateCommand": "git config --global --add safe.directory /workspaces/pymusas",
 	"postStartCommand": "uv sync --all-extras"
 }
