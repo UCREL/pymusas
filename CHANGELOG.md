@@ -9,7 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md).
+- Documentation:
+    - Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md).
+    - Linked the [combine/merge lexicons how guide](./docs/docs/usage/how_to/combine_lexicons.md) with the [creating a custom rule based tagger how to guide](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md) stating that if users want a more detailed guide on creating a custom rule based tagger they should read the `creating a custom rule based tagger how to guide.`
 
 ### Changed
 

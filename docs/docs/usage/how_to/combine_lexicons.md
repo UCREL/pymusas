@@ -3,7 +3,11 @@ title: Combine/Merge Lexicons
 sidebar_position: 4
 ---
 
-In this guide we will show how to combine two lexicons together, both for single word and Multi Word Expression (MWE), so that the combined lexicon can be used in a single PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger).
+In this guide we will show how to combine two lexicons together, both for single word and Multi Word Expression (MWE), so that the combined lexicon can be used in a single PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger). 
+
+:::info
+If you want a more detailed guide on creating custom Rule Based Taggers please see the [how to create a custom rule based tagger guide.](/usage/how_to/create_custom_rule_based_tagger)
+:::
 
 This approach is useful if you want the coverage of the existing lexicons that are available for the given language but you want to customize them. You might want to customize them because;
 * Want to add domain specific language to the lexicons, e.g. `flat_* white_*` = `F2/Z3` (type of coffee)
