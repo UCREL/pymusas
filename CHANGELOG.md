@@ -10,7 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Documentation:
-    - Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md).
+    - Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md). Now includes how to create the custom rule based tagger with mismatched POS tagsets between tokens in the running text and lexicons.
     - Linked the [combine/merge lexicons how guide](./docs/docs/usage/how_to/combine_lexicons.md) with the [creating a custom rule based tagger how to guide](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md) stating that if users want a more detailed guide on creating a custom rule based tagger they should read the `creating a custom rule based tagger how to guide.`
 
 ### Changed
