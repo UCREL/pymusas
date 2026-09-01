@@ -573,9 +573,9 @@ check_VERB up_*	X2.4
 
 and the following sentence:
 
-``` text
+<code>
 He read a **book** on the train while I will **book** the table for the restaurant, a **check up** at the dentist, and ask Dave to **check** up on the children.
-```
+</code>
 
 For the MWE `check up` could be the verb form *checking up on someone* or the noun form to *make an appointment*.
 
