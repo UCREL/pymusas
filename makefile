@@ -67,7 +67,7 @@ release-notes: build-python-package
 lint:
 	@echo "ISort:"
 	@uv run isort pymusas tests scripts benchmarks
-	@echo "Falke 8:"
+	@echo "Flake 8:"
 	@uv run flake8 --config ./.flake8 pymusas/** tests/** scripts/** benchmarks/**
 	@echo "MyPy:"
 	@uv run mypy

@@ -1,0 +1,43 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(**/*.env)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*credentials*)",
+      "Read(**/*secrets*)",
+      "Read(**/.ssh/*)",
+      "Edit(**/.env)",
+      "Edit(**/.env.*)",
+      "Edit(**/*.env)",
+      "Edit(**/*.pem)",
+      "Edit(**/*.key)",
+      "Edit(**/*credentials*)",
+      "Edit(**/*secrets*)",
+      "Edit(**/.ssh/*)",
+      "Write(**/.env)",
+      "Write(**/.env.*)",
+      "Write(**/*.env)",
+      "Write(**/*.pem)",
+      "Write(**/*.key)",
+      "Write(**/*credentials*)",
+      "Write(**/*secrets*)",
+      "Write(**/.ssh/*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Edit|Write|Grep|Glob|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 $CLAUDE_PROJECT_DIR/.claude/hooks/block_sensitive_files.py"
+          }
+        ]
+      }
+    ]
+  }
+}
