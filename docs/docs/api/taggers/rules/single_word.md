@@ -104,6 +104,52 @@ object based on the rule matches stated in the class docstring above.
 
 - `List[List[RankingMetaData]]` <br/>
 
+<a id="pymusas.taggers.rules.single_word.SingleWordRule.best_match"></a>
+
+### best\_match
+
+```python
+class SingleWordRule(Rule):
+ | ...
+ | def best_match(
+ |     self,
+ |     token: str,
+ |     lemma: str,
+ |     pos_tag: str
+ | ) -> Optional[RankingMetaData]
+```
+
+Returns the best single word rule match for the given token, lemma, and
+POS tag, or `None` if there is no match. The matches are found using
+[`__call__`](#__call__) and ranked using
+[`pymusas.rankers.single_word.SingleWordRanker`](/pymusas/api/rankers/single_word/#singlewordranker).
+
+<h4 id="best_match.parameters">Parameters<a className="headerlink" href="#best_match.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __token__ : `str` <br/>
+    The token.
+- __lemma__ : `str` <br/>
+    The lemma of the token.
+- __pos\_tag__ : `str` <br/>
+    The Part Of Speech tag of the token.
+
+<h4 id="best_match.returns">Returns<a className="headerlink" href="#best_match.returns" title="Permanent link">&para;</a></h4>
+
+
+- `Optional[RankingMetaData]` <br/>
+
+<h4 id="best_match.examples">Examples<a className="headerlink" href="#best_match.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.taggers.rules.single_word import SingleWordRule
+rule = SingleWordRule({'act|ADJ': ['A1']}, {'acting': ['A2']})
+best_match = rule.best_match('acting', 'act', 'ADJ')
+assert best_match is not None
+assert ('A1',) == best_match.semantic_tags
+assert rule.best_match('style', 'style', 'NOUN') is None
+```
+
 <a id="pymusas.taggers.rules.single_word.SingleWordRule.to_bytes"></a>
 
 ### to\_bytes

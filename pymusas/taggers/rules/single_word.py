@@ -5,6 +5,7 @@ import srsly
 from pymusas.lexicon_collection import LexiconCollection, LexiconType
 from pymusas.rankers.lexical_match import LexicalMatch
 from pymusas.rankers.ranking_meta_data import RankingMetaData
+from pymusas.rankers.single_word import SingleWordRanker
 from pymusas.taggers.rules.rule import Rule
 
 
@@ -160,6 +161,40 @@ class SingleWordRule(Rule):
             index += 1
 
         return token_ranking_meta_data
+
+    def best_match(self, token: str, lemma: str, pos_tag: str
+                   ) -> Optional[RankingMetaData]:
+        '''
+        Returns the best single word rule match for the given token, lemma, and
+        POS tag, or `None` if there is no match. The matches are found using
+        :func:`__call__` and ranked using
+        :class:`pymusas.rankers.single_word.SingleWordRanker`.
+
+        # Parameters
+
+        token : `str`
+            The token.
+        lemma : `str`
+            The lemma of the token.
+        pos_tag : `str`
+            The Part Of Speech tag of the token.
+
+        # Returns
+
+        `Optional[RankingMetaData]`
+
+        # Examples
+        ``` python
+        >>> from pymusas.taggers.rules.single_word import SingleWordRule
+        >>> rule = SingleWordRule({'act|ADJ': ['A1']}, {'acting': ['A2']})
+        >>> best_match = rule.best_match('acting', 'act', 'ADJ')
+        >>> assert best_match is not None
+        >>> assert ('A1',) == best_match.semantic_tags
+        >>> assert rule.best_match('style', 'style', 'NOUN') is None
+
+        ```
+        '''
+        return SingleWordRanker.best_match(self([token], [lemma], [pos_tag])[0])
 
     def to_bytes(self) -> bytes:
         '''

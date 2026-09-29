@@ -225,3 +225,22 @@ def test__eq__() -> None:
     assert empty_rule != SingleWordRule({}, lemma_lexicon, None)
     assert empty_rule != SingleWordRule({}, {}, pos_mapper)
     assert 1 != empty_rule
+
+
+def test_single_word_rule_best_match() -> None:
+    rule = SingleWordRule({'act|ADJ': ['A1'], 'acting|ADJ': ['A3']},
+                          {'Acting': ['A2']})
+    best_match = rule.best_match('Acting', 'act', 'ADJ')
+    assert best_match is not None
+    assert ('A1',) == best_match.semantic_tags
+    assert LexicalMatch.LEMMA == best_match.lexical_match
+    assert (0, 1) == (best_match.token_match_start_index,
+                      best_match.token_match_end_index)
+
+    best_match = rule.best_match('Acting', 'run', 'NOUN')
+    assert best_match is not None
+    assert ('A2',) == best_match.semantic_tags
+    assert best_match.exclude_pos_information
+
+    assert rule.best_match('style', 'style', 'NOUN') is None
+    assert SingleWordRule({}, {}).best_match('Acting', 'act', 'ADJ') is None
