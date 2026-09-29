@@ -660,3 +660,17 @@ def test_mwe_lexicon_collection_tsv_merge() -> None:
     combined_lexicon_data = MWELexiconCollection.tsv_merge(*tsv_file_paths)
     assert 11 == len(combined_lexicon_data)
     assert combined_lexicon_data["South_noun Wales_noun"] == ["R2"]
+
+
+@pytest.mark.parametrize("pos_mapper", [None, {'NOUN': ['noun']}])
+def test_mwe_lexicon_collection_default_tag_templates(pos_mapper: Optional[Dict[str, List[str]]]
+                                                      ) -> None:
+    collection = MWELexiconCollection(pos_mapper=pos_mapper)
+    collection['*_NOUN type*_NOUN'] = ['Df']
+    collection['on_ADP a*_DET *_NOUN basis_NOUN'] = ['C1/Df+']
+    assert 2 == len(collection)
+
+    with pytest.warns(UserWarning, match='default'):
+        collection['ski_NOUN boot*_NOUN'] = ['Z3/Df']
+    assert 'ski_NOUN boot*_NOUN' not in collection
+    assert 2 == len(collection)

@@ -684,6 +684,11 @@ any MWE templates that contain a `{` or `}` will be ignored and will not be
 added to this collection, in addition a `UserWarning` will be raised stating
 this.
 
+Any MWE template that has a default (`Df`) semantic tag, see
+[`pymusas.utils.DEFAULT_TAG_RE`](/pymusas/api/utils/#default_tag_re), must contain a token that starts with
+a wildcard (`*`), as this is the token the `Df` tag refers to. MWE templates
+that do not will be ignored and a `UserWarning` will be raised stating this.
+
 <h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 

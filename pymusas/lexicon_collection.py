@@ -569,6 +569,11 @@ class MWELexiconCollection(MutableMapping):
     added to this collection, in addition a `UserWarning` will be raised stating
     this.
 
+    Any MWE template that has a default (`Df`) semantic tag, see
+    :var:`pymusas.utils.DEFAULT_TAG_RE`, must contain a token that starts with
+    a wildcard (`*`), as this is the token the `Df` tag refers to. MWE templates
+    that do not will be ignored and a `UserWarning` will be raised stating this.
+
     # Parameters
 
     data: `Dict[str, List[str]]`, optional (default = `None`)
@@ -1039,6 +1044,13 @@ class MWELexiconCollection(MutableMapping):
                           ' within Multi Word Expression (MWE) lexicons and '
                           'therefore any MWE template that contains a `{` '
                           'or `}` will be ignored.')
+            return None
+
+        if utils.contains_default_tag(value) and utils.default_token_index(key) is None:
+            warnings.warn('A Multi Word Expression (MWE) template that contains '
+                          'a default (`Df`) semantic tag must contain a token '
+                          'that starts with a wildcard (`*`), the following '
+                          f'MWE template does not and will be ignored: {key}')
             return None
 
         semantic_tags = value
