@@ -15,6 +15,7 @@ Structure of this documentation page:
 
 1. [General syntax structure](#general-syntax-structure) - explains the general MWE syntax structure.
 2. [Syntax symbol definitions](#syntax-symbol-definitions) - will define special syntax symbols that allow the MWE syntax to capture more complicated MWE, e.g. inflection variants and discontinuous MWE.
+3. [Default semantic tag](#default-semantic-tag) - explains the default (`Df`) semantic tag that some MWE templates use.
 
 ## General syntax structure
 
@@ -130,4 +131,42 @@ You can use the following MWE template in conjunction with a noun phrase parser 
 
 ``` txt
 brush*_* {Np} off_*
+```
+
+## Default semantic tag
+
+Some MWE templates, currently only in the English MWE lexicon, have the semantic tag `Df`, which stands for default. The `Df` tag is replaced with the single word semantic tag of the token that matched the **first token in the MWE template that starts with a wildcard (`*`)**. For example, given the following MWE template:
+
+``` tsv
+mwe_template	semantic_tags
+*_ADJ style_NOUN	C1/Df
+```
+
+And the following single word lexicon entry:
+
+``` tsv
+lemma	pos	semantic_tags
+acting	ADJ	A1/Z3
+```
+
+The text `The acting style.` would tag `acting style` as a MWE with the semantic tag `C1/A1`.
+
+When replacing the `Df` tag:
+
+* Only the first semantic tag of the single word match is used, and only the first part of it if it is a slash (`/`) tag, e.g. `A1/Z3` becomes `A1`.
+* All affixes (e.g. `+` and `-`), lower case markers (e.g. gender markers such as `m` and `f`), and rarity markers (`%` and `@`) are removed from the single word semantic tag.
+* Any affixes, lower case markers, and rarity markers on the `Df` tag, which can appear in any order and independently of each other, are added to the replacement in the same order, e.g. `Df++` becomes `A1++`, `Dfc` becomes `A1c`, `Df-m%` becomes `A1-m%`, and `Dfm+` becomes `A1m+`.
+* If the token has no single word match, the `Df` tag is replaced with `Z99`.
+
+MWE templates that contain a `Df` tag but no token that starts with a wildcard are ignored, and a warning is raised.
+
+In PyMUSAS the `Df` tag is replaced by the [`MWERule`](/api/taggers/rules/mwe), which requires a `single_word_rule` to find the single word semantic tags. If no `single_word_rule` is given, all `Df` tags are replaced with `Z99`:
+
+``` python
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.single_word import SingleWordRule
+
+single_word_rule = SingleWordRule({'acting|ADJ': ['A1/Z3']}, {})
+mwe_rule = MWERule({'*_ADJ style_NOUN': ['C1/Df']}, single_word_rule=single_word_rule)
+assert "C1/A1" == mwe_rule(["acting", "style"], ["act", "style"], ["ADJ", "NOUN"])[0][0].semantic_tags[0]
 ```

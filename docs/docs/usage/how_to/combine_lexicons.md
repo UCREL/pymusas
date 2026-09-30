@@ -193,7 +193,8 @@ single_word_rule = SingleWordRule(lexicon_collection=combined_single_pos_lexicon
                                   lemma_lexicon_collection=combined_single_lexicon_data,
                                   pos_mapper=None)
 mwe_word_rule = MWERule(mwe_lexicon_lookup=combined_mwe_lexicon_data,
-                        pos_mapper=None)
+                        pos_mapper=None,
+                        single_word_rule=single_word_rule)
 rules = [single_word_rule, mwe_word_rule]
 ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
 

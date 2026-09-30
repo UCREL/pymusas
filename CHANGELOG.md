@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+### Added
+
+- Support for default (`Df`) semantic tags in Multi Word Expression (MWE) templates. `MWERule` has a new optional `single_word_rule` argument, which it uses to replace the `Df` tag with the single word semantic tag of the first token in the MWE template that starts with a wildcard (`*`). See the MWE syntax notes in the documentation for details, [./docs/docs/usage/notes/mwe_syntax.md](./docs/docs/usage/notes/mwe_syntax.md).
+- `pymusas.taggers.rules.MWERule.v2` spaCy registered function, which accepts the `single_word_rule` argument, backward compatibility support through `pymusas.taggers.rules.MWERule.v1`.
+- `SingleWordRanker` in `pymusas.rankers.single_word`, a stateless ranker for the single word matches of one token, and `SingleWordRule.best_match`, which uses it to return the best single word match for a token.
+- `contains_default_tag`, `default_token_index`, and `resolve_default_tags` helper functions, and `DEFAULT_TAG_RE`, in `pymusas.utils`.
+
+### Changed
+
+- `Df` tags that cannot be resolved, because the `MWERule` has no `single_word_rule` or the token has no single word match, are now output as `Z99` instead of `Df`.
+- MWE templates with a `Df` tag but no token starting with a wildcard are now ignored by `MWELexiconCollection`, with a `UserWarning`.
+- `MWERule.to_bytes` uses a new serialisation format that includes the `single_word_rule`. `MWERule.from_bytes` can still load the previous format (backward compatibility).
+
 ## [v0.4.2](https://github.com/UCREL/pymusas/releases/tag/v0.4.2) - 2026-05-29
 
 ### Added

@@ -53,7 +53,8 @@ lemma_lexicon_lookup = LexiconCollection.from_tsv(english_single_lexicon_url, in
 mwe_lexicon_lookup = MWELexiconCollection.from_tsv(english_mwe_lexicon_url)
 # The rules that use the lexicons
 single_word_rule = SingleWordRule(lexicon_lookup, lemma_lexicon_lookup)
-mwe_word_rule = MWERule(mwe_lexicon_lookup)
+# The single word rule is used to replace default (`Df`) tags in the MWE lexicon
+mwe_word_rule = MWERule(mwe_lexicon_lookup, single_word_rule=single_word_rule)
 word_rules = [single_word_rule, mwe_word_rule]
 # The ranker that determines which rule should be used/applied
 ranker_arguments = ContextualRuleBasedRanker.get_construction_arguments(word_rules)
