@@ -185,6 +185,10 @@ class MWERule(Rule):
                         if utils.contains_default_tag(mwe_meta_data.semantic_tags):
                             default_index = utils.default_token_index(matched_mwe_template)
                             replacement_tag: Optional[str] = None
+                            # `default_index` should never be `None` as the
+                            # `MWELexiconCollection` ignores MWE templates
+                            # that have a `Df` tag but no token that starts
+                            # with a wildcard.
                             if default_index is not None:
                                 replacement_tag = default_semantic_tag(start_index + default_index)
                             semantic_tags = tuple(utils.resolve_default_tags(mwe_meta_data.semantic_tags,
