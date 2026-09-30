@@ -1,10 +1,14 @@
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, cast
 
+import srsly
+
+from pymusas import utils
 from pymusas.lexicon_collection import LexiconType, MWELexiconCollection
 from pymusas.rankers.lexical_match import LexicalMatch
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules import util
 from pymusas.taggers.rules.rule import Rule
+from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 class MWERule(Rule):
@@ -22,6 +26,25 @@ class MWERule(Rule):
     method for matching. Matches are found based on the original token/lemma and
     lower cased versions of the token/lemma.
 
+    **Default (`Df`) semantic tags**
+
+    A MWE template can contain a default (`Df`) semantic tag, e.g. the
+    template `*_ADJ style_NOUN` with the semantic tags `C1/Df`. The `Df` tag is
+    replaced with the single word semantic tag of the token that matched the
+    first token in the MWE template that starts with a wildcard (`*`), in
+    this example the adjective. The single word semantic tag is found using the
+    `single_word_rule`, whereby the best single word match is found using
+    the :func:`pymusas.taggers.rules.single_word.best_match` method of
+    :class:`pymusas.taggers.rules.single_word.SingleWordRule`. From
+    this single word match the first semantic tag is used, and of that
+    semantic tag only the first part of any slash tag, with all affixes and
+    lower case markers removed, e.g. `A1+/Z3` becomes `A1`. Any affixes and
+    lower case markers on the `Df` tag are added to it, e.g. `Df++` becomes
+    `A1++`. For more details see :func:`pymusas.utils.resolve_default_tags`.
+
+    If the `single_word_rule` is `None` or the token has no single word match
+    then the `Df` tag is replaced with `Z99`.
+
     # Parameters
 
     mwe_lexicon_lookup : `Dict[str, List[str]]`
@@ -37,6 +60,10 @@ class MWERule(Rule):
         each POS mapping the slower the tagger, a one to one mapping will have
         no speed impact on the tagger. A selection of POS mappers can be found in
         :mod:`pymusas.pos_mapper`.
+    single_word_rule : `pymusas.taggers.rules.single_word.SingleWordRule`, optional (default = `None`)
+        The single word rule used to find the semantic tags that replace
+        default (`Df`) semantic tags, see the default semantic tags section
+        above. If `None` all `Df` tags will be replaced with `Z99`.
 
     # Instance Attributes
 
@@ -44,13 +71,31 @@ class MWERule(Rule):
         A :class:`pymusas.lexicon_collection.MWELexiconCollection` instance that
         has been initialised using the `mwe_lexicon_lookup` and `pos_mapper`
         parameters. This collection is used to find MWE rule matches.
+    single_word_rule : `pymusas.taggers.rules.single_word.SingleWordRule`, optional (default = `None`)
+        The given `single_word_rule`.
+
+    # Examples
+    ``` python
+    >>> from pymusas.taggers.rules.mwe import MWERule
+    >>> from pymusas.taggers.rules.single_word import SingleWordRule
+    >>> single_word_rule = SingleWordRule({'acting|ADJ': ['A1/Z3']}, {})
+    >>> mwe_rule = MWERule({'*_ADJ style_NOUN': ['C1/Df']},
+    ...                    single_word_rule=single_word_rule)
+    >>> ranking_meta_data = mwe_rule(['The', 'acting', 'style'],
+    ...                              ['the', 'acting', 'style'],
+    ...                              ['DET', 'ADJ', 'NOUN'])
+    >>> assert ('C1/A1',) == ranking_meta_data[1][0].semantic_tags
+
+    ```
     '''
 
     def __init__(self, mwe_lexicon_lookup: Dict[str, List[str]],
-                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
+                 pos_mapper: Optional[Dict[str, List[str]]] = None,
+                 single_word_rule: Optional[SingleWordRule] = None) -> None:
         
         self.mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_lookup,
                                                            pos_mapper)
+        self.single_word_rule = single_word_rule
 
     def __call__(self, tokens: List[str], lemmas: List[str], pos_tags: List[str]
                  ) -> List[List[RankingMetaData]]:
@@ -73,6 +118,28 @@ class MWERule(Rule):
 
         `List[List[RankingMetaData]]`
         '''
+
+        default_semantic_tag_cache: Dict[int, Optional[str]] = {}
+
+        def default_semantic_tag(token_index: int) -> Optional[str]:
+            '''
+            Returns the first semantic tag of the best single word match for
+            the token at `token_index`, or `None` if there is no single word
+            rule or match.
+            '''
+            if token_index in default_semantic_tag_cache:
+                return default_semantic_tag_cache[token_index]
+
+            semantic_tag: Optional[str] = None
+            if self.single_word_rule is not None:
+                best_match = self.single_word_rule.best_match(tokens[token_index],
+                                                              lemmas[token_index],
+                                                              pos_tags[token_index])
+                if best_match is not None and best_match.semantic_tags:
+                    semantic_tag = best_match.semantic_tags[0]
+
+            default_semantic_tag_cache[token_index] = semantic_tag
+            return semantic_tag
 
         def tag_n_gram_indexes(_n_gram_indexes: List[Tuple[int, int]],
                                mwe_type: LexiconType,
@@ -115,6 +182,13 @@ class MWERule(Rule):
                     for matched_mwe_template in matched_mwe_templates:
                         mwe_meta_data = self.mwe_lexicon_collection[matched_mwe_template]
                         semantic_tags = tuple(mwe_meta_data.semantic_tags)
+                        if utils.contains_default_tag(mwe_meta_data.semantic_tags):
+                            default_index = utils.default_token_index(matched_mwe_template)
+                            replacement_tag: Optional[str] = None
+                            if default_index is not None:
+                                replacement_tag = default_semantic_tag(start_index + default_index)
+                            semantic_tags = tuple(utils.resolve_default_tags(mwe_meta_data.semantic_tags,
+                                                                             replacement_tag))
                         ranking_meta_data = RankingMetaData(mwe_type,
                                                             mwe_meta_data.n_gram_length,
                                                             mwe_meta_data.wildcard_count,
@@ -212,12 +286,21 @@ class MWERule(Rule):
 
         `bytes`
         '''
-        return self.mwe_lexicon_collection.to_bytes()
+        serialise: Dict[str, Optional[bytes]] = {}
+        serialise['mwe_lexicon_collection'] = self.mwe_lexicon_collection.to_bytes()
+        serialise['single_word_rule'] = None
+        if self.single_word_rule is not None:
+            serialise['single_word_rule'] = self.single_word_rule.to_bytes()
+        return cast(bytes, srsly.msgpack_dumps(serialise))
 
     @staticmethod
     def from_bytes(bytes_data: bytes) -> "MWERule":
         '''
         Loads :class:`MWERule` from the given bytestring and returns it.
+
+        Bytestrings created before the `single_word_rule` was added, which
+        only contain the serialised `mwe_lexicon_collection`, can also be
+        loaded.
 
         # Parameters
 
@@ -229,8 +312,16 @@ class MWERule(Rule):
         :class:`MWERule`
         '''
         mwe_rule = MWERule({}, None)
-        mwe_lexicon_collection = MWELexiconCollection.from_bytes(bytes_data)
-        mwe_rule.mwe_lexicon_collection = mwe_lexicon_collection
+        serialise_data = srsly.msgpack_loads(bytes_data)
+        if 'mwe_lexicon_collection' not in serialise_data:
+            mwe_rule.mwe_lexicon_collection = MWELexiconCollection.from_bytes(bytes_data)
+            return mwe_rule
+
+        mwe_rule.mwe_lexicon_collection \
+            = MWELexiconCollection.from_bytes(serialise_data['mwe_lexicon_collection'])
+        if serialise_data['single_word_rule'] is not None:
+            mwe_rule.single_word_rule \
+                = SingleWordRule.from_bytes(serialise_data['single_word_rule'])
         return mwe_rule
 
     def __eq__(self, other: object) -> bool:
@@ -252,6 +343,9 @@ class MWERule(Rule):
             return False
         
         if self.mwe_lexicon_collection != other.mwe_lexicon_collection:
+            return False
+
+        if self.single_word_rule != other.single_word_rule:
             return False
 
         return True

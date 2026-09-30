@@ -42,6 +42,9 @@ def mwe_rule(mwe_lexicon_lookup: Dict[str, List[str]],
     `pymusas.taggers.rules.MWERule.v1` is a registered function under the
     `@misc` function register.
 
+    Compared to `pymusas.taggers.rules.MWERule.v2`, if a matching MWE rule
+    contains a (`Df`) semantic tag, the `Df` tag is replaced with `Z99`.
+
     See the :class:`pymusas.taggers.rules.mwe.MWERule` for details on
     parameters to this function.
 
@@ -50,6 +53,27 @@ def mwe_rule(mwe_lexicon_lookup: Dict[str, List[str]],
     :class:`pymusas.taggers.rules.mwe.MWERule`
     '''
     return MWERule(mwe_lexicon_lookup, pos_mapper)
+
+
+@spacy.util.registry.misc('pymusas.taggers.rules.MWERule.v2')
+def mwe_rule_v2(mwe_lexicon_lookup: Dict[str, List[str]],
+                pos_mapper: Optional[Dict[str, List[str]]] = None,
+                single_word_rule: Optional[SingleWordRule] = None
+                ) -> MWERule:
+    '''
+    `pymusas.taggers.rules.MWERule.v2` is a registered function under the
+    `@misc` function register. Compared to `pymusas.taggers.rules.MWERule.v1`
+    it also accepts a `single_word_rule`, which is used to replace default
+    (`Df`) semantic tags.
+
+    See the :class:`pymusas.taggers.rules.mwe.MWERule` for details on
+    parameters to this function.
+
+    # Returns
+
+    :class:`pymusas.taggers.rules.mwe.MWERule`
+    '''
+    return MWERule(mwe_lexicon_lookup, pos_mapper, single_word_rule)
 
 
 @spacy.util.registry.misc('pymusas.taggers.rules.rule_list')

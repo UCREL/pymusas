@@ -5,10 +5,11 @@ from typing import Dict, List, Optional, Tuple, Union
 from _pytest.fixtures import SubRequest
 import pytest
 
-from pymusas.lexicon_collection import LexiconType
+from pymusas.lexicon_collection import LexiconType, MWELexiconCollection
 from pymusas.rankers.lexical_match import LexicalMatch
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.single_word import SingleWordRule
 from pymusas.utils import token_pos_tags_in_lexicon_entry
 
 
@@ -322,3 +323,170 @@ def test__eq__() -> None:
 
     empty_rule = MWERule(lexicon, pos_mapper)
     assert empty_rule == MWERule(lexicon, pos_mapper)
+
+
+def _mwe_semantic_tags(mwe_rule: MWERule, tokens: List[str], lemmas: List[str],
+                       pos_tags: List[str]) -> Dict[str, Tuple[str, ...]]:
+    '''
+    Returns a dictionary of the MWE template matched to its semantic tags for
+    all MWE matches found by the `mwe_rule`.
+    '''
+    template_tags: Dict[str, Tuple[str, ...]] = {}
+    for token_ranking_meta_data in mwe_rule(tokens, lemmas, pos_tags):
+        for ranking_meta_data in token_ranking_meta_data:
+            template_tags[ranking_meta_data.lexicon_entry_match] = ranking_meta_data.semantic_tags
+    return template_tags
+
+
+@pytest.mark.parametrize("mwe_semantic_tags, expected", [
+    (['Df'], ('A1',)),
+    (['C1/Df'], ('C1/A1',)),
+    (['Df++'], ('A1++',)),
+    (['Dfc', 'Df/O2'], ('A1c', 'A1/O2')),
+])
+def test_mwe_rule_default_tags(mwe_semantic_tags: List[str],
+                               expected: Tuple[str, ...]) -> None:
+    single_word_rule = SingleWordRule({'acting|ADJ': ['A1+/Z3', 'B1']}, {})
+    mwe_rule = MWERule({'*_ADJ style_NOUN': mwe_semantic_tags},
+                       single_word_rule=single_word_rule)
+    tokens = ['The', 'acting', 'style']
+    pos_tags = ['DET', 'ADJ', 'NOUN']
+    token_ranking_meta_data = mwe_rule(tokens, tokens, pos_tags)
+    assert [] == token_ranking_meta_data[0]
+    for token_index in [1, 2]:
+        # A token and lemma match, the lower cased matches also lower case
+        # the POS tags and therefore do not match.
+        assert 2 == len(token_ranking_meta_data[token_index])
+        for ranking_meta_data in token_ranking_meta_data[token_index]:
+            assert (1, 3) == (ranking_meta_data.token_match_start_index,
+                              ranking_meta_data.token_match_end_index)
+            assert expected == ranking_meta_data.semantic_tags
+
+
+def test_mwe_rule_default_tags_token_position() -> None:
+    single_word_rule = SingleWordRule({'the|DET': ['Z5'], 'dark|ADJ': ['W2-']}, {})
+    mwe_rule = MWERule({'on_ADP the_DET *_ADJ side_NOUN': ['Df'],
+                        'half_DET a*_DET *_NOUN': ['Df']},
+                       single_word_rule=single_word_rule)
+    tokens = ['on', 'the', 'dark', 'side']
+    template_tags = _mwe_semantic_tags(mwe_rule, tokens, tokens,
+                                       ['ADP', 'DET', 'ADJ', 'NOUN'])
+    assert {'on_ADP the_DET *_ADJ side_NOUN': ('W2',)} == template_tags
+
+    single_word_rule = SingleWordRule({'an|DET': ['Z5'], 'hour|NOUN': ['T1.3']}, {})
+    mwe_rule.single_word_rule = single_word_rule
+    tokens = ['half', 'an', 'hour']
+    template_tags = _mwe_semantic_tags(mwe_rule, tokens, tokens,
+                                       ['DET', 'DET', 'NOUN'])
+    assert {'half_DET a*_DET *_NOUN': ('T1.3',)} == template_tags
+
+
+def test_mwe_rule_default_tags_single_word_match_priority() -> None:
+    tokens = ['Acting', 'style']
+    lemmas = ['act', 'style']
+    pos_tags = ['ADJ', 'NOUN']
+    mwe_lexicon = {'*_ADJ style_NOUN': ['Df']}
+
+    # POS information is preferred over no POS information, and within those
+    # Token < Lemma < Lower cased token < Lower cased lemma.
+    single_word_lexicon = {'Acting|ADJ': ['A1'], 'act|ADJ': ['A2'],
+                           'acting|ADJ': ['A3'], 'Act|ADJ': ['A4']}
+    lemma_lexicon = {'Acting': ['B1']}
+    ordered_expected = [('Acting|ADJ', 'A1'), ('act|ADJ', 'A2'),
+                        ('acting|ADJ', 'A3')]
+    for lexicon_entry, expected_tag in ordered_expected:
+        single_word_rule = SingleWordRule(single_word_lexicon, lemma_lexicon)
+        mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
+        template_tags = _mwe_semantic_tags(mwe_rule, tokens, lemmas, pos_tags)
+        assert {'*_ADJ style_NOUN': (expected_tag,)} == template_tags
+        del single_word_lexicon[lexicon_entry]
+
+    # With no POS information both `act` (lemma match) and `acting` (lower
+    # cased token match) match, of which the lemma match is preferred.
+    single_word_rule = SingleWordRule({}, {'act': ['C1'], 'acting': ['C2']})
+    mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
+    template_tags = _mwe_semantic_tags(mwe_rule, tokens, lemmas, pos_tags)
+    assert {'*_ADJ style_NOUN': ('C1',)} == template_tags
+
+
+def test_mwe_rule_default_tags_uses_single_word_pos_mapper() -> None:
+    '''
+    The text, MWE lexicon, and single word lexicon all use different POS
+    tagsets, `JJ`, `ADJ`, and `adj` respectively. The `Df` tag must be
+    resolved by giving the single word rule the text's POS tag, which it maps
+    using its own POS mapper, and not the MWE lexicon's POS tag.
+    '''
+    tokens = ['acting', 'style']
+    text_pos_tags = ['JJ', 'NN1']
+    mwe_lexicon = {'*_ADJ style_NOUN': ['Df']}
+    # Maps from the MWE lexicon's POS tagset to the text's POS tagset.
+    mwe_pos_mapper = {'ADJ': ['JJ'], 'NOUN': ['NN1']}
+    single_word_lexicon = {'acting|adj': ['A1']}
+    # Maps from the text's POS tagset to the single word lexicon's POS tagset.
+    single_word_pos_mapper = {'JJ': ['adj']}
+
+    single_word_rule = SingleWordRule(single_word_lexicon, {},
+                                      pos_mapper=single_word_pos_mapper)
+    mwe_rule = MWERule(mwe_lexicon, pos_mapper=mwe_pos_mapper,
+                       single_word_rule=single_word_rule)
+    template_tags = _mwe_semantic_tags(mwe_rule, tokens, tokens, text_pos_tags)
+    assert {'*_ADJ style_NOUN': ('A1',)} == template_tags
+
+    # Without the single word POS mapper `acting|JJ` is looked up, which is
+    # not in the single word lexicon, and so the `Df` tag becomes `Z99`.
+    mwe_rule.single_word_rule = SingleWordRule(single_word_lexicon, {})
+    template_tags = _mwe_semantic_tags(mwe_rule, tokens, tokens, text_pos_tags)
+    assert {'*_ADJ style_NOUN': ('Z99',)} == template_tags
+
+
+def test_mwe_rule_default_tags_no_single_word_match() -> None:
+    mwe_lexicon = {'*_ADJ style_NOUN': ['C1/Df', 'Df+']}
+    tokens = ['acting', 'style']
+    pos_tags = ['ADJ', 'NOUN']
+    expected = {'*_ADJ style_NOUN': ('C1/Z99', 'Z99')}
+
+    single_word_rule = SingleWordRule({'style|NOUN': ['A4.1']}, {})
+    mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
+    assert expected == _mwe_semantic_tags(mwe_rule, tokens, tokens, pos_tags)
+
+    mwe_rule = MWERule(mwe_lexicon)
+    assert expected == _mwe_semantic_tags(mwe_rule, tokens, tokens, pos_tags)
+
+
+def test_to_from_bytes_single_word_rule() -> None:
+    lexicon = {"*_ADJ style_NOUN": ['Df'], "East_* London_*": ['Z4']}
+    pos_mapper = {'NN': ['noun']}
+    single_word_rule = SingleWordRule({'acting|ADJ': ['A1']}, {'acting': ['A2']},
+                                      {'JJ': ['ADJ']})
+
+    mwe_rule = MWERule(lexicon, pos_mapper, single_word_rule)
+    mwe_rule_from_bytes = MWERule.from_bytes(mwe_rule.to_bytes())
+    assert mwe_rule == mwe_rule_from_bytes
+    assert single_word_rule == mwe_rule_from_bytes.single_word_rule
+
+    mwe_rule = MWERule(lexicon, pos_mapper)
+    mwe_rule_from_bytes = MWERule.from_bytes(mwe_rule.to_bytes())
+    assert mwe_rule == mwe_rule_from_bytes
+    assert mwe_rule_from_bytes.single_word_rule is None
+
+
+def test_from_bytes_legacy_format() -> None:
+    '''
+    Before the `single_word_rule` was added `MWERule.to_bytes` only serialised
+    the `mwe_lexicon_collection`.
+    '''
+    lexicon = {"*_ADJ style_NOUN": ['Df'], "East_* London_*": ['Z4']}
+    pos_mapper = {'NN': ['noun']}
+    legacy_bytes = MWELexiconCollection(lexicon, pos_mapper).to_bytes()
+    mwe_rule_from_bytes = MWERule.from_bytes(legacy_bytes)
+    assert MWERule(lexicon, pos_mapper) == mwe_rule_from_bytes
+    assert mwe_rule_from_bytes.single_word_rule is None
+
+
+def test__eq__single_word_rule() -> None:
+    lexicon = {"*_ADJ style_NOUN": ['Df']}
+    single_word_rule = SingleWordRule({'acting|ADJ': ['A1']}, {})
+    mwe_rule = MWERule(lexicon, None, single_word_rule)
+    assert mwe_rule == MWERule(lexicon, None, SingleWordRule({'acting|ADJ': ['A1']}, {}))
+    assert mwe_rule != MWERule(lexicon, None)
+    assert mwe_rule != MWERule(lexicon, None, SingleWordRule({'acting|ADJ': ['A2']}, {}))

@@ -51,10 +51,39 @@ def mwe_rule(
 `pymusas.taggers.rules.MWERule.v1` is a registered function under the
 `@misc` function register.
 
+Compared to `pymusas.taggers.rules.MWERule.v2`, if a matching MWE rule
+contains a (`Df`) semantic tag, the `Df` tag is replaced with `Z99`.
+
 See the [`pymusas.taggers.rules.mwe.MWERule`](/pymusas/api/taggers/rules/mwe/#mwerule) for details on
 parameters to this function.
 
 <h4 id="mwe_rule.returns">Returns<a className="headerlink" href="#mwe_rule.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`pymusas.taggers.rules.mwe.MWERule`](/pymusas/api/taggers/rules/mwe/#mwerule) <br/>
+
+<a id="pymusas.spacy_api.taggers.rules.mwe_rule_v2"></a>
+
+### mwe\_rule\_v2
+
+```python
+@spacy.util.registry.misc('pymusas.taggers.rules.MWERule.v2')
+def mwe_rule_v2(
+    mwe_lexicon_lookup: Dict[str, List[str]],
+    pos_mapper: Optional[Dict[str, List[str]]] = None,
+    single_word_rule: Optional[SingleWordRule] = None
+) -> MWERule
+```
+
+`pymusas.taggers.rules.MWERule.v2` is a registered function under the
+`@misc` function register. Compared to `pymusas.taggers.rules.MWERule.v1`
+it also accepts a `single_word_rule`, which is used to replace default
+(`Df`) semantic tags.
+
+See the [`pymusas.taggers.rules.mwe.MWERule`](/pymusas/api/taggers/rules/mwe/#mwerule) for details on
+parameters to this function.
+
+<h4 id="mwe_rule_v2.returns">Returns<a className="headerlink" href="#mwe_rule_v2.returns" title="Permanent link">&para;</a></h4>
 
 
 - [`pymusas.taggers.rules.mwe.MWERule`](/pymusas/api/taggers/rules/mwe/#mwerule) <br/>

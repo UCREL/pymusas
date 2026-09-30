@@ -21,6 +21,16 @@ def test_mwe_rule() -> None:
     assert isinstance(mwe_rule({}, {}), MWERule)
 
 
+def test_mwe_rule_v2() -> None:
+    mwe_rule: Callable[[Dict[str, List[str]], Dict[str, List[str]],
+                        SingleWordRule], MWERule] \
+        = spacy.util.registry.misc.get('pymusas.taggers.rules.MWERule.v2')
+    single_word_rule = SingleWordRule({'acting|ADJ': ['A1']}, {})
+    rule = mwe_rule({}, {}, single_word_rule)
+    assert isinstance(rule, MWERule)
+    assert single_word_rule == rule.single_word_rule
+
+
 def test_rule_list() -> None:
     rule_list_call: Callable[[Rule, Rule], List[Rule]] \
         = spacy.util.registry.misc.get('pymusas.taggers.rules.rule_list')

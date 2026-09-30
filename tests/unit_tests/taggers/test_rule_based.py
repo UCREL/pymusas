@@ -190,3 +190,21 @@ def test_rule_based_tagger__call__() -> None:
                               mwe_word_rule(None)], ranker)
     tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
     assert expected_output == tagger_output
+
+
+def test_rule_based_tagger__call__default_tags() -> None:
+    single_word_rule = SingleWordRule({'acting|ADJ': ['A1/Z3'],
+                                       'style|NOUN': ['A4.1']}, {})
+    mwe_rule = MWERule({'*_ADJ style_NOUN': ['C1/Df']},
+                       single_word_rule=single_word_rule)
+    rules = [single_word_rule, mwe_rule]
+    ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
+    tagger = RuleBasedTagger(rules, ranker)
+
+    tokens = ['The', 'acting', 'style', '.']
+    pos_tags = ['DET', 'ADJ', 'NOUN', 'punc']
+    expected = [(['Z99'], [(0, 1)]),
+                (['C1/A1'], [(1, 3)]),
+                (['C1/A1'], [(1, 3)]),
+                (['PUNCT'], [(3, 4)])]
+    assert expected == tagger(tokens, tokens, pos_tags)

@@ -16,7 +16,8 @@ class MWERule(Rule):
  | def __init__(
  |     self,
  |     mwe_lexicon_lookup: Dict[str, List[str]],
- |     pos_mapper: Optional[Dict[str, List[str]]] = None
+ |     pos_mapper: Optional[Dict[str, List[str]]] = None,
+ |     single_word_rule: Optional[SingleWordRule] = None
  | ) -> None
 ```
 
@@ -32,6 +33,25 @@ All rule matches use the
 `pymusas.lexicon_collection.MWELexiconCollection.mwe_match`
 method for matching. Matches are found based on the original token/lemma and
 lower cased versions of the token/lemma.
+
+**Default (`Df`) semantic tags**
+
+A MWE template can contain a default (`Df`) semantic tag, e.g. the
+template `*_ADJ style_NOUN` with the semantic tags `C1/Df`. The `Df` tag is
+replaced with the single word semantic tag of the token that matched the
+first token in the MWE template that starts with a wildcard (`*`), in
+this example the adjective. The single word semantic tag is found using the
+`single_word_rule`, whereby the best single word match is found using
+the [`pymusas.taggers.rules.single_word.best_match`](/pymusas/api/taggers/rules/single_word/#best_match) method of
+[`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule). From
+this single word match the first semantic tag is used, and of that
+semantic tag only the first part of any slash tag, with all affixes and
+lower case markers removed, e.g. `A1+/Z3` becomes `A1`. Any affixes and
+lower case markers on the `Df` tag are added to it, e.g. `Df++` becomes
+`A1++`. For more details see [`pymusas.utils.resolve_default_tags`](/pymusas/api/utils/#resolve_default_tags).
+
+If the `single_word_rule` is `None` or the token has no single word match
+then the `Df` tag is replaced with `Z99`.
 
 <h4 id="mwerule.parameters">Parameters<a className="headerlink" href="#mwerule.parameters" title="Permanent link">&para;</a></h4>
 
@@ -49,6 +69,10 @@ lower cased versions of the token/lemma.
     each POS mapping the slower the tagger, a one to one mapping will have
     no speed impact on the tagger. A selection of POS mappers can be found in
     [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
+- __single\_word\_rule__ : `pymusas.taggers.rules.single_word.SingleWordRule`, optional (default = `None`) <br/>
+    The single word rule used to find the semantic tags that replace
+    default (`Df`) semantic tags, see the default semantic tags section
+    above. If `None` all `Df` tags will be replaced with `Z99`.
 
 <h4 id="mwerule.instance_attributes">Instance Attributes<a className="headerlink" href="#mwerule.instance_attributes" title="Permanent link">&para;</a></h4>
 
@@ -57,6 +81,22 @@ lower cased versions of the token/lemma.
     A [`pymusas.lexicon_collection.MWELexiconCollection`](/pymusas/api/lexicon_collection/#mwelexiconcollection) instance that
     has been initialised using the `mwe_lexicon_lookup` and `pos_mapper`
     parameters. This collection is used to find MWE rule matches.
+- __single\_word\_rule__ : `pymusas.taggers.rules.single_word.SingleWordRule`, optional (default = `None`) <br/>
+    The given `single_word_rule`.
+
+<h4 id="mwerule.examples">Examples<a className="headerlink" href="#mwerule.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.single_word import SingleWordRule
+single_word_rule = SingleWordRule({'acting|ADJ': ['A1/Z3']}, {})
+mwe_rule = MWERule({'*_ADJ style_NOUN': ['C1/Df']},
+                   single_word_rule=single_word_rule)
+ranking_meta_data = mwe_rule(['The', 'acting', 'style'],
+                             ['the', 'acting', 'style'],
+                             ['DET', 'ADJ', 'NOUN'])
+assert ('C1/A1',) == ranking_meta_data[1][0].semantic_tags
+```
 
 <a id="pymusas.taggers.rules.mwe.MWERule.__call__"></a>
 
@@ -122,6 +162,10 @@ class MWERule(Rule):
 ```
 
 Loads [`MWERule`](#mwerule) from the given bytestring and returns it.
+
+Bytestrings created before the `single_word_rule` was added, which
+only contain the serialised `mwe_lexicon_collection`, can also be
+loaded.
 
 <h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
 
