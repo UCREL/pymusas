@@ -88,14 +88,12 @@ build-backend = "uv_build"
 
 [tool.uv]
 default-groups = "all"
+index = [
+    { name = "pytorch", url = "https://download.pytorch.org/whl/cpu", explicit = true },
+]
 
-[tool.uv.sources]
-torch = { index = "pytorch" }
-
-[[tool.uv.index]]
-name = "pytorch"
-url = "https://download.pytorch.org/whl/cpu"
-explicit = true
+[tool.uv.sources.torch]
+index = "pytorch"
 
 [tool.uv.build-backend]
 module-name = "pymusas"
@@ -129,7 +127,7 @@ files = [
     "tests/",
     "pymusas/",
     "scripts/",
-    "benchmarks"
+    "benchmarks",
 ]
 exclude = [
     "scripts/py2md.py",
@@ -154,12 +152,14 @@ module = [
     "tqdm.*",
     "pydoc_markdown.*",
     "spacy.vocab",
-    "srsly.*"
+    "srsly.*",
 ]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
-module = ["datasets.*"]
+module = [
+    "datasets.*",
+]
 follow_untyped_imports = true
 
 [tool.pytest.ini_options]

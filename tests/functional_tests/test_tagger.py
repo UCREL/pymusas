@@ -1,3 +1,5 @@
+from typing import Iterator
+
 import pytest
 import spacy
 
@@ -36,6 +38,17 @@ def cuda_available() -> bool:
         return False
 
 
+@pytest.fixture(autouse=True)
+def reset_spacy_device() -> Iterator[None]:
+    """
+    `spacy.prefer_gpu` changes global state, this resets spaCy back to CPU
+    after each test so that the tests that should run without the spaCy GPU
+    enabled are not affected by an earlier test that enabled it.
+    """
+    yield
+    spacy.require_cpu()
+
+
 def test_rule_base_single_and_mwe_spacy_tagger() -> None:
     """
     Based off the PyMUSAS English MWE spaCy model test, this tests the spaCy
@@ -57,7 +70,8 @@ def test_rule_base_single_and_mwe_spacy_tagger() -> None:
 
     single_rule = single_word.SingleWordRule(single_lexicon, single_lemma_lexicon,
                                              pos_mapper=None)
-    mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None)
+    mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None,
+                           single_word_rule=single_rule)
 
     rules = [single_rule, mwe_rule]
     ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
@@ -73,8 +87,8 @@ def test_rule_base_single_and_mwe_spacy_tagger() -> None:
                            pos=TEST_POS)
     output = nlp(doc)
     expected_output = [
-        ['Df/S5+c'],
-        ['Df/S5+c'],
+        ['A10/S5+c'],
+        ['A10/S5+c'],
         ['Q4.2/S2mf', 'Y2', 'K5.1'],
         ['A9+', 'Z5', 'A2.2', 'S4'],
         ['PUNCT'],
@@ -175,7 +189,8 @@ def test_hybrid_tagger(device: str) -> None:
 
         single_rule = single_word.SingleWordRule(single_lexicon, single_lemma_lexicon,
                                                  pos_mapper=None)
-        mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None)
+        mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None,
+                               single_word_rule=single_rule)
 
         rules = [single_rule, mwe_rule]
         ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
@@ -188,8 +203,8 @@ def test_hybrid_tagger(device: str) -> None:
         assert len(output_tag_indicies) == len(TEST_TOKENS)
 
         expected_output = [
-            ['Df/S5+c'],
-            ['Df/S5+c'],
+            ['A10/S5+c'],
+            ['A10/S5+c'],
             ['Q4.2/S2mf', 'Y2', 'K5.1'],
             ['A9+', 'Z5', 'A2.2', 'S4'],
             ['S2', 'N3.2', 'Z5', 'T1.2', 'O3'],
@@ -242,7 +257,8 @@ def test_hybrid_spacy_tagger(with_gpu: bool, device: str, with_spacy_gpu: bool) 
 
         single_rule = single_word.SingleWordRule(single_lexicon, single_lemma_lexicon,
                                                  pos_mapper=None)
-        mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None)
+        mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None,
+                               single_word_rule=single_rule)
 
         rules = [single_rule, mwe_rule]
         ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
@@ -258,8 +274,8 @@ def test_hybrid_spacy_tagger(with_gpu: bool, device: str, with_spacy_gpu: bool) 
                                     pos=TEST_POS)
         output_doc = nlp(test_doc)
         expected_output = [
-            ['Df/S5+c'],
-            ['Df/S5+c'],
+            ['A10/S5+c'],
+            ['A10/S5+c'],
             ['Q4.2/S2mf', 'Y2', 'K5.1'],
             ['A9+', 'Z5', 'A2.2', 'S4'],
             ['S2', 'N3.2', 'Z5', 'T1.2', 'O3'],
