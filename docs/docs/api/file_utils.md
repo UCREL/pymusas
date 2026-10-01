@@ -11,7 +11,7 @@
 ### ensure\_path
 
 ```python
-def ensure_path(path: Union[str, Path]) -> Path
+def ensure_path(path: str | Path) -> Path
 ```
 
 Ensure string is converted to a Path.
@@ -21,7 +21,7 @@ This is a more restrictive version of spaCy's [ensure_path](https://github.com/e
 <h4 id="ensure_path.parameters">Parameters<a className="headerlink" href="#ensure_path.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __path__ : `Union[str, Path]` <br/>
+- __path__ : `str | Path` <br/>
     If string, it's converted to Path.
 
 <h4 id="ensure_path.returns">Returns<a className="headerlink" href="#ensure_path.returns" title="Permanent link">&para;</a></h4>

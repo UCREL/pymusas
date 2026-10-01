@@ -16,7 +16,7 @@ spaCy registered functions for creating the following rankers:
 ```python
 @spacy.util.registry.misc('pymusas.rankers.ContextualRuleBasedRanker.v1')
 def contextual_rule_based_ranker(
-    rules: List[Rule]
+    rules: list[Rule]
 ) -> ContextualRuleBasedRanker
 ```
 
@@ -32,8 +32,8 @@ constructor.
 <h4 id="contextual_rule_based_ranker.parameters">Parameters<a className="headerlink" href="#contextual_rule_based_ranker.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __rules__ : `List[Rule]` <br/>
-    A `List` of [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule).
+- __rules__ : `list[Rule]` <br/>
+    A `list` of [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule).
 
 <h4 id="contextual_rule_based_ranker.returns">Returns<a className="headerlink" href="#contextual_rule_based_ranker.returns" title="Permanent link">&para;</a></h4>
 

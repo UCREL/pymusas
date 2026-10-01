@@ -19,9 +19,9 @@ And helper functions for the rules.
 ```python
 @spacy.util.registry.misc('pymusas.taggers.rules.SingleWordRule.v1')
 def single_word_rule(
-    lexicon_collection: Dict[str, List[str]],
-    lemma_lexicon_collection: Dict[str, List[str]],
-    pos_mapper: Optional[Dict[str, List[str]]] = None
+    lexicon_collection: dict[str, list[str]],
+    lemma_lexicon_collection: dict[str, list[str]],
+    pos_mapper: dict[str, list[str]] | None = None
 ) -> SingleWordRule
 ```
 
@@ -43,8 +43,8 @@ details on parameters to this function.
 ```python
 @spacy.util.registry.misc('pymusas.taggers.rules.MWERule.v1')
 def mwe_rule(
-    mwe_lexicon_lookup: Dict[str, List[str]],
-    pos_mapper: Optional[Dict[str, List[str]]] = None
+    mwe_lexicon_lookup: dict[str, list[str]],
+    pos_mapper: dict[str, list[str]] | None = None
 ) -> MWERule
 ```
 
@@ -69,9 +69,9 @@ parameters to this function.
 ```python
 @spacy.util.registry.misc('pymusas.taggers.rules.MWERule.v2')
 def mwe_rule_v2(
-    mwe_lexicon_lookup: Dict[str, List[str]],
-    pos_mapper: Optional[Dict[str, List[str]]] = None,
-    single_word_rule: Optional[SingleWordRule] = None
+    mwe_lexicon_lookup: dict[str, list[str]],
+    pos_mapper: dict[str, list[str]] | None = None,
+    single_word_rule: SingleWordRule | None = None
 ) -> MWERule
 ```
 
@@ -94,14 +94,14 @@ parameters to this function.
 
 ```python
 @spacy.util.registry.misc('pymusas.taggers.rules.rule_list')
-def rule_list(*rules: Rule) -> List[Rule]
+def rule_list(*rules: Rule) -> list[Rule]
 ```
 
 `pymusas.taggers.rules.rule_list` is a registered function under the
 `@misc` function register. The function is required when wanting to create
-a `List` of rules within a
+a `list` of rules within a
 [config file](https://thinc.ai/docs/usage-config). We
-found it not possible to specify a `List` of custom objects within a config
+found it not possible to specify a `list` of custom objects within a config
 file, but is possible when using
 [variable position arguments](https://thinc.ai/docs/usage-config#registries-args),
 which this function accepts as input.
@@ -114,11 +114,11 @@ used when creating a [`pymusas.spacy_api.taggers.rule_based.RuleBasedTagger`](/p
 
 
 - __rules__ : `Rule` <br/>
-    The [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule)s to convert into a `List`
+    The [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule)s to convert into a `list`
     of `Rule`s.
 
 <h4 id="rule_list.returns">Returns<a className="headerlink" href="#rule_list.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[Rule]` <br/>
+- `list[Rule]` <br/>
 

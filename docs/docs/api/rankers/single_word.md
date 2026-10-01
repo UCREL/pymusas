@@ -15,7 +15,7 @@ class SingleWordRanker
 ```
 
 A stateless ranker that ranks the single word lexicon entry matches of
-**one** token, represented by a `List` of
+**one** token, represented by a `list` of
 [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) objects, e.g. the
 matches returned by [`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule)
 for one token.
@@ -55,7 +55,7 @@ assert SingleWordRanker.best_match([]) is None
 class SingleWordRanker:
  | ...
  | @staticmethod
- | def sort_key(match: RankingMetaData) -> Tuple[bool, int]
+ | def sort_key(match: RankingMetaData) -> tuple[bool, int]
 ```
 
 Returns the key used to rank the given single word `match`, a lower key
@@ -71,7 +71,7 @@ is a better ranked match. It can be used as the `key` argument of
 <h4 id="sort_key.returns">Returns<a className="headerlink" href="#sort_key.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Tuple[bool, int]` <br/>
+- `tuple[bool, int]` <br/>
 
 <a id="pymusas.rankers.single_word.SingleWordRanker.best_match"></a>
 
@@ -82,8 +82,8 @@ class SingleWordRanker:
  | ...
  | @staticmethod
  | def best_match(
- |     matches: List[RankingMetaData]
- | ) -> Optional[RankingMetaData]
+ |     matches: list[RankingMetaData]
+ | ) -> RankingMetaData | None
 ```
 
 Returns the lowest ranked, best, single word match from the given
@@ -93,11 +93,11 @@ are joint ranked the first of those matches in `matches` is returned.
 <h4 id="best_match.parameters">Parameters<a className="headerlink" href="#best_match.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __matches__ : `List[RankingMetaData]` <br/>
+- __matches__ : `list[RankingMetaData]` <br/>
     The single word lexicon entry matches of one token.
 
 <h4 id="best_match.returns">Returns<a className="headerlink" href="#best_match.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Optional[RankingMetaData]` <br/>
+- `RankingMetaData | None` <br/>
 

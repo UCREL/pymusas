@@ -114,17 +114,17 @@ class NeuralTagger:
  | @torch.inference_mode(mode=True)
  | def __call__(
  |     self,
- |     tokens: List[str]
- | ) -> List[Tuple[List[str], List[Tuple[int, int]]]]
+ |     tokens: list[str]
+ | ) -> list[tuple[list[str], list[tuple[int, int]]]]
 ```
 
-Given a `List` of tokens it returns for each token:
+Given a `list` of tokens it returns for each token:
 
-1. A `List` of tags. The first tag in the `List` of tags is the most likely tag.
-2. A `List` of `Tuples` whereby each `Tuple` indicates the start and end
-token index of the associated Multi Word Expression (MWE). If the `List` contains
-more than one `Tuple` then the MWE is discontinuous. For single word
-expressions the `List` will only contain 1 `Tuple` which will be
+1. A `list` of tags. The first tag in the `list` of tags is the most likely tag.
+2. A `list` of `Tuples` whereby each `tuple` indicates the start and end
+token index of the associated Multi Word Expression (MWE). If the `list` contains
+more than one `tuple` then the MWE is discontinuous. For single word
+expressions the `list` will only contain 1 `tuple` which will be
 (token_start_index, token_start_index + 1).
 
 NOTE: we recommend that the number of tokens in the list should represent
@@ -142,13 +142,13 @@ decorator which makes the model run more efficiently.
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tokens__ : `List[str]` <br/>
+- __tokens__ : `list[str]` <br/>
     A List of full text form of the tokens to be tagged.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[Tuple[List[str], List[Tuple[int, int]]]]` <br/>
+- `list[tuple[list[str], list[tuple[int, int]]]]` <br/>
 
 <h4 id="__call__.raises">Raises<a className="headerlink" href="#__call__.raises" title="Permanent link">&para;</a></h4>
 

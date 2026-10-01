@@ -48,7 +48,7 @@ same text/sentence that is being tagged.
     The lexicon entry match, which can be either a single word or MWE entry
     match. In the case for single word this could be `Car|noun` and in the
     case for a MWE it would be it's template, e.g. `snow_noun boots_noun`.
-- __semantic\_tags__ : `Tuple[str, ...]` <br/>
+- __semantic\_tags__ : `tuple[str, ...]` <br/>
     The semantic tags associated with the lexicon entry. The semantic tags
     are in rank order, the most likely tag is the first tag in the tuple.
     The Tuple can be of variable length hence the `...` in the
@@ -141,6 +141,6 @@ class RankingMetaData:
 ```python
 class RankingMetaData:
  | ...
- | semantic_tags: Tuple[str, ...] = None
+ | semantic_tags: tuple[str, ...] = None
 ```
 

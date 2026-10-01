@@ -42,7 +42,7 @@ DEFAULT_TAG_RE: re.Pattern[str] = re.compile(r'^Df(?P<suffix>[+\-a-z%@]*)$')
 ```python
 def token_pos_tags_in_lexicon_entry(
     lexicon_entry: str
-) -> Iterable[Tuple[str, str]]
+) -> Iterable[tuple[str, str]]
 ```
 
 Yields the token and associated POS tag in the given `lexicon_entry`.
@@ -60,14 +60,14 @@ Yields the token and associated POS tag in the given `lexicon_entry`.
 <h4 id="token_pos_tags_in_lexicon_entry.returns">Returns<a className="headerlink" href="#token_pos_tags_in_lexicon_entry.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Iterable[Tuple[str, str]]` <br/>
+- `Iterable[tuple[str, str]]` <br/>
 
 <h4 id="token_pos_tags_in_lexicon_entry.raises">Raises<a className="headerlink" href="#token_pos_tags_in_lexicon_entry.raises" title="Permanent link">&para;</a></h4>
 
 
 - `ValueError` <br/>
     If the lexicon entry when split on whitespace and then split by `_`
-    does not create a `Iterable[Tuple[str, str]]` whereby the tuple contains
+    does not create a `Iterable[tuple[str, str]]` whereby the tuple contains
     the `token text` and it's associated `POS tag`.
 
 <h4 id="token_pos_tags_in_lexicon_entry.examples">Examples<a className="headerlink" href="#token_pos_tags_in_lexicon_entry.examples" title="Permanent link">&para;</a></h4>
@@ -89,7 +89,7 @@ assert ([('East', 'noun')]
 ```python
 def unique_pos_tags_in_lexicon_entry(
     lexicon_entry: str
-) -> Set[str]
+) -> set[str]
 ```
 
 Returns the unique POS tag values in the given `lexicon_entry`.
@@ -107,14 +107,14 @@ Returns the unique POS tag values in the given `lexicon_entry`.
 <h4 id="unique_pos_tags_in_lexicon_entry.returns">Returns<a className="headerlink" href="#unique_pos_tags_in_lexicon_entry.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Set[str]` <br/>
+- `set[str]` <br/>
 
 <h4 id="unique_pos_tags_in_lexicon_entry.raises">Raises<a className="headerlink" href="#unique_pos_tags_in_lexicon_entry.raises" title="Permanent link">&para;</a></h4>
 
 
 - `ValueError` <br/>
     If the lexicon entry when split on whitespace and then split by `_`
-    does not create a `List[Tuple[str, str]]` whereby the tuple contains
+    does not create a `list[tuple[str, str]]` whereby the tuple contains
     the `token text` and it's associated `POS tag`.
 
 <h4 id="unique_pos_tags_in_lexicon_entry.examples">Examples<a className="headerlink" href="#unique_pos_tags_in_lexicon_entry.examples" title="Permanent link">&para;</a></h4>
@@ -133,7 +133,7 @@ assert {'noun'} == unique_pos_tags_in_lexicon_entry(single_word_lexicon)
 ### contains\_default\_tag
 
 ```python
-def contains_default_tag(semantic_tags: List[str]) -> bool
+def contains_default_tag(semantic_tags: list[str]) -> bool
 ```
 
 Returns `True` if any of the given `semantic_tags`, including any part of
@@ -142,7 +142,7 @@ a slash (`/`) tag, is a default (`Df`) tag, see [`DEFAULT_TAG_RE`](#default_tag_
 <h4 id="contains_default_tag.parameters">Parameters<a className="headerlink" href="#contains_default_tag.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __semantic\_tags__ : `List[str]` <br/>
+- __semantic\_tags__ : `list[str]` <br/>
     The semantic tags of a lexicon entry, e.g. `['C1/Df', 'Z3']`.
 
 <h4 id="contains_default_tag.returns">Returns<a className="headerlink" href="#contains_default_tag.returns" title="Permanent link">&para;</a></h4>
@@ -166,7 +166,7 @@ assert not contains_default_tag(['Z3', 'A1/B2'])
 ### default\_token\_index
 
 ```python
-def default_token_index(mwe_template: str) -> Optional[int]
+def default_token_index(mwe_template: str) -> int | None
 ```
 
 Returns the index of the first token in the `mwe_template` whose token
@@ -183,7 +183,7 @@ wildcard.
 <h4 id="default_token_index.returns">Returns<a className="headerlink" href="#default_token_index.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Optional[int]` <br/>
+- `int | None` <br/>
 
 <h4 id="default_token_index.raises">Raises<a className="headerlink" href="#default_token_index.raises" title="Permanent link">&para;</a></h4>
 
@@ -207,9 +207,9 @@ assert default_token_index('ski_NOUN boot*_NOUN') is None
 
 ```python
 def resolve_default_tags(
-    semantic_tags: List[str],
-    replacement: Optional[str]
-) -> List[str]
+    semantic_tags: list[str],
+    replacement: str | None
+) -> list[str]
 ```
 
 Returns the `semantic_tags` whereby every default (`Df`) tag, including
@@ -228,16 +228,16 @@ even if the Df tag contains suffixes.
 <h4 id="resolve_default_tags.parameters">Parameters<a className="headerlink" href="#resolve_default_tags.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __semantic\_tags__ : `List[str]` <br/>
+- __semantic\_tags__ : `list[str]` <br/>
     The semantic tags that may contain `Df` tags, e.g. `['C1/Df']`.
-- __replacement__ : `Optional[str]` <br/>
+- __replacement__ : `str | None` <br/>
     The semantic tag to replace the `Df` tags with, this would be the
     single word semantic tag of the token the `Df` tag refers to.
 
 <h4 id="resolve_default_tags.returns">Returns<a className="headerlink" href="#resolve_default_tags.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[str]` <br/>
+- `list[str]` <br/>
 
 <h4 id="resolve_default_tags.examples">Examples<a className="headerlink" href="#resolve_default_tags.examples" title="Permanent link">&para;</a></h4>
 

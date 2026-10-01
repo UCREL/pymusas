@@ -17,7 +17,7 @@ class Rule(Serialise)
 An **abstract class** that defines the basic method, `__call__`, that is
 required for all [`Rule`](#rule)s.
 
-A Rule when called, `__call__`, creates a `List` of rules matches for each
+A Rule when called, `__call__`, creates a `list` of rules matches for each
 token, whereby each rule matched is defined by the
 [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object. These
 rules matches per token can then be, optionally, combined with other rule
@@ -34,30 +34,30 @@ class Rule(Serialise):
  | @abstractmethod
  | def __call__(
  |     self,
- |     tokens: List[str],
- |     lemmas: List[str],
- |     pos_tags: List[str]
- | ) -> List[List[RankingMetaData]]
+ |     tokens: list[str],
+ |     lemmas: list[str],
+ |     pos_tags: list[str]
+ | ) -> list[list[RankingMetaData]]
 ```
 
-For each token it returns a `List` of rules matches defined by the
+For each token it returns a `list` of rules matches defined by the
 [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object.
 
-Each `List` of `tokens`, `lemmas`, and `pos_tags` are assumed to be of
+Each `list` of `tokens`, `lemmas`, and `pos_tags` are assumed to be of
 equal length.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tokens__ : `List[str]` <br/>
+- __tokens__ : `list[str]` <br/>
     The tokens that are within the text.
-- __lemmas__ : `List[str]` <br/>
+- __lemmas__ : `list[str]` <br/>
     The lemmas of the tokens.
-- __pos\_tags__ : `List[str]` <br/>
+- __pos\_tags__ : `list[str]` <br/>
     The Part Of Speech tags of the tokens.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[List[RankingMetaData]]` <br/>
+- `list[list[RankingMetaData]]` <br/>
 

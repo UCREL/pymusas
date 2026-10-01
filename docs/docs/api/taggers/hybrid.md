@@ -15,11 +15,11 @@ class HybridTagger(RuleBasedTagger):
  | ...
  | def __init__(
  |     self,
- |     rules: List[Rule],
+ |     rules: list[Rule],
  |     ranker: LexiconEntryRanker,
  |     neural_tagger: NeuralTagger,
- |     default_punctuation_tags: Optional[Set[str]] = None,
- |     default_number_tags: Optional[Set[str]] = None
+ |     default_punctuation_tags: set[str] | None = None,
+ |     default_number_tags: set[str] | None = None
  | ) -> None
 ```
 
@@ -39,7 +39,7 @@ Each candidate, represented as a
 token is then Ranked using a
 [`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker) ranker. The best
 candidate and it's associated tag(s) for each token are then returned along
-with a `List` of token indexes indicating if the token is part of a Multi
+with a `list` of token indexes indicating if the token is part of a Multi
 Word Expression (MWE).
 
 If we cannot tag a token then the following process will happen:
@@ -53,7 +53,7 @@ are determined by how you have initialised the `NeuralTagger`.
 <h4 id="hybridtagger.parameters">Parameters<a className="headerlink" href="#hybridtagger.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
+- __rules__ : `list[pymusas.taggers.rules.rule.Rule]` <br/>
     A list of rules to apply to the sequence of tokens in the
     [`__call__`](#__call__). The output from each rule is concatenated and given
     to the `ranker`.
@@ -62,26 +62,26 @@ are determined by how you have initialised the `NeuralTagger`.
 - __neural\_tagger__ : `pymusas.taggers.neural.NeuralTagger` <br/>
     The `NeuralTagger` that will be used to tag tokens that the
     `RuleBasedTagger` cannot tag.
-- __default\_punctuation\_tags__ : `Set[str]`, optional (default = `None`) <br/>
+- __default\_punctuation\_tags__ : `set[str]`, optional (default = `None`) <br/>
     The POS tags that represent punctuation. If `None` then we will use
-    the `Set`: `set(['punc'])`.
-- __default\_number\_tags__ : `Set[str]`, optional (default = `None`) <br/>
+    the `set`: `set(['punc'])`.
+- __default\_number\_tags__ : `set[str]`, optional (default = `None`) <br/>
     The POS tags that represent numbers. If `None` then we will use
-    the `Set`: `set(['num'])`.
+    the `set`: `set(['num'])`.
 
 <h4 id="hybridtagger.instance_attributes">Instance Attributes<a className="headerlink" href="#hybridtagger.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
+- __rules__ : `list[pymusas.taggers.rules.rule.Rule]` <br/>
     The given `rules`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     The given `ranker`.
 - __neural\_tagger__ : `pymusas.taggers.neural.NeuralTagger` <br/>
     The `NeuralTagger` that will be used to tag tokens that the
     `RuleBasedTagger` cannot tag.
-- __default\_punctuation\_tags__ : `Set[str]` <br/>
+- __default\_punctuation\_tags__ : `set[str]` <br/>
     The given `default_punctuation_tags`
-- __default\_number\_tags__ : `Set[str]` <br/>
+- __default\_number\_tags__ : `set[str]` <br/>
     The given `default_number_tags`
 
 <h4 id="hybridtagger.examples">Examples<a className="headerlink" href="#hybridtagger.examples" title="Permanent link">&para;</a></h4>
@@ -118,21 +118,21 @@ class HybridTagger(RuleBasedTagger):
  | ...
  | def __call__(
  |     self,
- |     tokens: List[str],
- |     lemmas: List[str],
- |     pos_tags: List[str]
- | ) -> List[Tuple[List[str],
- |                                  List[Tuple[int, int]]]]
+ |     tokens: list[str],
+ |     lemmas: list[str],
+ |     pos_tags: list[str]
+ | ) -> list[tuple[list[str],
+ |                                  list[tuple[int, int]]]]
 ```
 
-Given a `List` of tokens, their associated lemmas and
+Given a `list` of tokens, their associated lemmas and
 Part Of Speech (POS) tags it returns for each token:
 
-1. A `List` of tags. The first tag in the `List` of tags is the most likely tag.
-2. A `List` of `Tuples` whereby each `Tuple` indicates the start and end
-token index of the associated Multi Word Expression (MWE). If the `List` contains
-more than one `Tuple` then the MWE is discontinuous. For single word
-expressions the `List` will only contain 1 `Tuple` which will be
+1. A `list` of tags. The first tag in the `list` of tags is the most likely tag.
+2. A `list` of `Tuples` whereby each `tuple` indicates the start and end
+token index of the associated Multi Word Expression (MWE). If the `list` contains
+more than one `tuple` then the MWE is discontinuous. For single word
+expressions the `list` will only contain 1 `tuple` which will be
 (token_start_index, token_start_index + 1).
 
 All the generated tags and MWEs are based on the rules, ranker,
@@ -140,7 +140,7 @@ and NeuralTagger given to this model.
 
 **NOTE** this tagger has been designed to be flexible with the amount of
 resources available, if you do not have POS or lemma information assign
-them a `List` of empty strings.
+them a `list` of empty strings.
 
 **NOTE** we recommend for the `NeuralTagger` that the number of tokens
 in the list should represent a sentence, in addition the more tokens
@@ -150,17 +150,17 @@ CPU at least the more time it will take to predict the tags.
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tokens__ : `List[str]` <br/>
+- __tokens__ : `list[str]` <br/>
     A List of full text form of the tokens to be tagged.
-- __lemmas__ : `List[str]` <br/>
+- __lemmas__ : `list[str]` <br/>
     The List of lemma/base form of the tokens to be tagged.
-- __pos\_tags__ : `List[str]` <br/>
+- __pos\_tags__ : `list[str]` <br/>
     The List of POS tags of the tokens to be tagged.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[Tuple[List[str], List[Tuple[int, int]]]]` <br/>
+- `list[tuple[list[str], list[tuple[int, int]]]]` <br/>
 
 <h4 id="__call__.raises">Raises<a className="headerlink" href="#__call__.raises" title="Permanent link">&para;</a></h4>
 

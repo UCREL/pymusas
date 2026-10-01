@@ -33,7 +33,7 @@ Each candidate, represented as a
 token is then Ranked using a
 [`pymusas.rankers.lexicon_entry.LexiconEntryRanker`](/pymusas/api/rankers/lexicon_entry/#lexiconentryranker) ranker. The best
 candidate and it's associated tag(s) for each token are then assigned to the
-`Token._.pymusas_tags` attribute in addition a `List` of token indexes
+`Token._.pymusas_tags` attribute in addition a `list` of token indexes
 indicating if the token is part of a Multi Word Expression (MWE) is assigned
 to the `Token._.pymusas_mwe_indexes`.
 
@@ -60,17 +60,17 @@ lemmatiser in your spaCy pipeline this ok, just use the default
     </tr>
     <tr>
         <td> Token._.pymusas_tags </td>
-        <td> `List[str]` </td>
+        <td> `list[str]` </td>
         <td> Prediced tags, the first tag in the List of tags is the
         most likely tag.</td>
     </tr>
     <tr>
         <td> Token._.pymusas_mwe_indexes </td>
-        <td> `List[Tuple[int, int]]` </td>
-        <td> Each `Tuple` indicates the start and end token index of the
-        associated Multi Word Expression (MWE). If the `List` contains
-        more than one `Tuple` then the MWE is discontinuous. For single word
-        expressions the `List` will only contain 1 `Tuple` which will be
+        <td> `list[tuple[int, int]]` </td>
+        <td> Each `tuple` indicates the start and end token index of the
+        associated Multi Word Expression (MWE). If the `list` contains
+        more than one `tuple` then the MWE is discontinuous. For single word
+        expressions the `list` will only contain 1 `tuple` which will be
         (token_start_index, token_start_index + 1).</td>
     </tr>
 </table>
@@ -124,15 +124,15 @@ argument on [nlp.add_pipe](https://spacy.io/api/language#add_pipe) or in your
 
 - __name__ : `str` <br/>
     The component name.
-- __rules__ : `List[pymusas.taggers.rules.rule.Rule]`, optional (default = `None`) <br/>
+- __rules__ : `list[pymusas.taggers.rules.rule.Rule]`, optional (default = `None`) <br/>
     The `rules` is set through the [`initialize`](#initialize) method. Before it is
     set by the [`initialize`](#initialize) method the value of this attribute is `None`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`, optional (default = `None`) <br/>
     The `ranker` is set through the [`initialize`](#initialize) method. Before it is
     set by the [`initialize`](#initialize) method the value of this attribute is `None`.
-- __default\_punctuation\_tags__ : `Set[str]` <br/>
+- __default\_punctuation\_tags__ : `set[str]` <br/>
     The `default_punctuation_tags` is set through the [`initialize`](#initialize) method.
-- __default\_number\_tags__ : `Set[str]` <br/>
+- __default\_number\_tags__ : `set[str]` <br/>
     The `default_number_tags` is set through the [`initialize`](#initialize) method.
 - __pymusas\_tags\_token\_attr__ : `str`, optional (default = `pymusas_tags`) <br/>
     The given `pymusas_tags_token_attr`
@@ -210,13 +210,13 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def initialize(
  |     self,
- |     get_examples: Optional[Callable[[], Iterable[Example]]] = None,
+ |     get_examples: Callable[[], Iterable[Example]] | None = None,
  |     *,
- |     nlp: Optional[Language] = None,
- |     rules: Optional[List[Rule]] = None,
- |     ranker: Optional[LexiconEntryRanker] = None,
- |     default_punctuation_tags: Optional[List[str]] = None,
- |     default_number_tags: Optional[List[str]] = None
+ |     nlp: Language | None = None,
+ |     rules: list[Rule] | None = None,
+ |     ranker: LexiconEntryRanker | None = None,
+ |     default_punctuation_tags: list[str] | None = None,
+ |     default_number_tags: list[str] | None = None
  | ) -> None
 ```
 
@@ -231,19 +231,19 @@ typically before training. At runtime, all data is load from disk.
 <h4 id="initialize.parameters">Parameters<a className="headerlink" href="#initialize.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __rules__ : `List[pymusas.taggers.rules.rule.Rule]` <br/>
+- __rules__ : `list[pymusas.taggers.rules.rule.Rule]` <br/>
     A list of rules to apply to the sequence of tokens in the
     [`__call__`](#__call__). The output from each rule is concatenated and given
     to the `ranker`.
 - __ranker__ : `pymusas.rankers.lexicon_entry.LexiconEntryRanker` <br/>
     A ranker to rank the output from all of the `rules`.
-- __default\_punctuation\_tags__ : `List[str]`, optional (default = `None`) <br/>
+- __default\_punctuation\_tags__ : `list[str]`, optional (default = `None`) <br/>
     The POS tags that represent punctuation. If `None` then we will use
-    `['punc']`. The list will be converted into a `Set` before assigning
+    `['punc']`. The list will be converted into a `set` before assigning
     to the `default_punctuation_tags` attribute.
-- __default\_number\_tags__ : `List[str]`, optional (default = `None`) <br/>
+- __default\_number\_tags__ : `list[str]`, optional (default = `None`) <br/>
     The POS tags that represent numbers. If `None` then we will use
-    `['num']`. The list will be converted into a `Set` before assigning
+    `['num']`. The list will be converted into a `set` before assigning
     to the `default_number_tags` attribute.
 
 <a id="pymusas.spacy_api.taggers.rule_based.RuleBasedTagger.__call__"></a>
@@ -373,7 +373,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def to_disk(
  |     self,
- |     path: Union[str, Path],
+ |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
  | ) -> None
@@ -384,7 +384,7 @@ Serialises the tagger to the given `path`.
 <h4 id="to_disk.parameters">Parameters<a className="headerlink" href="#to_disk.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __path__ : `Union[str, Path]` <br/>
+- __path__ : `str | Path` <br/>
     Path to a direcotry. Path may be either string or `Path`-like
     object. If the directory does not exist it attempts to create a
     directory at the given `path`.
@@ -424,7 +424,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def from_disk(
  |     self,
- |     path: Union[str, Path],
+ |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
  | ) -> "RuleBasedTagger"
@@ -435,7 +435,7 @@ Loads the tagger from the given `path` in place and returns it.
 <h4 id="from_disk.parameters">Parameters<a className="headerlink" href="#from_disk.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __path__ : `Union[str, Path]` <br/>
+- __path__ : `str | Path` <br/>
     Path to an existing direcotry. Path may be either string or
     `Path`-like object.
 

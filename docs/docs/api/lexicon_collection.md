@@ -127,7 +127,7 @@ Attributes.
 
 - __lemma__ : `str` <br/>
     The lemma of a token or the token itself.
-- __semantic\_tags__ : `List[str]` <br/>
+- __semantic\_tags__ : `list[str]` <br/>
     The semantic tags associated with the `lemma` and optional `POS`.
     The semantic tags are in rank order, the most likely tag
     is the first tag in the list.
@@ -151,7 +151,7 @@ class LexiconEntry:
 ```python
 class LexiconEntry:
  | ...
- | semantic_tags: List[str] = None
+ | semantic_tags: list[str] = None
 ```
 
 <a id="pymusas.lexicon_collection.LexiconEntry.pos"></a>
@@ -161,7 +161,7 @@ class LexiconEntry:
 ```python
 class LexiconEntry:
  | ...
- | pos: Optional[str] = None
+ | pos: str | None = None
 ```
 
 <a id="pymusas.lexicon_collection.LexiconMetaData"></a>
@@ -186,7 +186,7 @@ Attributes.
 <h4 id="lexiconmetadata.instance_attributes">Instance Attributes<a className="headerlink" href="#lexiconmetadata.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __semantic\_tags__ : `List[str]` <br/>
+- __semantic\_tags__ : `list[str]` <br/>
     The semantic tags associated with the lexicon entry.
     The semantic tags are in rank order, the most likely tag
     is the first tag in the list.
@@ -206,7 +206,7 @@ Attributes.
 ```python
 class LexiconMetaData:
  | ...
- | semantic_tags: List[str] = None
+ | semantic_tags: list[str] = None
 ```
 
 <a id="pymusas.lexicon_collection.LexiconMetaData.n_gram_length"></a>
@@ -246,10 +246,7 @@ class LexiconMetaData:
 ```python
 class LexiconCollection(MutableMapping):
  | ...
- | def __init__(
- |     self,
- |     data: Optional[Dict[str, List[str]]] = None
- | ) -> None
+ | def __init__(data: dict[str, list[str]] | None = None) -> None
 ```
 
 This is a dictionary object that will hold [`LexiconEntry`](#lexiconentry) data in a fast to
@@ -269,12 +266,12 @@ Expression (MWE) see the [`MWELexiconCollection`](#mwelexiconcollection).
 <h4 id="lexiconcollection.parameters">Parameters<a className="headerlink" href="#lexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __data__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
 
 <h4 id="lexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#lexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]` <br/>
+- __data__ : `dict[str, list[str]]` <br/>
     Dictionary where the keys are `{lemma}|{pos}` and the values are
     a list of associated semantic tags. If the `data` parameter given was
     `None` then the value of this attribute will be an empty dictionary.
@@ -333,7 +330,7 @@ overwrite the existing entry.
 ```python
 class LexiconCollection(MutableMapping):
  | ...
- | def to_dictionary() -> Dict[str, List[str]]
+ | def to_dictionary() -> dict[str, list[str]]
 ```
 
 Returns the `data` instance attribute.
@@ -341,7 +338,7 @@ Returns the `data` instance attribute.
 <h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.lexicon_collection.LexiconCollection.to_bytes"></a>
 
@@ -394,9 +391,9 @@ class LexiconCollection(MutableMapping):
  | ...
  | @staticmethod
  | def from_tsv(
- |     tsv_file_path: Union[PathLike, str],
+ |     tsv_file_path: PathLike | str,
  |     include_pos: bool = True
- | ) -> Dict[str, List[str]]
+ | ) -> dict[str, list[str]]
 ```
 
 Given a `tsv_file_path` it will return a dictionary object that can
@@ -421,7 +418,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.parameters">Parameters<a className="headerlink" href="#from_tsv.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+- __tsv\_file\_path__ : `PathLike | str` <br/>
     A file path or URL to a TSV file that contains at least two
     fields, with an optional third, with the following headings:
 
@@ -438,7 +435,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
 
@@ -653,8 +650,8 @@ class MWELexiconCollection(MutableMapping):
  | ...
  | def __init__(
  |     self,
- |     data: Optional[Dict[str, List[str]]] = None,
- |     pos_mapper: Optional[Dict[str, List[str]]] = None
+ |     data: dict[str, list[str]] | None = None,
+ |     pos_mapper: dict[str, list[str]] | None = None
  | ) -> None
 ```
 
@@ -692,15 +689,15 @@ that do not will be ignored and a `UserWarning` will be raised stating this.
 <h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __data__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     Dictionary where the keys are MWE templates, of any [`LexiconType`](#lexicontype),
     and the values are a list of associated semantic tags.
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __pos\_mapper__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     If not `None`, maps from the lexicon's POS tagset to the desired
-    POS tagset, whereby the mapping is a `List` of tags, at the moment there
+    POS tagset, whereby the mapping is a `list` of tags, at the moment there
     is no preference order in this list of POS tags. The POS mapping is
     useful in situations whereby the lexicon's POS tagset is different to
-    the token's. **Note** that the longer the `List[str]` for each POS
+    the token's. **Note** that the longer the `list[str]` for each POS
     mapping the longer it will take to match MWE templates. A one to one
     mapping will have no speed impact on the tagger. A selection of POS
     mappers can be found in [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
@@ -713,7 +710,7 @@ dictionary attributes will be an empty dictionary and all integer values will
 be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
 will be an empty dictionary.
 
-- __meta\_data__ : `Dict[str, LexiconMetaData]` <br/>
+- __meta\_data__ : `dict[str, LexiconMetaData]` <br/>
     Dictionary where the keys are MWE templates, of any type, and the values
     are their associated meta data stored in a [`LexiconMetaData`](#lexiconmetadata) object.
 - __longest\_non\_special\_mwe\_template__ : `int` <br/>
@@ -728,24 +725,24 @@ will be an empty dictionary.
     The number of wildcards in the MWE template that contains the
     most wildcards, e.g. the MWE template `ski_* *_noun` would contain 2
     wildcards. This can be 0 if you have no wildcard MWE templates.
-- __mwe\_regular\_expression\_lookup__ : `Dict[int, Dict[str, Dict[str, re.Pattern]]]` <br/>
+- __mwe\_regular\_expression\_lookup__ : `dict[int, dict[str, dict[str, re.Pattern]]]` <br/>
     A dictionary that can lookup all special syntax MWE templates there
     regular expression pattern. These templates are found first by
     their n-gram length and then their first character symbol. The regular
     expression pattern is used for quick matching within the [`mwe_match`](#mwe_match).
     From the special syntax only wildcard (`*`) symbols are supported at the
     moment.
-- __pos\_mapper__ : `Dict[str, List[str]]` <br/>
+- __pos\_mapper__ : `dict[str, list[str]]` <br/>
     The given `pos_mapper`.
-- __one\_to\_many\_pos\_tags__ : `Set[str]` <br/>
+- __one\_to\_many\_pos\_tags__ : `set[str]` <br/>
     A set of POS tags that have a one to many mapping, this is created based
     on the `pos_mapper`. This is empty if `pos_mapper` is `None`
-- __pos\_mapping\_lookup__ : `Dict[str, str]` <br/>
+- __pos\_mapping\_lookup__ : `dict[str, str]` <br/>
     Only used if `pos_mapper` is not `None`. For all one-to-one POS mappings
     will store the mapped POS MWE template as keys and the original non-mapped
     (original) MWE templates as values, which can be used to lookup the meta
     data from `meta_data`.
-- __pos\_mapping\_regular\_expression\_lookup__ : `Dict[LexiconType, Dict[int, Dict[str, Dict[str, re.Pattern]]]]` <br/>
+- __pos\_mapping\_regular\_expression\_lookup__ : `dict[LexiconType, dict[int, dict[str, dict[str, re.Pattern]]]]` <br/>
     Only used if `pos_mapper` is not `None` and will result in
     `mwe_regular_expression_lookup` being empty as it replaces it
     functionality and extends it and by handlining the one-to-many POS
@@ -785,11 +782,11 @@ class MWELexiconCollection(MutableMapping):
  |     self,
  |     mwe_template: str,
  |     mwe_type: LexiconType
- | ) -> List[str]
+ | ) -> list[str]
 ```
 
-Returns a `List` of MWE templates, with the given `mwe_type`, that match
-the given `mwe_template`. If there are no matches the returned `List`
+Returns a `list` of MWE templates, with the given `mwe_type`, that match
+the given `mwe_template`. If there are no matches the returned `list`
 will be empty.
 
 This method applies all of the special syntax rules that should be applied
@@ -809,7 +806,7 @@ special syntax rules see the following [notes](/usage/notes/mwe_syntax).
 <h4 id="mwe_match.returns">Returns<a className="headerlink" href="#mwe_match.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Optional[List[str]]` <br/>
+- `list[str] | None` <br/>
 
 <h4 id="mwe_match.examples">Examples<a className="headerlink" href="#mwe_match.examples" title="Permanent link">&para;</a></h4>
 
@@ -828,7 +825,7 @@ assert ['*_noun boot_noun', '*_noun *_noun'] == collection.mwe_match('walking_no
 ```python
 class MWELexiconCollection(MutableMapping):
  | ...
- | def to_dictionary() -> Dict[str, List[str]]
+ | def to_dictionary() -> dict[str, list[str]]
 ```
 
 Returns a dictionary of all MWE templates, the keys, stored in the
@@ -839,7 +836,7 @@ This can then be used to re-create a [`MWELexiconCollection`](#mwelexiconcollect
 <h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <h4 id="to_dictionary.examples">Examples<a className="headerlink" href="#to_dictionary.examples" title="Permanent link">&para;</a></h4>
 
@@ -905,8 +902,8 @@ class MWELexiconCollection(MutableMapping):
  | ...
  | @staticmethod
  | def from_tsv(
- |     tsv_file_path: Union[PathLike, str]
- | ) -> Dict[str, List[str]]
+ |     tsv_file_path: PathLike | str
+ | ) -> dict[str, list[str]]
 ```
 
 Given a `tsv_file_path` it will return a dictionary object
@@ -926,7 +923,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.parameters">Parameters<a className="headerlink" href="#from_tsv.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+- __tsv\_file\_path__ : `PathLike | str` <br/>
     A file path or URL to a TSV file that contains at least these two
     fields:
 
@@ -938,7 +935,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
 
@@ -987,7 +984,7 @@ could cause issues during tag time.
 <h4 id="tsv_merge.parameters">Parameters<a className="headerlink" href="#tsv_merge.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __*tsv\_file\_paths__ : `Union[PathLike, str]` <br/>
+- __*tsv\_file\_paths__ : `PathLike | str` <br/>
     File paths or URLs to a TSV file that contains at least these two
     fields:
 
@@ -1072,7 +1069,7 @@ assert r'ano_prep\ carta_[^\s_]*' == mwe_escaped
 ```python
 class MWELexiconCollection(MutableMapping):
  | ...
- | def __setitem__(key: str, value: List[str]) -> None
+ | def __setitem__(key: str, value: list[str]) -> None
 ```
 
 <h4 id="__setitem__.raises">Raises<a className="headerlink" href="#__setitem__.raises" title="Permanent link">&para;</a></h4>

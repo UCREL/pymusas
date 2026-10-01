@@ -17,9 +17,9 @@ spaCy registered functions for reading in a
 ```python
 @spacy.util.registry.misc('pymusas.LexiconCollection.from_tsv')
 def lexicon_collection_from_tsv(
-    tsv_file_path: Union[PathLike, str],
+    tsv_file_path: PathLike | str,
     include_pos: bool = True
-) -> Dict[str, List[str]]
+) -> dict[str, list[str]]
 ```
 
 `pymusas.LexiconCollection.from_tsv` is a registered function under the
@@ -30,7 +30,7 @@ dictionary object that can be used to create a
 <h4 id="lexicon_collection_from_tsv.parameters">Parameters<a className="headerlink" href="#lexicon_collection_from_tsv.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+- __tsv\_file\_path__ : `PathLike | str` <br/>
     A file path or URL to a TSV file that contains at least two
     fields, with an optional third, with the following headings:
 
@@ -47,7 +47,7 @@ dictionary object that can be used to create a
 <h4 id="lexicon_collection_from_tsv.returns">Returns<a className="headerlink" href="#lexicon_collection_from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.spacy_api.lexicon_collection.mwe_lexicon_collection_from_tsv"></a>
 
@@ -56,8 +56,8 @@ dictionary object that can be used to create a
 ```python
 @spacy.util.registry.misc('pymusas.MWELexiconCollection.from_tsv')
 def mwe_lexicon_collection_from_tsv(
-    tsv_file_path: Union[PathLike, str]
-) -> Dict[str, List[str]]
+    tsv_file_path: PathLike | str
+) -> dict[str, list[str]]
 ```
 
 `pymusas.MWELexiconCollection.from_tsv` is a registered function under the
@@ -68,7 +68,7 @@ dictionary object that can be used to create a
 <h4 id="mwe_lexicon_collection_from_tsv.parameters">Parameters<a className="headerlink" href="#mwe_lexicon_collection_from_tsv.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+- __tsv\_file\_path__ : `PathLike | str` <br/>
     A file path or URL to a TSV file that contains at least these two
     fields:
 
@@ -80,5 +80,5 @@ dictionary object that can be used to create a
 <h4 id="mwe_lexicon_collection_from_tsv.returns">Returns<a className="headerlink" href="#mwe_lexicon_collection_from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 

@@ -15,9 +15,9 @@ class MWERule(Rule):
  | ...
  | def __init__(
  |     self,
- |     mwe_lexicon_lookup: Dict[str, List[str]],
- |     pos_mapper: Optional[Dict[str, List[str]]] = None,
- |     single_word_rule: Optional[SingleWordRule] = None
+ |     mwe_lexicon_lookup: dict[str, list[str]],
+ |     pos_mapper: dict[str, list[str]] | None = None,
+ |     single_word_rule: SingleWordRule | None = None
  | ) -> None
 ```
 
@@ -56,16 +56,16 @@ then the `Df` tag is replaced with `Z99`.
 <h4 id="mwerule.parameters">Parameters<a className="headerlink" href="#mwerule.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __mwe\_lexicon\_lookup__ : `Dict[str, List[str]]` <br/>
+- __mwe\_lexicon\_lookup__ : `dict[str, list[str]]` <br/>
     The data to create `mwe_lexicon_collection` instance attribute. A
     Dictionary where the keys are MWE templates, of any
     [`pymusas.lexicon_collection.LexiconType`](/pymusas/api/lexicon_collection/#lexicontype),
     and the values are a list of associated semantic tags.
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __pos\_mapper__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     If not `None`, maps from the `mwe_lexicon_lookup` POS tagset to the
-    desired POS tagset,whereby the mapping is a `List` of tags,
+    desired POS tagset,whereby the mapping is a `list` of tags,
     at the moment there is no preference order in this list of POS tags.
-    **Note** the longer the `List[str]` for
+    **Note** the longer the `list[str]` for
     each POS mapping the slower the tagger, a one to one mapping will have
     no speed impact on the tagger. A selection of POS mappers can be found in
     [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
@@ -107,31 +107,31 @@ class MWERule(Rule):
  | ...
  | def __call__(
  |     self,
- |     tokens: List[str],
- |     lemmas: List[str],
- |     pos_tags: List[str]
- | ) -> List[List[RankingMetaData]]
+ |     tokens: list[str],
+ |     lemmas: list[str],
+ |     pos_tags: list[str]
+ | ) -> list[list[RankingMetaData]]
 ```
 
 Given the tokens, lemmas, and POS tags for each word in a text,
-it returns for each token a `List` of rules matches defined by
+it returns for each token a `list` of rules matches defined by
 the [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) object based on
 the rule matches stated in the class docstring above.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tokens__ : `List[str]` <br/>
+- __tokens__ : `list[str]` <br/>
     The tokens that are within the text.
-- __lemmas__ : `List[str]` <br/>
+- __lemmas__ : `list[str]` <br/>
     The lemmas of the tokens.
-- __pos\_tags__ : `List[str]` <br/>
+- __pos\_tags__ : `list[str]` <br/>
     The Part Of Speech tags of the tokens.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[List[RankingMetaData]]` <br/>
+- `list[list[RankingMetaData]]` <br/>
 
 <a id="pymusas.taggers.rules.mwe.MWERule.to_bytes"></a>
 

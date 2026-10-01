@@ -15,10 +15,10 @@ class SingleWordRule(Rule):
  | ...
  | def __init__(
  |     self,
- |     lexicon_collection: Dict[str, List[str]],
- |     lemma_lexicon_collection: Dict[str, List[str]],
- |     pos_mapper: Optional[Dict[str, List[str]]] = None
- | )
+ |     lexicon_collection: dict[str, list[str]],
+ |     lemma_lexicon_collection: dict[str, list[str]],
+ |     pos_mapper: dict[str, list[str]] | None = None
+ | ) -> None
 ```
 
 A single word rule match, is a rule that matches on single word lexicon
@@ -37,22 +37,22 @@ the `lexicon_collection` and `lemma_lexicon_collection` attributes.
 <h4 id="singlewordrule.parameters">Parameters<a className="headerlink" href="#singlewordrule.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __lexicon\_collection__ : `Dict[str, List[str]]` <br/>
+- __lexicon\_collection__ : `dict[str, list[str]]` <br/>
     The data to create `lexicon_collection` instance attribute. A
     Dictionary where the keys are a combination of
     lemma/token and POS in the following format: `{lemma}|{POS}` and the
     values are a list of associated semantic tags.
-- __lemma\_lexicon\_collection__ : `Dict[str, List[str]]` <br/>
+- __lemma\_lexicon\_collection__ : `dict[str, list[str]]` <br/>
     The data to create `lemma_lexicon_collection` instance attribute. A
     Dictionary where the keys are either just a lemma/token
     in the following format: `{lemma}` and the
     values are a list of associated semantic tags.
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __pos\_mapper__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     If not `None`, maps from the given token's POS tagset to the desired
-    POS tagset, whereby the mapping is a `List` of tags, at the moment there
+    POS tagset, whereby the mapping is a `list` of tags, at the moment there
     is no preference order in this list of POS tags. The POS mapping is
     useful in situtation whereby the token's POS tagset is different to
-    those used in the lexicons. **Note** the longer the `List[str]` for
+    those used in the lexicons. **Note** the longer the `list[str]` for
     each POS mapping the slower the tagger, a one to one mapping will have
     no speed impact on the tagger. A selection of POS mappers can be found in
     [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
@@ -66,7 +66,7 @@ the `lexicon_collection` and `lemma_lexicon_collection` attributes.
 - __lemma\_lexicon\_collection__ : `pymusas.lexicon_collection.LexiconCollection` <br/>
     A [`pymusas.lexicon_collection.LexiconCollection`](/pymusas/api/lexicon_collection/#lexiconcollection) instance that
     has been initialised using the `lemma_lexicon_collection` parameter.
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __pos\_mapper__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     The given `pos_mapper`.
 
 <a id="pymusas.taggers.rules.single_word.SingleWordRule.__call__"></a>
@@ -78,31 +78,31 @@ class SingleWordRule(Rule):
  | ...
  | def __call__(
  |     self,
- |     tokens: List[str],
- |     lemmas: List[str],
- |     pos_tags: List[str]
- | ) -> List[List[RankingMetaData]]
+ |     tokens: list[str],
+ |     lemmas: list[str],
+ |     pos_tags: list[str]
+ | ) -> list[list[RankingMetaData]]
 ```
 
 Given the tokens, lemmas, and POS tags for each word in a text,
-it returns for each token a `List` of rules matches defined by
+it returns for each token a `list` of rules matches defined by
 the [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
 object based on the rule matches stated in the class docstring above.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tokens__ : `List[str]` <br/>
+- __tokens__ : `list[str]` <br/>
     The tokens that are within the text.
-- __lemmas__ : `List[str]` <br/>
+- __lemmas__ : `list[str]` <br/>
     The lemmas of the tokens.
-- __pos\_tags__ : `List[str]` <br/>
+- __pos\_tags__ : `list[str]` <br/>
     The Part Of Speech tags of the tokens.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `List[List[RankingMetaData]]` <br/>
+- `list[list[RankingMetaData]]` <br/>
 
 <a id="pymusas.taggers.rules.single_word.SingleWordRule.best_match"></a>
 
@@ -116,7 +116,7 @@ class SingleWordRule(Rule):
  |     token: str,
  |     lemma: str,
  |     pos_tag: str
- | ) -> Optional[RankingMetaData]
+ | ) -> RankingMetaData | None
 ```
 
 Returns the best single word rule match for the given token, lemma, and
@@ -137,7 +137,7 @@ POS tag, or `None` if there is no match. The matches are found using
 <h4 id="best_match.returns">Returns<a className="headerlink" href="#best_match.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Optional[RankingMetaData]` <br/>
+- `RankingMetaData | None` <br/>
 
 <h4 id="best_match.examples">Examples<a className="headerlink" href="#best_match.examples" title="Permanent link">&para;</a></h4>
 

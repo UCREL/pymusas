@@ -24,12 +24,12 @@ Each lexicon entry match is represented by a
 **Lower ranked lexicon entry matches should be given priority when making
 tagging decisions. A rank of 0 is better than a rank of 1.**
 
-A LexcionEntryRanker when called, `__call__`, returns a tuple of two `List`s
+A LexcionEntryRanker when called, `__call__`, returns a tuple of two `list`s
 whereby each entry in the list corresponds to a token:
 
-1. Contains the ranks of the lexicon entry matches as a `List[int]`.
-**Note** that the `List` can be empty if a token has no lexicon entry matches.
-2. An `Optional[RankingMetaData]` that is the global lowest ranked entry
+1. Contains the ranks of the lexicon entry matches as a `list[int]`.
+**Note** that the `list` can be empty if a token has no lexicon entry matches.
+2. An `RankingMetaData | None` that is the global lowest ranked entry
 match for that token. If the value is `None` then no global lowest ranked
 entry can be found for that token. If the `RankingMetaData` represents more
 than one token, like a Multi Word Expression (MWE) match, then those associated tokens
@@ -57,25 +57,25 @@ class LexiconEntryRanker(Serialise):
  | @abstractmethod
  | def __call__(
  |     self,
- |     token_ranking_data: List[List[RankingMetaData]]
- | ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]
+ |     token_ranking_data: list[list[RankingMetaData]]
+ | ) -> tuple[list[list[int]], list[RankingMetaData | None]]
 ```
 
-For each token it returns a `List` of rankings for each lexicon entry
+For each token it returns a `list` of rankings for each lexicon entry
 match and the optional [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
 object of the **global** lowest ranked match for each token.
 
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __token\_ranking\_data__ : `List[List[RankingMetaData]]` <br/>
-    For each token a `List` of [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
+- __token\_ranking\_data__ : `list[list[RankingMetaData]]` <br/>
+    For each token a `list` of [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
     representing the lexicon entry match.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Tuple[List[List[int]], List[Optional[RankingMetaData]]]` <br/>
+- `tuple[list[list[int]], list[RankingMetaData | None]]` <br/>
 
 <a id="pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker"></a>
 
@@ -154,7 +154,7 @@ ranked with another entry then it is random which lexicon entry match is chosen.
     The number of indexes that each wildcard count value should have when
     converting the wildcard count value to a string using
     `pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.int_2_str`.
-- __n\_gram\_ranking\_dictionary__ : `Dict[int, int]` <br/>
+- __n\_gram\_ranking\_dictionary__ : `dict[int, int]` <br/>
     Maps the n-gram length to it's rank value, as the n-gram length is
     inverse to it's rank, as the larger the n-gram length the lower it's
     rank.
@@ -210,11 +210,11 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
  | ...
  | @staticmethod
  | def get_construction_arguments(
- |     rules: List['Rule']
- | ) -> Tuple[int, int]
+ |     rules: list['Rule']
+ | ) -> tuple[int, int]
 ```
 
-Given a `List` of rules it will return the `maximum_n_gram_length` and
+Given a `list` of rules it will return the `maximum_n_gram_length` and
 `maximum_number_wildcards` from the lexicon collections that those
 [`pymusas.taggers.rules.rule.Rule`](/pymusas/api/taggers/rules/rule/#rule)(s) are based on. The output from
 this function can then be used as the arguments to the constructor of
@@ -223,14 +223,14 @@ this function can then be used as the arguments to the constructor of
 <h4 id="get_construction_arguments.parameters">Parameters<a className="headerlink" href="#get_construction_arguments.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __rules__ : `List[Rule]` <br/>
-    A `List` of rules. This `List` is typically required when creating
+- __rules__ : `list[Rule]` <br/>
+    A `list` of rules. This `list` is typically required when creating
     a [`pymusas.taggers.rule_based.RuleBasedTagger`](/pymusas/api/taggers/rule_based/#rulebasedtagger) tagger.
 
 <h4 id="get_construction_arguments.returns">Returns<a className="headerlink" href="#get_construction_arguments.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Tuple[int, int]` <br/>
+- `tuple[int, int]` <br/>
 
 <h4 id="get_construction_arguments.examples">Examples<a className="headerlink" href="#get_construction_arguments.examples" title="Permanent link">&para;</a></h4>
 
@@ -290,10 +290,10 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
  | ...
  | @staticmethod
  | def get_global_lowest_ranks(
- |     token_ranking_data: List[List[RankingMetaData]],
- |     token_rankings: List[List[int]],
- |     ranking_data_to_exclude: Optional[Set[RankingMetaData]] = None
- | ) -> List[Optional[RankingMetaData]]
+ |     token_ranking_data: list[list[RankingMetaData]],
+ |     token_rankings: list[list[int]],
+ |     ranking_data_to_exclude: set[RankingMetaData] | None = None
+ | ) -> list[RankingMetaData | None]
 ```
 
 Returns the global lowest ranked entry match for each token. If the value
@@ -311,15 +311,15 @@ O(N + P) + O(M log M) + O(M)
 <h4 id="get_global_lowest_ranks.parameters">Parameters<a className="headerlink" href="#get_global_lowest_ranks.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __token\_ranking\_data__ : `List[List[RankingMetaData]]` <br/>
-    For each token a `List` of
+- __token\_ranking\_data__ : `list[list[RankingMetaData]]` <br/>
+    For each token a `list` of
     [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) representing
     the lexicon entry match.
-- __token\_rankings__ : `List[List[int]]` <br/>
+- __token\_rankings__ : `list[list[int]]` <br/>
     For each token contains the ranks of the lexicon entry matches.
-    **Note** that the `List` can be empty if a token has no lexicon
+    **Note** that the `list` can be empty if a token has no lexicon
     entry matches.
-- __ranking\_data\_to\_exclude__ : `Set[RankingMetaData]`, optional (default = `None`) <br/>
+- __ranking\_data\_to\_exclude__ : `set[RankingMetaData]`, optional (default = `None`) <br/>
     Any [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata) to
     exclude from the ranking selection, this can be useful when wanting
     to get the next best global rank for each token.
@@ -329,7 +329,7 @@ O(N + P) + O(M log M) + O(M)
 
 - `AssertionError` <br/>
     If the length of `token_ranking_data` is not equal to the length of
-    `token_rankings`, for both the outer and inner `List`s.
+    `token_rankings`, for both the outer and inner `list`s.
 
 <h4 id="get_global_lowest_ranks.examples">Examples<a className="headerlink" href="#get_global_lowest_ranks.examples" title="Permanent link">&para;</a></h4>
 
@@ -387,11 +387,11 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
  | ...
  | def __call__(
  |     self,
- |     token_ranking_data: List[List[RankingMetaData]]
- | ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]
+ |     token_ranking_data: list[list[RankingMetaData]]
+ | ) -> tuple[list[list[int]], list[RankingMetaData | None]]
 ```
 
-For each token it returns a `List` of rankings for each lexicon entry
+For each token it returns a `list` of rankings for each lexicon entry
 match and the optional [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
 object of the **global** lowest ranked match for each token.
 
@@ -407,14 +407,14 @@ O(3(N + P)) + O(M log M) + O(M)
 <h4 id="__call__.parameters">Parameters<a className="headerlink" href="#__call__.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __token\_ranking\_data__ : `List[List[RankingMetaData]]` <br/>
-    For each token a `List` of [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
+- __token\_ranking\_data__ : `list[list[RankingMetaData]]` <br/>
+    For each token a `list` of [`pymusas.rankers.ranking_meta_data.RankingMetaData`](/pymusas/api/rankers/ranking_meta_data/#rankingmetadata)
     representing the lexicon entry match.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Tuple[List[List[int]], List[Optional[RankingMetaData]]]` <br/>
+- `tuple[list[list[int]], list[RankingMetaData | None]]` <br/>
 
 <h4 id="__call__.examples">Examples<a className="headerlink" href="#__call__.examples" title="Permanent link">&para;</a></h4>
 
