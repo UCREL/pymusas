@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 
@@ -6,7 +5,7 @@ from pymusas.rankers.ranking_meta_data import RankingMetaData
 class SingleWordRanker:
     '''
     A stateless ranker that ranks the single word lexicon entry matches of
-    **one** token, represented by a `List` of
+    **one** token, represented by a `list` of
     :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` objects, e.g. the
     matches returned by :class:`pymusas.taggers.rules.single_word.SingleWordRule`
     for one token.
@@ -40,7 +39,7 @@ class SingleWordRanker:
     '''
 
     @staticmethod
-    def sort_key(match: RankingMetaData) -> Tuple[bool, int]:
+    def sort_key(match: RankingMetaData) -> tuple[bool, int]:
         '''
         Returns the key used to rank the given single word `match`, a lower key
         is a better ranked match. It can be used as the `key` argument of
@@ -53,12 +52,12 @@ class SingleWordRanker:
 
         # Returns
 
-        `Tuple[bool, int]`
+        `tuple[bool, int]`
         '''
         return (match.exclude_pos_information, match.lexical_match.value)
 
     @staticmethod
-    def best_match(matches: List[RankingMetaData]) -> Optional[RankingMetaData]:
+    def best_match(matches: list[RankingMetaData]) -> RankingMetaData | None:
         '''
         Returns the lowest ranked, best, single word match from the given
         `matches` of one token, or `None` if `matches` is empty. When matches
@@ -66,12 +65,12 @@ class SingleWordRanker:
 
         # Parameters
 
-        matches : `List[RankingMetaData]`
+        matches : `list[RankingMetaData]`
             The single word lexicon entry matches of one token.
 
         # Returns
 
-        `Optional[RankingMetaData]`
+        `RankingMetaData | None`
         '''
         if not matches:
             return None

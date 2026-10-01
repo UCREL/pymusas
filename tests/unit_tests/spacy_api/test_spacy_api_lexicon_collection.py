@@ -1,6 +1,6 @@
+from collections.abc import Callable
 from os import PathLike
 from pathlib import Path
-from typing import Callable, Dict, List, Union
 
 import spacy
 
@@ -15,8 +15,8 @@ MWE_LEXICON_FILE_PATH = Path(DATA_DIR, 'MWELexiconCollection', 'mwe_lexicon.tsv'
 
 
 def test_lexicon_collection_from_tsv() -> None:
-    lexicon_collection_from_tsv: Callable[[Union[PathLike, str], bool],
-                                          Dict[str, List[str]]] \
+    lexicon_collection_from_tsv: Callable[[PathLike | str, bool],
+                                          dict[str, list[str]]] \
         = spacy.util.registry.misc.get('pymusas.LexiconCollection.from_tsv')
     collection = lexicon_collection_from_tsv(LEXICON_FILE_PATH, True)
     assert isinstance(collection, dict)
@@ -31,8 +31,8 @@ def test_lexicon_collection_from_tsv() -> None:
 
 
 def test_mwe_lexicon_collection_from_tsv() -> None:
-    mwe_lexicon_collection_from_tsv: Callable[[Union[PathLike, str]],
-                                              Dict[str, List[str]]] \
+    mwe_lexicon_collection_from_tsv: Callable[[PathLike | str],
+                                              dict[str, list[str]]] \
         = spacy.util.registry.misc.get('pymusas.MWELexiconCollection.from_tsv')
     collection = mwe_lexicon_collection_from_tsv(MWE_LEXICON_FILE_PATH)
     assert isinstance(collection, dict)

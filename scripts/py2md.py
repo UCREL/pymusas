@@ -28,7 +28,7 @@ from pathlib import Path
 import re
 import sys
 import textwrap
-from typing import Dict, List, Optional, TextIO, Tuple, Union
+from typing import TextIO
 
 from databind.core import DeserializeAs
 import docspec
@@ -43,9 +43,9 @@ import typing_extensions as te
 
 
 class EnhancedParser(Parser):
-    def prepare_docstring(self: Union['EnhancedParser', Parser],
-                          s: str, node_for_location: Union[Node, Leaf]
-                          ) -> Optional[docspec.Docstring]:
+    def prepare_docstring(self: 'EnhancedParser | Parser',
+                          s: str, node_for_location: Node | Leaf
+                          ) -> docspec.Docstring | None:
         def dedent_docstring(s: str) -> str:
             lines = s.split('\n')
             lines[0] = lines[0].strip()
@@ -128,12 +128,12 @@ OPTIONAL_PARAM_NO_DEFAULT_RE = re.compile(r"^`([^`]+)`,?\s+optional\.?$")
 @dataclasses.dataclass
 class Param:
     ident: str
-    ty: Optional[str] = None
+    ty: str | None = None
     required: bool = False
-    default: Optional[str] = None
+    default: str | None = None
 
     @classmethod
-    def from_line(cls, line: str) -> Optional["Param"]:
+    def from_line(cls, line: str) -> "Param | None":
         if ":" not in line:
             return None
 
@@ -185,9 +185,9 @@ Attrib = Param
 
 @dataclasses.dataclass
 class RetVal:
-    description: Optional[str] = None
-    ident: Optional[str] = None
-    ty: Optional[str] = None
+    description: str | None = None
+    ident: str | None = None
+    ty: str | None = None
 
     @classmethod
     def from_line(cls, line: str) -> "RetVal":
@@ -217,7 +217,7 @@ class RetVal:
 @dataclasses.dataclass
 class ProcessorState:
     parameters: "OrderedDict[str, Param]"
-    current_section: Optional[Section] = None
+    current_section: Section | None = None
     codeblock_opened: bool = False
     consecutive_blank_line_count: int = 0
 
@@ -232,13 +232,13 @@ class AllenNlpDocstringProcessor(Processor):
     UNDERSCORE_HEADER_RE = re.compile(r"(.*)\n-{3,}\n")
     MULTI_LINE_LINK_RE = re.compile(r"(\[[^\]]+\])\n\s*(\([^\)]+\))")
 
-    def process(self, modules: List[docspec.Module], resolver: Optional[Resolver]) -> None:
+    def process(self, modules: list[docspec.Module], resolver: Resolver | None) -> None:
         docspec.visit(modules, self._process) # type: ignore  # noqa
 
     def _process(self, node: docspec.ApiObject) -> None:
         if not getattr(node, "docstring", None):
             return
-        lines: List[str] = []
+        lines: list[str] = []
         state: ProcessorState = ProcessorState(parameters=OrderedDict())
 
         _docstring = ''
@@ -326,14 +326,14 @@ class AllenNlpRenderer(MarkdownRenderer):
     def _is_method(self, obj: docspec.ApiObject) -> bool:
         return is_method(obj) # type: ignore  # noqa
 
-    def _get_parent(self, obj: docspec.ApiObject) -> Optional[docspec.ApiObject]:
+    def _get_parent(self, obj: docspec.ApiObject) -> docspec.ApiObject | None:
         '''
         This never gets called. As `signature_class_prefix` is False.
         '''
         return self._resolver.reverse_map.get_parent(obj) # type: ignore  # noqa
 
-    def format_arglist_list(self, args: List[docspec.Argument],
-                            render_type_hints: bool = True) -> List[str]:
+    def format_arglist_list(self, args: list[docspec.Argument],
+                            render_type_hints: bool = True) -> list[str]:
         """
         Formats a Python argument list.
         """
@@ -362,7 +362,7 @@ class AllenNlpRenderer(MarkdownRenderer):
         return result
 
     def _format_function_signature(self, func: docspec.Function,
-                                   override_name: Optional[str] = None,
+                                   override_name: str | None = None,
                                    add_method_bar: bool = True,
                                    include_parent_class: bool = True,
                                    ) -> str:
@@ -529,7 +529,7 @@ class CustomDocusaurusRenderer(Renderer):
     #: module reference.
     relative_output_path: str = 'reference'
 
-    def render(self, modules: List[docspec.Module]) -> None:
+    def render(self, modules: list[docspec.Module]) -> None:
         output_path = Path(self.docs_base_path) / self.relative_output_path
         for module in modules:
             filepath = output_path
@@ -562,16 +562,16 @@ class CustomCrossrefProcess(CrossrefProcessor):
     [AllenNLP version](https://github.com/allenai/allennlp/blob/main/scripts/py2md.py#L174)
     '''
 
-    def process(self, modules: List[docspec.Module],
-                resolver: Optional[Resolver]) -> None:
+    def process(self, modules: list[docspec.Module],
+                resolver: Resolver | None) -> None:
         if len(modules) > 0:
-            unresolved: Dict[str, List[str]] = {}
+            unresolved: dict[str, list[str]] = {}
             resolver = None
             docspec.visit(modules, lambda x: self._preprocess_refs(x, resolver, ApiSuite(modules), unresolved)) # type: ignore  # noqa
 
     def _preprocess_refs(self, node: docspec.ApiObject, resolver: Resolver,
                          reverse: ApiSuite,
-                         unresolved: Dict[str, List[str]]) -> None:
+                         unresolved: dict[str, list[str]]) -> None:
         if not node.docstring:
             return None
         doc_string = str(node.docstring.content)
@@ -600,7 +600,7 @@ class CustomFilterProcessor(Processor):
     pydoc_markdown/contrib/processors/filter.py)
     '''
 
-    expression: Optional[str] = None
+    expression: str | None = None
 
     #: Keep only API objects that have docstrings. Default: `true`
     documented_only: bool = True
@@ -623,7 +623,7 @@ class CustomFilterProcessor(Processor):
                        'logger', '__version__')
     INCLUDED_MEMBERS = ('__init__')
 
-    def process(self, modules: List[docspec.Module], resolver: Optional[Resolver]) -> None:
+    def process(self, modules: list[docspec.Module], resolver: Resolver | None) -> None:
         def m(obj: docspec.ApiObject) -> bool:
             return self._match(obj)
         docspec.filter_visit(modules, m, order='post') # type: ignore  # noqa
@@ -659,7 +659,7 @@ class CustomFilterProcessor(Processor):
         return _check()
 
 
-def py2md(module: str, out: Optional[str] = None) -> bool:
+def py2md(module: str, out: str | None = None) -> bool:
     """
     Returns `True` if module successfully processed, otherwise `False`.
     """
@@ -698,7 +698,7 @@ def py2md(module: str, out: Optional[str] = None) -> bool:
     return True
 
 
-def _py2md_wrapper(x: Tuple[str, str]) -> bool:
+def _py2md_wrapper(x: tuple[str, str]) -> bool:
     """
     Used to wrap py2md since we can't pickle a lambda (needed for multiprocessing).
     """

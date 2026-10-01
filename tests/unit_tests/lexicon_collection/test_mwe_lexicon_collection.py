@@ -1,3 +1,4 @@
+from collections import defaultdict
 from collections.abc import MutableMapping
 from copy import deepcopy
 import importlib
@@ -5,7 +6,7 @@ from os import PathLike
 from pathlib import Path
 import re
 import tempfile
-from typing import Any, DefaultDict, Dict, List, Optional, Union
+from typing import Any
 
 import pytest
 from pytest import MonkeyPatch
@@ -75,9 +76,8 @@ DOMAIN_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, "domain_lexicon.tsv")
 CUSTOM_LEXICON_FILE_PATH = Path(LEXICON_DATA_DIR, "custom_tags_lexicon.tsv")
 
 
-def compare_nested_dictionaries(dict_1: Dict[Any, Any],
-                                dict_2: Union[Dict[Any, Any],
-                                              DefaultDict[Any, Any]]) -> bool:
+def compare_nested_dictionaries(dict_1: dict[Any, Any],
+                                dict_2: dict[Any, Any] | defaultdict[Any, Any]) -> bool:
     
     dictionary_length_error = ('Lengths of the dictionaries are not equal: '
                                f'{len(dict_1)}, {len(dict_2)}.\n Dictionaries:'
@@ -376,14 +376,14 @@ def test_mwe_lexicon_collection_set_get_del_item_pos_mapped() -> None:
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_lexicon_collection_iter(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_iter(pos_mapper: dict[str, list[str]] | None
                                      ) -> None:
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
     assert list(MWE_TEMPLATE_ITEMS) == list(mwe_lexicon_collection)
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_lexicon_collection_keys(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_keys(pos_mapper: dict[str, list[str]] | None
                                      ) -> None:
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
     assert (list(MWE_TEMPLATE_ITEMS)
@@ -391,7 +391,7 @@ def test_mwe_lexicon_collection_keys(pos_mapper: Optional[Dict[str, List[str]]]
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_lexicon_collection_values(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_values(pos_mapper: dict[str, list[str]] | None
                                        ) -> None:
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
     assert (list(MWE_TEMPLATE_ITEMS.values())
@@ -399,7 +399,7 @@ def test_mwe_lexicon_collection_values(pos_mapper: Optional[Dict[str, List[str]]
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_lexicon_collection_items(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_items(pos_mapper: dict[str, list[str]] | None
                                       ) -> None:
     mwe_lexicon_collection = MWELexiconCollection(MWE_TEMPLATES, pos_mapper)
     assert (list(MWE_TEMPLATE_ITEMS.items())
@@ -407,7 +407,7 @@ def test_mwe_lexicon_collection_items(pos_mapper: Optional[Dict[str, List[str]]]
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_lexicon_collection_repr(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_repr(pos_mapper: dict[str, list[str]] | None
                                      ) -> None:
     str_pos_mapper = pos_mapper
     if str_pos_mapper is None:
@@ -432,7 +432,7 @@ def test_mwe_lexicon_collection_repr(pos_mapper: Optional[Dict[str, List[str]]]
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_lexicon_collection_str(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_str(pos_mapper: dict[str, list[str]] | None
                                     ) -> None:
 
     empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
@@ -472,7 +472,7 @@ def test_escape_mwe() -> None:
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_mwe_match(pos_mapper: Optional[Dict[str, List[str]]]) -> None:
+def test_mwe_match(pos_mapper: dict[str, list[str]] | None) -> None:
     empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
     assert [] == empty_collection.mwe_match('walking_noun boot_noun',
                                             LexiconType.MWE_NON_SPECIAL)
@@ -572,7 +572,7 @@ def test_mwe_match(pos_mapper: Optional[Dict[str, List[str]]]) -> None:
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_to_dictionary(pos_mapper: Optional[Dict[str, List[str]]]
+def test_to_dictionary(pos_mapper: dict[str, list[str]] | None
                        ) -> None:
 
     empty_collection = MWELexiconCollection(pos_mapper=pos_mapper)
@@ -583,7 +583,7 @@ def test_to_dictionary(pos_mapper: Optional[Dict[str, List[str]]]
 
 
 @pytest.mark.parametrize("pos_mapper", [None, POS_MAPPER])
-def test_to_from_bytes(pos_mapper: Optional[Dict[str, List[str]]]
+def test_to_from_bytes(pos_mapper: dict[str, list[str]] | None
                        ) -> None:
     expected_pos_mapper = pos_mapper if pos_mapper is not None else {}
     
@@ -663,7 +663,7 @@ def test_mwe_lexicon_collection_tsv_merge() -> None:
 
 
 @pytest.mark.parametrize("pos_mapper", [None, {'NOUN': ['noun']}])
-def test_mwe_lexicon_collection_default_tag_templates(pos_mapper: Optional[Dict[str, List[str]]]
+def test_mwe_lexicon_collection_default_tag_templates(pos_mapper: dict[str, list[str]] | None
                                                       ) -> None:
     collection = MWELexiconCollection(pos_mapper=pos_mapper)
     collection['*_NOUN type*_NOUN'] = ['Df']

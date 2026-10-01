@@ -1,5 +1,6 @@
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Callable, Iterable, List, Optional, Union, cast
+from typing import cast
 
 import spacy
 from spacy.language import Language
@@ -27,7 +28,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
     token is then Ranked using a
     :class:`pymusas.rankers.lexicon_entry.LexiconEntryRanker` ranker. The best
     candidate and it's associated tag(s) for each token are then assigned to the
-    `Token._.pymusas_tags` attribute in addition a `List` of token indexes
+    `Token._.pymusas_tags` attribute in addition a `list` of token indexes
     indicating if the token is part of a Multi Word Expression (MWE) is assigned
     to the `Token._.pymusas_mwe_indexes`.
 
@@ -53,17 +54,17 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         </tr>
         <tr>
             <td> Token._.pymusas_tags </td>
-            <td> `List[str]` </td>
+            <td> `list[str]` </td>
             <td> Prediced tags, the first tag in the List of tags is the
             most likely tag.</td>
         </tr>
         <tr>
             <td> Token._.pymusas_mwe_indexes </td>
-            <td> `List[Tuple[int, int]]` </td>
-            <td> Each `Tuple` indicates the start and end token index of the
-            associated Multi Word Expression (MWE). If the `List` contains
-            more than one `Tuple` then the MWE is discontinuous. For single word
-            expressions the `List` will only contain 1 `Tuple` which will be
+            <td> `list[tuple[int, int]]` </td>
+            <td> Each `tuple` indicates the start and end token index of the
+            associated Multi Word Expression (MWE). If the `list` contains
+            more than one `tuple` then the MWE is discontinuous. For single word
+            expressions the `list` will only contain 1 `tuple` which will be
             (token_start_index, token_start_index + 1).</td>
         </tr>
     </table>
@@ -114,15 +115,15 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
 
     name : `str`
         The component name.
-    rules : `List[pymusas.taggers.rules.rule.Rule]`, optional (default = `None`)
+    rules : `list[pymusas.taggers.rules.rule.Rule]`, optional (default = `None`)
         The `rules` is set through the :func:`initialize` method. Before it is
         set by the :func:`initialize` method the value of this attribute is `None`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`, optional (default = `None`)
         The `ranker` is set through the :func:`initialize` method. Before it is
         set by the :func:`initialize` method the value of this attribute is `None`.
-    default_punctuation_tags : `Set[str]`
+    default_punctuation_tags : `set[str]`
         The `default_punctuation_tags` is set through the :func:`initialize` method.
-    default_number_tags : `Set[str]`
+    default_number_tags : `set[str]`
         The `default_number_tags` is set through the :func:`initialize` method.
     pymusas_tags_token_attr : `str`, optional (default = `pymusas_tags`)
         The given `pymusas_tags_token_attr`
@@ -200,8 +201,8 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         self._pos_attribute = pos_attribute
         self._lemma_attribute = lemma_attribute
         
-        self.rules: Optional[List[Rule]] = None
-        self.ranker: Optional[LexiconEntryRanker] = None
+        self.rules: list[Rule] | None = None
+        self.ranker: LexiconEntryRanker | None = None
         
         self.default_punctuation_tags = set(['punc'])
         self.default_number_tags = set(['num'])
@@ -228,13 +229,13 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         self._validated = True
     
     def initialize(self,
-                   get_examples: Optional[Callable[[], Iterable[Example]]] = None,
+                   get_examples: Callable[[], Iterable[Example]] | None = None,
                    *,
-                   nlp: Optional[Language] = None,
-                   rules: Optional[List[Rule]] = None,
-                   ranker: Optional[LexiconEntryRanker] = None,
-                   default_punctuation_tags: Optional[List[str]] = None,
-                   default_number_tags: Optional[List[str]] = None,
+                   nlp: Language | None = None,
+                   rules: list[Rule] | None = None,
+                   ranker: LexiconEntryRanker | None = None,
+                   default_punctuation_tags: list[str] | None = None,
+                   default_number_tags: list[str] | None = None,
                    ) -> None:
         '''
         Initialize the tagger and load any of the resources given. The method is
@@ -247,19 +248,19 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
 
         # Parameters
         
-        rules : `List[pymusas.taggers.rules.rule.Rule]`
+        rules : `list[pymusas.taggers.rules.rule.Rule]`
             A list of rules to apply to the sequence of tokens in the
             :func:`__call__`. The output from each rule is concatenated and given
             to the `ranker`.
         ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
             A ranker to rank the output from all of the `rules`.
-        default_punctuation_tags : `List[str]`, optional (default = `None`)
+        default_punctuation_tags : `list[str]`, optional (default = `None`)
             The POS tags that represent punctuation. If `None` then we will use
-            `['punc']`. The list will be converted into a `Set` before assigning
+            `['punc']`. The list will be converted into a `set` before assigning
             to the `default_punctuation_tags` attribute.
-        default_number_tags : `List[str]`, optional (default = `None`)
+        default_number_tags : `list[str]`, optional (default = `None`)
             The POS tags that represent numbers. If `None` then we will use
-            `['num']`. The list will be converted into a `Set` before assigning
+            `['num']`. The list will be converted into a `set` before assigning
             to the `default_number_tags` attribute.
         '''
         if rules is not None:
@@ -296,20 +297,20 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
             self._validate()
         
         ranker = cast(LexiconEntryRanker, self.ranker)
-        rules = cast(List[Rule], self.rules)
+        rules = cast(list[Rule], self.rules)
         
         # Try, catch error handling reference:
         # https://github.com/explosion/spaCy/blob/6af6c2e86cc7b08573b261563786bd1ab87d45e9/spacy/pipeline/lemmatizer.py#L131
         error_handler = self.get_error_handler()
         try:
-            tokens: List[str] = []
-            lemmas: List[str] = []
-            pos_tags: List[str] = []
+            tokens: list[str] = []
+            lemmas: list[str] = []
+            pos_tags: list[str] = []
             for token in doc:
                 tokens.append(token.text)
                 lemmas.append(getattr(token, self.lemma_attribute))
                 pos_tags.append(getattr(token, self.pos_attribute))
-            token_ranking_meta_data: List[List[RankingMetaData]] \
+            token_ranking_meta_data: list[list[RankingMetaData]] \
                 = [[] for _ in range(len(tokens))]
             for rule in rules:
                 rule_ranking_meta_data = rule(tokens, lemmas, pos_tags)
@@ -376,7 +377,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         if not self._validated:
             self._validate()
         ranker = cast(LexiconEntryRanker, self.ranker)
-        rules = cast(List[Rule], self.rules)
+        rules = cast(list[Rule], self.rules)
 
         default_punctuation_tags = list(self.default_punctuation_tags)
         default_number_tags = list(self.default_number_tags)
@@ -429,7 +430,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         '''
         serialise_data = srsly.msgpack_loads(bytes_data)
 
-        self.rules = cast(List[Rule],
+        self.rules = cast(list[Rule],
                           Rule.serialise_object_list_from_bytes(serialise_data['rules']))
 
         self.ranker \
@@ -445,7 +446,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         self._validate()
         return self
     
-    def to_disk(self, path: Union[str, Path], *,
+    def to_disk(self, path: str | Path, *,
                 exclude: Iterable[str] = SimpleFrozenList()
                 ) -> None:
         '''
@@ -453,7 +454,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
 
         # Parameters
 
-        path : `Union[str, Path]`
+        path : `str | Path`
             Path to a direcotry. Path may be either string or `Path`-like
             object. If the directory does not exist it attempts to create a
             directory at the given `path`.
@@ -486,7 +487,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         if not self._validated:
             self._validate()
         ranker = cast(LexiconEntryRanker, self.ranker)
-        rules = cast(List[Rule], self.rules)
+        rules = cast(list[Rule], self.rules)
 
         component_folder = ensure_path(path)
         component_folder.mkdir(exist_ok=True)
@@ -508,7 +509,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         default_number_tags = list(self.default_number_tags)
         srsly.write_msgpack(default_number_tags_path, default_number_tags)
 
-    def from_disk(self, path: Union[str, Path], *,
+    def from_disk(self, path: str | Path, *,
                   exclude: Iterable[str] = SimpleFrozenList()
                   ) -> "RuleBasedTagger":
         '''
@@ -516,7 +517,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
 
         # Parameters
 
-        path : `Union[str, Path]`
+        path : `str | Path`
             Path to an existing direcotry. Path may be either string or
             `Path`-like object.
         
@@ -562,7 +563,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         rules_path = Path(component_folder, 'rules.bin')
         serialised_rules = srsly.read_msgpack(rules_path)
         rules = Rule.serialise_object_list_from_bytes(serialised_rules)
-        self.rules = cast(List[Rule], rules)
+        self.rules = cast(list[Rule], rules)
 
         default_punctuation_tags_path = Path(component_folder,
                                              'default_punctuation_tags.bin')

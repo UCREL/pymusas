@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import Any
 
 
 try:
@@ -116,16 +116,16 @@ class NeuralTagger():
         self.wsd_model.eval()
 
     @torch.inference_mode(mode=True)
-    def __call__(self, tokens: List[str]
-                 ) -> List[Tuple[List[str], List[Tuple[int, int]]]]:
+    def __call__(self, tokens: list[str]
+                 ) -> list[tuple[list[str], list[tuple[int, int]]]]:
         '''
-        Given a `List` of tokens it returns for each token:
+        Given a `list` of tokens it returns for each token:
         
-        1. A `List` of tags. The first tag in the `List` of tags is the most likely tag.
-        2. A `List` of `Tuples` whereby each `Tuple` indicates the start and end
-        token index of the associated Multi Word Expression (MWE). If the `List` contains
-        more than one `Tuple` then the MWE is discontinuous. For single word
-        expressions the `List` will only contain 1 `Tuple` which will be
+        1. A `list` of tags. The first tag in the `list` of tags is the most likely tag.
+        2. A `list` of `Tuples` whereby each `tuple` indicates the start and end
+        token index of the associated Multi Word Expression (MWE). If the `list` contains
+        more than one `tuple` then the MWE is discontinuous. For single word
+        expressions the `list` will only contain 1 `tuple` which will be
         (token_start_index, token_start_index + 1).
 
         NOTE: we recommend that the number of tokens in the list should represent
@@ -142,12 +142,12 @@ class NeuralTagger():
         
         # Parameters
 
-        tokens : `List[str]`
+        tokens : `list[str]`
             A List of full text form of the tokens to be tagged.
  
         # Returns
 
-        `List[Tuple[List[str], List[Tuple[int, int]]]]`
+        `list[tuple[list[str], list[tuple[int, int]]]]`
 
         # Raises
 
@@ -158,7 +158,7 @@ class NeuralTagger():
 
         predicted_tags_candidates = self.wsd_model.predict(tokens, sub_word_tokenizer=self.tokenizer, top_n=self.top_n)
         
-        tags_indexes: List[Tuple[List[str], List[Tuple[int, int]]]] = []
+        tags_indexes: list[tuple[list[str], list[tuple[int, int]]]] = []
 
         for token_index, predicted_tag_candidates in enumerate(predicted_tags_candidates):
             start_end_index = [(token_index, token_index + 1)]

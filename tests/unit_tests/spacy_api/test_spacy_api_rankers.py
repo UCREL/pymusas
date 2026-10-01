@@ -1,4 +1,4 @@
-from typing import Callable, List
+from collections.abc import Callable
 
 import spacy
 
@@ -11,10 +11,10 @@ from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 def test_contextual_rule_based_ranker() -> None:
-    contextual_rule_based_ranker: Callable[[List[Rule]],
+    contextual_rule_based_ranker: Callable[[list[Rule]],
                                            ContextualRuleBasedRanker] \
         = spacy.util.registry.misc.get('pymusas.rankers.ContextualRuleBasedRanker.v1')
-    rules: List[Rule] = []
+    rules: list[Rule] = []
     ranker = contextual_rule_based_ranker(rules)
     assert isinstance(ranker, ContextualRuleBasedRanker)
     assert ranker._maximum_n_gram_length == 0

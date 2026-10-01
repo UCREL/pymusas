@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List
+from collections.abc import Callable
 
 import spacy
 
@@ -9,20 +9,20 @@ from pymusas.taggers.rules.single_word import SingleWordRule
 
 
 def test_single_word_rule() -> None:
-    single_word_rule: Callable[[Dict[str, List[str]], Dict[str, List[str]],
-                                Dict[str, List[str]]], SingleWordRule] \
+    single_word_rule: Callable[[dict[str, list[str]], dict[str, list[str]],
+                                dict[str, list[str]]], SingleWordRule] \
         = spacy.util.registry.misc.get('pymusas.taggers.rules.SingleWordRule.v1')
     assert isinstance(single_word_rule({}, {}, {}), SingleWordRule)
 
 
 def test_mwe_rule() -> None:
-    mwe_rule: Callable[[Dict[str, List[str]], Dict[str, List[str]]], MWERule] \
+    mwe_rule: Callable[[dict[str, list[str]], dict[str, list[str]]], MWERule] \
         = spacy.util.registry.misc.get('pymusas.taggers.rules.MWERule.v1')
     assert isinstance(mwe_rule({}, {}), MWERule)
 
 
 def test_mwe_rule_v2() -> None:
-    mwe_rule: Callable[[Dict[str, List[str]], Dict[str, List[str]],
+    mwe_rule: Callable[[dict[str, list[str]], dict[str, list[str]],
                         SingleWordRule], MWERule] \
         = spacy.util.registry.misc.get('pymusas.taggers.rules.MWERule.v2')
     single_word_rule = SingleWordRule({'acting|ADJ': ['A1']}, {})
@@ -32,10 +32,10 @@ def test_mwe_rule_v2() -> None:
 
 
 def test_rule_list() -> None:
-    rule_list_call: Callable[[Rule, Rule], List[Rule]] \
+    rule_list_call: Callable[[Rule, Rule], list[Rule]] \
         = spacy.util.registry.misc.get('pymusas.taggers.rules.rule_list')
     single_rule = SingleWordRule({}, {})
     mwe_rule = MWERule({})
     list_of_rules = rule_list_call(*(single_rule, mwe_rule))
-    assert isinstance(list_of_rules, List)
+    assert isinstance(list_of_rules, list)
     assert [single_rule, mwe_rule] == list_of_rules

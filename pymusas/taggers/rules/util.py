@@ -1,8 +1,9 @@
-from typing import Any, Iterator, Sequence, Tuple
+from collections.abc import Iterator, Sequence
+from typing import Any
 
 
 def n_gram_indexes(sequence: Sequence[Any], min_n: int, max_n: int
-                   ) -> Iterator[Tuple[int, int]]:
+                   ) -> Iterator[tuple[int, int]]:
     '''
     Returns n-grams as indexes of the `sequence`,
     in the range from `max_n` to `min_n`, in
@@ -23,7 +24,7 @@ def n_gram_indexes(sequence: Sequence[Any], min_n: int, max_n: int
 
     # Returns
 
-    `Iterator[Tuple[int, int]]`
+    `Iterator[tuple[int, int]]`
 
     # Raises
 

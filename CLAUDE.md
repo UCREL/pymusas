@@ -5,7 +5,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Python Guidelines
 
 - Use `match`/`case` syntax instead of `if`/`elif`/`else` for pattern matching, but do use `if/elif/else` for non-pattern matching. Reserve `match`/`case` for genuinely multi-way structural dispatch, e.g. matching several dataclass/enum variants, or destructuring nested sequences/mappings where the binding syntax saves real work. A two-way branch on a single `isinstance` check or a membership test (`"key" in d`) reads more clearly as a plain `if`/`else`, even though it's technically "type-based" — don't convert those just because `match`/`case` is available.
-- Use modern type hints through the `typing` module `Optional`, `Union`, `Dict`, `List`.
+- Use built-in generics (`list[str]`, `dict[str, int]`, `tuple[int, int]`, `set[str]`) and `|` unions
+  (`str | None`, `int | str`) instead of the deprecated `typing` aliases (`List`, `Dict`, `Optional`, `Union`, ...).
+  Import abstract types such as `Callable`, `Iterable` and `Iterator` from `collections.abc`, and use `typing` only
+  for names without a built-in form (`Any`, `cast`, `Protocol`, ...). Ruff's pyupgrade rules (`UP006`, `UP007`,
+  `UP035`, `UP045`) enforce this. Write docstring types the same way, e.g. `` `list[str] | None` ``.
 - Write code compatible with strict static analysis. This project uses
   ruff (linting and import sorting) and ty (type checking), both configured in
   `pyproject.toml`. Ruff's `ANN` rules require every function to be fully annotated.
@@ -94,7 +98,7 @@ components that wrap them.
 
 ### Core layer (`pymusas/`, no spaCy dependency in the tagging logic)
 
-The taggers take parallel `List[str]` inputs (tokens, lemmas, POS tags). For each
+The taggers take parallel `list[str]` inputs (tokens, lemmas, POS tags). For each
 token they return `(tags, mwe_indexes)`, where `mwe_indexes` is a list of
 `(start, end)` token spans. More than one span means a discontinuous MWE.
 

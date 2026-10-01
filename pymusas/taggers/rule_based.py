@@ -1,4 +1,3 @@
-from typing import List, Optional, Set, Tuple
 
 from pymusas.rankers.lexicon_entry import LexiconEntryRanker, RankingMetaData
 from pymusas.taggers.rules.rule import Rule
@@ -15,7 +14,7 @@ class RuleBasedTagger():
     token is then Ranked using a
     :class:`pymusas.rankers.lexicon_entry.LexiconEntryRanker` ranker. The best
     candidate and it's associated tag(s) for each token are then returned along
-    with a `List` of token indexes indicating if the token is part of a Multi
+    with a `list` of token indexes indicating if the token is part of a Multi
     Word Expression (MWE).
 
     If we cannot tag a token then the following process will happen:
@@ -27,28 +26,28 @@ class RuleBasedTagger():
 
     # Parameters
 
-    rules : `List[pymusas.taggers.rules.rule.Rule]`
+    rules : `list[pymusas.taggers.rules.rule.Rule]`
         A list of rules to apply to the sequence of tokens in the
         :func:`__call__`. The output from each rule is concatenated and given
         to the `ranker`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
         A ranker to rank the output from all of the `rules`.
-    default_punctuation_tags : `Set[str]`, optional (default = `None`)
+    default_punctuation_tags : `set[str]`, optional (default = `None`)
         The POS tags that represent punctuation. If `None` then we will use
-        the `Set`: `set(['punc'])`.
-    default_number_tags : `Set[str]`, optional (default = `None`)
+        the `set`: `set(['punc'])`.
+    default_number_tags : `set[str]`, optional (default = `None`)
         The POS tags that represent numbers. If `None` then we will use
-        the `Set`: `set(['num'])`.
+        the `set`: `set(['num'])`.
     
     # Instance Attributes
 
-    rules : `List[pymusas.taggers.rules.rule.Rule]`
+    rules : `list[pymusas.taggers.rules.rule.Rule]`
         The given `rules`.
     ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
         The given `ranker`.
-    default_punctuation_tags : `Set[str]`
+    default_punctuation_tags : `set[str]`
         The given `default_punctuation_tags`
-    default_number_tags : `Set[str]`
+    default_number_tags : `set[str]`
         The given `default_number_tags`
 
     # Examples
@@ -69,9 +68,9 @@ class RuleBasedTagger():
     ```
     '''
 
-    def __init__(self, rules: List[Rule], ranker: LexiconEntryRanker,
-                 default_punctuation_tags: Optional[Set[str]] = None,
-                 default_number_tags: Optional[Set[str]] = None) -> None:
+    def __init__(self, rules: list[Rule], ranker: LexiconEntryRanker,
+                 default_punctuation_tags: set[str] | None = None,
+                 default_number_tags: set[str] | None = None) -> None:
 
         self.rules = rules
         self.ranker = ranker
@@ -84,19 +83,19 @@ class RuleBasedTagger():
         if default_number_tags is not None:
             self.default_number_tags = default_number_tags
 
-    def __call__(self, tokens: List[str], lemmas: List[str],
-                 pos_tags: List[str]) -> List[Tuple[List[str],
-                                                    List[Tuple[int, int]]
+    def __call__(self, tokens: list[str], lemmas: list[str],
+                 pos_tags: list[str]) -> list[tuple[list[str],
+                                                    list[tuple[int, int]]
                                                     ]]:
         '''
-        Given a `List` of tokens, their associated lemmas and
+        Given a `list` of tokens, their associated lemmas and
         Part Of Speech (POS) tags it returns for each token:
         
-        1. A `List` of tags. The first tag in the `List` of tags is the most likely tag.
-        2. A `List` of `Tuples` whereby each `Tuple` indicates the start and end
-        token index of the associated Multi Word Expression (MWE). If the `List` contains
-        more than one `Tuple` then the MWE is discontinuous. For single word
-        expressions the `List` will only contain 1 `Tuple` which will be
+        1. A `list` of tags. The first tag in the `list` of tags is the most likely tag.
+        2. A `list` of `Tuples` whereby each `tuple` indicates the start and end
+        token index of the associated Multi Word Expression (MWE). If the `list` contains
+        more than one `tuple` then the MWE is discontinuous. For single word
+        expressions the `list` will only contain 1 `tuple` which will be
         (token_start_index, token_start_index + 1).
     
         All the generated tags and MWEs are based on the rules and ranker given
@@ -104,20 +103,20 @@ class RuleBasedTagger():
 
         **NOTE** this tagger has been designed to be flexible with the amount of
         resources available, if you do not have POS or lemma information assign
-        them a `List` of empty strings.
+        them a `list` of empty strings.
         
         # Parameters
 
-        tokens : `List[str]`
+        tokens : `list[str]`
             A List of full text form of the tokens to be tagged.
-        lemmas : `List[str]`
+        lemmas : `list[str]`
             The List of lemma/base form of the tokens to be tagged.
-        pos_tags : `List[str]`
+        pos_tags : `list[str]`
             The List of POS tags of the tokens to be tagged.
         
         # Returns
 
-        `List[Tuple[List[str], List[Tuple[int, int]]]]`
+        `list[tuple[list[str], list[tuple[int, int]]]]`
 
         # Raises
 
@@ -135,7 +134,7 @@ class RuleBasedTagger():
         if (tokens_length != pos_tags_length) or (tokens_length != lemmas_length):
             raise ValueError(length_error_msg)
             
-        token_ranking_meta_data: List[List[RankingMetaData]] \
+        token_ranking_meta_data: list[list[RankingMetaData]] \
             = [[] for _ in range(len(tokens))]
         for rule in self.rules:
             rule_ranking_meta_data = rule(tokens, lemmas, pos_tags)
@@ -144,7 +143,7 @@ class RuleBasedTagger():
 
         token_ranks, token_best_rank = self.ranker(token_ranking_meta_data)
         
-        tags_indexes: List[Tuple[List[str], List[Tuple[int, int]]]] = []
+        tags_indexes: list[tuple[list[str], list[tuple[int, int]]]] = []
         for token_index, best_rank in enumerate(token_best_rank):
             if best_rank is None:
                 pos_tag = pos_tags[token_index]

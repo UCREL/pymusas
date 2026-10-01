@@ -1,6 +1,7 @@
+from collections.abc import Callable
 from pathlib import Path
 import pickle
-from typing import Callable, Dict, List, Optional, cast
+from typing import cast
 
 import pytest
 import spacy
@@ -14,7 +15,7 @@ from pymusas.spacy_api.utils import remove_custom_token_extension as remove_exte
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
-def non_standard_config() -> Dict[str, str]:
+def non_standard_config() -> dict[str, str]:
     return {
         'pymusas_tags_token_attr': 'usas_tags',
         'pymusas_mwe_indexes_attr': 'mwe_indexes',
@@ -35,7 +36,7 @@ def create_non_valid_tagger(remove_extension_if_exists: bool = True,
 
 
 @registry.misc("rules")
-def rules() -> List[SingleWordRule]:
+def rules() -> list[SingleWordRule]:
     return [SingleWordRule({'': ['']}, {'': ['']})]
     
 
@@ -80,8 +81,8 @@ def create_tagger(remove_extension_if_exists: bool = True,
 @pytest.mark.parametrize("nlp_callable", [create_non_valid_tagger,
                                           create_tagger])
 def test_rule_based_tagger__init__(nlp_callable: Callable[[bool, str, str], Language],
-                                   config: Dict[str, str],
-                                   name: Optional[str]
+                                   config: dict[str, str],
+                                   name: str | None
                                    ) -> None:
     nlp = nlp_callable(True,
                        config.get("pymusas_tags_token_attr", "pymusas_tags"),

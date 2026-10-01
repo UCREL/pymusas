@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Union
 
 import pytest
 
@@ -18,12 +17,12 @@ POS_MAPPED_NON_SPECIAL_DATA_FILE = Path(RULE_DATA_DIR, 'single_word_pos_mapped_n
 
 
 def generate_test_data(test_data_file: Path, lexicon_file: Path
-                       ) -> Tuple[List[str],
-                                  List[str],
-                                  List[str],
-                                  Dict[str, List[str]],
-                                  Dict[str, List[str]],
-                                  List[List[RankingMetaData]]
+                       ) -> tuple[list[str],
+                                  list[str],
+                                  list[str],
+                                  dict[str, list[str]],
+                                  dict[str, list[str]],
+                                  list[list[RankingMetaData]]
                                   ]:
     '''
     Given the test data stored at `test_data_file`, and the lexicon file
@@ -46,7 +45,7 @@ def generate_test_data(test_data_file: Path, lexicon_file: Path
         1. token, type str
         2. lemma, type str
         3. pos, type str
-        4. ranking_meta_data_objects, type List[List[RankingMetaData]] - This
+        4. ranking_meta_data_objects, type list[list[RankingMetaData]] - This
         has to be written as a JSON object that is then converted to a
         RankingMetaData object in Python.
 
@@ -57,11 +56,10 @@ def generate_test_data(test_data_file: Path, lexicon_file: Path
     
     # Returns
 
-    `Tuple[List[str], List[str], List[str], Dict[str, List[str]],
-           Dict[str, List[str]], List[List[RankingMetaData]]]`
+    `tuple[list[str], list[str], list[str], dict[str, list[str]],
+           dict[str, list[str]], list[list[RankingMetaData]]]`
     '''
-    def json_to_ranking_meta_data(json_object: Dict[str, Union[str, int,
-                                                               bool, List[str]]]
+    def json_to_ranking_meta_data(json_object: dict[str, str | int | bool | list[str]]
                                   ) -> RankingMetaData:
         
         assert isinstance(json_object['lexicon_type'], str)
@@ -101,10 +99,10 @@ def generate_test_data(test_data_file: Path, lexicon_file: Path
                                start_index, end_index, lexicon_entry_match,
                                semantic_tags)
     
-    test_tokens: List[str] = []
-    test_lemmas: List[str] = []
-    test_pos_tags: List[str] = []
-    test_ranking_meta_data: List[List[RankingMetaData]] = []
+    test_tokens: list[str] = []
+    test_lemmas: list[str] = []
+    test_pos_tags: list[str] = []
+    test_ranking_meta_data: list[list[RankingMetaData]] = []
     
     with test_data_file.open('r') as test_data_fp:
         for token_data in json.load(test_data_fp):
@@ -112,7 +110,7 @@ def generate_test_data(test_data_file: Path, lexicon_file: Path
             test_lemmas.append(token_data['lemma'])
             test_pos_tags.append(token_data['pos'])
             
-            token_ranking_meta_data: List[RankingMetaData] = []
+            token_ranking_meta_data: list[RankingMetaData] = []
             ranking_meta_data_objects = token_data['ranking_meta_data_objects']
             for ranking_object in ranking_meta_data_objects:
                 ranking_object = json_to_ranking_meta_data(ranking_object)
@@ -127,8 +125,8 @@ def generate_test_data(test_data_file: Path, lexicon_file: Path
             lemma_lexicon_lookup, test_ranking_meta_data)
 
 
-def compare_token_ranking_meta_data(token_ranking_meta_data_1: List[List[RankingMetaData]],
-                                    token_ranking_meta_data_2: List[List[RankingMetaData]]
+def compare_token_ranking_meta_data(token_ranking_meta_data_1: list[list[RankingMetaData]],
+                                    token_ranking_meta_data_2: list[list[RankingMetaData]]
                                     ) -> None:
     '''
     This tests if the two token ranking meta data lists are equal to each other.
@@ -198,7 +196,7 @@ def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES(from_bytes: bool
 
 
 @pytest.mark.parametrize("pos_mapper", [None, {'NN': ['adv', 'noun']}])
-def test_to_from_bytes(pos_mapper: Optional[Dict[str, List[str]]]) -> None:
+def test_to_from_bytes(pos_mapper: dict[str, list[str]] | None) -> None:
 
     (_, _, _, lexicon, lemma_lexicon, _) = generate_test_data(NON_SPECIAL_DATA_FILE,
                                                               NON_SPECIAL_LEXICON_FILE)

@@ -1,7 +1,6 @@
 from hashlib import sha256
 import os
 from pathlib import Path
-from typing import Union
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -11,7 +10,7 @@ from urllib3.util.retry import Retry
 from . import config
 
 
-def ensure_path(path: Union[str, Path]) -> Path:
+def ensure_path(path: str | Path) -> Path:
     """
     Ensure string is converted to a Path.
     
@@ -19,7 +18,7 @@ def ensure_path(path: Union[str, Path]) -> Path:
     
     # Parameters
 
-    path : `Union[str, Path]`
+    path : `str | Path`
         If string, it's converted to Path.
     
     # Returns

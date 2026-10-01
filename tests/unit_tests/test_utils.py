@@ -1,5 +1,4 @@
 from collections.abc import Iterable
-from typing import List, Optional, Set, Tuple
 
 import pytest
 
@@ -13,7 +12,7 @@ from pymusas.utils import (
 
 
 @pytest.fixture
-def examples() -> List[str]:
+def examples() -> list[str]:
     return [
         'East_noun London_noun is_det great_adj',
         'East_noun',
@@ -23,7 +22,7 @@ def examples() -> List[str]:
     
 
 @pytest.fixture
-def example_unique_pos_tags() -> List[Set[str]]:
+def example_unique_pos_tags() -> list[set[str]]:
     return [
         set({'noun', 'adj', 'det'}),
         set({'noun'}),
@@ -33,7 +32,7 @@ def example_unique_pos_tags() -> List[Set[str]]:
 
 
 @pytest.fixture
-def example_token_pos_tags() -> List[List[Tuple[str, str]]]:
+def example_token_pos_tags() -> list[list[tuple[str, str]]]:
     return [
         [
             ('East', 'noun'),
@@ -48,16 +47,16 @@ def example_token_pos_tags() -> List[List[Tuple[str, str]]]:
 
 
 @pytest.fixture
-def value_error_examples() -> List[str]:
+def value_error_examples() -> list[str]:
     return [
         'Ea_st_noun',
         'East_noun __adj'
     ]
 
 
-def test_token_pos_tags_in_lexicon_entry(examples: List[str],
-                                         example_token_pos_tags: List[List[Tuple[str, str]]],
-                                         value_error_examples: List[str]) -> None:
+def test_token_pos_tags_in_lexicon_entry(examples: list[str],
+                                         example_token_pos_tags: list[list[tuple[str, str]]],
+                                         value_error_examples: list[str]) -> None:
     for example, token_pos_tags in zip(examples, example_token_pos_tags):
         generated_token_pos_tags = token_pos_tags_in_lexicon_entry(example)
         assert isinstance(generated_token_pos_tags, Iterable)
@@ -68,9 +67,9 @@ def test_token_pos_tags_in_lexicon_entry(examples: List[str],
             list(token_pos_tags_in_lexicon_entry(value_error_example))
 
 
-def test_unique_pos_tags_in_lexicon_entry(examples: List[str],
-                                          example_unique_pos_tags: List[Set[str]],
-                                          value_error_examples: List[str]) -> None:
+def test_unique_pos_tags_in_lexicon_entry(examples: list[str],
+                                          example_unique_pos_tags: list[set[str]],
+                                          value_error_examples: list[str]) -> None:
     for example, unique_pos_tag in zip(examples, example_unique_pos_tags):
         assert unique_pos_tag == unique_pos_tags_in_lexicon_entry(example)
 
@@ -102,7 +101,7 @@ def test_unique_pos_tags_in_lexicon_entry(examples: List[str],
     (['ADf'], False),
     ([], False),
 ])
-def test_contains_default_tag(semantic_tags: List[str], expected: bool) -> None:
+def test_contains_default_tag(semantic_tags: list[str], expected: bool) -> None:
     assert expected == contains_default_tag(semantic_tags)
 
 
@@ -115,7 +114,7 @@ def test_contains_default_tag(semantic_tags: List[str], expected: bool) -> None:
     ('ski_NOUN boot*_NOUN', None),
     ('ski_* boot_*', None),
 ])
-def test_default_token_index(mwe_template: str, expected: Optional[int]) -> None:
+def test_default_token_index(mwe_template: str, expected: int | None) -> None:
     assert expected == default_token_index(mwe_template)
 
 
@@ -145,7 +144,7 @@ def test_default_token_index(mwe_template: str, expected: Optional[int]) -> None
     (['Df+++'], None, ['Z99']),
     (['C1/Df', 'Z3'], None, ['C1/Z99', 'Z3']),
 ])
-def test_resolve_default_tags(semantic_tags: List[str],
-                              replacement: Optional[str],
-                              expected: List[str]) -> None:
+def test_resolve_default_tags(semantic_tags: list[str],
+                              replacement: str | None,
+                              expected: list[str]) -> None:
     assert expected == resolve_default_tags(semantic_tags, replacement)

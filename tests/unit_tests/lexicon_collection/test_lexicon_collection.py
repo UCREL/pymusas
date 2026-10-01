@@ -3,7 +3,6 @@ import importlib
 from os import PathLike
 from pathlib import Path
 import tempfile
-from typing import Dict, List
 
 import pytest
 from pytest import MonkeyPatch
@@ -27,7 +26,7 @@ LEXICON_ENTRY = LexiconEntry('London', ['Z2'], 'noun')
 LEXICON_ENTRY_MULTI_SEM = LexiconEntry('Laptop', ['Z3', 'Z0'], 'noun')
 NON_POS_ENTRY = LexiconEntry('London', ['Z2'])
 
-LEXICON_ENTRIES: Dict[str, List[str]] = {}
+LEXICON_ENTRIES: dict[str, list[str]] = {}
 for entry in [LEXICON_ENTRY, LEXICON_ENTRY_MULTI_SEM, NON_POS_ENTRY]:
     lemma = entry.lemma
     if entry.pos is not None:

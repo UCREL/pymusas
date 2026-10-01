@@ -104,7 +104,9 @@ line-length = 119
 [tool.ruff.lint]
 # pycodestyle (E, W), pyflakes (F), isort (I) and missing type annotations (ANN),
 # ANN replaces mypy's disallow_untyped_defs and disallow_incomplete_defs.
-select = ["E", "F", "W", "I", "ANN"]
+# UP006, UP007, UP035 and UP045 (pyupgrade) enforce built-in generics (PEP 585) and
+# `X | Y` unions (PEP 604) instead of the deprecated `typing` aliases.
+select = ["E", "F", "W", "I", "ANN", "UP006", "UP007", "UP035", "UP045"]
 # E266, E501 and W293 are the same rules that were ignored by flake8. ANN401 allows `Any`.
 ignore = ["E266", "E501", "W293", "ANN401"]
 

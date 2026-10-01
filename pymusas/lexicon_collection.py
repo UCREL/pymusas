@@ -1,11 +1,11 @@
 import collections
-from collections.abc import MutableMapping
+from collections.abc import Generator, MutableMapping
 import csv
 from dataclasses import dataclass
 from enum import Enum, unique
 from os import PathLike
 import re
-from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union, cast
+from typing import cast
 from urllib.parse import urlparse
 import warnings
 
@@ -81,7 +81,7 @@ class LexiconEntry:
 
     lemma: `str`
         The lemma of a token or the token itself.
-    semantic_tags: `List[str]`
+    semantic_tags: `list[str]`
         The semantic tags associated with the `lemma` and optional `POS`.
         The semantic tags are in rank order, the most likely tag
         is the first tag in the list.
@@ -90,8 +90,8 @@ class LexiconEntry:
     '''
 
     lemma: str
-    semantic_tags: List[str]
-    pos: Optional[str] = None
+    semantic_tags: list[str]
+    pos: str | None = None
 
 
 @dataclass(init=True, repr=True, eq=True, order=False,
@@ -109,7 +109,7 @@ class LexiconMetaData:
 
     # Instance Attributes
 
-    semantic_tags : `List[str]`
+    semantic_tags : `list[str]`
         The semantic tags associated with the lexicon entry.
         The semantic tags are in rank order, the most likely tag
         is the first tag in the list.
@@ -123,7 +123,7 @@ class LexiconMetaData:
         be 2 and `ski_noun boot_noun` will be 0.
     '''
 
-    semantic_tags: List[str]
+    semantic_tags: list[str]
     n_gram_length: int
     lexicon_type: LexiconType
     wildcard_count: int
@@ -147,11 +147,11 @@ class LexiconCollection(MutableMapping):
 
     # Parameters
 
-    data: `Dict[str, List[str]]`, optional (default = `None`)
+    data: `dict[str, list[str]]`, optional (default = `None`)
 
     # Instance Attributes
 
-    data: `Dict[str, List[str]]`
+    data: `dict[str, list[str]]`
         Dictionary where the keys are `{lemma}|{pos}` and the values are
         a list of associated semantic tags. If the `data` parameter given was
         `None` then the value of this attribute will be an empty dictionary.
@@ -171,9 +171,9 @@ class LexiconCollection(MutableMapping):
 
     '''
     
-    def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, data: dict[str, list[str]] | None = None) -> None:
 
-        self.data: Dict[str, List[str]] = {}
+        self.data: dict[str, list[str]] = {}
         if data is not None:
             self.data = data
 
@@ -204,13 +204,13 @@ class LexiconCollection(MutableMapping):
             lemma += f'|{value.pos}'
         self[lemma] = value.semantic_tags
 
-    def to_dictionary(self) -> Dict[str, List[str]]:
+    def to_dictionary(self) -> dict[str, list[str]]:
         '''
         Returns the `data` instance attribute.
 
         # Returns
 
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
         '''
 
         return self.data
@@ -243,8 +243,8 @@ class LexiconCollection(MutableMapping):
         return LexiconCollection(srsly.msgpack_loads(bytes_data))
 
     @staticmethod
-    def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
-                 ) -> Dict[str, List[str]]:
+    def from_tsv(tsv_file_path: PathLike | str, include_pos: bool = True
+                 ) -> dict[str, list[str]]:
         '''
         Given a `tsv_file_path` it will return a dictionary object that can
         be used to create a :class:`LexiconCollection`.
@@ -267,7 +267,7 @@ class LexiconCollection(MutableMapping):
 
         # Parameters
 
-        tsv_file_path: `Union[PathLike, str]`
+        tsv_file_path: `PathLike | str`
             A file path or URL to a TSV file that contains at least two
             fields, with an optional third, with the following headings:
             
@@ -283,7 +283,7 @@ class LexiconCollection(MutableMapping):
 
         # Returns
         
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
         
         # Raises
         
@@ -316,7 +316,7 @@ class LexiconCollection(MutableMapping):
         '''
         minimum_field_names = {'lemma', 'semantic_tags'}
         extra_field_names = ['pos']
-        field_names_to_extract: Set[str] = set()
+        field_names_to_extract: set[str] = set()
 
         collection_from_tsv = LexiconCollection()
 
@@ -329,7 +329,7 @@ class LexiconCollection(MutableMapping):
 
         with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
-            file_field_names: Set[str] = set()
+            file_field_names: set[str] = set()
             if csv_reader.fieldnames:
                 file_field_names = set(csv_reader.fieldnames)
             if minimum_field_names.issubset(file_field_names):
@@ -352,7 +352,7 @@ class LexiconCollection(MutableMapping):
             for row in csv_reader:
                 semantic_tags: list[str] = row['semantic_tags'].split()
                 lemma: str = row['lemma']
-                pos: Optional[str] = None
+                pos: str | None = None
                 
                 if include_pos and contains_pos:
                     pos = row['pos']
@@ -479,10 +479,10 @@ class LexiconCollection(MutableMapping):
 
         return combined_lexicon_data
 
-    def __setitem__(self, key: str, value: List[str]) -> None:
+    def __setitem__(self, key: str, value: list[str]) -> None:
         self.data[key] = value
 
-    def __getitem__(self, key: str) -> List[str]:
+    def __getitem__(self, key: str) -> list[str]:
         return self.data[key]
 
     def __delitem__(self, key: str) -> None:
@@ -576,15 +576,15 @@ class MWELexiconCollection(MutableMapping):
 
     # Parameters
 
-    data: `Dict[str, List[str]]`, optional (default = `None`)
+    data: `dict[str, list[str]]`, optional (default = `None`)
         Dictionary where the keys are MWE templates, of any :class:`LexiconType`,
         and the values are a list of associated semantic tags.
-    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+    pos_mapper : `dict[str, list[str]]`, optional (default = `None`)
         If not `None`, maps from the lexicon's POS tagset to the desired
-        POS tagset, whereby the mapping is a `List` of tags, at the moment there
+        POS tagset, whereby the mapping is a `list` of tags, at the moment there
         is no preference order in this list of POS tags. The POS mapping is
         useful in situations whereby the lexicon's POS tagset is different to
-        the token's. **Note** that the longer the `List[str]` for each POS
+        the token's. **Note** that the longer the `list[str]` for each POS
         mapping the longer it will take to match MWE templates. A one to one
         mapping will have no speed impact on the tagger. A selection of POS
         mappers can be found in :mod:`pymusas.pos_mapper`.
@@ -596,7 +596,7 @@ class MWELexiconCollection(MutableMapping):
     be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
     will be an empty dictionary.
     
-    meta_data: `Dict[str, LexiconMetaData]`
+    meta_data: `dict[str, LexiconMetaData]`
         Dictionary where the keys are MWE templates, of any type, and the values
         are their associated meta data stored in a :class:`LexiconMetaData` object.
     longest_non_special_mwe_template : `int`
@@ -611,24 +611,24 @@ class MWELexiconCollection(MutableMapping):
         The number of wildcards in the MWE template that contains the
         most wildcards, e.g. the MWE template `ski_* *_noun` would contain 2
         wildcards. This can be 0 if you have no wildcard MWE templates.
-    mwe_regular_expression_lookup: `Dict[int, Dict[str, Dict[str, re.Pattern]]]`
+    mwe_regular_expression_lookup: `dict[int, dict[str, dict[str, re.Pattern]]]`
         A dictionary that can lookup all special syntax MWE templates there
         regular expression pattern. These templates are found first by
         their n-gram length and then their first character symbol. The regular
         expression pattern is used for quick matching within the :func:`mwe_match`.
         From the special syntax only wildcard (`*`) symbols are supported at the
         moment.
-    pos_mapper : `Dict[str, List[str]]`
+    pos_mapper : `dict[str, list[str]]`
         The given `pos_mapper`.
-    one_to_many_pos_tags : `Set[str]`
+    one_to_many_pos_tags : `set[str]`
         A set of POS tags that have a one to many mapping, this is created based
         on the `pos_mapper`. This is empty if `pos_mapper` is `None`
-    pos_mapping_lookup : `Dict[str, str]`
+    pos_mapping_lookup : `dict[str, str]`
         Only used if `pos_mapper` is not `None`. For all one-to-one POS mappings
         will store the mapped POS MWE template as keys and the original non-mapped
         (original) MWE templates as values, which can be used to lookup the meta
         data from `meta_data`.
-    pos_mapping_regular_expression_lookup : `Dict[LexiconType, Dict[int, Dict[str, Dict[str, re.Pattern]]]]`
+    pos_mapping_regular_expression_lookup : `dict[LexiconType, dict[int, dict[str, dict[str, re.Pattern]]]]`
         Only used if `pos_mapper` is not `None` and will result in
         `mwe_regular_expression_lookup` being empty as it replaces it
         functionality and extends it and by handlining the one-to-many POS
@@ -659,21 +659,21 @@ class MWELexiconCollection(MutableMapping):
 
     '''
     
-    def __init__(self, data: Optional[Dict[str, List[str]]] = None,
-                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, data: dict[str, list[str]] | None = None,
+                 pos_mapper: dict[str, list[str]] | None = None) -> None:
 
-        self.meta_data: Dict[str, LexiconMetaData] = {}
+        self.meta_data: dict[str, LexiconMetaData] = {}
         self.longest_non_special_mwe_template = 0
         self.longest_wildcard_mwe_template = 0
         self.longest_mwe_template = 0
         self.most_wildcards_in_mwe_template = 0
-        self.mwe_regular_expression_lookup: DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]\
+        self.mwe_regular_expression_lookup: collections.defaultdict[int, collections.defaultdict[str, dict[str, re.Pattern]]]\
             = collections.defaultdict(lambda: collections.defaultdict(dict))
 
-        self.pos_mapper: Dict[str, List[str]] = {}
-        self.one_to_many_pos_tags: Set[str] = set()
-        self.pos_mapping_lookup: Dict[str, str] = {}
-        self.pos_mapping_regular_expression_lookup: DefaultDict[LexiconType, DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]]\
+        self.pos_mapper: dict[str, list[str]] = {}
+        self.one_to_many_pos_tags: set[str] = set()
+        self.pos_mapping_lookup: dict[str, str] = {}
+        self.pos_mapping_regular_expression_lookup: collections.defaultdict[LexiconType, collections.defaultdict[int, collections.defaultdict[str, dict[str, re.Pattern]]]]\
             = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(dict)))
         
         if pos_mapper is not None:
@@ -687,10 +687,10 @@ class MWELexiconCollection(MutableMapping):
                 self[key] = value
 
     def mwe_match(self, mwe_template: str, mwe_type: LexiconType
-                  ) -> List[str]:
+                  ) -> list[str]:
         '''
-        Returns a `List` of MWE templates, with the given `mwe_type`, that match
-        the given `mwe_template`. If there are no matches the returned `List`
+        Returns a `list` of MWE templates, with the given `mwe_type`, that match
+        the given `mwe_template`. If there are no matches the returned `list`
         will be empty.
         
         This method applies all of the special syntax rules that should be applied
@@ -708,7 +708,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
 
-        `Optional[List[str]]`
+        `list[str] | None`
 
         # Examples
         ``` python
@@ -720,7 +720,7 @@ class MWELexiconCollection(MutableMapping):
         
         ```
         '''
-        mwe_templates_matches: List[str] = []
+        mwe_templates_matches: list[str] = []
         if self.pos_mapper:
             if mwe_type == LexiconType.MWE_NON_SPECIAL:
                 mwe_mapped_template = self.pos_mapping_lookup.get(mwe_template, None)
@@ -779,7 +779,7 @@ class MWELexiconCollection(MutableMapping):
 
         return mwe_templates_matches
 
-    def to_dictionary(self) -> Dict[str, List[str]]:
+    def to_dictionary(self) -> dict[str, list[str]]:
         '''
         Returns a dictionary of all MWE templates, the keys, stored in the
         collection and their associated semantic tags, the values.
@@ -788,7 +788,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
 
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
 
         # Examples
         ``` python
@@ -815,7 +815,7 @@ class MWELexiconCollection(MutableMapping):
         `bytes`
         '''
         serialise = {}
-        data: Dict[str, List[str]] = {key: value.semantic_tags
+        data: dict[str, list[str]] = {key: value.semantic_tags
                                       for key, value in self.meta_data.items()}
         serialise['data'] = srsly.msgpack_dumps(data)
         serialise['pos_mapper'] = srsly.msgpack_dumps(self.pos_mapper)
@@ -842,8 +842,8 @@ class MWELexiconCollection(MutableMapping):
         return MWELexiconCollection(data, pos_mapper)
 
     @staticmethod
-    def from_tsv(tsv_file_path: Union[PathLike, str]
-                 ) -> Dict[str, List[str]]:
+    def from_tsv(tsv_file_path: PathLike | str
+                 ) -> dict[str, list[str]]:
         '''
         Given a `tsv_file_path` it will return a dictionary object
         that can be used to create a :class:`MWELexiconCollection`.
@@ -861,7 +861,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Parameters
 
-        tsv_file_path: `Union[PathLike, str]`
+        tsv_file_path: `PathLike | str`
             A file path or URL to a TSV file that contains at least these two
             fields:
             
@@ -872,7 +872,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
         
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
         
         # Raises
         
@@ -906,7 +906,7 @@ class MWELexiconCollection(MutableMapping):
 
         with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
-            file_field_names: Set[str] = set()
+            file_field_names: set[str] = set()
             if csv_reader.fieldnames:
                 file_field_names = set(csv_reader.fieldnames)
             if not minimum_field_names.issubset(file_field_names):
@@ -919,7 +919,7 @@ class MWELexiconCollection(MutableMapping):
             
             for row in csv_reader:
                 mwe_template = ''
-                semantic_tags: List[str] = []
+                semantic_tags: list[str] = []
                 for field_name in minimum_field_names:
                     if field_name == 'semantic_tags':
                         semantic_tags = row[field_name].split()
@@ -948,7 +948,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Parameters
 
-        *tsv_file_paths: `Union[PathLike, str]`
+        *tsv_file_paths: `PathLike | str`
             File paths or URLs to a TSV file that contains at least these two
             fields:
             
@@ -1022,7 +1022,7 @@ class MWELexiconCollection(MutableMapping):
         ```
         '''
         
-        escaped_mwe_template_list: List[str] = []
+        escaped_mwe_template_list: list[str] = []
         for token, pos in utils.token_pos_tags_in_lexicon_entry(mwe_template):
             escaped_token = re.escape(token).replace(r'\*', r'[^\s_]*')
             escaped_pos = pos.replace(r'*', r'[^\s_]*')
@@ -1030,7 +1030,7 @@ class MWELexiconCollection(MutableMapping):
         escaped_mwe_template = r'\ '.join(escaped_mwe_template_list)
         return escaped_mwe_template
     
-    def __setitem__(self, key: str, value: List[str]) -> None:
+    def __setitem__(self, key: str, value: list[str]) -> None:
         '''
         # Raises
 
@@ -1077,7 +1077,7 @@ class MWELexiconCollection(MutableMapping):
                     self.longest_non_special_mwe_template = key_n_gram_length
         else:
             contains_one_to_many_pos_tag = False
-            pos_mapped_key_list: List[str] = []
+            pos_mapped_key_list: list[str] = []
             for token, pos in utils.token_pos_tags_in_lexicon_entry(key):
                 if '*' in pos:
                     pos_error = ('When using a POS mapper a POS tag within '
@@ -1133,16 +1133,16 @@ class MWELexiconCollection(MutableMapping):
 
     def __delitem__(self, key: str) -> None:
         
-        def _get_lexicon_statistics() -> Tuple[int, int, int]:
+        def _get_lexicon_statistics() -> tuple[int, int, int]:
             '''
             Returns the `longest_non_special_mwe_template`,
             `longest_wildcard_mwe_template`, and `most_wildcards_in_mwe_template`
-            in the `meta_data` as a `Tuple`. This is required as after deleting
+            in the `meta_data` as a `tuple`. This is required as after deleting
             an MWE we do not know if it has affected any of these statistics.
 
             # Returns
 
-            `Tuple[int, int, int]`
+            `tuple[int, int, int]`
             '''
             longest_non_special_mwe_template = 0
             longest_wildcard_mwe_template = 0

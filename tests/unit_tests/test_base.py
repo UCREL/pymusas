@@ -1,4 +1,3 @@
-from typing import List
 
 import pytest
 
@@ -22,7 +21,7 @@ def mwe_rule() -> MWERule:
 
 def test_serialise_object_list_to_from_bytes(single_word_rule: SingleWordRule,
                                              mwe_rule: MWERule) -> None:
-    rule_list: List[Rule] = []
+    rule_list: list[Rule] = []
     serialised = Serialise.serialise_object_list_to_bytes(rule_list)
     assert rule_list == Serialise.serialise_object_list_from_bytes(serialised)
 

@@ -13,7 +13,6 @@ Prepares markdown release notes for GitHub releases.
 
 import os
 import subprocess
-from typing import List
 
 import pymusas
 
@@ -31,7 +30,7 @@ SECURITY_HEADER = "### Security 🔒"
 
 def get_change_log_notes() -> str:
     in_current_section = False
-    current_section_notes: List[str] = []
+    current_section_notes: list[str] = []
     with open("CHANGELOG.md") as changelog:
         for line in changelog:
             if line.startswith("## "):

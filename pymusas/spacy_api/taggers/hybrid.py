@@ -1,5 +1,6 @@
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from typing import Any, Callable, Iterable, List, Optional, Union, cast
+from typing import Any, cast
 
 from spacy.language import Language
 from spacy.tokens import Doc
@@ -46,7 +47,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
     token is then Ranked using a
     :class:`pymusas.rankers.lexicon_entry.LexiconEntryRanker` ranker. The best
     candidate and it's associated tag(s) for each token are then returned along
-    with a `List` of token indexes indicating if the token is part of a Multi
+    with a `list` of token indexes indicating if the token is part of a Multi
     Word Expression (MWE).
 
     If we cannot tag a token then the following process will happen:
@@ -67,17 +68,17 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         </tr>
         <tr>
             <td> Token._.pymusas_tags </td>
-            <td> `List[str]` </td>
+            <td> `list[str]` </td>
             <td> Predicted tags, the first tag in the List of tags is the
             most likely tag.</td>
         </tr>
         <tr>
             <td> Token._.pymusas_mwe_indexes </td>
-            <td> `List[Tuple[int, int]]` </td>
-            <td> Each `Tuple` indicates the start and end token index of the
-            associated Multi Word Expression (MWE). If the `List` contains
-            more than one `Tuple` then the MWE is discontinuous. For single word
-            expressions the `List` will only contain 1 `Tuple` which will be
+            <td> `list[tuple[int, int]]` </td>
+            <td> Each `tuple` indicates the start and end token index of the
+            associated Multi Word Expression (MWE). If the `list` contains
+            more than one `tuple` then the MWE is discontinuous. For single word
+            expressions the `list` will only contain 1 `tuple` which will be
             (token_start_index, token_start_index + 1).</td>
         </tr>
     </table>
@@ -147,7 +148,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         The given `pymusas_tags_token_attr`
     pymusas_mwe_indexes_attr : `str`, optional (default = `pymusas_mwe_indexes`)
         The given `pymusas_mwe_indexes_attr`
-    rules : `List[pymusas.taggers.rules.rule.Rule]`, optional (default = `None`)
+    rules : `list[pymusas.taggers.rules.rule.Rule]`, optional (default = `None`)
         For the RuleBasedTagger.
         The `rules` is set through the :func:`initialize` method. Before it is
         set by the :func:`initialize` method the value of this attribute is `None`.
@@ -155,10 +156,10 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         For the RuleBasedTagger.
         The `ranker` is set through the :func:`initialize` method. Before it is
         set by the :func:`initialize` method the value of this attribute is `None`.
-    default_punctuation_tags : `Set[str]`
+    default_punctuation_tags : `set[str]`
         For the RuleBasedTagger.
         The `default_punctuation_tags` is set through the :func:`initialize` method.
-    default_number_tags : `Set[str]`
+    default_number_tags : `set[str]`
         For the RuleBasedTagger.
         The `default_number_tags` is set through the :func:`initialize` method.
     pos_attribute : `str`, optional (default = `pos_`)
@@ -300,14 +301,14 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         self._validated = True
     
     def initialize(self,
-                   get_examples: Optional[Callable[[], Iterable[Example]]] = None,
+                   get_examples: Callable[[], Iterable[Example]] | None = None,
                    *,
-                   nlp: Optional[Language] = None,
-                   rules: Optional[List[Rule]] = None,
-                   ranker: Optional[LexiconEntryRanker] = None,
-                   default_punctuation_tags: Optional[List[str]] = None,
-                   default_number_tags: Optional[List[str]] = None,
-                   pretrained_model_name_or_path: Optional[str | Path] = None,
+                   nlp: Language | None = None,
+                   rules: list[Rule] | None = None,
+                   ranker: LexiconEntryRanker | None = None,
+                   default_punctuation_tags: list[str] | None = None,
+                   default_number_tags: list[str] | None = None,
+                   pretrained_model_name_or_path: str | Path | None = None,
                    ) -> None:
         '''
         Initialize the tagger and load any of the resources given. The method is
@@ -320,19 +321,19 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
 
         # Parameters
 
-        rules : `List[pymusas.taggers.rules.rule.Rule]`
+        rules : `list[pymusas.taggers.rules.rule.Rule]`
             A list of rules to apply to the sequence of tokens in the
             :func:`__call__`. The output from each rule is concatenated and given
             to the `ranker`.
         ranker : `pymusas.rankers.lexicon_entry.LexiconEntryRanker`
             A ranker to rank the output from all of the `rules`.
-        default_punctuation_tags : `List[str]`, optional (default = `None`)
+        default_punctuation_tags : `list[str]`, optional (default = `None`)
             The POS tags that represent punctuation. If `None` then we will use
-            `['punc']`. The list will be converted into a `Set` before assigning
+            `['punc']`. The list will be converted into a `set` before assigning
             to the `default_punctuation_tags` attribute.
-        default_number_tags : `List[str]`, optional (default = `None`)
+        default_number_tags : `list[str]`, optional (default = `None`)
             The POS tags that represent numbers. If `None` then we will use
-            `['num']`. The list will be converted into a `Set` before assigning
+            `['num']`. The list will be converted into a `set` before assigning
             to the `default_number_tags` attribute.
         pretrained_model_name_or_path : `str | Path`
             The string ID or path of the pretrained neural
@@ -459,7 +460,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         raise NotImplementedError("from_bytes is not implemented for HybridTagger")
 
     def to_disk(self,
-                path: Union[str, Path],
+                path: str | Path,
                 *,
                 exclude: Iterable[str] = SimpleFrozenList()
                 ) -> None:
@@ -468,7 +469,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
 
         # Parameters
 
-        path : `Union[str, Path]`
+        path : `str | Path`
             Path to a directory. Path may be either string or `Path`-like
             object. If the directory does not exist it attempts to create a
             directory at the given `path`.
@@ -510,7 +511,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         NeuralTagger.to_disk(self, path, exclude=exclude)
 
     def from_disk(self,
-                  path: Union[str, Path],
+                  path: str | Path,
                   *,
                   exclude: Iterable[str] = SimpleFrozenList()
                   ) -> "HybridTagger":
@@ -519,7 +520,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
 
         # Parameters
 
-        path : `Union[str, Path]`
+        path : `str | Path`
             Path to an existing directory. Path may be either string or
             `Path`-like object.
         
@@ -578,7 +579,7 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
         rules_path = Path(component_folder, 'rules.bin')
         serialised_rules = srsly.read_msgpack(rules_path)
         rules = Rule.serialise_object_list_from_bytes(serialised_rules)
-        self.rules = cast(List[Rule], rules)
+        self.rules = cast(list[Rule], rules)
 
         default_punctuation_tags_path = Path(component_folder,
                                              'default_punctuation_tags.bin')

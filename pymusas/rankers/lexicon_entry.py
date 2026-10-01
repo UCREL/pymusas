@@ -1,6 +1,6 @@
 from abc import abstractmethod
 import collections
-from typing import DefaultDict, Dict, List, Optional, Set, Tuple, cast
+from typing import cast
 
 import srsly
 
@@ -24,12 +24,12 @@ class LexiconEntryRanker(Serialise):
     **Lower ranked lexicon entry matches should be given priority when making
     tagging decisions. A rank of 0 is better than a rank of 1.**
 
-    A LexcionEntryRanker when called, `__call__`, returns a tuple of two `List`s
+    A LexcionEntryRanker when called, `__call__`, returns a tuple of two `list`s
     whereby each entry in the list corresponds to a token:
 
-    1. Contains the ranks of the lexicon entry matches as a `List[int]`.
-    **Note** that the `List` can be empty if a token has no lexicon entry matches.
-    2. An `Optional[RankingMetaData]` that is the global lowest ranked entry
+    1. Contains the ranks of the lexicon entry matches as a `list[int]`.
+    **Note** that the `list` can be empty if a token has no lexicon entry matches.
+    2. An `RankingMetaData | None` that is the global lowest ranked entry
     match for that token. If the value is `None` then no global lowest ranked
     entry can be found for that token. If the `RankingMetaData` represents more
     than one token, like a Multi Word Expression (MWE) match, then those associated tokens
@@ -49,22 +49,22 @@ class LexiconEntryRanker(Serialise):
     '''
     
     @abstractmethod
-    def __call__(self, token_ranking_data: List[List[RankingMetaData]]
-                 ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]:
+    def __call__(self, token_ranking_data: list[list[RankingMetaData]]
+                 ) -> tuple[list[list[int]], list[RankingMetaData | None]]:
         '''
-        For each token it returns a `List` of rankings for each lexicon entry
+        For each token it returns a `list` of rankings for each lexicon entry
         match and the optional :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
         object of the **global** lowest ranked match for each token.
 
         # Parameters
 
-        token_ranking_data : `List[List[RankingMetaData]]`
-            For each token a `List` of :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
+        token_ranking_data : `list[list[RankingMetaData]]`
+            For each token a `list` of :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
             representing the lexicon entry match.
 
         # Returns
         
-        `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
+        `tuple[list[list[int]], list[RankingMetaData | None]]`
         '''
         ...  # pragma: no cover
 
@@ -136,7 +136,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         The number of indexes that each wildcard count value should have when
         converting the wildcard count value to a string using
         `pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker.int_2_str`.
-    n_gram_ranking_dictionary : `Dict[int, int]`
+    n_gram_ranking_dictionary : `dict[int, int]`
         Maps the n-gram length to it's rank value, as the n-gram length is
         inverse to it's rank, as the larger the n-gram length the lower it's
         rank.
@@ -151,7 +151,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         self.n_gram_number_indexes = len(str(maximum_n_gram_length))
         self.wildcards_number_indexes = len(str(maximum_number_wildcards))
 
-        self.n_gram_ranking_dictionary: Dict[int, int] = \
+        self.n_gram_ranking_dictionary: dict[int, int] = \
             dict(zip(range(1, maximum_n_gram_length + 1, 1),
                      range(maximum_n_gram_length, 0, -1)))
 
@@ -190,9 +190,9 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
                                          maximum_number_wildcards)
 
     @staticmethod
-    def get_construction_arguments(rules: List['Rule']) -> Tuple[int, int]:
+    def get_construction_arguments(rules: list['Rule']) -> tuple[int, int]:
         '''
-        Given a `List` of rules it will return the `maximum_n_gram_length` and
+        Given a `list` of rules it will return the `maximum_n_gram_length` and
         `maximum_number_wildcards` from the lexicon collections that those
         :class:`pymusas.taggers.rules.rule.Rule`(s) are based on. The output from
         this function can then be used as the arguments to the constructor of
@@ -200,13 +200,13 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         # Parameters
 
-        rules : `List[Rule]`
-            A `List` of rules. This `List` is typically required when creating
+        rules : `list[Rule]`
+            A `list` of rules. This `list` is typically required when creating
             a :class:`pymusas.taggers.rule_based.RuleBasedTagger` tagger.
         
         # Returns
 
-        `Tuple[int, int]`
+        `tuple[int, int]`
 
         # Examples
         ``` python
@@ -278,10 +278,10 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         return f'{prefix_zeros}{str_value}'
 
     @staticmethod
-    def get_global_lowest_ranks(token_ranking_data: List[List[RankingMetaData]],
-                                token_rankings: List[List[int]],
-                                ranking_data_to_exclude: Optional[Set[RankingMetaData]] = None
-                                ) -> List[Optional[RankingMetaData]]:
+    def get_global_lowest_ranks(token_ranking_data: list[list[RankingMetaData]],
+                                token_rankings: list[list[int]],
+                                ranking_data_to_exclude: set[RankingMetaData] | None = None
+                                ) -> list[RankingMetaData | None]:
         '''
         Returns the global lowest ranked entry match for each token. If the value
         is `None` then no global lowest ranked entry can be found for that token.
@@ -297,15 +297,15 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         
         # Parameters
 
-        token_ranking_data : `List[List[RankingMetaData]]`
-            For each token a `List` of
+        token_ranking_data : `list[list[RankingMetaData]]`
+            For each token a `list` of
             :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` representing
             the lexicon entry match.
-        token_rankings : `List[List[int]]`
+        token_rankings : `list[list[int]]`
             For each token contains the ranks of the lexicon entry matches.
-            **Note** that the `List` can be empty if a token has no lexicon
+            **Note** that the `list` can be empty if a token has no lexicon
             entry matches.
-        ranking_data_to_exclude : `Set[RankingMetaData]`, optional (default = `None`)
+        ranking_data_to_exclude : `set[RankingMetaData]`, optional (default = `None`)
             Any :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` to
             exclude from the ranking selection, this can be useful when wanting
             to get the next best global rank for each token.
@@ -314,7 +314,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         `AssertionError`
             If the length of `token_ranking_data` is not equal to the length of
-            `token_rankings`, for both the outer and inner `List`s.
+            `token_rankings`, for both the outer and inner `list`s.
 
         # Examples
         ``` python
@@ -369,7 +369,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         
         assert len(token_ranking_data) == len(token_rankings), 'Lengths should be equal'
 
-        ranking_meta_data: DefaultDict[int, Set[RankingMetaData]] = collections.defaultdict(set)
+        ranking_meta_data: collections.defaultdict[int, set[RankingMetaData]] = collections.defaultdict(set)
         for token_data, token_ranking in zip(token_ranking_data, token_rankings):
             assert len(token_data) == len(token_ranking), 'Lengths should be equal'
             
@@ -378,7 +378,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
                     continue
                 ranking_meta_data[rank].add(data)
         
-        global_lowest_ranks: List[Optional[RankingMetaData]] = \
+        global_lowest_ranks: list[RankingMetaData | None] = \
             [None for _ in token_ranking_data]
         
         ordered_ranking_meta_data = sorted(ranking_meta_data.items(),
@@ -394,10 +394,10 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         return global_lowest_ranks
 
-    def __call__(self, token_ranking_data: List[List[RankingMetaData]]
-                 ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]:
+    def __call__(self, token_ranking_data: list[list[RankingMetaData]]
+                 ) -> tuple[list[list[int]], list[RankingMetaData | None]]:
         '''
-        For each token it returns a `List` of rankings for each lexicon entry
+        For each token it returns a `list` of rankings for each lexicon entry
         match and the optional :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
         object of the **global** lowest ranked match for each token.
         
@@ -412,13 +412,13 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         # Parameters
 
-        token_ranking_data : `List[List[RankingMetaData]]`
-            For each token a `List` of :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
+        token_ranking_data : `list[list[RankingMetaData]]`
+            For each token a `list` of :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
             representing the lexicon entry match.
 
         # Returns
         
-        `Tuple[List[List[int]], List[Optional[RankingMetaData]]]`
+        `tuple[list[list[int]], list[RankingMetaData | None]]`
 
         # Examples
         ```python
@@ -468,10 +468,10 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
             True: 2
         }
 
-        initial_rankings: List[List[str]] = []
+        initial_rankings: list[list[str]] = []
         largest_token_index = 0
         for token in token_ranking_data:
-            token_rankings: List[str] = []
+            token_rankings: list[str] = []
             for ranking_data in token:
                 lexicon_type_rank = lexicon_type_to_rank[ranking_data.lexicon_type]
                 n_gram_rank = self.n_gram_ranking_dictionary[ranking_data.lexicon_n_gram_length]
@@ -492,9 +492,9 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
 
         # Add to each token ranking where it first appears in the text, rule 6.
         largest_token_index_number_indexes = len(str(largest_token_index))
-        rankings: List[List[int]] = []
+        rankings: list[list[int]] = []
         for str_token_rankings, token in zip(initial_rankings, token_ranking_data):
-            int_token_rankings: List[int] = []
+            int_token_rankings: list[int] = []
             for str_ranking, ranking_data in zip(str_token_rankings, token):
                 start_index_str_rank = self.int_2_str(ranking_data.token_match_start_index,
                                                       largest_token_index_number_indexes)

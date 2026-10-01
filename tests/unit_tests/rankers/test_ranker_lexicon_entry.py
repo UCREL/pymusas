@@ -1,4 +1,3 @@
-from typing import List, Optional, Tuple
 
 import pytest
 
@@ -20,8 +19,8 @@ def test_lexicon_entry_ranker() -> None:
     
     class TestRanker(LexiconEntryRanker):
 
-        def __call__(self, token_ranking_data: List[List[RankingMetaData]]
-                     ) -> Tuple[List[List[int]], List[Optional[RankingMetaData]]]:
+        def __call__(self, token_ranking_data: list[list[RankingMetaData]]
+                     ) -> tuple[list[list[int]], list[RankingMetaData | None]]:
             return ([[0]], [None])
 
         def to_bytes(self) -> bytes:
@@ -97,7 +96,7 @@ def test_contextual_rule_based_ranker__call__() -> None:
     # Test that it assigns [] and None to tokens that have
     # no rank meta data objects
 
-    token_ranking_data: List[List[RankingMetaData]] = [
+    token_ranking_data: list[list[RankingMetaData]] = [
         []
     ]
     assert ([[]], [None]) == ranker(token_ranking_data)
@@ -170,7 +169,7 @@ def test_contextual_rule_based_ranker__call__() -> None:
             420141
         ]
     ]
-    expected_lowest_ranked_matches: List[Optional[RankingMetaData]]
+    expected_lowest_ranked_matches: list[RankingMetaData | None]
     expected_lowest_ranked_matches = [snow_boot_mwe, snow_boot_mwe]
     assert (expected_ranks, expected_lowest_ranked_matches) \
         == ranker(token_ranking_data)
@@ -463,7 +462,7 @@ def test_contextual_rule_based_ranker_get_global_lowest_ranks() -> None:
 
 
 def test_contextual_rule_based_ranker_get_construction_arguments() -> None:
-    rules: List[Rule] = []
+    rules: list[Rule] = []
     # Empty case
     assert (0, 0) == ContextualRuleBasedRanker.get_construction_arguments(rules)
 

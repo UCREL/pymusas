@@ -12,9 +12,9 @@ DEFAULT_TAG_RE: `re.Pattern[str]`
     e.g. gender markers, and rarity markers (`%` and `@`).
 """
 
+from collections.abc import Iterable
 import importlib.util
 import re
-from typing import Iterable, List, Optional, Set, Tuple
 
 
 NEURAL_EXTRA_PACKAGES: list[str] = ['transformers', 'wsd_torch_models', 'torch']
@@ -22,7 +22,7 @@ DEFAULT_TAG_RE: re.Pattern[str] = re.compile(r'^Df(?P<suffix>[+\-a-z%@]*)$')
 
 
 def token_pos_tags_in_lexicon_entry(lexicon_entry: str
-                                    ) -> Iterable[Tuple[str, str]]:
+                                    ) -> Iterable[tuple[str, str]]:
     '''
     Yields the token and associated POS tag in the given `lexicon_entry`.
 
@@ -37,13 +37,13 @@ def token_pos_tags_in_lexicon_entry(lexicon_entry: str
 
     # Returns
 
-    `Iterable[Tuple[str, str]]`
+    `Iterable[tuple[str, str]]`
 
     # Raises
 
     `ValueError`
         If the lexicon entry when split on whitespace and then split by `_`
-        does not create a `Iterable[Tuple[str, str]]` whereby the tuple contains
+        does not create a `Iterable[tuple[str, str]]` whereby the tuple contains
         the `token text` and it's associated `POS tag`.
 
     # Examples
@@ -59,7 +59,7 @@ def token_pos_tags_in_lexicon_entry(lexicon_entry: str
     ```
     '''
     split_error_msg = ('The lexicon entry when split on whitespace and then by'
-                       ' `_` does not create a `List[Tuple[str, str]]`. '
+                       ' `_` does not create a `list[tuple[str, str]]`. '
                        f'lexicon entry: {lexicon_entry}')
     for token_pos in lexicon_entry.split():
         token_pos_split = token_pos.split('_')
@@ -69,7 +69,7 @@ def token_pos_tags_in_lexicon_entry(lexicon_entry: str
         yield token, pos_tag
 
 
-def unique_pos_tags_in_lexicon_entry(lexicon_entry: str) -> Set[str]:
+def unique_pos_tags_in_lexicon_entry(lexicon_entry: str) -> set[str]:
     '''
     Returns the unique POS tag values in the given `lexicon_entry`.
 
@@ -84,13 +84,13 @@ def unique_pos_tags_in_lexicon_entry(lexicon_entry: str) -> Set[str]:
 
     # Returns
 
-    `Set[str]`
+    `set[str]`
 
     # Raises
 
     `ValueError`
         If the lexicon entry when split on whitespace and then split by `_`
-        does not create a `List[Tuple[str, str]]` whereby the tuple contains
+        does not create a `list[tuple[str, str]]` whereby the tuple contains
         the `token text` and it's associated `POS tag`.
 
     # Examples
@@ -104,20 +104,20 @@ def unique_pos_tags_in_lexicon_entry(lexicon_entry: str) -> Set[str]:
 
     ```
     '''
-    unique_pos_tags: Set[str] = set()
+    unique_pos_tags: set[str] = set()
     for _, pos_tag in token_pos_tags_in_lexicon_entry(lexicon_entry):
         unique_pos_tags.add(pos_tag)
     return unique_pos_tags
 
 
-def contains_default_tag(semantic_tags: List[str]) -> bool:
+def contains_default_tag(semantic_tags: list[str]) -> bool:
     '''
     Returns `True` if any of the given `semantic_tags`, including any part of
     a slash (`/`) tag, is a default (`Df`) tag, see :var:`DEFAULT_TAG_RE`.
 
     # Parameters
 
-    semantic_tags : `List[str]`
+    semantic_tags : `list[str]`
         The semantic tags of a lexicon entry, e.g. `['C1/Df', 'Z3']`.
 
     # Returns
@@ -142,7 +142,7 @@ def contains_default_tag(semantic_tags: List[str]) -> bool:
     return False
 
 
-def default_token_index(mwe_template: str) -> Optional[int]:
+def default_token_index(mwe_template: str) -> int | None:
     '''
     Returns the index of the first token in the `mwe_template` whose token
     text starts with a wildcard (`*`). This is the token that a default (`Df`)
@@ -156,7 +156,7 @@ def default_token_index(mwe_template: str) -> Optional[int]:
 
     # Returns
 
-    `Optional[int]`
+    `int | None`
 
     # Raises
 
@@ -179,8 +179,8 @@ def default_token_index(mwe_template: str) -> Optional[int]:
     return None
 
 
-def resolve_default_tags(semantic_tags: List[str], replacement: Optional[str]
-                         ) -> List[str]:
+def resolve_default_tags(semantic_tags: list[str], replacement: str | None
+                         ) -> list[str]:
     '''
     Returns the `semantic_tags` whereby every default (`Df`) tag, including
     those within a slash (`/`) tag, has been replaced using the `replacement`
@@ -197,15 +197,15 @@ def resolve_default_tags(semantic_tags: List[str], replacement: Optional[str]
 
     # Parameters
 
-    semantic_tags : `List[str]`
+    semantic_tags : `list[str]`
         The semantic tags that may contain `Df` tags, e.g. `['C1/Df']`.
-    replacement : `Optional[str]`
+    replacement : `str | None`
         The semantic tag to replace the `Df` tags with, this would be the
         single word semantic tag of the token the `Df` tag refers to.
 
     # Returns
 
-    `List[str]`
+    `list[str]`
 
     # Examples
     ``` python
@@ -225,9 +225,9 @@ def resolve_default_tags(semantic_tags: List[str], replacement: Optional[str]
         first_tag_part = replacement.split('/')[0]
         replacement_core_tag = re.sub(r'[^A-Z0-9.]', '', first_tag_part)
 
-    resolved_tags: List[str] = []
+    resolved_tags: list[str] = []
     for semantic_tag in semantic_tags:
-        resolved_parts: List[str] = []
+        resolved_parts: list[str] = []
         for tag_part in semantic_tag.split('/'):
             default_match = DEFAULT_TAG_RE.match(tag_part)
             if default_match is None:

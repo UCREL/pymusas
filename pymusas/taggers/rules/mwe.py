@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Tuple, cast
+from typing import cast
 
 import srsly
 
@@ -47,16 +47,16 @@ class MWERule(Rule):
 
     # Parameters
 
-    mwe_lexicon_lookup : `Dict[str, List[str]]`
+    mwe_lexicon_lookup : `dict[str, list[str]]`
         The data to create `mwe_lexicon_collection` instance attribute. A
         Dictionary where the keys are MWE templates, of any
         :class:`pymusas.lexicon_collection.LexiconType`,
         and the values are a list of associated semantic tags.
-    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+    pos_mapper : `dict[str, list[str]]`, optional (default = `None`)
         If not `None`, maps from the `mwe_lexicon_lookup` POS tagset to the
-        desired POS tagset,whereby the mapping is a `List` of tags,
+        desired POS tagset,whereby the mapping is a `list` of tags,
         at the moment there is no preference order in this list of POS tags.
-        **Note** the longer the `List[str]` for
+        **Note** the longer the `list[str]` for
         each POS mapping the slower the tagger, a one to one mapping will have
         no speed impact on the tagger. A selection of POS mappers can be found in
         :mod:`pymusas.pos_mapper`.
@@ -89,39 +89,39 @@ class MWERule(Rule):
     ```
     '''
 
-    def __init__(self, mwe_lexicon_lookup: Dict[str, List[str]],
-                 pos_mapper: Optional[Dict[str, List[str]]] = None,
-                 single_word_rule: Optional[SingleWordRule] = None) -> None:
+    def __init__(self, mwe_lexicon_lookup: dict[str, list[str]],
+                 pos_mapper: dict[str, list[str]] | None = None,
+                 single_word_rule: SingleWordRule | None = None) -> None:
         
         self.mwe_lexicon_collection = MWELexiconCollection(mwe_lexicon_lookup,
                                                            pos_mapper)
         self.single_word_rule = single_word_rule
 
-    def __call__(self, tokens: List[str], lemmas: List[str], pos_tags: List[str]
-                 ) -> List[List[RankingMetaData]]:
+    def __call__(self, tokens: list[str], lemmas: list[str], pos_tags: list[str]
+                 ) -> list[list[RankingMetaData]]:
         '''
         Given the tokens, lemmas, and POS tags for each word in a text,
-        it returns for each token a `List` of rules matches defined by
+        it returns for each token a `list` of rules matches defined by
         the :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` object based on
         the rule matches stated in the class docstring above.
         
         # Parameters
 
-        tokens : `List[str]`
+        tokens : `list[str]`
             The tokens that are within the text.
-        lemmas : `List[str]`
+        lemmas : `list[str]`
             The lemmas of the tokens.
-        pos_tags : `List[str]`
+        pos_tags : `list[str]`
             The Part Of Speech tags of the tokens.
         
         # Returns
 
-        `List[List[RankingMetaData]]`
+        `list[list[RankingMetaData]]`
         '''
 
-        default_semantic_tag_cache: Dict[int, Optional[str]] = {}
+        default_semantic_tag_cache: dict[int, str | None] = {}
 
-        def default_semantic_tag(token_index: int) -> Optional[str]:
+        def default_semantic_tag(token_index: int) -> str | None:
             '''
             Returns the first semantic tag of the best single word match for
             the token at `token_index`, or `None` if there is no single word
@@ -130,7 +130,7 @@ class MWERule(Rule):
             if token_index in default_semantic_tag_cache:
                 return default_semantic_tag_cache[token_index]
 
-            semantic_tag: Optional[str] = None
+            semantic_tag: str | None = None
             if self.single_word_rule is not None:
                 best_match = self.single_word_rule.best_match(tokens[token_index],
                                                               lemmas[token_index],
@@ -141,16 +141,16 @@ class MWERule(Rule):
             default_semantic_tag_cache[token_index] = semantic_tag
             return semantic_tag
 
-        def tag_n_gram_indexes(_n_gram_indexes: List[Tuple[int, int]],
+        def tag_n_gram_indexes(_n_gram_indexes: list[tuple[int, int]],
                                mwe_type: LexiconType,
-                               token_pos: List[str], lemma_pos: List[str],
-                               token_lower_pos: List[str], lemma_lower_pos: List[str],
-                               token_ranking_meta_data: List[List[RankingMetaData]]
+                               token_pos: list[str], lemma_pos: list[str],
+                               token_lower_pos: list[str], lemma_lower_pos: list[str],
+                               token_ranking_meta_data: list[list[RankingMetaData]]
                                ) -> None:
             '''
-            Given a `List` of n gram indexes, whereby all grams have the same value
+            Given a `list` of n gram indexes, whereby all grams have the same value
             of *n*, it will find all MWE rule matches of type `mwe_type` for those
-            n-grams in the four token `List`s (`token_pos`, `lemma_pos`,
+            n-grams in the four token `list`s (`token_pos`, `lemma_pos`,
             `token_lower_pos`, `lemma_lower_pos`). All rule matches will crate a
             `RankingMetaData` object for each token in the match, of which these
             objects are appended to the relevant token indexes within the
@@ -159,7 +159,7 @@ class MWERule(Rule):
             Nothing is returned but the `token_ranking_meta_data` object will have
             been updated if at least one rule match has been found.
             '''
-            token_list_type: List[Tuple[List[str], LexicalMatch]]
+            token_list_type: list[tuple[list[str], LexicalMatch]]
             token_list_type = [(token_pos, LexicalMatch.TOKEN),
                                (lemma_pos, LexicalMatch.LEMMA),
                                (token_lower_pos, LexicalMatch.TOKEN_LOWER),
@@ -184,7 +184,7 @@ class MWERule(Rule):
                         semantic_tags = tuple(mwe_meta_data.semantic_tags)
                         if utils.contains_default_tag(mwe_meta_data.semantic_tags):
                             default_index = utils.default_token_index(matched_mwe_template)
-                            replacement_tag: Optional[str] = None
+                            replacement_tag: str | None = None
                             # `default_index` should never be `None` as the
                             # `MWELexiconCollection` ignores MWE templates
                             # that have a `Df` tag but no token that starts
@@ -204,9 +204,9 @@ class MWERule(Rule):
                             token_ranking_meta_data[token_index].append(ranking_meta_data)
                 
         def tag_n_gram_based_MWE(mwe_type: LexiconType,
-                                 token_pos: List[str], lemma_pos: List[str],
-                                 token_lower_pos: List[str], lemma_lower_pos: List[str],
-                                 token_ranking_meta_data: List[List[RankingMetaData]]
+                                 token_pos: list[str], lemma_pos: list[str],
+                                 token_lower_pos: list[str], lemma_lower_pos: list[str],
+                                 token_ranking_meta_data: list[list[RankingMetaData]]
                                  ) -> None:
             '''
             Any type of rule match that uses n-grams should use this function.
@@ -234,7 +234,7 @@ class MWERule(Rule):
                 return
             
             largest_n_gram = largest_mwe_in_lexicon + 1
-            largest_n_gram_indexes: List[Tuple[int, int]] = []
+            largest_n_gram_indexes: list[tuple[int, int]] = []
 
             for n_gram_index in util.n_gram_indexes(token_pos, 2, largest_mwe_in_lexicon):
                 start_index, end_index = n_gram_index
@@ -253,10 +253,10 @@ class MWERule(Rule):
                                lemma_pos, token_lower_pos,
                                lemma_lower_pos, token_ranking_meta_data)
         
-        token_pos: List[str] = []
-        token_lower_pos: List[str] = []
-        lemma_pos: List[str] = []
-        lemma_lower_pos: List[str] = []
+        token_pos: list[str] = []
+        token_lower_pos: list[str] = []
+        lemma_pos: list[str] = []
+        lemma_lower_pos: list[str] = []
         for token, lemma, pos in zip(tokens, lemmas, pos_tags):
             token_pos.append(f'{token}_{pos}')
             token_lower_pos.append(f'{token}_{pos}'.lower())
@@ -264,7 +264,7 @@ class MWERule(Rule):
             lemma_lower_pos.append(f'{lemma}_{pos}'.lower())
         
         number_tokens = len(tokens)
-        token_ranking_meta_data: List[List[RankingMetaData]] \
+        token_ranking_meta_data: list[list[RankingMetaData]] \
             = [[] for _ in range(number_tokens)]
         
         if number_tokens < 2:
@@ -290,7 +290,7 @@ class MWERule(Rule):
 
         `bytes`
         '''
-        serialise: Dict[str, Optional[bytes]] = {}
+        serialise: dict[str, bytes | None] = {}
         serialise['mwe_lexicon_collection'] = self.mwe_lexicon_collection.to_bytes()
         serialise['single_word_rule'] = None
         if self.single_word_rule is not None:

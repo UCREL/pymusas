@@ -1,4 +1,3 @@
-from typing import List
 
 import pytest
 
@@ -6,7 +5,7 @@ from pymusas.taggers.rules.util import n_gram_indexes, n_grams
 
 
 def test_n_grams() -> None:
-    test_tokens: List[str] = []
+    test_tokens: list[str] = []
     empty_n_grams = n_grams(test_tokens, 1, 3)
     assert [] == list(empty_n_grams)
 
@@ -30,7 +29,7 @@ def test_n_grams() -> None:
 
 
 def test_n_gram_indexes() -> None:
-    test_tokens: List[str] = []
+    test_tokens: list[str] = []
     empty_n_grams = n_gram_indexes(test_tokens, 1, 3)
     assert [] == list(empty_n_grams)
 

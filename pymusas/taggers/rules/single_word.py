@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, cast
+from typing import cast
 
 import srsly
 
@@ -26,22 +26,22 @@ class SingleWordRule(Rule):
 
     # Parameters
 
-    lexicon_collection : `Dict[str, List[str]]`
+    lexicon_collection : `dict[str, list[str]]`
         The data to create `lexicon_collection` instance attribute. A
         Dictionary where the keys are a combination of
         lemma/token and POS in the following format: `{lemma}|{POS}` and the
         values are a list of associated semantic tags.
-    lemma_lexicon_collection : `Dict[str, List[str]]`
+    lemma_lexicon_collection : `dict[str, list[str]]`
         The data to create `lemma_lexicon_collection` instance attribute. A
         Dictionary where the keys are either just a lemma/token
         in the following format: `{lemma}` and the
         values are a list of associated semantic tags.
-    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+    pos_mapper : `dict[str, list[str]]`, optional (default = `None`)
         If not `None`, maps from the given token's POS tagset to the desired
-        POS tagset, whereby the mapping is a `List` of tags, at the moment there
+        POS tagset, whereby the mapping is a `list` of tags, at the moment there
         is no preference order in this list of POS tags. The POS mapping is
         useful in situtation whereby the token's POS tagset is different to
-        those used in the lexicons. **Note** the longer the `List[str]` for
+        those used in the lexicons. **Note** the longer the `list[str]` for
         each POS mapping the slower the tagger, a one to one mapping will have
         no speed impact on the tagger. A selection of POS mappers can be found in
         :mod:`pymusas.pos_mapper`.
@@ -54,44 +54,44 @@ class SingleWordRule(Rule):
     lemma_lexicon_collection : `pymusas.lexicon_collection.LexiconCollection`
         A :class:`pymusas.lexicon_collection.LexiconCollection` instance that
         has been initialised using the `lemma_lexicon_collection` parameter.
-    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+    pos_mapper : `dict[str, list[str]]`, optional (default = `None`)
         The given `pos_mapper`.
     '''
-    def __init__(self, lexicon_collection: Dict[str, List[str]],
-                 lemma_lexicon_collection: Dict[str, List[str]],
-                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, lexicon_collection: dict[str, list[str]],
+                 lemma_lexicon_collection: dict[str, list[str]],
+                 pos_mapper: dict[str, list[str]] | None = None) -> None:
 
         self.lexicon_collection = LexiconCollection(lexicon_collection)
         self.lemma_lexicon_collection = LexiconCollection(lemma_lexicon_collection)
         self.pos_mapper = pos_mapper
 
-    def __call__(self, tokens: List[str], lemmas: List[str], pos_tags: List[str]
-                 ) -> List[List[RankingMetaData]]:
+    def __call__(self, tokens: list[str], lemmas: list[str], pos_tags: list[str]
+                 ) -> list[list[RankingMetaData]]:
         '''
         Given the tokens, lemmas, and POS tags for each word in a text,
-        it returns for each token a `List` of rules matches defined by
+        it returns for each token a `list` of rules matches defined by
         the :class:`pymusas.rankers.ranking_meta_data.RankingMetaData`
         object based on the rule matches stated in the class docstring above.
         
         # Parameters
 
-        tokens : `List[str]`
+        tokens : `list[str]`
             The tokens that are within the text.
-        lemmas : `List[str]`
+        lemmas : `list[str]`
             The lemmas of the tokens.
-        pos_tags : `List[str]`
+        pos_tags : `list[str]`
             The Part Of Speech tags of the tokens.
         
         # Returns
 
-        `List[List[RankingMetaData]]`
+        `list[list[RankingMetaData]]`
         '''
 
         def find_match_and_add_to_ranking_data(lexicon_entry: str,
                                                exclude_pos_information: bool,
                                                lexical_match: LexicalMatch,
                                                start_index: int, end_index: int,
-                                               token_ranking_meta_data: List[List[RankingMetaData]]
+                                               token_ranking_meta_data: list[list[RankingMetaData]]
                                                ) -> None:
             collection = self.lexicon_collection
             if exclude_pos_information:
@@ -105,7 +105,7 @@ class SingleWordRule(Rule):
                                                lexicon_entry, semantic_tags)
                 token_ranking_meta_data[start_index].append(ranking_data)
 
-        token_ranking_meta_data: List[List[RankingMetaData]] \
+        token_ranking_meta_data: list[list[RankingMetaData]] \
             = [[] for _ in range(len(tokens))]
         
         index = 0
@@ -163,7 +163,7 @@ class SingleWordRule(Rule):
         return token_ranking_meta_data
 
     def best_match(self, token: str, lemma: str, pos_tag: str
-                   ) -> Optional[RankingMetaData]:
+                   ) -> RankingMetaData | None:
         '''
         Returns the best single word rule match for the given token, lemma, and
         POS tag, or `None` if there is no match. The matches are found using
@@ -181,7 +181,7 @@ class SingleWordRule(Rule):
 
         # Returns
 
-        `Optional[RankingMetaData]`
+        `RankingMetaData | None`
 
         # Examples
         ``` python

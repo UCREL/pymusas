@@ -1,9 +1,10 @@
+from collections.abc import Iterable, Iterator
 from contextlib import contextmanager
 from enum import Enum
 import json
 import os
 from pathlib import Path
-from typing import Iterable, Iterator, TypedDict, cast
+from typing import TypedDict, cast
 import warnings
 
 from datasets import get_dataset_config_names, get_dataset_split_names, load_dataset

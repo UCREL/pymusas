@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Type hints now use built-in generics ([PEP 585](https://peps.python.org/pep-0585/)), e.g. `list[str]` instead of `List[str]`, and `|` unions ([PEP 604](https://peps.python.org/pep-0604/)), e.g. `str | None` instead of `Optional[str]`. Abstract types such as `Callable` and `Iterable` are imported from `collections.abc`. The types written in docstrings, and in the API documentation, follow the same style. Ruff's pyupgrade rules `UP006`, `UP007`, `UP035` and `UP045` now enforce this.
 - `Df` tags that cannot be resolved, because the `MWERule` has no `single_word_rule` or the token has no single word match, are now output as `Z99` instead of `Df`.
 - MWE templates with a `Df` tag but no token starting with a wildcard are now ignored by `MWELexiconCollection`, with a `UserWarning`.
 - `MWERule.to_bytes` uses a new serialisation format that includes the `single_word_rule`. `MWERule.from_bytes` can still load the previous format (backward compatibility).
