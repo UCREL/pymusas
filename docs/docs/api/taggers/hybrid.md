@@ -14,7 +14,6 @@
 class HybridTagger(RuleBasedTagger):
  | ...
  | def __init__(
- |     self,
  |     rules: list[Rule],
  |     ranker: LexiconEntryRanker,
  |     neural_tagger: NeuralTagger,
@@ -117,7 +116,6 @@ assert tagger(["The", "river", "full", "of", "creaturez"],
 class HybridTagger(RuleBasedTagger):
  | ...
  | def __call__(
- |     self,
  |     tokens: list[str],
  |     lemmas: list[str],
  |     pos_tags: list[str]

@@ -14,7 +14,6 @@
 class RuleBasedTagger:
  | ...
  | def __init__(
- |     self,
  |     rules: list[Rule],
  |     ranker: LexiconEntryRanker,
  |     default_punctuation_tags: set[str] | None = None,
@@ -94,7 +93,6 @@ tagger = RuleBasedTagger([single_word_rule], ranker)
 class RuleBasedTagger:
  | ...
  | def __call__(
- |     self,
  |     tokens: list[str],
  |     lemmas: list[str],
  |     pos_tags: list[str]

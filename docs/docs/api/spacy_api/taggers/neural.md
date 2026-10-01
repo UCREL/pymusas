@@ -14,7 +14,6 @@
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def __init__(
- |     self,
  |     name: str = 'pymusas_neural_tagger',
  |     pymusas_tags_token_attr: str = 'pymusas_tags',
  |     pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes',
@@ -202,7 +201,6 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def initialize(
- |     self,
  |     get_examples: Callable[[], Iterable[Example]] | None = None,
  |     *,
  |     nlp: Language | None = None,
@@ -272,7 +270,6 @@ order.
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def to_disk(
- |     self,
  |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
@@ -318,7 +315,6 @@ with TemporaryDirectory() as temp_dir:
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def from_disk(
- |     self,
  |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()

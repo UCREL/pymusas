@@ -14,7 +14,6 @@
 class NeuralTagger:
  | ...
  | def __init__(
- |     self,
  |     pretrained_model_name_or_path: str | Path,
  |     top_n: int = -1,
  |     device: str = 'cpu',
@@ -113,7 +112,6 @@ class NeuralTagger:
  | ...
  | @torch.inference_mode(mode=True)
  | def __call__(
- |     self,
  |     tokens: list[str]
  | ) -> list[tuple[list[str], list[tuple[int, int]]]]
 ```

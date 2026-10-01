@@ -14,7 +14,6 @@
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def __init__(
- |     self,
  |     name: str = 'pymusas_rule_based_tagger',
  |     pymusas_tags_token_attr: str = 'pymusas_tags',
  |     pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes',
@@ -209,7 +208,6 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def initialize(
- |     self,
  |     get_examples: Callable[[], Iterable[Example]] | None = None,
  |     *,
  |     nlp: Language | None = None,
@@ -280,7 +278,6 @@ order.
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def to_bytes(
- |     self,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
  | ) -> bytes
@@ -321,7 +318,6 @@ tagger_bytes = tagger.to_bytes()
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def from_bytes(
- |     self,
  |     bytes_data: bytes,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
@@ -372,7 +368,6 @@ assert tagger_2.ranker == ranker
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def to_disk(
- |     self,
  |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
@@ -423,7 +418,6 @@ with TemporaryDirectory() as temp_dir:
 class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def from_disk(
- |     self,
  |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()

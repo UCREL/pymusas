@@ -339,6 +339,11 @@ class AllenNlpRenderer(MarkdownRenderer):
         """
         result = []
 
+        # Mirror pydoc_markdown's `format_function_signature`, which only
+        # excludes a leading argument that is named `self`.
+        if args and args[0].name == "self":
+            args = args[1:]
+
         for arg in args:
             parts = []
             if arg.type == docspec.Argument.Type.KEYWORD_ONLY and '*' not in result:

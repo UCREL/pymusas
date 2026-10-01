@@ -33,7 +33,6 @@ class Rule(Serialise):
  | ...
  | @abstractmethod
  | def __call__(
- |     self,
  |     tokens: list[str],
  |     lemmas: list[str],
  |     pos_tags: list[str]

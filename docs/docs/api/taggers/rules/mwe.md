@@ -14,7 +14,6 @@
 class MWERule(Rule):
  | ...
  | def __init__(
- |     self,
  |     mwe_lexicon_lookup: dict[str, list[str]],
  |     pos_mapper: dict[str, list[str]] | None = None,
  |     single_word_rule: SingleWordRule | None = None
@@ -106,7 +105,6 @@ assert ('C1/A1',) == ranking_meta_data[1][0].semantic_tags
 class MWERule(Rule):
  | ...
  | def __call__(
- |     self,
  |     tokens: list[str],
  |     lemmas: list[str],
  |     pos_tags: list[str]

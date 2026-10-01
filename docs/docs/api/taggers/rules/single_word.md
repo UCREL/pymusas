@@ -14,7 +14,6 @@
 class SingleWordRule(Rule):
  | ...
  | def __init__(
- |     self,
  |     lexicon_collection: dict[str, list[str]],
  |     lemma_lexicon_collection: dict[str, list[str]],
  |     pos_mapper: dict[str, list[str]] | None = None
@@ -77,7 +76,6 @@ the `lexicon_collection` and `lemma_lexicon_collection` attributes.
 class SingleWordRule(Rule):
  | ...
  | def __call__(
- |     self,
  |     tokens: list[str],
  |     lemmas: list[str],
  |     pos_tags: list[str]
@@ -112,7 +110,6 @@ object based on the rule matches stated in the class docstring above.
 class SingleWordRule(Rule):
  | ...
  | def best_match(
- |     self,
  |     token: str,
  |     lemma: str,
  |     pos_tag: str

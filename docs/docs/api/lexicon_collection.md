@@ -297,7 +297,6 @@ assert least_likely_tag == 'A1'
 class LexiconCollection(MutableMapping):
  | ...
  | def add_lexicon_entry(
- |     self,
  |     value: LexiconEntry,
  |     include_pos: bool = True
  | ) -> None
@@ -649,7 +648,6 @@ object is the same class and contains the same `data` instance attribute.
 class MWELexiconCollection(MutableMapping):
  | ...
  | def __init__(
- |     self,
  |     data: dict[str, list[str]] | None = None,
  |     pos_mapper: dict[str, list[str]] | None = None
  | ) -> None
@@ -779,7 +777,6 @@ assert ({k: dict(v) for k, v in mwe_collection.mwe_regular_expression_lookup.ite
 class MWELexiconCollection(MutableMapping):
  | ...
  | def mwe_match(
- |     self,
  |     mwe_template: str,
  |     mwe_type: LexiconType
  | ) -> list[str]

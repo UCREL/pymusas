@@ -56,7 +56,6 @@ class LexiconEntryRanker(Serialise):
  | ...
  | @abstractmethod
  | def __call__(
- |     self,
  |     token_ranking_data: list[list[RankingMetaData]]
  | ) -> tuple[list[list[int]], list[RankingMetaData | None]]
 ```
@@ -85,7 +84,6 @@ object of the **global** lowest ranked match for each token.
 class ContextualRuleBasedRanker(LexiconEntryRanker):
  | ...
  | def __init__(
- |     self,
  |     maximum_n_gram_length: int,
  |     maximum_number_wildcards: int
  | ) -> None
@@ -386,7 +384,6 @@ assert (ContextualRuleBasedRanker.get_global_lowest_ranks(token_ranking_data, to
 class ContextualRuleBasedRanker(LexiconEntryRanker):
  | ...
  | def __call__(
- |     self,
  |     token_ranking_data: list[list[RankingMetaData]]
  | ) -> tuple[list[list[int]], list[RankingMetaData | None]]
 ```

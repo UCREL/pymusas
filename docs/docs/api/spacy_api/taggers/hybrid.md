@@ -14,7 +14,6 @@
 class HybridTagger(RuleBasedTagger, NeuralTagger):
  | ...
  | def __init__(
- |     self,
  |     name: str = 'pymusas_hybrid_tagger',
  |     pymusas_tags_token_attr: str = 'pymusas_tags',
  |     pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes',
@@ -272,7 +271,6 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
 class HybridTagger(RuleBasedTagger, NeuralTagger):
  | ...
  | def initialize(
- |     self,
  |     get_examples: Callable[[], Iterable[Example]] | None = None,
  |     *,
  |     nlp: Language | None = None,
@@ -360,7 +358,6 @@ order.
 class HybridTagger(RuleBasedTagger, NeuralTagger):
  | ...
  | def to_bytes(
- |     self,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
  | ) -> bytes
@@ -380,7 +377,6 @@ it is not implemented for the HybridTagger.
 class HybridTagger(RuleBasedTagger, NeuralTagger):
  | ...
  | def from_bytes(
- |     self,
  |     bytes_data: bytes,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
@@ -401,7 +397,6 @@ it is not implemented for the HybridTagger.
 class HybridTagger(RuleBasedTagger, NeuralTagger):
  | ...
  | def to_disk(
- |     self,
  |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
@@ -458,7 +453,6 @@ with TemporaryDirectory() as temp_dir:
 class HybridTagger(RuleBasedTagger, NeuralTagger):
  | ...
  | def from_disk(
- |     self,
  |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
