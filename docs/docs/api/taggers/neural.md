@@ -143,7 +143,7 @@ decorator which makes the model run more efficiently.
 
 
 - __tokens__ : `list[str]` <br/>
-    A List of full text form of the tokens to be tagged.
+    A `list` of full text form of the tokens to be tagged.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 

@@ -42,7 +42,7 @@ class RankingMetaData:
     semantic_tags : `tuple[str, ...]`
         The semantic tags associated with the lexicon entry. The semantic tags
         are in rank order, the most likely tag is the first tag in the tuple.
-        The Tuple can be of variable length hence the `...` in the
+        The `tuple` can be of variable length hence the `...` in the
         type annotation.
     '''
     lexicon_type: LexiconType

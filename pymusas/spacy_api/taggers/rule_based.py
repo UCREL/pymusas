@@ -55,7 +55,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
         <tr>
             <td> Token._.pymusas_tags </td>
             <td> `list[str]` </td>
-            <td> Prediced tags, the first tag in the List of tags is the
+            <td> Prediced tags, the first tag in the `list` of tags is the
             most likely tag.</td>
         </tr>
         <tr>

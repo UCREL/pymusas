@@ -61,7 +61,7 @@ lemmatiser in your spaCy pipeline this ok, just use the default
     <tr>
         <td> Token._.pymusas_tags </td>
         <td> `list[str]` </td>
-        <td> Prediced tags, the first tag in the List of tags is the
+        <td> Prediced tags, the first tag in the `list` of tags is the
         most likely tag.</td>
     </tr>
     <tr>

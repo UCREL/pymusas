@@ -126,7 +126,7 @@ it returns a `list` of USAS core POS tags that are equivalent, whereby if the
 length of the `list` is greater than `1` then the first tag in the `list`
 is the most equivalent tag.
 
-If the List is empty then an invalid UPOS tag was given.
+If the `list` is empty then an invalid UPOS tag was given.
 
 The mappings between UPOS and USAS core can be seen in [`UPOS_TO_USAS_CORE`](#upos_to_usas_core)
 

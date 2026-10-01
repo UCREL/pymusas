@@ -108,11 +108,11 @@ class RuleBasedTagger():
         # Parameters
 
         tokens : `list[str]`
-            A List of full text form of the tokens to be tagged.
+            A `list` of full text form of the tokens to be tagged.
         lemmas : `list[str]`
-            The List of lemma/base form of the tokens to be tagged.
+            The `list` of lemma/base form of the tokens to be tagged.
         pos_tags : `list[str]`
-            The List of POS tags of the tokens to be tagged.
+            The `list` of POS tags of the tokens to be tagged.
         
         # Returns
 

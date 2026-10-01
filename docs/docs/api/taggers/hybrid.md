@@ -151,11 +151,11 @@ CPU at least the more time it will take to predict the tags.
 
 
 - __tokens__ : `list[str]` <br/>
-    A List of full text form of the tokens to be tagged.
+    A `list` of full text form of the tokens to be tagged.
 - __lemmas__ : `list[str]` <br/>
-    The List of lemma/base form of the tokens to be tagged.
+    The `list` of lemma/base form of the tokens to be tagged.
 - __pos\_tags__ : `list[str]` <br/>
-    The List of POS tags of the tokens to be tagged.
+    The `list` of POS tags of the tokens to be tagged.
 
 <h4 id="__call__.returns">Returns<a className="headerlink" href="#__call__.returns" title="Permanent link">&para;</a></h4>
 

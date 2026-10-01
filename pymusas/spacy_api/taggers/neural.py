@@ -53,7 +53,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
         <tr>
             <td> Token._.pymusas_tags </td>
             <td> `list[str]` </td>
-            <td> Predicted tags, the first tag in the List of tags is the
+            <td> Predicted tags, the first tag in the `list` of tags is the
             most likely tag.</td>
         </tr>
         <tr>

@@ -54,7 +54,7 @@ The number of possible candidate tags for each token is determined by the
     <tr>
         <td> Token._.pymusas_tags </td>
         <td> `list[str]` </td>
-        <td> Predicted tags, the first tag in the List of tags is the
+        <td> Predicted tags, the first tag in the `list` of tags is the
         most likely tag.</td>
     </tr>
     <tr>

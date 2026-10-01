@@ -51,7 +51,7 @@ same text/sentence that is being tagged.
 - __semantic\_tags__ : `tuple[str, ...]` <br/>
     The semantic tags associated with the lexicon entry. The semantic tags
     are in rank order, the most likely tag is the first tag in the tuple.
-    The Tuple can be of variable length hence the `...` in the
+    The `tuple` can be of variable length hence the `...` in the
     type annotation.
 
 <a id="pymusas.rankers.ranking_meta_data.RankingMetaData.lexicon_type"></a>

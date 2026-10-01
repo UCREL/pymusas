@@ -143,7 +143,7 @@ class NeuralTagger():
         # Parameters
 
         tokens : `list[str]`
-            A List of full text form of the tokens to be tagged.
+            A `list` of full text form of the tokens to be tagged.
  
         # Returns
 
