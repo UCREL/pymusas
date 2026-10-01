@@ -2,10 +2,13 @@ from typing import Iterator
 
 import pytest
 import spacy
+import spacy.tokens
+import spacy.vocab
 
 from pymusas import lexicon_collection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.taggers.rules import mwe, single_word
+from pymusas.taggers.rules.rule import Rule
 from pymusas.utils import NEURAL_EXTRA_PACKAGES, are_packages_installed
 
 
@@ -73,7 +76,7 @@ def test_rule_base_single_and_mwe_spacy_tagger() -> None:
     mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None,
                            single_word_rule=single_rule)
 
-    rules = [single_rule, mwe_rule]
+    rules: list[Rule] = [single_rule, mwe_rule]
     ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
     tagger = nlp.add_pipe('pymusas_rule_based_tagger')
     tagger.rules = rules  # type: ignore
@@ -131,7 +134,7 @@ def test_neural_spacy_tagger(with_gpu: bool, device: str, with_spacy_gpu: bool) 
             nlp.add_pipe('pymusas_neural_tagger')
     else:
         tagger = nlp.add_pipe('pymusas_neural_tagger', config=config)
-        tagger.initialize(pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")  # type: ignore[attr-defined]
+        tagger.initialize(pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")  # ty: ignore[unresolved-attribute]
         output_doc = nlp(" ".join(TEST_TOKENS))
         assert len(output_doc) == len(TEST_TOKENS)
         for token_index, token in enumerate(output_doc):
@@ -192,7 +195,7 @@ def test_hybrid_tagger(device: str) -> None:
         mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None,
                                single_word_rule=single_rule)
 
-        rules = [single_rule, mwe_rule]
+        rules: list[Rule] = [single_rule, mwe_rule]
         ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
         neural_tagger = NeuralTagger("ucrelnlp/PyMUSAS-Neural-English-Small-BEM",
                                      top_n=5,
@@ -260,11 +263,11 @@ def test_hybrid_spacy_tagger(with_gpu: bool, device: str, with_spacy_gpu: bool) 
         mwe_rule = mwe.MWERule(mwe_lexicon, pos_mapper=None,
                                single_word_rule=single_rule)
 
-        rules = [single_rule, mwe_rule]
+        rules: list[Rule] = [single_rule, mwe_rule]
         ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
 
         tagger = nlp.add_pipe('pymusas_hybrid_tagger', config=config)
-        tagger.initialize(rules=rules,  # type: ignore[attr-defined]
+        tagger.initialize(rules=rules,  # ty: ignore[unresolved-attribute]
                           ranker=ranker,
                           pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
         test_doc = spacy.tokens.Doc(nlp.vocab,

@@ -3,7 +3,7 @@ from enum import Enum
 import json
 import os
 from pathlib import Path
-from typing import Iterable, Iterator, cast
+from typing import Iterable, Iterator, TypedDict, cast
 import warnings
 
 from datasets import get_dataset_config_names, get_dataset_split_names, load_dataset
@@ -342,8 +342,19 @@ def load_neural_tagger(language_code: str, size: str, device: str) -> spacy.Lang
         return spacy_model
 
 
+class HybridTaggerInitializerKwargs(TypedDict):
+    """
+    The keyword arguments for `HybridTagger.initialize`.
+    """
+    rules: list[Rule]
+    ranker: ContextualRuleBasedRanker
+    default_punctuation_tags: list[str]
+    default_number_tags: list[str]
+    pretrained_model_name_or_path: str
+
+
 def get_hybrid_tagger_initializer_kwargs(language_code: str, size: str
-                                         ) -> dict[str, set[str] | ContextualRuleBasedRanker | list[Rule] | str]:
+                                         ) -> HybridTaggerInitializerKwargs:
     """
     Returns the keyword arguments to use for the initializer of the hybrid tagger
     for the given language code and size.
@@ -354,7 +365,7 @@ def get_hybrid_tagger_initializer_kwargs(language_code: str, size: str
         size (str): The size of the neural tagger model to load within the hybrid tagger.
 
     Returns:
-        dict[str, Any]: The keyword arguments to use for the initializer of the hybrid tagger.
+        HybridTaggerInitializerKwargs: The keyword arguments to use for the initializer of the hybrid tagger.
     """
     if language_code not in hybrid_tagger_supported_languages:
         raise ValueError("The benchmarking script currently only supports the "
@@ -371,13 +382,13 @@ def get_hybrid_tagger_initializer_kwargs(language_code: str, size: str
     # The rules that use the lexicons
     single_word_rule = SingleWordRule(lexicon_lookup, lemma_lexicon_lookup)
     mwe_word_rule = MWERule(mwe_lexicon_lookup)
-    word_rules = [single_word_rule, mwe_word_rule]
+    word_rules: list[Rule] = [single_word_rule, mwe_word_rule]
     # The ranker that determines which rule should be used/applied
     ranker_arguments = ContextualRuleBasedRanker.get_construction_arguments(word_rules)
     ranker = ContextualRuleBasedRanker(*ranker_arguments)
     # POS that indicate a Punctuation and Numeric value
-    default_punctuation_tags = set(['PUNCT'])
-    default_number_tags = set(['NUM'])
+    default_punctuation_tags = ['PUNCT']
+    default_number_tags = ['NUM']
 
     pretrained_model_name = language_code_to_neural_model_huggingface_id[language_code][size]
 
@@ -411,7 +422,7 @@ def load_hybrid_tagger(language_code: str, size: str, device: str) -> spacy.Lang
                                              config={"top_n": 5,
                                                      "device": device})
         hybrid_tagger = cast(HybridTagger, hybrid_tagger)
-        hybrid_tagger.initialize(**get_hybrid_tagger_initializer_kwargs(language_code, size))  # type: ignore[arg-type]
+        hybrid_tagger.initialize(**get_hybrid_tagger_initializer_kwargs(language_code, size))
         return spacy_model
 
 

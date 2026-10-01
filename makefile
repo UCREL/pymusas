@@ -65,12 +65,11 @@ release-notes: build-python-package
 
 .PHONY: lint
 lint:
-	@echo "ISort:"
-	@uv run isort pymusas tests scripts benchmarks
-	@echo "Flake 8:"
-	@uv run flake8 --config ./.flake8 pymusas/** tests/** scripts/** benchmarks/**
-	@echo "MyPy:"
-	@uv run mypy
+	@echo "Linting with Ruff:"
+	@uv run ruff check --fix-only pymusas tests scripts benchmarks
+	@uv run ruff check pymusas tests scripts benchmarks
+	@echo "Type checking with Ty:"
+	@uv run ty check
 	@echo "Linting finished"
 
 .PHONY: tests

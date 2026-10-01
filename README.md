@@ -136,7 +136,7 @@ uv sync --all-extras
 
 ### Running linters and tests
 
-This code base uses isort, flake8 and mypy to ensure that the format of the code is consistent and contain type hints. ISort and mypy settings can be found within [./pyproject.toml](./pyproject.toml) and the flake8 settings can be found in [./.flake8](./.flake8). To run these linters:
+This code base uses [ruff](https://docs.astral.sh/ruff/) (linting and import sorting) and [ty](https://docs.astral.sh/ty/) (type checking) to ensure that the format of the code is consistent and contain type hints. The settings for both can be found within [./pyproject.toml](./pyproject.toml). To run these linters, which will also automatically fix any fixable ruff errors such as import order:
 
 ``` bash
 make lint

@@ -12,6 +12,7 @@ Prepares markdown release notes for GitHub releases.
 '''
 
 import os
+import subprocess
 from typing import List
 
 import pymusas
@@ -59,11 +60,11 @@ def get_change_log_notes() -> str:
 
 
 def get_commit_history() -> str:
-    stream = os.popen(
-        f"git log $(git describe --always --tags --abbrev=0 {TAG}^^)..{TAG}^ --oneline"
+    git_log = subprocess.run(
+        f"git log $(git describe --always --tags --abbrev=0 {TAG}^^)..{TAG}^ --oneline",
+        shell=True, stdout=subprocess.PIPE, text=True
     )
-    commit_history = "## Commits\n\n" + stream.read()
-    stream.close()
+    commit_history = "## Commits\n\n" + git_log.stdout
     return commit_history
 
 

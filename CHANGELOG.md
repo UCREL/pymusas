@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Df` tags that cannot be resolved, because the `MWERule` has no `single_word_rule` or the token has no single word match, are now output as `Z99` instead of `Df`.
 - MWE templates with a `Df` tag but no token starting with a wildcard are now ignored by `MWELexiconCollection`, with a `UserWarning`.
 - `MWERule.to_bytes` uses a new serialisation format that includes the `single_word_rule`. `MWERule.from_bytes` can still load the previous format (backward compatibility).
+- Development tooling: replaced isort, flake8 and mypy with [ruff](https://docs.astral.sh/ruff/) (linting and import sorting) and [ty](https://docs.astral.sh/ty/) (type checking) so that linting runs faster, resolves [issue 63](https://github.com/UCREL/pymusas/issues/63). The `.flake8` file has been removed and all settings are now in `pyproject.toml`. Code in the tests, scripts and benchmarks has been updated with more precise type hints so that it type checks with ty. Modernising type hints to built-in generics is tracked in [issue 64](https://github.com/UCREL/pymusas/issues/64).
 
 ## [v0.4.2](https://github.com/UCREL/pymusas/releases/tag/v0.4.2) - 2026-05-29
 

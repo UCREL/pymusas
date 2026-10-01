@@ -274,7 +274,7 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
             tokenizer_kwargs = {}
             if self._tokenizer_kwargs is not None:
                 tokenizer_kwargs = self._tokenizer_kwargs
-            tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path,  # type: ignore
+            tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path,
                                                       **tokenizer_kwargs)
             assert isinstance(tokenizer, PreTrainedTokenizerBase)
             self.tokenizer = tokenizer

@@ -1,6 +1,7 @@
 from pathlib import Path
 import tempfile
 import timeit
+from typing import cast
 
 import benchmarking_utils
 import typer
@@ -128,20 +129,25 @@ def main(language_code: benchmarking_utils.LanguageCodes = typer.Argument(help=l
         output_statistics[tokens_per_second_key] = tokens_per_seconds
 
         large_text = ""
+        large_text_tokens_processed = 0
         for line in benchmarking_utils.text_from_files(Path(temp_dir), temp_file_prefix):
             large_text += line
             spacy_doc = spacy_nlp(line)
-            output_statistics[large_text_tokens_processed_key] += len(spacy_doc)  # type: ignore[operator]
+            large_text_tokens_processed += len(spacy_doc)
 
-            if output_statistics[large_text_tokens_processed_key] >= large_text_token_limit:  # type: ignore[operator]
+            if large_text_tokens_processed >= large_text_token_limit:
                 break
+        output_statistics[large_text_tokens_processed_key] = large_text_tokens_processed
         
         with benchmarking_utils.track_memory_usage(large_text_memory_requirements_key, large_gpu_memory_requirements_key, output_statistics, device):
             tagger = benchmarking_utils.load_neural_tagger(language_code, tagger_size, device)
             tagger(large_text)
 
-    output_statistics[average_memory_required_key] += output_statistics[load_memory_requirements_key]  # type: ignore[operator]
-    output_statistics[large_text_memory_requirements_key] += output_statistics[load_memory_requirements_key]  # type: ignore[operator]
+    load_memory_required = cast(float, output_statistics[load_memory_requirements_key])
+    average_memory_required = cast(float, output_statistics[average_memory_required_key])
+    large_text_memory_required = cast(float, output_statistics[large_text_memory_requirements_key])
+    output_statistics[average_memory_required_key] = average_memory_required + load_memory_required
+    output_statistics[large_text_memory_requirements_key] = large_text_memory_required + load_memory_required
     benchmarking_utils.to_json_file(output_file, output_statistics)
 
 

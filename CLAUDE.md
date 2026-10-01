@@ -7,7 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - Use `match`/`case` syntax instead of `if`/`elif`/`else` for pattern matching, but do use `if/elif/else` for non-pattern matching. Reserve `match`/`case` for genuinely multi-way structural dispatch, e.g. matching several dataclass/enum variants, or destructuring nested sequences/mappings where the binding syntax saves real work. A two-way branch on a single `isinstance` check or a membership test (`"key" in d`) reads more clearly as a plain `if`/`else`, even though it's technically "type-based" — don't convert those just because `match`/`case` is available.
 - Use modern type hints through the `typing` module `Optional`, `Union`, `Dict`, `List`.
 - Write code compatible with strict static analysis. This project uses
-  isort, flake8, and mypy.
+  ruff (linting and import sorting) and ty (type checking), both configured in
+  `pyproject.toml`. Ruff's `ANN` rules require every function to be fully annotated.
+  ty only honours `# type: ignore` and `# ty: ignore[<rule>]`, not mypy-style
+  `# type: ignore[<code>]`. Prefer fixing the types over suppressing them.
 - Use `pathlib.Path` for all filesystem operations instead of `os.path`.
 - Follow PEP 8. Prefer f-strings, comprehensions, and context managers where they improve clarity.
 - Prioritise readability — avoid deeply nested `if` statements or complex one-liner comprehensions.
@@ -42,7 +45,7 @@ uv sync --all-extras
 
 Use the `make` commands when finalising a feature or fix, otherwise use `make` or the underlying tools:
 
-- `make lint` — `uv run isort pymusas tests scripts benchmarks`, then `uv run flake8 --config ./.flake8 pymusas/** tests/** scripts/** benchmarks/**`, then `uv run mypy`, 
+- `make lint` — `uv run ruff check --fix-only pymusas tests scripts benchmarks`, then `uv run ruff check pymusas tests scripts benchmarks`, then `uv run ty check`.
 - `make tests` — `uv run coverage run` (runs `pytest` under the hood via
   `[tool.coverage.run] command_line` within @pyproject.toml) then `uv run coverage report`.
   Only `tests/unit_tests` is collected by default (`testpaths`).
@@ -77,8 +80,8 @@ Notes on test dependencies:
 - Many doctests download lexicon TSVs from GitHub (`Multilingual-USAS`) through
   `pymusas.file_utils.download_url_file`, and cache them under `PYMUSAS_HOME`
   (default `~/.cache/pymusas`). Those doctests need network access the first time.
-- CI runs `isort --check-only`, so run `make lint` (which rewrites imports)
-  before committing.
+- CI runs `ruff check` without fixing, so run `make lint` (which applies ruff's
+  fixes, such as import sorting) before committing.
 
 ### Handy makefile commands
 

@@ -59,7 +59,7 @@ class SingleWordRule(Rule):
     '''
     def __init__(self, lexicon_collection: Dict[str, List[str]],
                  lemma_lexicon_collection: Dict[str, List[str]],
-                 pos_mapper: Optional[Dict[str, List[str]]] = None):
+                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
 
         self.lexicon_collection = LexiconCollection(lexicon_collection)
         self.lemma_lexicon_collection = LexiconCollection(lemma_lexicon_collection)

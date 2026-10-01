@@ -8,6 +8,7 @@ from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
@@ -197,7 +198,7 @@ def test_rule_based_tagger__call__default_tags() -> None:
                                        'style|NOUN': ['A4.1']}, {})
     mwe_rule = MWERule({'*_ADJ style_NOUN': ['C1/Df']},
                        single_word_rule=single_word_rule)
-    rules = [single_word_rule, mwe_rule]
+    rules: List[Rule] = [single_word_rule, mwe_rule]
     ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
     tagger = RuleBasedTagger(rules, ranker)
 

@@ -106,7 +106,7 @@ class NeuralTagger():
         self.wsd_model = BEM.from_pretrained(pretrained_model_name_or_path)
         if tokenizer_kwargs is None:
             tokenizer_kwargs = {}
-        tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path,  # type: ignore
+        tokenizer = AutoTokenizer.from_pretrained(pretrained_model_name_or_path,
                                                   **tokenizer_kwargs)
         assert isinstance(tokenizer, PreTrainedTokenizerBase)
         self.tokenizer = tokenizer
