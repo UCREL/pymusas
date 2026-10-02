@@ -162,6 +162,8 @@ make full-coverage-tests
 
 To note the functional tests that are ran within this `make` command are the tests that build the `pymusas` package and then use the built package to test that the output of the taggers are what is to be expected.
 
+**Note** `make full-coverage-tests` continues to the next step when a step fails, and it still exits successfully. This ensures the temporary `pyproject.toml` is always restored at the end. Check the output for failed tests or `error:` messages, rather than relying on the exit code of the `make` command.
+
 #### Running GPU tests
 
 **NOTE** We do not expect contributors to run these tests, the UCREL team can run these tests as part of the pull request before we merge into the main branch.

@@ -71,7 +71,10 @@ wheel*. They are not collected by `make tests`. Run them with
 functional tests. That target runs the functional tests twice in isolated
 environments, once without and once with the `neural` extra, because each test
 branches on whether the neural packages are installed. The target also rewrites
-`pyproject.toml` temporarily and restores it at the end. Running
+`pyproject.toml` temporarily and restores it at the end. Because of
+`.ONESHELL` without `set -e`, a failing step does not stop the target and the
+exit code only reflects the last command, so check the output for test
+failures and `error:` lines rather than the exit code. Running
 `uv run pytest tests/functional_tests` directly tests the source tree in the dev
 environment, which has all extras installed, so it only covers the
 neural-installed path.

@@ -6,7 +6,7 @@ SRC = pymusas
 DOCS_API_DIR = ./docs/docs/api
 DOCS_SRC_TMP = $(filter-out $(SRC)/__main__.py %/__init__.py ,$(shell find $(SRC) -type f -name '*.py'))
 DOCS_SRC = $(subst .py,,$(subst /,.,${DOCS_SRC_TMP}))
-VERSION_CMD = "uv run scripts/get_version.py ./pyproject.toml"
+VERSION_CMD = "uv run --frozen scripts/get_version.py ./pyproject.toml"
 
 
 .PHONY: develop-docs
@@ -90,13 +90,18 @@ doc-tests:
 	@uv run coverage run -m pytest --doctest-modules pymusas/
 	@uv run coverage report
 
+# NOTE: with .ONESHELL and no `set -e`, a failing step does not stop this target
+# and its exit code only reflects the last command. This ensures pyproject.toml is
+# always restored, but the output must be checked for failures.
+# --frozen stops uv from re-locking against the temporary pyproject.toml version,
+# which would otherwise rewrite uv.lock.
 .PHONY: full-coverage-tests
 full-coverage-tests:
-	@uv run scripts/create_temporary_version.py ./pyproject.toml ./temp_pyproject.toml
 	@uv lock --check
+	@uv run scripts/create_temporary_version.py ./pyproject.toml ./temp_pyproject.toml
 	@rm -rf ./dist
 	@uv build
-	@uv run coverage erase
+	@uv run --frozen coverage erase
 	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl \
 	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
 	coverage run --append -m pytest tests/functional_tests
@@ -108,10 +113,12 @@ full-coverage-tests:
 	--index https://download.pytorch.org/whl/cpu \
 	--with "pytest<9.0.2" --with "coverage>=6.0.0" --no-project --isolated \
 	coverage run --append -m pytest --doctest-modules pymusas/
-	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural,dev] \
-	--index https://download.pytorch.org/whl/cpu \
+	@uv export --frozen --only-group dev --no-hashes --no-emit-project --quiet -o dist/dev-requirements.txt
+	@uv run --with dist/pymusas-$$("${VERSION_CMD}")-py3-none-any.whl[neural] \
+	--with-requirements dist/dev-requirements.txt \
+	--index https://download.pytorch.org/whl/cpu --index-strategy unsafe-first-match \
 	--no-project --isolated coverage run --append
-	@uv run coverage report
+	@uv run --frozen coverage report
 	@mv ./temp_pyproject.toml ./pyproject.toml
 	@rm -rf ./dist
 

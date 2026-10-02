@@ -22,6 +22,6 @@ dependencies:
     - "psutil>=7.2.1"
     - "pytest>=6.0,!=7.1.0,!=8.1.0,<9.0.2"
     - "responses>=0.25.7"
-    - "tomli-w>=1.2.0"
+    - "tomlkit>=0.15.1"
     - "types-requests>=2.32.4.20250913"
     - "types-psutil>=7.2.1.20251231"

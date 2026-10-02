@@ -1,17 +1,10 @@
 import argparse
 from pathlib import Path
 import random
-import sys
 import time
 from typing import cast
 
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
-
-import tomli_w
+import tomlkit
 
 
 def get_unique_number() -> int:
@@ -51,14 +44,13 @@ if __name__ == "__main__":
     toml_file_path = cast(Path, args.toml_file_path)
     copy_toml_file_path = cast(Path, args.store_original_toml_file_path)
 
-    with toml_file_path.open("r+", encoding="utf-8") as original_toml_fp:
-        pyproject_dict = tomllib.loads(original_toml_fp.read())
-        with copy_toml_file_path.open("w", encoding="utf-8") as copy_toml_fp:
-            copy_toml_fp.write(tomli_w.dumps(pyproject_dict))
-        current_project_version = pyproject_dict['project']['version']
-        x, y, z = current_project_version.split('.')
-        unique_version = f"{x}.{y}.{z}.{get_unique_number()}"
-        pyproject_dict['project']['version'] = unique_version
-        original_toml_fp.seek(0)
-        original_toml_fp.truncate()
-        original_toml_fp.write(tomli_w.dumps(pyproject_dict))
+    # The original file is copied byte for byte and the version is edited with
+    # tomlkit, so that comments and formatting are preserved in both files.
+    original_toml_text = toml_file_path.read_text(encoding="utf-8")
+    copy_toml_file_path.write_text(original_toml_text, encoding="utf-8")
+
+    pyproject = tomlkit.parse(original_toml_text)
+    current_project_version = str(pyproject["project"]["version"])
+    x, y, z = current_project_version.split('.')
+    pyproject["project"]["version"] = f"{x}.{y}.{z}.{get_unique_number()}"
+    toml_file_path.write_text(tomlkit.dumps(pyproject), encoding="utf-8")

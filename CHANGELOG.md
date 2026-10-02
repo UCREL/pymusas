@@ -21,10 +21,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - MWE templates with a `Df` tag but no token starting with a wildcard are now ignored by `MWELexiconCollection`, with a `UserWarning`.
 - `MWERule.to_bytes` uses a new serialisation format that includes the `single_word_rule`. `MWERule.from_bytes` can still load the previous format (backward compatibility).
 - Development tooling: replaced isort, flake8 and mypy with [ruff](https://docs.astral.sh/ruff/) (linting and import sorting) and [ty](https://docs.astral.sh/ty/) (type checking) so that linting runs faster, resolves [issue 63](https://github.com/UCREL/pymusas/issues/63). The `.flake8` file has been removed and all settings are now in `pyproject.toml`. Code in the tests, scripts and benchmarks has been updated with more precise type hints so that it type checks with ty. Modernising type hints to built-in generics is tracked in [issue 64](https://github.com/UCREL/pymusas/issues/64).
+- Development tooling: `scripts/create_temporary_version.py` and `scripts/get_version.py` now use [tomlkit](https://github.com/python-poetry/tomlkit) instead of `tomllib`/`tomli` and `tomli-w`. The `tomli` and `tomli-w` development dependencies have been replaced with `tomlkit`.
+- `make full-coverage-tests` now checks that `uv.lock` is up to date before the temporary version is set in `pyproject.toml`, and its `uv run` commands that use the project environment run with `--frozen`.
 
 ### Fixed
 
 - The API documentation generator, `scripts/py2md.py`, only removed `self` from method signatures that fit on one line, so it appeared in longer signatures such as `__init__`. `self` is now removed from all method signatures.
+- Comments and formatting in `pyproject.toml` are no longer removed when running `make full-coverage-tests`. Previously `scripts/create_temporary_version.py` re-serialised `pyproject.toml`, and the backup it restored at the end, without comments.
+- `make full-coverage-tests` no longer changes the `pymusas` version in `uv.lock` to the temporary version.
+- The unit test step of `make full-coverage-tests` failed because it installed the `dev` dependency group as an extra (`[neural,dev]`), which a built wheel does not contain. The `dev` group is now exported to a requirements file and installed from that.
 
 ## [v0.4.2](https://github.com/UCREL/pymusas/releases/tag/v0.4.2) - 2026-05-29
 
