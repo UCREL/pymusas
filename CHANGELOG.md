@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `SingleWordRule` has a new optional `autotag_lexicon_collection` argument. `autotag` patterns are only matched for tokens that have no single word lexicon match, and both the lemma and POS patterns must match. If more than one `autotag` entry matches a token, only the entry that comes first in the `autotag` lexicon is used, so the lexicon order sets the priority. Lexicon order takes priority over whether the token, lemma, or their lower cased versions matched, and over the order of the POS tags in a `pos_mapper` mapping.
   - `pymusas.taggers.rules.SingleWordRule.v2` spaCy registered function, which accepts the `autotag_lexicon_collection` argument, backward compatibility support through `pymusas.taggers.rules.SingleWordRule.v1`.
   - `pymusas.AutotagLexiconCollection.from_tsv` spaCy registered function.
+- Documentation:
+    - Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md). Now includes how to create the custom rule based tagger with mismatched POS tagsets between tokens in the running text and lexicons.
+    - Linked the [combine/merge lexicons how guide](./docs/docs/usage/how_to/combine_lexicons.md) with the [creating a custom rule based tagger how to guide](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md) stating that if users want a more detailed guide on creating a custom rule based tagger they should read the `creating a custom rule based tagger how to guide.`
 
 ### Changed
 
@@ -32,6 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Development tooling: replaced isort, flake8 and mypy with [ruff](https://docs.astral.sh/ruff/) (linting and import sorting) and [ty](https://docs.astral.sh/ty/) (type checking) so that linting runs faster, resolves [issue 63](https://github.com/UCREL/pymusas/issues/63). The `.flake8` file has been removed and all settings are now in `pyproject.toml`. Code in the tests, scripts and benchmarks has been updated with more precise type hints so that it type checks with ty. Modernising type hints to built-in generics is tracked in [issue 64](https://github.com/UCREL/pymusas/issues/64).
 - Development tooling: `scripts/create_temporary_version.py` and `scripts/get_version.py` now use [tomlkit](https://github.com/python-poetry/tomlkit) instead of `tomllib`/`tomli` and `tomli-w`. The `tomli` and `tomli-w` development dependencies have been replaced with `tomlkit`.
 - `make full-coverage-tests` now checks that `uv.lock` is up to date before the temporary version is set in `pyproject.toml`, and its `uv run` commands that use the project environment run with `--frozen`.
+- The [./.devcontainer/devcontainer.json](./.devcontainer/devcontainer.json) so that on the container being built the git config globally states that this working directory is safe. This is required so that documentation website can be built `make docs/build`.
 
 ### Fixed
 
@@ -39,6 +43,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comments and formatting in `pyproject.toml` are no longer removed when running `make full-coverage-tests`. Previously `scripts/create_temporary_version.py` re-serialised `pyproject.toml`, and the backup it restored at the end, without comments.
 - `make full-coverage-tests` no longer changes the `pymusas` version in `uv.lock` to the temporary version.
 - The unit test step of `make full-coverage-tests` failed because it installed the `dev` dependency group as an extra (`[neural,dev]`), which a built wheel does not contain. The `dev` group is now exported to a requirements file and installed from that.
+
+
+
+
+
+
 
 ## [v0.4.2](https://github.com/UCREL/pymusas/releases/tag/v0.4.2) - 2026-05-29
 

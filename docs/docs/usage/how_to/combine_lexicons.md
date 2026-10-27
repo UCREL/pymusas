@@ -1,9 +1,13 @@
 ---
 title: Combine/Merge Lexicons
-sidebar_position: 3
+sidebar_position: 4
 ---
 
-In this guide we will show how to combine two lexicons together, both for single word and Multi Word Expression (MWE), so that the combined lexicon can be used in a single PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger).
+In this guide we will show how to combine two lexicons together, both for single word and Multi Word Expression (MWE), so that the combined lexicon can be used in a single PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger). 
+
+:::info
+If you want a more detailed guide on creating custom Rule Based Taggers please see the [how to create a custom rule based tagger guide.](/usage/how_to/create_custom_rule_based_tagger)
+:::
 
 This approach is useful if you want the coverage of the existing lexicons that are available for the given language but you want to customize them. You might want to customize them because;
 * Want to add domain specific language to the lexicons, e.g. `flat_* white_*` = `F2/Z3` (type of coffee)
@@ -13,9 +17,9 @@ All of the existing lexicons for different languages can be found at the [Multil
 
 This guide is going to show how to create a PyMUSAS [RuleBasedTagger](/api/spacy_api/taggers/rule_based.md#rulebasedtagger) that uses the existing [English lexicons](https://github.com/UCREL/Multilingual-USAS/tree/master/English) with additional custom lexicons that both extend the existing as well as override them. The guide will be broken down into:
 
-1. Setup
-2. How the existing tagger performs
-3. How to customize the tagger through combining the existing lexicon with a custom lexicon
+1. [Setup](#setup)
+2. [How the existing tagger performs](#how-the-existing-tagger-performs)
+3. [How to customize the tagger through combining the existing lexicon with a custom lexicon](#how-to-customize-the-tagger-through-combining-the-existing-lexicon-with-a-custom-lexicon)
 
 ## Setup
 
@@ -52,7 +56,7 @@ sentence = ("While drinking my flat white I was reading about the "
             "one of the broligarchy")
 ```
 
-Using this sentence and the custom lexicons we will show that we can netter reflect the meaning in this sentence.
+Using this sentence and the custom lexicons we will show that we can better reflect the meaning in this sentence.
 
 ## How the existing tagger performs
 

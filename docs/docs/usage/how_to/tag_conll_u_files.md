@@ -1,6 +1,6 @@
 ---
 title: Tag CoNLL-U Files
-sidebar_position: 2
+sidebar_position: 3
 ---
 
 In this guide we will show how to tag text that is in [CoNLL-U formatted files](https://universaldependencies.org/format.html) and save the output to a TSV file. To make this guide as simple as possible we are going to base it on one language, **French**, and we are going to tag the [French GSD Universal Dependencies version 2.10 development treebank](https://raw.githubusercontent.com/UniversalDependencies/UD_French-GSD/r2.10/fr_gsd-ud-dev.conllu). As we are tagging a treebank that contains gold standard tokens, lemmas, and Part Of Speech tags we will not need any other NLP tools other than the [rule based pre-configured French PyMUSAS spaCy pipeline](https://github.com/UCREL/pymusas-models/releases/tag/fr_single_upos2usas_contextual_none-0.4.0) which will output [USAS](https://ucrel.lancs.ac.uk/usas/) semantic tags.
