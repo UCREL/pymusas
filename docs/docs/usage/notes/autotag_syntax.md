@@ -68,7 +68,7 @@ lemma	pos	semantic_tags
 
 ## Using autotag lexicons in PyMUSAS
 
-An `autotag` lexicon is loaded with [`AutotagLexiconCollection.from_tsv`](/api/lexicon_collection#pymusas.lexicon_collection.AutotagLexiconCollection.from_tsv) and given to the [`SingleWordRule`](/api/taggers/rules/single_word) through its `autotag_lexicon_collection` argument:
+An `autotag` lexicon is loaded with [`AutotagLexiconCollection.from_tsv`](/api/lexicon_collection#from_tsv-1) and given to the [`SingleWordRule`](/api/taggers/rules/single_word) through its `autotag_lexicon_collection` argument:
 
 ``` python
 from pymusas.lexicon_collection import AutotagLexiconCollection
