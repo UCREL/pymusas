@@ -38,7 +38,7 @@ def generate_test_data(test_data_file: Path, lexicon_file: Path
     `pymusas.lexicon_collection.LexiconCollection.from_tsv` method.
     5. The same as 4, but excluding Part Of Speech (POS) information.
     6. A list of a list of expected
-    :class:`pymusas.rankers.lexicon_entry.RankingMetaData` objects.
+    :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` objects.
 
     # Parameters
 
@@ -150,10 +150,10 @@ def compare_token_ranking_meta_data(token_ranking_meta_data_1: list[list[Ranking
                                                         token_ranking_meta_data_2):
         assert len(ranking_meta_data_1) == len(ranking_meta_data_2), index
         assert set(ranking_meta_data_1) == set(ranking_meta_data_2), index
+        index += 1
 
 
-@pytest.mark.parametrize('from_bytes', [False, True])
-def test_single_word_rule__NON_SPECIAL_CASES(from_bytes: bool) -> None:
+def test_single_word_rule__NON_SPECIAL_CASES() -> None:
     '''
     This tests Single Word Rule when using only NON SPECIAL CASES,
     which are direct matches, i.e. does not use any special syntax
@@ -170,16 +170,11 @@ def test_single_word_rule__NON_SPECIAL_CASES(from_bytes: bool) -> None:
     
     single_rule = SingleWordRule(lexicon, lemma_lexicon)
     
-    if from_bytes:
-        single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
-    
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, lemmas, pos_tags))
 
 
-@pytest.mark.parametrize('from_bytes', [False, True])
-def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES(from_bytes: bool
-                                                        ) -> None:
+def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES() -> None:
     '''
     This tests Single Word Rule using the `pos_mapper` when using only
     NON SPECIAL CASES, which are direct matches, i.e. does not use any
@@ -191,26 +186,26 @@ def test_single_word_rule_pos_mapper__NON_SPECIAL_CASES(from_bytes: bool
     pos_mapper = {'NN': ['adv', 'noun']}
     single_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
     
-    if from_bytes:
-        single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
-    
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, lemmas, pos_tags))
 
 
 @pytest.mark.parametrize("pos_mapper", [None, {'NN': ['adv', 'noun']}])
-def test_to_from_bytes(pos_mapper: dict[str, list[str]] | None) -> None:
+@pytest.mark.parametrize("with_autotag", [False, True])
+def test_to_from_bytes(pos_mapper: dict[str, list[str]] | None,
+                       with_autotag: bool) -> None:
 
     (_, _, _, lexicon, lemma_lexicon, _) = generate_test_data(NON_SPECIAL_DATA_FILE,
                                                               NON_SPECIAL_LEXICON_FILE)
-    single_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper)
+    autotag_lexicon = None
+    if with_autotag:
+        autotag_lexicon = AutotagLexiconCollection.from_tsv(AUTOTAG_LEXICON_FILE)
+    single_rule = SingleWordRule(lexicon, lemma_lexicon, pos_mapper, autotag_lexicon)
     single_rule_from_bytes = SingleWordRule.from_bytes(single_rule.to_bytes())
 
-    assert single_rule.pos_mapper == single_rule_from_bytes.pos_mapper
-    assert single_rule.lexicon_collection.data \
-        == single_rule_from_bytes.lexicon_collection.data
-    assert single_rule.lemma_lexicon_collection.data \
-        == single_rule_from_bytes.lemma_lexicon_collection.data
+    assert single_rule == single_rule_from_bytes
+    assert single_rule.autotag_lexicon_collection.data \
+        == single_rule_from_bytes.autotag_lexicon_collection.data
 
 
 def test__eq__() -> None:
@@ -226,6 +221,17 @@ def test__eq__() -> None:
     assert empty_rule != SingleWordRule({}, lemma_lexicon, None)
     assert empty_rule != SingleWordRule({}, {}, pos_mapper)
     assert 1 != empty_rule
+
+    # An unset, `None`, and empty autotag lexicon are all the same.
+    assert empty_rule == SingleWordRule({}, {}, None, None)
+    assert empty_rule == SingleWordRule({}, {}, None, {})
+
+    autotag_lexicon = {'*kg|NUM': ['N3.5']}
+    autotag_rule = SingleWordRule({}, {}, None, autotag_lexicon)
+    assert autotag_rule == SingleWordRule({}, {}, None, dict(autotag_lexicon))
+    assert empty_rule != autotag_rule
+    assert autotag_rule != SingleWordRule({}, {}, None, {'*kg|NUM': ['N5']})
+    assert autotag_rule != SingleWordRule({}, {}, None, {'*g|NUM': ['N3.5']})
 
 
 def test_single_word_rule_best_match() -> None:
@@ -261,16 +267,13 @@ def _all_lexical_matches(entry: str, semantic_tags: tuple[str, ...],
             for lexical_match in LexicalMatch]
 
 
-@pytest.mark.parametrize('from_bytes', [False, True])
-def test_single_word_rule__AUTOTAG_CASES(from_bytes: bool) -> None:
+def test_single_word_rule__AUTOTAG_CASES() -> None:
     '''
     The example from issue #28, an `autotag` entry only matches when both
     its lemma pattern and its POS pattern match.
     '''
     autotag_lexicon = AutotagLexiconCollection.from_tsv(AUTOTAG_LEXICON_FILE)
     single_rule = SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)
-    if from_bytes:
-        single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
 
     tokens = ['15kg', '15kg', '10ish', 'ish', '!', ',', '10MB', '10mb']
     pos_tags = ['NUM', 'NOUN', 'NUM', 'NUM', 'PUNCT', 'PUNCT', 'NOUN', 'NOUN']
@@ -330,7 +333,8 @@ def test_single_word_rule_autotag_pos_mapper() -> None:
     '''
     With a one to many POS mapping more than one entry can match, in which
     case the entry that comes first in the `autotag` lexicon is used,
-    regardless of the order of the mapped POS tags.
+    regardless of the order of the mapped POS tags, `CD` maps to
+    `['noun', 'num']` but `*kg|num` is first in the lexicon.
     '''
     autotag_lexicon = {'*kg|num': ['N3.5'], '*kg|noun': ['N5']}
     pos_mapper = {'CD': ['noun', 'num'], 'NN': ['noun']}
@@ -343,22 +347,6 @@ def test_single_word_rule_autotag_pos_mapper() -> None:
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(['15kg'] * 3, ['15kg'] * 3,
                                                 ['CD', 'NN', 'NUM']))
-
-    reversed_autotag_lexicon = {'*kg|noun': ['N5'], '*kg|num': ['N3.5']}
-    single_rule = SingleWordRule({}, {}, pos_mapper, reversed_autotag_lexicon)
-    expected_ranking_meta_data[0] = _all_lexical_matches('*kg|noun', ('N5',), 0)
-    compare_token_ranking_meta_data(expected_ranking_meta_data,
-                                    single_rule(['15kg'] * 3, ['15kg'] * 3,
-                                                ['CD', 'NN', 'NUM']))
-
-
-def test_to_from_bytes_autotag() -> None:
-    autotag_lexicon = AutotagLexiconCollection.from_tsv(AUTOTAG_LEXICON_FILE)
-    single_rule = SingleWordRule({'kg|NOUN': ['N3.5']}, {},
-                                 autotag_lexicon_collection=autotag_lexicon)
-    single_rule_from_bytes = SingleWordRule.from_bytes(single_rule.to_bytes())
-    assert single_rule == single_rule_from_bytes
-    assert autotag_lexicon == single_rule_from_bytes.autotag_lexicon_collection.data
 
 
 def test_from_bytes_without_autotag() -> None:
@@ -378,24 +366,15 @@ def test_from_bytes_without_autotag() -> None:
     assert AutotagLexiconCollection() == single_rule.autotag_lexicon_collection
 
 
-def test__eq__autotag() -> None:
-    autotag_lexicon = {'*kg|NUM': ['N3.5']}
-    assert (SingleWordRule({}, {}, None, autotag_lexicon)
-            == SingleWordRule({}, {}, None, dict(autotag_lexicon)))
-    assert SingleWordRule({}, {}) == SingleWordRule({}, {}, None, None)
-    assert SingleWordRule({}, {}) == SingleWordRule({}, {}, None, {})
-    assert SingleWordRule({}, {}) != SingleWordRule({}, {}, None, autotag_lexicon)
-
-
 def test_single_word_rule_best_match_autotag() -> None:
     '''
     `best_match`, which is used to resolve MWE default (`Df`) tags, includes
-    `autotag` matches, but an exact single word lexicon match, with or
-    without POS information, is always returned before an `autotag` match.
+    `autotag` matches and returns the best ranked one. Exact matches taking
+    precedence over `autotag` matches is tested through `__call__` in
+    `test_single_word_rule_autotag_exact_match_precedence`.
     '''
-    autotag_lexicon = {'*kg|NUM': ['N3.5'], '*|NUM': ['N1'], '*|PUNCT': ['PUNCT']}
-    rule = SingleWordRule({'!|PUNCT': ['E4.1+']}, {'5kg': ['N5']},
-                          autotag_lexicon_collection=autotag_lexicon)
+    autotag_lexicon = {'*kg|NUM': ['N3.5'], '*|PUNCT': ['PUNCT']}
+    rule = SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)
 
     best_match = rule.best_match('15kg', '15kg', 'NUM')
     assert best_match is not None
@@ -408,59 +387,37 @@ def test_single_word_rule_best_match_autotag() -> None:
     assert best_match is not None
     assert ('PUNCT',) == best_match.semantic_tags
 
-    # Exact matches, with or without POS information, are used instead.
-    best_match = rule.best_match('!', '!', 'PUNCT')
-    assert best_match is not None
-    assert LexiconType.SINGLE_NON_SPECIAL == best_match.lexicon_type
-    assert ('E4.1+',) == best_match.semantic_tags
-    best_match = rule.best_match('5kg', '5kg', 'NUM')
-    assert best_match is not None
-    assert LexiconType.SINGLE_NON_SPECIAL == best_match.lexicon_type
-    assert ('N5',) == best_match.semantic_tags
-
     # The POS pattern still has to match.
     assert rule.best_match('15kg', '15kg', 'NOUN') is None
 
 
 @pytest.mark.parametrize('from_bytes', [False, True])
-def test_single_word_rule_autotag_lexicon_order_priority(from_bytes: bool) -> None:
+@pytest.mark.parametrize(('autotag_lexicon', 'tokens', 'expected_ranking_meta_data'), [
+    ({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']}, ['5kg', '5'],
+     [_all_lexical_matches('*kg|NUM', ('N3.5',), 0),
+      _all_lexical_matches('*|NUM', ('N1',), 1)]),
+    ({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']}, ['5kg', '5'],
+     [_all_lexical_matches('*|NUM', ('N1',), 0),
+      _all_lexical_matches('*|NUM', ('N1',), 1)]),
+    # The first entry is used even when a later entry matches on a better
+    # ranked lexical match, here the later entry matches the token whereas the
+    # first entry only matches the lower cased token.
+    ({'*mb|NOUN': ['N3.2'], '*MB|NOUN': ['N5']}, ['10MB'],
+     [[_autotag_match(LexicalMatch.TOKEN_LOWER, '*mb|NOUN', ('N3.2',)),
+       _autotag_match(LexicalMatch.LEMMA_LOWER, '*mb|NOUN', ('N3.2',))]]),
+], ids=['first_entry', 'reversed_entries', 'worse_lexical_match'])
+def test_single_word_rule_autotag_lexicon_order_priority(
+        from_bytes: bool, autotag_lexicon: dict[str, list[str]],
+        tokens: list[str], expected_ranking_meta_data: list[list[RankingMetaData]]
+        ) -> None:
     '''
     When more than one `autotag` entry matches a token, only the entry that
-    comes first in the `autotag` lexicon is used.
+    comes first in the `autotag` lexicon is used. The order has to be kept
+    when the rule is serialised.
     '''
-    tokens = ['5kg', '5']
-    pos_tags = ['NUM', 'NUM']
-
-    single_rule = SingleWordRule({}, {}, autotag_lexicon_collection={'*kg|NUM': ['N3.5'],
-                                                                     '*|NUM': ['N1']})
+    single_rule = SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)
     if from_bytes:
         single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
-    expected_ranking_meta_data = [_all_lexical_matches('*kg|NUM', ('N3.5',), 0),
-                                  _all_lexical_matches('*|NUM', ('N1',), 1)]
+    pos_tags = ['NOUN' if token.endswith('MB') else 'NUM' for token in tokens]
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, tokens, pos_tags))
-
-    single_rule = SingleWordRule({}, {}, autotag_lexicon_collection={'*|NUM': ['N1'],
-                                                                     '*kg|NUM': ['N3.5']})
-    if from_bytes:
-        single_rule = SingleWordRule.from_bytes(single_rule.to_bytes())
-    expected_ranking_meta_data = [_all_lexical_matches('*|NUM', ('N1',), 0),
-                                  _all_lexical_matches('*|NUM', ('N1',), 1)]
-    compare_token_ranking_meta_data(expected_ranking_meta_data,
-                                    single_rule(tokens, tokens, pos_tags))
-
-
-def test_single_word_rule_autotag_lexicon_order_different_lexical_matches() -> None:
-    '''
-    The first entry in the `autotag` lexicon is used even when a later entry
-    matches on a better ranked lexical match, here the later entry matches the
-    token whereas the first entry only matches the lower cased token.
-    '''
-    single_rule = SingleWordRule({}, {}, autotag_lexicon_collection={'*mb|NOUN': ['N3.2'],
-                                                                     '*MB|NOUN': ['N5']})
-    expected_ranking_meta_data = [[
-        _autotag_match(LexicalMatch.TOKEN_LOWER, '*mb|NOUN', ('N3.2',)),
-        _autotag_match(LexicalMatch.LEMMA_LOWER, '*mb|NOUN', ('N3.2',))
-    ]]
-    compare_token_ranking_meta_data(expected_ranking_meta_data,
-                                    single_rule(['10MB'], ['10MB'], ['NOUN']))
