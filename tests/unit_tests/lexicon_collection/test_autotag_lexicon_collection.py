@@ -154,6 +154,13 @@ def test_to_from_bytes() -> None:
     assert collection == collection_from_bytes
     assert collection.patterns == collection_from_bytes.patterns
 
+    # Entry order sets priority, so serialisation must preserve it, the keys are
+    # deliberately not alphabetical so that sorting during serialisation would fail.
+    unsorted_collection = AutotagLexiconCollection({'*z|NUM': ['N1'], '*a|NUM': ['N2'], '*m|NUM': ['N3']})
+    unsorted_from_bytes = AutotagLexiconCollection.from_bytes(unsorted_collection.to_bytes())
+    assert list(unsorted_collection) == list(unsorted_from_bytes)
+    assert unsorted_collection == unsorted_from_bytes
+
     empty_collection = AutotagLexiconCollection()
     assert empty_collection == AutotagLexiconCollection.from_bytes(empty_collection.to_bytes())
 
@@ -235,3 +242,10 @@ def test__eq__() -> None:
     assert collection != AutotagLexiconCollection({'*kg|NUM': ['N3.5']})
     assert collection != AUTOTAG_ENTRIES
     assert AutotagLexiconCollection() == AutotagLexiconCollection()
+
+    # The order of the entries sets their priority, so it must affect equality.
+    reordered_entries = dict(reversed(AUTOTAG_ENTRIES.items()))
+    assert AUTOTAG_ENTRIES == reordered_entries
+    assert collection != AutotagLexiconCollection(reordered_entries)
+    assert AutotagLexiconCollection(reordered_entries) \
+        == AutotagLexiconCollection(dict(reversed(AUTOTAG_ENTRIES.items())))

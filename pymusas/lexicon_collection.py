@@ -1029,7 +1029,10 @@ class AutotagLexiconCollection(MutableMapping):
     def __eq__(self, other: object) -> bool:
         '''
         Given another object to compare too it will return `True` if the other
-        object is the same class and contains the same `data` instance attribute.
+        object is the same class and contains the same `data` instance attribute
+        entries in the same order. The order matters as it determines which
+        entry takes priority when matching, therefore two collections with
+        the same entries in a different order are not equal.
 
         # Parameters
 
@@ -1039,11 +1042,25 @@ class AutotagLexiconCollection(MutableMapping):
         # Returns
 
         `True`
+
+        # Examples
+
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> first = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+        >>> same_order = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+        >>> different_order = AutotagLexiconCollection({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']})
+        >>> first == same_order
+        True
+        >>> first == different_order
+        False
+
+        ```
         '''
         if not isinstance(other, AutotagLexiconCollection):
             return False
 
-        return self.data == other.data
+        return list(self.data.items()) == list(other.data.items())
 
 
 class MWELexiconCollection(MutableMapping):

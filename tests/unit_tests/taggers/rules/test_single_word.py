@@ -233,6 +233,11 @@ def test__eq__() -> None:
     assert autotag_rule != SingleWordRule({}, {}, None, {'*kg|NUM': ['N5']})
     assert autotag_rule != SingleWordRule({}, {}, None, {'*g|NUM': ['N3.5']})
 
+    # The `autotag` entry order sets the priority, so it affects equality.
+    ordered_rule = SingleWordRule({}, {}, None, {'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+    reordered_rule = SingleWordRule({}, {}, None, {'*|NUM': ['N1'], '*kg|NUM': ['N3.5']})
+    assert ordered_rule != reordered_rule
+
 
 def test_single_word_rule_best_match() -> None:
     rule = SingleWordRule({'act|ADJ': ['A1'], 'acting|ADJ': ['A3']},
