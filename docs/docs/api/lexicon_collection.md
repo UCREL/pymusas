@@ -1145,6 +1145,11 @@ Any MWE template that has a default (`Df`) semantic tag, see
 a wildcard (`*`), as this is the token the `Df` tag refers to. MWE templates
 that do not will be ignored and a `UserWarning` will be raised stating this.
 
+**Note** when a `pos_mapper` is given, a POS tag in a MWE template can only
+contain a wildcard (`*`) if the POS tag is only a wildcard, e.g.
+`river_*` is allowed but `river_noun*` is not. A MWE template that does not
+follow this raises a `ValueError`.
+
 <h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 
@@ -1159,7 +1164,18 @@ that do not will be ignored and a `UserWarning` will be raised stating this.
     the token's. **Note** that the longer the `list[str]` for each POS
     mapping the longer it will take to match MWE templates. A one to one
     mapping will have no speed impact on the tagger. A selection of POS
-    mappers can be found in [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
+    mappers can be found in [`pymusas.pos_mapper`](/pymusas/api/pos_mapper). **Note** POS tags
+    in the MWE templates cannot contain a wildcard, unless the POS tag is
+    only a wildcard, see the `ValueError` below.
+
+<h4 id="mwelexiconcollection.raises">Raises<a className="headerlink" href="#mwelexiconcollection.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If a `pos_mapper` is given and a POS tag within a MWE template in
+    `data` contains a wildcard (`*`) along with other characters, e.g.
+    `river_noun*`. A POS tag that is only a wildcard, e.g. `river_*`,
+    is allowed.
 
 <h4 id="mwelexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#mwelexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
 

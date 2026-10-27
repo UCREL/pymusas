@@ -1079,6 +1079,11 @@ class MWELexiconCollection(MutableMapping):
     a wildcard (`*`), as this is the token the `Df` tag refers to. MWE templates
     that do not will be ignored and a `UserWarning` will be raised stating this.
 
+    **Note** when a `pos_mapper` is given, a POS tag in a MWE template can only
+    contain a wildcard (`*`) if the POS tag is only a wildcard, e.g.
+    `river_*` is allowed but `river_noun*` is not. A MWE template that does not
+    follow this raises a `ValueError`.
+
     # Parameters
 
     data: `dict[str, list[str]]`, optional (default = `None`)
@@ -1092,15 +1097,25 @@ class MWELexiconCollection(MutableMapping):
         the token's. **Note** that the longer the `list[str]` for each POS
         mapping the longer it will take to match MWE templates. A one to one
         mapping will have no speed impact on the tagger. A selection of POS
-        mappers can be found in :mod:`pymusas.pos_mapper`.
+        mappers can be found in :mod:`pymusas.pos_mapper`. **Note** POS tags
+        in the MWE templates cannot contain a wildcard, unless the POS tag is
+        only a wildcard, see the `ValueError` below.
+
+    # Raises
+
+    `ValueError`
+        If a `pos_mapper` is given and a POS tag within a MWE template in
+        `data` contains a wildcard (`*`) along with other characters, e.g.
+        `river_noun*`. A POS tag that is only a wildcard, e.g. `river_*`,
+        is allowed.
 
     # Instance Attributes
-    
+
     **Note** if the `data` parameter given was `None` then the value of all
     dictionary attributes will be an empty dictionary and all integer values will
     be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
     will be an empty dictionary.
-    
+
     meta_data: `dict[str, LexiconMetaData]`
         Dictionary where the keys are MWE templates, of any type, and the values
         are their associated meta data stored in a :class:`LexiconMetaData` object.
@@ -1588,7 +1603,7 @@ class MWELexiconCollection(MutableMapping):
                     pos_error = ('When using a POS mapper a POS tag within '
                                  'a lexicon entry cannot contain a wildcard'
                                  ' unless the POS tag is only a wildcard '
-                                 'and no other characters. Leixcon entry '
+                                 'and no other characters. Lexicon entry'
                                  'and POS tag in that entry that caused '
                                  f'this error: {key} {pos}')
                     if set(pos.strip()) != set('*'):
