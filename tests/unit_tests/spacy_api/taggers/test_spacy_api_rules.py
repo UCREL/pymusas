@@ -15,6 +15,18 @@ def test_single_word_rule() -> None:
     assert isinstance(single_word_rule({}, {}, {}), SingleWordRule)
 
 
+def test_single_word_rule_v2() -> None:
+    single_word_rule: Callable[[dict[str, list[str]], dict[str, list[str]],
+                                dict[str, list[str]] | None, dict[str, list[str]]],
+                               SingleWordRule] \
+        = spacy.util.registry.misc.get('pymusas.taggers.rules.SingleWordRule.v2')
+    autotag_lexicon = {'*kg|NUM': ['N3.5']}
+    rule = single_word_rule({'kg|NOUN': ['N3.5']}, {}, None, autotag_lexicon)
+    assert isinstance(rule, SingleWordRule)
+    assert SingleWordRule({'kg|NOUN': ['N3.5']}, {}, None, autotag_lexicon) == rule
+    assert autotag_lexicon == rule.autotag_lexicon_collection.data
+
+
 def test_mwe_rule() -> None:
     mwe_rule: Callable[[dict[str, list[str]], dict[str, list[str]]], MWERule] \
         = spacy.util.registry.misc.get('pymusas.taggers.rules.MWERule.v1')

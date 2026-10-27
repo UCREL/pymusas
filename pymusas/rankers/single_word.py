@@ -1,4 +1,5 @@
 
+from pymusas.lexicon_collection import LexiconType
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 
 
@@ -14,8 +15,9 @@ class SingleWordRanker:
     :class:`pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker`, as the other
     rules are the same for all single word matches of one token:
 
-    1. Matches that use POS information are ranked lower than those that do not. (Contextual Rule Based Ranker rule 4).
-    2. Matches on Token < Lemma < Lower cased token < Lower cased lemma. (Contextual Rule Based Ranker rule 5).
+    1. Exact matches are ranked lower than `autotag` pattern matches. (Contextual Rule Based Ranker rule 1).
+    2. Matches that use POS information are ranked lower than those that do not. (Contextual Rule Based Ranker rule 4).
+    3. Matches on Token < Lemma < Lower cased token < Lower cased lemma. (Contextual Rule Based Ranker rule 5).
 
     **Lower ranked matches should be given priority.** As the ranker has no
     state it does not need to be created or serialised, all methods are static.
@@ -39,7 +41,7 @@ class SingleWordRanker:
     '''
 
     @staticmethod
-    def sort_key(match: RankingMetaData) -> tuple[bool, int]:
+    def sort_key(match: RankingMetaData) -> tuple[bool, bool, int]:
         '''
         Returns the key used to rank the given single word `match`, a lower key
         is a better ranked match. It can be used as the `key` argument of
@@ -52,9 +54,10 @@ class SingleWordRanker:
 
         # Returns
 
-        `tuple[bool, int]`
+        `tuple[bool, bool, int]`
         '''
-        return (match.exclude_pos_information, match.lexical_match.value)
+        return (match.lexicon_type == LexiconType.SINGLE_AUTOTAG,
+                match.exclude_pos_information, match.lexical_match.value)
 
     @staticmethod
     def best_match(matches: list[RankingMetaData]) -> RankingMetaData | None:

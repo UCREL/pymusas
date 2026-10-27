@@ -208,3 +208,48 @@ def test_rule_based_tagger__call__default_tags() -> None:
                 (['C1/A1'], [(1, 3)]),
                 (['PUNCT'], [(3, 4)])]
     assert expected == tagger(tokens, tokens, pos_tags)
+
+
+def test_rule_based_tagger__call__autotag() -> None:
+    '''
+    `autotag` matches are used only when a token has no exact single word
+    match and they are ranked lower than MWE matches.
+    '''
+    single_word_rule = SingleWordRule({'!|PUNCT': ['E4.1+'], 'heavy|ADJ': ['N3.5+']}, {},
+                                      autotag_lexicon_collection={'*kg|NUM': ['N3.5'],
+                                                                  '*|PUNCT': ['PUNCT'],
+                                                                  '*|NOUN': ['Z0']})
+    mwe_rule = MWERule({'heavy_ADJ weight_NOUN': ['A1']})
+    rules: list[Rule] = [single_word_rule, mwe_rule]
+    ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
+    tagger = RuleBasedTagger(rules, ranker)
+
+    tokens = ['15kg', 'is', 'a', 'heavy', 'weight', '!', '?', '15kg']
+    pos_tags = ['NUM', 'AUX', 'DET', 'ADJ', 'NOUN', 'PUNCT', 'PUNCT', 'NOUN']
+    expected = [(['N3.5'], [(0, 1)]),
+                (['Z99'], [(1, 2)]),
+                (['Z99'], [(2, 3)]),
+                (['A1'], [(3, 5)]),
+                (['A1'], [(3, 5)]),
+                (['E4.1+'], [(5, 6)]),
+                (['PUNCT'], [(6, 7)]),
+                (['Z0'], [(7, 8)])]
+    assert expected == tagger(tokens, tokens, pos_tags)
+
+
+def test_rule_based_tagger__call__autotag_lexicon_order() -> None:
+    '''
+    When more than one `autotag` entry matches a token, the entry that comes
+    first in the `autotag` lexicon is used, so the output does not depend on
+    Python's hash seed.
+    '''
+    tokens = ['5kg', '5']
+    pos_tags = ['NUM', 'NUM']
+    for autotag_lexicon, expected_tags in [
+        ({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']}, [['N3.5'], ['N1']]),
+        ({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']}, [['N1'], ['N1']])
+    ]:
+        rules: list[Rule] = [SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)]
+        ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
+        tagger = RuleBasedTagger(rules, ranker)
+        assert expected_tags == [tags for tags, _ in tagger(tokens, tokens, pos_tags)]

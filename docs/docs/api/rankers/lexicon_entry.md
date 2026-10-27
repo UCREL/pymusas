@@ -107,7 +107,9 @@ are based on the 6 heuristic stated at the top of column 2 on page 4 of
 First we create an initial ranking based on lexicon entry type:
 
 1. Multi Word Expression (MWE) entries ranked lower than single and Non-Special
-entries are ranked lower than wild card entires.
+entries are ranked lower than wild card entires. Single word `autotag` entries,
+`LexiconType.SINGLE_AUTOTAG` (see [`pymusas.lexicon_collection.LexiconType`](/pymusas/api/lexicon_collection/#lexicontype)),
+are ranked higher than all other entries.
 
 Then within these rankings we further rank based on:
 

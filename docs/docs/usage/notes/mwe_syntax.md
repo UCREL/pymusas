@@ -156,6 +156,7 @@ When replacing the `Df` tag:
 * Only the first semantic tag of the single word match is used, and only the first part of it if it is a slash (`/`) tag, e.g. `A1/Z3` becomes `A1`.
 * All affixes (e.g. `+` and `-`), lower case markers (e.g. gender markers such as `m` and `f`), and rarity markers (`%` and `@`) are removed from the single word semantic tag.
 * Any affixes, lower case markers, and rarity markers on the `Df` tag, which can appear in any order and independently of each other, are added to the replacement in the same order, e.g. `Df++` becomes `A1++`, `Dfc` becomes `A1c`, `Df-m%` becomes `A1-m%`, and `Dfm+` becomes `A1m+`.
+* Single word [`autotag`](/usage/notes/autotag_syntax) pattern matches are also used, but only if the token has no single word lexicon match, e.g. if a token only matches the `autotag` entry `*kg` with the POS `NUM` and the semantic tag `N3.5`, the `Df` tag is replaced with `N3.5`.
 * If the token has no single word match, the `Df` tag is replaced with `Z99`.
 
 MWE templates that contain a `Df` tag but no token that starts with a wildcard are ignored, and a warning is raised.

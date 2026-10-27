@@ -33,6 +33,30 @@ def single_word_rule(lexicon_collection: dict[str, list[str]],
                           pos_mapper)
 
 
+@spacy.util.registry.misc('pymusas.taggers.rules.SingleWordRule.v2')
+def single_word_rule_v2(lexicon_collection: dict[str, list[str]],
+                        lemma_lexicon_collection: dict[str, list[str]],
+                        pos_mapper: dict[str, list[str]] | None = None,
+                        autotag_lexicon_collection: dict[str, list[str]] | None = None
+                        ) -> SingleWordRule:
+    '''
+    `pymusas.taggers.rules.SingleWordRule.v2` is a registered function under the
+    `@misc` function register. Compared to
+    `pymusas.taggers.rules.SingleWordRule.v1` it also accepts an
+    `autotag_lexicon_collection`, which is used to match tokens against
+    `autotag` patterns when they have no exact single word lexicon match.
+
+    See the :class:`pymusas.taggers.rules.single_word.SingleWordRule` for
+    details on parameters to this function.
+
+    # Returns
+
+    :class:`pymusas.taggers.rules.single_word.SingleWordRule`
+    '''
+    return SingleWordRule(lexicon_collection, lemma_lexicon_collection,
+                          pos_mapper, autotag_lexicon_collection)
+
+
 @spacy.util.registry.misc('pymusas.taggers.rules.MWERule.v1')
 def mwe_rule(mwe_lexicon_lookup: dict[str, list[str]],
              pos_mapper: dict[str, list[str]] | None = None

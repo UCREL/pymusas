@@ -24,8 +24,9 @@ Matches are ranked using the single word ranking rules of
 [`pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker`](/pymusas/api/rankers/lexicon_entry/#contextualrulebasedranker), as the other
 rules are the same for all single word matches of one token:
 
-1. Matches that use POS information are ranked lower than those that do not. (Contextual Rule Based Ranker rule 4).
-2. Matches on Token < Lemma < Lower cased token < Lower cased lemma. (Contextual Rule Based Ranker rule 5).
+1. Exact matches are ranked lower than `autotag` pattern matches. (Contextual Rule Based Ranker rule 1).
+2. Matches that use POS information are ranked lower than those that do not. (Contextual Rule Based Ranker rule 4).
+3. Matches on Token < Lemma < Lower cased token < Lower cased lemma. (Contextual Rule Based Ranker rule 5).
 
 **Lower ranked matches should be given priority.** As the ranker has no
 state it does not need to be created or serialised, all methods are static.
@@ -55,7 +56,7 @@ assert SingleWordRanker.best_match([]) is None
 class SingleWordRanker:
  | ...
  | @staticmethod
- | def sort_key(match: RankingMetaData) -> tuple[bool, int]
+ | def sort_key(match: RankingMetaData) -> tuple[bool, bool, int]
 ```
 
 Returns the key used to rank the given single word `match`, a lower key
@@ -71,7 +72,7 @@ is a better ranked match. It can be used as the `key` argument of
 <h4 id="sort_key.returns">Returns<a className="headerlink" href="#sort_key.returns" title="Permanent link">&para;</a></h4>
 
 
-- `tuple[bool, int]` <br/>
+- `tuple[bool, bool, int]` <br/>
 
 <a id="pymusas.rankers.single_word.SingleWordRanker.best_match"></a>
 

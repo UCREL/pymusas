@@ -30,6 +30,9 @@ class LexiconType(str, Enum):
 
     SINGLE_NON_SPECIAL : `LexiconType`
         Single word lexicon lookup.
+    SINGLE_AUTOTAG : `LexiconType`
+        Single word lexicon lookup using an `autotag` pattern, see
+        :class:`AutotagLexiconCollection`.
     MWE_NON_SPECIAL : `LexiconType`
         MWE lexicon lookup.
     MWE_WILDCARD : `LexiconType`
@@ -43,13 +46,14 @@ class LexiconType(str, Enum):
     >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL
     >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
     >>> assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
-    >>> all_possible_values = {'Single Non Special', 'MWE Non Special',
-    ... 'MWE Wildcard', 'MWE Curly Braces'}
+    >>> all_possible_values = {'Single Non Special', 'Single Autotag',
+    ... 'MWE Non Special', 'MWE Wildcard', 'MWE Curly Braces'}
     >>> assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconType}
     
     ```
     '''
     SINGLE_NON_SPECIAL = 'Single Non Special'
+    SINGLE_AUTOTAG = 'Single Autotag'
     MWE_NON_SPECIAL = 'MWE Non Special'
     MWE_WILDCARD = 'MWE Wildcard'
     MWE_CURLY_BRACES = 'MWE Curly Braces'
@@ -539,6 +543,507 @@ class LexiconCollection(MutableMapping):
             return False
         
         return True
+
+
+class AutotagLexiconCollection(MutableMapping):
+    r'''
+    This is a dictionary object that holds single word `autotag` lexicon
+    entries, whereby the `lemma` and `pos` of each entry are patterns rather
+    than literal values, e.g. `*[0-9]kg|NUM` or `[0-9][0-9]*ish|NUM`. The keys of
+    the dictionary are a combination of the lemma pattern and the POS pattern
+    in the following format: `{lemma}|{pos}`, the values are the associated
+    semantic tags in rank order, the most likely tag is the first tag in the
+    list.
+
+    The pattern syntax is:
+
+    1. `[...]` is a regular expression character class matching exactly one
+    character, e.g. `[0-9]` matches one digit. Within the class `\[` and `\]`
+    are literal brackets, e.g. `[\[\]]` matches `[` or `]`.
+    2. `*` straight after a character class means zero or more characters from
+    that class, e.g. `[0-9]*ish` matches `9ish`, `10ish`, and also `ish`.
+    3. `*` anywhere else means zero or more of any character, e.g. `*-year-old`
+    matches `10-year-old`.
+    4. Every other character is literal, e.g. `.`, `+`, `?`, and `(`, apart
+    from `[` and `]` which can only be used as part of a character class. A `[`
+    that is not closed, an unescaped `[` within a class, or a `]` that does not
+    close a class, e.g. `hello[a-z]]`, is an error.
+
+    A pattern has to match the whole lemma/token or POS tag. Patterns are
+    case sensitive and are never lower cased.
+
+    Every entry must have a POS pattern and that POS pattern cannot be just
+    `*`, as without a POS constraint patterns like `*kg` would match too many
+    tokens.
+
+    Each pattern is converted to a compiled regular expression, see
+    :func:`pattern_to_regex`, when it is added to the collection.
+
+    The order of the entries matters, as when more than one entry matches a
+    token the tagger uses the entry that comes first, see
+    :class:`pymusas.taggers.rules.single_word.SingleWordRule`. The order is
+    the order in which the entries were first added, adding an entry that
+    already exists updates its semantic tags but does not change its position.
+    For how the order is set when merging `autotag` TSV files, see
+    :func:`tsv_merge`.
+
+    For more information on the `autotag` syntax see the following
+    [notes](/usage/notes/autotag_syntax).
+
+    # Parameters
+
+    data : `dict[str, list[str]]`, optional (default = `None`)
+        Dictionary where the keys are `{lemma}|{pos}` patterns and the values
+        are a list of associated semantic tags.
+
+    # Instance Attributes
+
+    data : `dict[str, list[str]]`
+        Dictionary where the keys are `{lemma}|{pos}` patterns and the values
+        are a list of associated semantic tags. If the `data` parameter given
+        was `None` then the value of this attribute will be an empty dictionary.
+    patterns : `dict[str, tuple[re.Pattern, re.Pattern]]`
+        Dictionary where the keys are the same as `data` and the values are
+        the compiled regular expressions of the lemma pattern and the POS
+        pattern.
+
+    # Raises
+
+    `ValueError`
+        If a key does not contain a POS pattern, the POS pattern is just `*`,
+        or either pattern is not valid, e.g. it contains an unclosed `[` or a
+        `]` that does not close a character class.
+
+    # Examples
+    ``` python
+    >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+    >>> collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+    ...                                        '[0-9][0-9]*ish|NUM': ['N1']})
+    >>> assert collection['*kg|NUM'] == ['N3.5']
+    >>> assert collection.match('15kg', 'NUM') == ['*kg|NUM']
+    >>> assert collection.match('15kg', 'NOUN') == []
+    >>> assert collection.match('ish', 'NUM') == []
+
+    ```
+    '''
+
+    def __init__(self, data: dict[str, list[str]] | None = None) -> None:
+
+        self.data: dict[str, list[str]] = {}
+        self.patterns: dict[str, tuple[re.Pattern, re.Pattern]] = {}
+        if data is not None:
+            for key, value in data.items():
+                self[key] = value
+
+    @staticmethod
+    def _character_class_end(pattern: str, start_index: int) -> int:
+        r'''
+        Returns the index of the `]` that closes the character class opened by
+        the `[` at `start_index`. Within the class a `\` escapes the next
+        character, so `\[` and `\]` are literal brackets.
+
+        # Raises
+
+        `ValueError`
+            If the class is not closed, is empty, or contains an unescaped `[`.
+        '''
+        index = start_index + 1
+        while index < len(pattern):
+            character = pattern[index]
+            if character == '\\':
+                index += 2
+                continue
+            if character == '[':
+                raise ValueError(f'The pattern `{pattern}` contains an '
+                                 f'unescaped `[` at position {index} within '
+                                 'a character class, escape it with `\\[`.')
+            if character == ']':
+                if index == start_index + 1:
+                    raise ValueError(f'The character class at position '
+                                     f'{start_index} in the pattern '
+                                     f'`{pattern}` is empty.')
+                return index
+            index += 1
+        raise ValueError(f'The `[` at position {start_index} in the pattern '
+                         f'`{pattern}` is not closed by a `]`.')
+
+    @staticmethod
+    def pattern_to_regex(pattern: str) -> re.Pattern:
+        r'''
+        Returns the `autotag` `pattern` converted into a compiled regular
+        expression. For the pattern syntax see the
+        :class:`AutotagLexiconCollection` docstring. **Note** the regular
+        expression should be matched using `fullmatch`.
+
+        # Parameters
+
+        pattern : `str`
+            The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+        # Returns
+
+        `re.Pattern`
+
+        # Raises
+
+        `ValueError`
+            If the `pattern` contains a `[` that is not closed by a `]`, a `]`
+            that does not close a character class, an empty character class,
+            an unescaped `[` / `]` within a character class, or the character
+            class is not a valid regular expression character class.
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> regex = AutotagLexiconCollection.pattern_to_regex('[0-9]*.5*')
+        >>> assert regex.pattern == '[0-9]*\\.5.*'
+        >>> assert regex.fullmatch('10.5kg') is not None
+        >>> assert regex.fullmatch('.5') is not None
+        >>> assert regex.fullmatch('1x5') is None
+
+        ```
+        '''
+        regex_parts: list[str] = []
+        index = 0
+        while index < len(pattern):
+            character = pattern[index]
+            if character == '*':
+                regex_parts.append('.*')
+            elif character == '[':
+                end_index = AutotagLexiconCollection._character_class_end(
+                    pattern, index)
+                regex_parts.append(pattern[index: end_index + 1])
+                index = end_index
+                if pattern[index + 1: index + 2] == '*':
+                    regex_parts.append('*')
+                    index += 1
+            elif character == ']':
+                raise ValueError(f'The pattern `{pattern}` contains an '
+                                 f'unmatched `]` at position {index}, a `]` '
+                                 'is only a literal within a character class '
+                                 'when escaped, `\\]`.')
+            else:
+                regex_parts.append(re.escape(character))
+            index += 1
+
+        try:
+            return re.compile(''.join(regex_parts))
+        except re.error as error:
+            raise ValueError(f'The pattern `{pattern}` is not valid: '
+                             f'{error}') from error
+
+    def match(self, lexical_value: str, pos: str) -> list[str]:
+        '''
+        Returns the `{lemma}|{pos}` keys of all of the entries whose lemma
+        pattern matches the whole `lexical_value` and whose POS pattern matches
+        the whole `pos`. The keys are returned in the order they were added
+        to the collection, if there are no matches the `list` will be empty.
+
+        # Parameters
+
+        lexical_value : `str`
+            The token or lemma to match, e.g. `15kg`.
+        pos : `str`
+            The POS tag to match, e.g. `NUM`.
+
+        # Returns
+
+        `list[str]`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*MB|N*': ['N3.2'],
+        ...                                        '*|PUNCT': ['PUNCT']})
+        >>> assert collection.match('10MB', 'NOUN') == ['*MB|N*']
+        >>> assert collection.match('10mb', 'NOUN') == []
+        >>> assert collection.match('!', 'PUNCT') == ['*|PUNCT']
+
+        ```
+        '''
+        matches: list[str] = []
+        for key, (lemma_regex, pos_regex) in self.patterns.items():
+            if pos_regex.fullmatch(pos) is None:
+                continue
+            if lemma_regex.fullmatch(lexical_value) is not None:
+                matches.append(key)
+        return matches
+
+    def to_dictionary(self) -> dict[str, list[str]]:
+        '''
+        Returns the `data` instance attribute.
+
+        # Returns
+
+        `dict[str, list[str]]`
+        '''
+        return self.data
+
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`AutotagLexiconCollection` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        return cast(bytes, srsly.msgpack_dumps(self.data))
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "AutotagLexiconCollection":
+        '''
+        Loads :class:`AutotagLexiconCollection` from the given bytestring and
+        returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+
+        # Returns
+
+        :class:`AutotagLexiconCollection`
+        '''
+        return AutotagLexiconCollection(srsly.msgpack_loads(bytes_data))
+
+    @staticmethod
+    def from_tsv(tsv_file_path: PathLike | str) -> dict[str, list[str]]:
+        '''
+        Given a `tsv_file_path` to an `autotag` lexicon file it will return a
+        dictionary object that can be used to create a
+        :class:`AutotagLexiconCollection`. The `lemma` and `pos` fields are
+        kept exactly as written, they are not lower cased.
+
+        Each line in the TSV file is added to a temporary
+        :class:`AutotagLexiconCollection`, therefore all of the patterns are
+        validated when the file is loaded.
+
+        If the file path is a URL, the file will be downloaded and cached using
+        :func:`pymusas.file_utils.download_url_file`.
+
+        # Parameters
+
+        tsv_file_path : `PathLike | str`
+            A file path or URL to a TSV file that contains at least these three
+            fields:
+
+            1. `lemma`,
+            2. `pos`,
+            3. `semantic_tags`
+
+            All other fields will be ignored.
+
+        # Returns
+
+        `dict[str, list[str]]`
+
+        # Raises
+
+        `ValueError`
+            If the field headings, `lemma`, `pos`, and `semantic_tags`, do not
+            exist in the given TSV file, or if any entry is not valid, see
+            :class:`AutotagLexiconCollection`.
+
+        # Examples
+        ``` python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     tsv_file = Path(temp_dir, 'semantic_lexicon_en_autotag.tsv')
+        ...     _ = tsv_file.write_text('lemma\\tpos\\tsemantic_tags\\n*kg\\tNUM\\tN3.5\\n',
+        ...                             encoding='utf-8')
+        ...     autotag_dict = AutotagLexiconCollection.from_tsv(tsv_file)
+        ...
+        >>> assert autotag_dict == {'*kg|NUM': ['N3.5']}
+
+        ```
+        '''
+        required_field_names = {'lemma', 'pos', 'semantic_tags'}
+
+        collection_from_tsv = AutotagLexiconCollection()
+
+        if not isinstance(tsv_file_path, str):
+            tsv_file_path = str(tsv_file_path)
+
+        parsed = urlparse(tsv_file_path)
+        if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
+            tsv_file_path = file_utils.download_url_file(tsv_file_path)
+
+        with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
+            csv_reader = csv.DictReader(fp, delimiter='\t')
+            file_field_names: set[str] = set()
+            if csv_reader.fieldnames:
+                file_field_names = set(csv_reader.fieldnames)
+            if not required_field_names.issubset(file_field_names):
+                error_msg = (f"The autotag TSV file, {tsv_file_path}, given "
+                             "should contain a header that has at minimum "
+                             f"the following fields {required_field_names}. "
+                             f"The field names found were {file_field_names}")
+                raise ValueError(error_msg)
+
+            for row in csv_reader:
+                semantic_tags: list[str] = row['semantic_tags'].split()
+                collection_from_tsv[f"{row['lemma']}|{row['pos']}"] = semantic_tags
+
+        return collection_from_tsv.to_dictionary()
+
+    @staticmethod
+    def tsv_merge(*tsv_file_paths: PathLike | str) -> dict[str, list[str]]:
+        """
+        Given one or more `autotag` TSV files it will create a single
+        dictionary object with the combination of all the lexicon data in each
+        TSV, this dictionary object can then be used to create a
+        :class:`AutotagLexiconCollection`.
+
+        For more information on how the TSV data is loaded see :func:`from_tsv`.
+
+        **Note** later TSV files take precedence over earlier TSV files, for
+        both the semantic tags and the priority of the entries:
+
+        1. The entries are ordered by TSV file, last TSV file first, and
+        within a TSV file in the order they appear in that file. As the order
+        of the entries sets their priority, see :class:`AutotagLexiconCollection`,
+        an entry in a later TSV file has priority over all entries in earlier
+        TSV files, e.g. a more specific pattern in a later TSV file, `*kg|NUM`,
+        is used instead of a general pattern in an earlier TSV file, `*|NUM`.
+        2. If an entry is in more than one TSV file, the semantic tags and
+        position from the last TSV file that contains it are used, i.e. if the
+        last TSV file contains `*kg|NUM`: [`N3.5`] and the first TSV file
+        contains `*kg|NUM`: [`N1`] then the returned dictionary will only
+        contain the one entry; `*kg|NUM`: [`N3.5`].
+
+        If you want to customise an `autotag` lexicon it is recommended to
+        create your own `autotag` TSV file, e.g. a copy of the original file
+        that you then edit, rather than merging files. This gives you finer
+        control over the priority order of all of the entries.
+
+        # Parameters
+
+        *tsv_file_paths : `PathLike | str`
+            File paths and/or URLs to `autotag` TSV files, see :func:`from_tsv`.
+
+        # Returns
+
+        `dict[str, list[str]]`
+
+        # Raises
+
+        `ValueError`
+            See :func:`from_tsv`.
+
+        # Examples
+        ``` python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     published_file = Path(temp_dir, 'published_autotag.tsv')
+        ...     _ = published_file.write_text('lemma\\tpos\\tsemantic_tags\\n'
+        ...                                   '*\\tNUM\\tN1\\n*kg\\tNUM\\tN3.5\\n',
+        ...                                   encoding='utf-8')
+        ...     custom_file = Path(temp_dir, 'custom_autotag.tsv')
+        ...     _ = custom_file.write_text('lemma\\tpos\\tsemantic_tags\\n'
+        ...                                '*mg\\tNUM\\tN3.5\\n*kg\\tNUM\\tN3.6\\n',
+        ...                                encoding='utf-8')
+        ...     merged = AutotagLexiconCollection.tsv_merge(published_file, custom_file)
+        ...
+        >>> assert merged == {'*mg|NUM': ['N3.5'], '*kg|NUM': ['N3.6'], '*|NUM': ['N1']}
+        >>> assert list(merged) == ['*mg|NUM', '*kg|NUM', '*|NUM']
+
+        ```
+        """
+        combined_lexicon_data: dict[str, list[str]] = {}
+        # Later files are added first, so that their entries have priority.
+        # An entry already added comes from a later file, so it is kept.
+        for tsv_file_path in reversed(tsv_file_paths):
+            lexicon_data = AutotagLexiconCollection.from_tsv(tsv_file_path)
+            for lemma_pos, semantic_tags in lexicon_data.items():
+                if lemma_pos not in combined_lexicon_data:
+                    combined_lexicon_data[lemma_pos] = semantic_tags
+
+        return combined_lexicon_data
+
+    def __setitem__(self, key: str, value: list[str]) -> None:
+        '''
+        # Raises
+
+        `ValueError`
+            If the `key` does not contain a POS pattern, the POS pattern is
+            just `*`, or either pattern is not valid, e.g. it contains an
+            unclosed `[` or a `]` that does not close a character class.
+        '''
+        if '|' not in key:
+            raise ValueError(f'The autotag lexicon entry `{key}` does not '
+                             'contain a POS pattern, the key should be in '
+                             'the format `{lemma}|{pos}`.')
+        lemma, pos = key.rsplit('|', 1)
+        if pos == '*':
+            raise ValueError(f'The autotag lexicon entry `{key}` has a POS '
+                             'pattern of just `*`, which is not allowed as it '
+                             'would match any POS tag.')
+        try:
+            lemma_regex = self.pattern_to_regex(lemma)
+            pos_regex = self.pattern_to_regex(pos)
+        except ValueError as error:
+            raise ValueError(f'The autotag lexicon entry `{key}` is not '
+                             f'valid: {error}') from error
+
+        self.patterns[key] = (lemma_regex, pos_regex)
+        self.data[key] = value
+
+    def __getitem__(self, key: str) -> list[str]:
+        return self.data[key]
+
+    def __delitem__(self, key: str) -> None:
+        del self.data[key]
+        del self.patterns[key]
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> Generator[str, None, None]:
+        for key in self.data:
+            yield key
+
+    def __str__(self) -> str:
+        '''
+        Human readable string.
+        '''
+        object_str = 'AutotagLexiconCollection('
+        for index, item in enumerate(self.items()):
+            object_str += f"('{item[0]}': {item[1]}), "
+            if index == 1:
+                object_str += '... '
+                break
+        object_str += f') ({len(self)} entires in the collection)'
+        return object_str
+
+    def __repr__(self) -> str:
+        '''
+        Machine readable string. When printed and run `eval()` over the string
+        you should be able to recreate the object.
+        '''
+        return f'{self.__class__.__name__}(data={self.data})'
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and contains the same `data` instance attribute.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+
+        # Returns
+
+        `True`
+        '''
+        if not isinstance(other, AutotagLexiconCollection):
+            return False
+
+        return self.data == other.data
 
 
 class MWELexiconCollection(MutableMapping):

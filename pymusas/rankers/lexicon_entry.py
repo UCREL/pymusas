@@ -93,7 +93,9 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
     First we create an initial ranking based on lexicon entry type:
 
     1. Multi Word Expression (MWE) entries ranked lower than single and Non-Special
-    entries are ranked lower than wild card entires.
+    entries are ranked lower than wild card entires. Single word `autotag` entries,
+    `LexiconType.SINGLE_AUTOTAG` (see :class:`pymusas.lexicon_collection.LexiconType`),
+    are ranked higher than all other entries.
 
     Then within these rankings we further rank based on:
     
@@ -460,7 +462,8 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
             LexiconType.MWE_NON_SPECIAL: 1,
             LexiconType.MWE_WILDCARD: 2,
             LexiconType.MWE_CURLY_BRACES: 3,
-            LexiconType.SINGLE_NON_SPECIAL: 4
+            LexiconType.SINGLE_NON_SPECIAL: 4,
+            LexiconType.SINGLE_AUTOTAG: 5
         }
 
         exclude_pos_information_to_rank = {

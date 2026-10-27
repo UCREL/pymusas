@@ -488,3 +488,33 @@ def test__eq__single_word_rule() -> None:
     assert mwe_rule == MWERule(lexicon, None, SingleWordRule({'acting|ADJ': ['A1']}, {}))
     assert mwe_rule != MWERule(lexicon, None)
     assert mwe_rule != MWERule(lexicon, None, SingleWordRule({'acting|ADJ': ['A2']}, {}))
+
+
+def test_mwe_rule_default_tags_autotag() -> None:
+    '''
+    Default (`Df`) tags are resolved using `autotag` pattern matches when the
+    token has no exact single word lexicon match.
+    '''
+    mwe_lexicon = {'*_NUM weight_NOUN': ['Df', 'C1/Df+']}
+    tokens = ['15kg', 'weight']
+    pos_tags = ['NUM', 'NOUN']
+    autotag_lexicon = {'*kg|NUM': ['N3.5']}
+
+    single_word_rule = SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)
+    mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
+    assert ({'*_NUM weight_NOUN': ('N3.5', 'C1/N3.5+')}
+            == _mwe_semantic_tags(mwe_rule, tokens, tokens, pos_tags))
+
+    # An exact single word lexicon match is used instead of an `autotag` match.
+    single_word_rule = SingleWordRule({'15kg|NUM': ['N1']}, {},
+                                      autotag_lexicon_collection=autotag_lexicon)
+    mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
+    assert ({'*_NUM weight_NOUN': ('N1', 'C1/N1+')}
+            == _mwe_semantic_tags(mwe_rule, tokens, tokens, pos_tags))
+
+    # No exact or `autotag` match, as the POS pattern does not match.
+    mwe_lexicon = {'*_ADJ weight_NOUN': ['Df']}
+    single_word_rule = SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)
+    mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
+    assert ({'*_ADJ weight_NOUN': ('Z99',)}
+            == _mwe_semantic_tags(mwe_rule, tokens, tokens, ['ADJ', 'NOUN']))

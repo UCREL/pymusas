@@ -7,8 +7,9 @@
 ---
 
 spaCy registered functions for reading in a
-[`pymusas.lexicon_collection.LexiconCollection`](/pymusas/api/lexicon_collection/#lexiconcollection) or
-[`pymusas.lexicon_collection.MWELexiconCollection`](/pymusas/api/lexicon_collection/#mwelexiconcollection) from a TSV file.
+[`pymusas.lexicon_collection.LexiconCollection`](/pymusas/api/lexicon_collection/#lexiconcollection),
+[`pymusas.lexicon_collection.MWELexiconCollection`](/pymusas/api/lexicon_collection/#mwelexiconcollection), or
+[`pymusas.lexicon_collection.AutotagLexiconCollection`](/pymusas/api/lexicon_collection/#autotaglexiconcollection) from a TSV file.
 
 <a id="pymusas.spacy_api.lexicon_collection.lexicon_collection_from_tsv"></a>
 
@@ -81,4 +82,44 @@ dictionary object that can be used to create a
 
 
 - `dict[str, list[str]]` <br/>
+
+<a id="pymusas.spacy_api.lexicon_collection.autotag_lexicon_collection_from_tsv"></a>
+
+### autotag\_lexicon\_collection\_from\_tsv
+
+```python
+@spacy.util.registry.misc('pymusas.AutotagLexiconCollection.from_tsv')
+def autotag_lexicon_collection_from_tsv(
+    tsv_file_path: PathLike | str
+) -> dict[str, list[str]]
+```
+
+`pymusas.AutotagLexiconCollection.from_tsv` is a registered function under
+the `@misc` function register. Given a `tsv_file_path` to an `autotag`
+lexicon file it will return a dictionary object that can be used to create
+a [`pymusas.lexicon_collection.AutotagLexiconCollection`](/pymusas/api/lexicon_collection/#autotaglexiconcollection).
+
+<h4 id="autotag_lexicon_collection_from_tsv.parameters">Parameters<a className="headerlink" href="#autotag_lexicon_collection_from_tsv.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __tsv\_file\_path__ : `PathLike | str` <br/>
+    A file path or URL to a TSV file that contains at least these three
+    fields:
+
+    1. `lemma`,
+    2. `pos`,
+    3. `semantic_tags`
+
+    All other fields will be ignored.
+
+<h4 id="autotag_lexicon_collection_from_tsv.returns">Returns<a className="headerlink" href="#autotag_lexicon_collection_from_tsv.returns" title="Permanent link">&para;</a></h4>
+
+
+- `dict[str, list[str]]` <br/>
+
+<h4 id="autotag_lexicon_collection_from_tsv.raises">Raises<a className="headerlink" href="#autotag_lexicon_collection_from_tsv.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    See the `from_tsv` method of [`pymusas.lexicon_collection.AutotagLexiconCollection`](/pymusas/api/lexicon_collection/#autotaglexiconcollection).
 

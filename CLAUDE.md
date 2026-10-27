@@ -116,8 +116,11 @@ token they return `(tags, mwe_indexes)`, where `mwe_indexes` is a list of
   model. It tags single words only.
 - `taggers/hybrid.HybridTagger`: subclasses `RuleBasedTagger`. Tokens the rules
   would tag `Z99` get the neural tagger's prediction instead.
-- `lexicon_collection.py`: `LexiconCollection` and `MWELexiconCollection`, which
-  load USAS lexicon TSV files into the dict lookups the rules consume.
+- `lexicon_collection.py`: `LexiconCollection`, `MWELexiconCollection` and
+  `AutotagLexiconCollection`, which load USAS lexicon TSV files into the dict
+  lookups the rules consume. `AutotagLexiconCollection` holds single word
+  `autotag` pattern entries (e.g. `*kg|NUM`), which `SingleWordRule` only tries
+  when a token has no exact match.
 - `pos_mapper.py`: mappings between tagsets (UPOS, Penn Chinese Treebank,
   CorCenCC) and the USAS core POS tagset. They're passed to rules as a
   `pos_mapper`.

@@ -36,6 +36,34 @@ details on parameters to this function.
 
 - [`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule) <br/>
 
+<a id="pymusas.spacy_api.taggers.rules.single_word_rule_v2"></a>
+
+### single\_word\_rule\_v2
+
+```python
+@spacy.util.registry.misc('pymusas.taggers.rules.SingleWordRule.v2')
+def single_word_rule_v2(
+    lexicon_collection: dict[str, list[str]],
+    lemma_lexicon_collection: dict[str, list[str]],
+    pos_mapper: dict[str, list[str]] | None = None,
+    autotag_lexicon_collection: dict[str, list[str]] | None = None
+) -> SingleWordRule
+```
+
+`pymusas.taggers.rules.SingleWordRule.v2` is a registered function under the
+`@misc` function register. Compared to
+`pymusas.taggers.rules.SingleWordRule.v1` it also accepts an
+`autotag_lexicon_collection`, which is used to match tokens against
+`autotag` patterns when they have no exact single word lexicon match.
+
+See the [`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule) for
+details on parameters to this function.
+
+<h4 id="single_word_rule_v2.returns">Returns<a className="headerlink" href="#single_word_rule_v2.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule) <br/>
+
 <a id="pymusas.spacy_api.taggers.rules.mwe_rule"></a>
 
 ### mwe\_rule

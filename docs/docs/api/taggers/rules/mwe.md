@@ -42,8 +42,10 @@ first token in the MWE template that starts with a wildcard (`*`), in
 this example the adjective. The single word semantic tag is found using the
 `single_word_rule`, whereby the best single word match is found using
 the [`pymusas.taggers.rules.single_word.best_match`](/pymusas/api/taggers/rules/single_word/#best_match) method of
-[`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule). From
-this single word match the first semantic tag is used, and of that
+[`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule), this includes
+`autotag` pattern matches if the token has no exact single word lexicon
+match, e.g. `15kg` with the POS `NUM` can match the `autotag` entry
+`*kg|NUM`. From this single word match the first semantic tag is used, and of that
 semantic tag only the first part of any slash tag, with all affixes and
 lower case markers removed, e.g. `A1+/Z3` becomes `A1`. Any affixes and
 lower case markers on the `Df` tag are added to it, e.g. `Df++` becomes
