@@ -146,6 +146,13 @@ object based on the rule matches stated in the class docstring above.
 
 - `list[list[RankingMetaData]]` <br/>
 
+<h4 id="__call__.raises">Raises<a className="headerlink" href="#__call__.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
+    the same length.
+
 <a id="pymusas.taggers.rules.single_word.SingleWordRule.best_match"></a>
 
 ### best\_match
