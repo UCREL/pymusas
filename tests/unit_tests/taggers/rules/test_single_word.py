@@ -421,3 +421,13 @@ def test_single_word_rule_autotag_lexicon_order_priority(
     pos_tags = ['NOUN' if token.endswith('MB') else 'NUM' for token in tokens]
     compare_token_ranking_meta_data(expected_ranking_meta_data,
                                     single_rule(tokens, tokens, pos_tags))
+
+
+def test_single_word_rule_mismatched_lengths() -> None:
+    '''
+    Tests that mismatched `tokens`, `lemmas`, and `pos_tags` lengths raise a
+    `ValueError` rather than being silently truncated.
+    '''
+    rule = SingleWordRule({'London|noun': ['Z2']}, {})
+    with pytest.raises(ValueError):
+        rule(['London', 'is'], ['London'], ['noun', 'verb'])

@@ -1245,8 +1245,8 @@ class MWELexiconCollection(MutableMapping):
                 n_gram_length = len(mwe_template.split())
                 mwe_template_length = len(mwe_template)
                 if mwe_template_length > 0:
+                    regular_expression_lookup = self.pos_mapping_regular_expression_lookup[mwe_type][n_gram_length]
                     for character_lookup in ['*', mwe_template[0]]:
-                        regular_expression_lookup = self.pos_mapping_regular_expression_lookup[mwe_type][n_gram_length]
                         if character_lookup not in regular_expression_lookup:
                             continue
 
@@ -1269,8 +1269,8 @@ class MWELexiconCollection(MutableMapping):
                 mwe_template_length = len(mwe_template)
                 if mwe_template_length > 0:
                     # By default all MWE matches can start with a * as it covers all characters.
+                    regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
                     for character_lookup in ['*', mwe_template[0]]:
-                        regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
                         if character_lookup not in regular_expression_lookup:
                             continue
 

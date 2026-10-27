@@ -372,10 +372,10 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         assert len(token_ranking_data) == len(token_rankings), 'Lengths should be equal'
 
         ranking_meta_data: collections.defaultdict[int, set[RankingMetaData]] = collections.defaultdict(set)
-        for token_data, token_ranking in zip(token_ranking_data, token_rankings):
+        for token_data, token_ranking in zip(token_ranking_data, token_rankings, strict=True):
             assert len(token_data) == len(token_ranking), 'Lengths should be equal'
             
-            for data, rank in zip(token_data, token_ranking):
+            for data, rank in zip(token_data, token_ranking, strict=True):
                 if data in ranking_data_to_exclude:
                     continue
                 ranking_meta_data[rank].add(data)
@@ -496,9 +496,9 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         # Add to each token ranking where it first appears in the text, rule 6.
         largest_end_index_number_indexes = len(str(largest_end_index))
         rankings: list[list[int]] = []
-        for str_token_rankings, token_candidates in zip(initial_rankings, token_ranking_data):
+        for str_token_rankings, token_candidates in zip(initial_rankings, token_ranking_data, strict=True):
             int_token_rankings: list[int] = []
-            for str_ranking, ranking_data in zip(str_token_rankings, token_candidates):
+            for str_ranking, ranking_data in zip(str_token_rankings, token_candidates, strict=True):
                 start_index_str_rank = self.int_2_str(ranking_data.token_match_start_index,
                                                       largest_end_index_number_indexes)
                 int_token_ranking = int(f'{str_ranking}{start_index_str_rank}')

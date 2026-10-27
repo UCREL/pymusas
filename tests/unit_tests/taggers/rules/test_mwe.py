@@ -518,3 +518,13 @@ def test_mwe_rule_default_tags_autotag() -> None:
     mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
     assert ({'*_ADJ weight_NOUN': ('Z99',)}
             == _mwe_semantic_tags(mwe_rule, tokens, tokens, ['ADJ', 'NOUN']))
+
+
+def test_mwe_rule_mismatched_lengths() -> None:
+    '''
+    Tests that mismatched `tokens`, `lemmas`, and `pos_tags` lengths raise a
+    `ValueError` rather than being silently truncated.
+    '''
+    rule = MWERule({'ski_noun boot_noun': ['Z2']})
+    with pytest.raises(ValueError):
+        rule(['ski', 'boot'], ['ski', 'boot'], ['noun'])

@@ -119,6 +119,12 @@ class MWERule(Rule):
         # Returns
 
         `list[list[RankingMetaData]]`
+
+        # Raises
+
+        `ValueError`
+            If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
+            the same length.
         '''
 
         default_semantic_tag_cache: dict[int, str | None] = {}
@@ -259,7 +265,7 @@ class MWERule(Rule):
         tokens_lower_with_pos: list[str] = []
         lemmas_with_pos: list[str] = []
         lemmas_lower_with_pos: list[str] = []
-        for token, lemma, pos in zip(tokens, lemmas, pos_tags):
+        for token, lemma, pos in zip(tokens, lemmas, pos_tags, strict=True):
             tokens_with_pos.append(f'{token}_{pos}')
             tokens_lower_with_pos.append(f'{token}_{pos}'.lower())
             lemmas_with_pos.append(f'{lemma}_{pos}')

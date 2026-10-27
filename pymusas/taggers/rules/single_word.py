@@ -131,6 +131,12 @@ class SingleWordRule(Rule):
         # Returns
 
         `list[list[RankingMetaData]]`
+
+        # Raises
+
+        `ValueError`
+            If the length of the `tokens`, `lemmas`, and `pos_tags` are not of
+            the same length.
         '''
 
         def find_match_and_add_to_ranking_data(lexicon_entry: str,
@@ -156,7 +162,7 @@ class SingleWordRule(Rule):
         
         index = 0
 
-        for token, lemma, initial_pos in zip(tokens, lemmas, pos_tags):
+        for token, lemma, initial_pos in zip(tokens, lemmas, pos_tags, strict=True):
 
             token_lower = token.lower()
             lemma_lower = lemma.lower()

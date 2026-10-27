@@ -317,7 +317,7 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
                 for token_index, ranking_meta_data in enumerate(rule_ranking_meta_data):
                     token_ranking_meta_data[token_index].extend(ranking_meta_data)
             
-            token_ranks, token_best_rank = ranker(token_ranking_meta_data)
+            _token_ranks, token_best_rank = ranker(token_ranking_meta_data)
             
             for token_index, best_rank in enumerate(token_best_rank):
                 tagged_token = doc[token_index]

@@ -141,7 +141,7 @@ class RuleBasedTagger():
             for token_index, ranking_meta_data in enumerate(rule_ranking_meta_data):
                 token_ranking_meta_data[token_index].extend(ranking_meta_data)
 
-        token_ranks, token_best_rank = self.ranker(token_ranking_meta_data)
+        _token_ranks, token_best_rank = self.ranker(token_ranking_meta_data)
         
         tags_indexes: list[tuple[list[str], list[tuple[int, int]]]] = []
         for token_index, best_rank in enumerate(token_best_rank):
