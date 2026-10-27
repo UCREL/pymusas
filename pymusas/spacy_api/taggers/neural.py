@@ -320,9 +320,9 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
                 if tokens[token_index].strip() == "":
                     assigned_tags = ["Z9"]
                 
-                token = doc[token_index]
-                setattr(token._, self.pymusas_tags_token_attr, assigned_tags)
-                setattr(token._, self.pymusas_mwe_indexes_attr, start_end_index)
+                tagged_token = doc[token_index]
+                setattr(tagged_token._, self.pymusas_tags_token_attr, assigned_tags)
+                setattr(tagged_token._, self.pymusas_mwe_indexes_attr, start_end_index)
         except Exception as e:
             error_handler(self.name, self, [doc], e)
         

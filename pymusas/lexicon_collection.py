@@ -1252,10 +1252,10 @@ class MWELexiconCollection(MutableMapping):
 
                         for (potential_mwe_match,
                              mwe_pattern) in regular_expression_lookup[character_lookup].items():
-                            match = mwe_pattern.match(mwe_template)
-                            if match is not None:
-                                if (match.start() == 0
-                                   and match.end() == mwe_template_length):
+                            pattern_match = mwe_pattern.match(mwe_template)
+                            if pattern_match is not None:
+                                if (pattern_match.start() == 0
+                                   and pattern_match.end() == mwe_template_length):
                                     mwe_templates_matches.append(potential_mwe_match)
         else:
             if mwe_type == LexiconType.MWE_NON_SPECIAL:
@@ -1276,10 +1276,10 @@ class MWELexiconCollection(MutableMapping):
 
                         for (potential_mwe_match,
                              mwe_pattern) in regular_expression_lookup[character_lookup].items():
-                            match = mwe_pattern.match(mwe_template)
-                            if match is not None:
-                                if (match.start() == 0
-                                   and match.end() == mwe_template_length):
+                            pattern_match = mwe_pattern.match(mwe_template)
+                            if pattern_match is not None:
+                                if (pattern_match.start() == 0
+                                   and pattern_match.end() == mwe_template_length):
                                     mwe_templates_matches.append(potential_mwe_match)
 
         return mwe_templates_matches
@@ -1595,14 +1595,14 @@ class MWELexiconCollection(MutableMapping):
                         raise ValueError(pos_error)
 
                 mapped_pos_list = self.pos_mapper.get(pos, [pos])
+                mapped_pos: str
                 if len(mapped_pos_list) > 1:
                     contains_one_to_many_pos_tag = True
-                    mapped_pos = '|'.join(mapped_pos_list)
-                    mapped_pos = '(?:' + mapped_pos + ')'
-                    pos_mapped_key_list.append(f'{token}_{mapped_pos}')
+                    alternatives = '|'.join(mapped_pos_list)
+                    mapped_pos = f'(?:{alternatives})'
                 else:
                     mapped_pos = mapped_pos_list[0]
-                    pos_mapped_key_list.append(f'{token}_{mapped_pos}')
+                pos_mapped_key_list.append(f'{token}_{mapped_pos}')
             pos_mapped_key = ' '.join(pos_mapped_key_list)
             
             if '*' in pos_mapped_key:

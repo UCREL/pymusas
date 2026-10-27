@@ -293,8 +293,8 @@ def text_from_files(file_directory: Path,
     for file in file_directory.iterdir():
         if file.name.startswith(file_prefix):
             with file.open("r", encoding="utf-8") as file_fp:
-                for line in file_fp:
-                    line = line.strip()
+                for raw_line in file_fp:
+                    line = raw_line.strip()
                     if line:
                         yield line
 

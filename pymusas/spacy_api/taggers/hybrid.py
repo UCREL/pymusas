@@ -430,8 +430,8 @@ class HybridTagger(RuleBasedTagger, NeuralTagger):
                     neural_tags = predicted_tags_candidates[token_index]
                     if token_text.strip() == "":
                         neural_tags = ["Z9"]
-                    token = doc[token_index]
-                    setattr(token._, self.pymusas_tags_token_attr, neural_tags)
+                    tagged_token = doc[token_index]
+                    setattr(tagged_token._, self.pymusas_tags_token_attr, neural_tags)
         except Exception as e:
             error_handler(self.name, self, [doc], e)
         

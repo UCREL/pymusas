@@ -320,28 +320,28 @@ class RuleBasedTagger(spacy.pipeline.pipe.Pipe):
             token_ranks, token_best_rank = ranker(token_ranking_meta_data)
             
             for token_index, best_rank in enumerate(token_best_rank):
-                token = doc[token_index]
+                tagged_token = doc[token_index]
                 if best_rank is None:
                     pos_tag = pos_tags[token_index]
                     if pos_tag in self.default_punctuation_tags:
-                        setattr(token._, self.pymusas_tags_token_attr, ['PUNCT'])
-                        setattr(token._, self.pymusas_mwe_indexes_attr,
+                        setattr(tagged_token._, self.pymusas_tags_token_attr, ['PUNCT'])
+                        setattr(tagged_token._, self.pymusas_mwe_indexes_attr,
                                 [(token_index, token_index + 1)])
                     elif pos_tag in self.default_number_tags:
-                        setattr(token._, self.pymusas_tags_token_attr, ['N1'])
-                        setattr(token._, self.pymusas_mwe_indexes_attr,
+                        setattr(tagged_token._, self.pymusas_tags_token_attr, ['N1'])
+                        setattr(tagged_token._, self.pymusas_mwe_indexes_attr,
                                 [(token_index, token_index + 1)])
                     else:
-                        setattr(token._, self.pymusas_tags_token_attr, ['Z99'])
-                        setattr(token._, self.pymusas_mwe_indexes_attr,
+                        setattr(tagged_token._, self.pymusas_tags_token_attr, ['Z99'])
+                        setattr(tagged_token._, self.pymusas_mwe_indexes_attr,
                                 [(token_index, token_index + 1)])
                     continue
                 tags = list(best_rank.semantic_tags)
                 indexes = [(best_rank.token_match_start_index,
                             best_rank.token_match_end_index)]
             
-                setattr(token._, self.pymusas_tags_token_attr, tags)
-                setattr(token._, self.pymusas_mwe_indexes_attr, indexes)
+                setattr(tagged_token._, self.pymusas_tags_token_attr, tags)
+                setattr(tagged_token._, self.pymusas_mwe_indexes_attr, indexes)
         except Exception as e:
             error_handler(self.name, self, [doc], e)
         

@@ -145,27 +145,27 @@ class MWERule(Rule):
 
         def tag_n_gram_indexes(_n_gram_indexes: list[tuple[int, int]],
                                mwe_type: LexiconType,
-                               token_pos: list[str], lemma_pos: list[str],
-                               token_lower_pos: list[str], lemma_lower_pos: list[str],
-                               token_ranking_meta_data: list[list[RankingMetaData]]
+                               token_templates: list[str], lemma_templates: list[str],
+                               token_lower_templates: list[str], lemma_lower_templates: list[str],
+                               ranking_meta_data_by_token: list[list[RankingMetaData]]
                                ) -> None:
             '''
             Given a `list` of n gram indexes, whereby all grams have the same value
             of *n*, it will find all MWE rule matches of type `mwe_type` for those
-            n-grams in the four token `list`s (`token_pos`, `lemma_pos`,
-            `token_lower_pos`, `lemma_lower_pos`). All rule matches will crate a
+            n-grams in the four token `list`s (`token_templates`, `lemma_templates`,
+            `token_lower_templates`, `lemma_lower_templates`). All rule matches will crate a
             `RankingMetaData` object for each token in the match, of which these
             objects are appended to the relevant token indexes within the
-            `token_ranking_meta_data` object.
+            `ranking_meta_data_by_token` object.
 
-            Nothing is returned but the `token_ranking_meta_data` object will have
+            Nothing is returned but the `ranking_meta_data_by_token` object will have
             been updated if at least one rule match has been found.
             '''
             token_list_type: list[tuple[list[str], LexicalMatch]]
-            token_list_type = [(token_pos, LexicalMatch.TOKEN),
-                               (lemma_pos, LexicalMatch.LEMMA),
-                               (token_lower_pos, LexicalMatch.TOKEN_LOWER),
-                               (lemma_lower_pos, LexicalMatch.LEMMA_LOWER)]
+            token_list_type = [(token_templates, LexicalMatch.TOKEN),
+                               (lemma_templates, LexicalMatch.LEMMA),
+                               (token_lower_templates, LexicalMatch.TOKEN_LOWER),
+                               (lemma_lower_templates, LexicalMatch.LEMMA_LOWER)]
             
             for token_list, token_type in token_list_type:
                 for n_gram_index in _n_gram_indexes:
@@ -203,12 +203,12 @@ class MWERule(Rule):
                                                             matched_mwe_template,
                                                             semantic_tags)
                         for token_index in range(start_index, end_index):
-                            token_ranking_meta_data[token_index].append(ranking_meta_data)
+                            ranking_meta_data_by_token[token_index].append(ranking_meta_data)
                 
         def tag_n_gram_based_MWE(mwe_type: LexiconType,
-                                 token_pos: list[str], lemma_pos: list[str],
-                                 token_lower_pos: list[str], lemma_lower_pos: list[str],
-                                 token_ranking_meta_data: list[list[RankingMetaData]]
+                                 token_templates: list[str], lemma_templates: list[str],
+                                 token_lower_templates: list[str], lemma_lower_templates: list[str],
+                                 ranking_meta_data_by_token: list[list[RankingMetaData]]
                                  ) -> None:
             '''
             Any type of rule match that uses n-grams should use this function.
@@ -221,7 +221,7 @@ class MWERule(Rule):
             `pymusas.lexicon_collection.MWELexiconCollection.mwe_match`
             method.
 
-            Nothing is returned but the `token_ranking_meta_data` object will have
+            Nothing is returned but the `ranking_meta_data_by_token` object will have
             been updated if at least one rule match has been found.
             '''
             largest_mwe_in_lexicon = 0
@@ -238,32 +238,32 @@ class MWERule(Rule):
             largest_n_gram = largest_mwe_in_lexicon + 1
             largest_n_gram_indexes: list[tuple[int, int]] = []
 
-            for n_gram_index in util.n_gram_indexes(token_pos, 2, largest_mwe_in_lexicon):
+            for n_gram_index in util.n_gram_indexes(token_templates, 2, largest_mwe_in_lexicon):
                 start_index, end_index = n_gram_index
                 n_gram_size = end_index - start_index
                 if largest_n_gram > n_gram_size:
                     largest_n_gram = n_gram_size
                     tag_n_gram_indexes(largest_n_gram_indexes, mwe_type,
-                                       token_pos, lemma_pos, token_lower_pos,
-                                       lemma_lower_pos,
-                                       token_ranking_meta_data)
+                                       token_templates, lemma_templates, token_lower_templates,
+                                       lemma_lower_templates,
+                                       ranking_meta_data_by_token)
                     largest_n_gram_indexes = []
 
                 largest_n_gram_indexes.append(n_gram_index)
             
-            tag_n_gram_indexes(largest_n_gram_indexes, mwe_type, token_pos,
-                               lemma_pos, token_lower_pos,
-                               lemma_lower_pos, token_ranking_meta_data)
+            tag_n_gram_indexes(largest_n_gram_indexes, mwe_type, token_templates,
+                               lemma_templates, token_lower_templates,
+                               lemma_lower_templates, ranking_meta_data_by_token)
         
-        token_pos: list[str] = []
-        token_lower_pos: list[str] = []
-        lemma_pos: list[str] = []
-        lemma_lower_pos: list[str] = []
+        tokens_with_pos: list[str] = []
+        tokens_lower_with_pos: list[str] = []
+        lemmas_with_pos: list[str] = []
+        lemmas_lower_with_pos: list[str] = []
         for token, lemma, pos in zip(tokens, lemmas, pos_tags):
-            token_pos.append(f'{token}_{pos}')
-            token_lower_pos.append(f'{token}_{pos}'.lower())
-            lemma_pos.append(f'{lemma}_{pos}')
-            lemma_lower_pos.append(f'{lemma}_{pos}'.lower())
+            tokens_with_pos.append(f'{token}_{pos}')
+            tokens_lower_with_pos.append(f'{token}_{pos}'.lower())
+            lemmas_with_pos.append(f'{lemma}_{pos}')
+            lemmas_lower_with_pos.append(f'{lemma}_{pos}'.lower())
         
         number_tokens = len(tokens)
         token_ranking_meta_data: list[list[RankingMetaData]] \
@@ -273,13 +273,13 @@ class MWERule(Rule):
             return token_ranking_meta_data
 
         # First match on `MWE_NON_SPECIAL`
-        tag_n_gram_based_MWE(LexiconType.MWE_NON_SPECIAL, token_pos, lemma_pos,
-                             token_lower_pos, lemma_lower_pos,
+        tag_n_gram_based_MWE(LexiconType.MWE_NON_SPECIAL, tokens_with_pos, lemmas_with_pos,
+                             tokens_lower_with_pos, lemmas_lower_with_pos,
                              token_ranking_meta_data)
 
         # Second match on `MWE_WILDCARD`
-        tag_n_gram_based_MWE(LexiconType.MWE_WILDCARD, token_pos, lemma_pos,
-                             token_lower_pos, lemma_lower_pos,
+        tag_n_gram_based_MWE(LexiconType.MWE_WILDCARD, tokens_with_pos, lemmas_with_pos,
+                             tokens_lower_with_pos, lemmas_lower_with_pos,
                              token_ranking_meta_data)
 
         return token_ranking_meta_data

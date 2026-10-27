@@ -164,12 +164,12 @@ class SingleWordRule(Rule):
             start_index = index
             end_index = start_index + 1
             
-            pos_tags = [initial_pos]
+            token_pos_tags = [initial_pos]
             if self.pos_mapper is not None:
-                pos_tags = self.pos_mapper.get(initial_pos, [])
+                token_pos_tags = self.pos_mapper.get(initial_pos, [])
             
             # All of these use POS information
-            for pos in pos_tags:
+            for pos in token_pos_tags:
                 token_pos = f'{token}|{pos}'
                 find_match_and_add_to_ranking_data(token_pos, False,
                                                    LexicalMatch.TOKEN,
@@ -207,7 +207,7 @@ class SingleWordRule(Rule):
             # Autotag patterns are only used when there is no exact match.
             if self.autotag_lexicon_collection and not token_ranking_meta_data[start_index]:
                 autotag_matches: list[tuple[str, LexicalMatch]] = []
-                for pos in pos_tags:
+                for pos in token_pos_tags:
                     for lexical_value, lexical_type in lexical_value_type:
                         for autotag_entry in self.autotag_lexicon_collection.match(lexical_value, pos):
                             autotag_matches.append((autotag_entry, lexical_type))

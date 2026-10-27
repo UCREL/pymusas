@@ -77,11 +77,12 @@ def main(benchmarking_data_file: Path = typer.Argument(help=benchmarking_data_fi
         markdown_table_column_string += " --- |"
         
         for row_index, heading_row_data in enumerate(benchmarking_data[heading]):
+            formatted_row_data = str(heading_row_data)
             if isinstance(heading_row_data, float):
-                heading_row_data = f"{heading_row_data:,.2f}"
-            if isinstance(heading_row_data, int):
-                heading_row_data = f"{heading_row_data:,}"
-            markdown_table_content[row_index].append(str(heading_row_data))
+                formatted_row_data = f"{heading_row_data:,.2f}"
+            elif isinstance(heading_row_data, int):
+                formatted_row_data = f"{heading_row_data:,}"
+            markdown_table_content[row_index].append(formatted_row_data)
 
     print(markdown_table_header_string)
     print(markdown_table_column_string)

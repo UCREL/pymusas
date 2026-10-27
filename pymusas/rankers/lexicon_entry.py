@@ -472,10 +472,10 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
         }
 
         initial_rankings: list[list[str]] = []
-        largest_token_index = 0
-        for token in token_ranking_data:
+        largest_end_index = 0
+        for token_candidates in token_ranking_data:
             token_rankings: list[str] = []
-            for ranking_data in token:
+            for ranking_data in token_candidates:
                 lexicon_type_rank = lexicon_type_to_rank[ranking_data.lexicon_type]
                 n_gram_rank = self.n_gram_ranking_dictionary[ranking_data.lexicon_n_gram_length]
                 n_gram_str_rank = self.int_2_str(n_gram_rank, self.n_gram_number_indexes)
@@ -487,20 +487,20 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
                             f'{exclude_pos_information_rank}{lexical_match_rank}')
                 token_rankings.append(rank_str)
 
-                if largest_token_index < ranking_data.token_match_start_index:
-                    largest_token_index = ranking_data.token_match_start_index
-                if largest_token_index < ranking_data.token_match_end_index:
-                    largest_token_index = ranking_data.token_match_end_index
+                if largest_end_index < ranking_data.token_match_start_index:
+                    largest_end_index = ranking_data.token_match_start_index
+                if largest_end_index < ranking_data.token_match_end_index:
+                    largest_end_index = ranking_data.token_match_end_index
             initial_rankings.append(token_rankings)
 
         # Add to each token ranking where it first appears in the text, rule 6.
-        largest_token_index_number_indexes = len(str(largest_token_index))
+        largest_end_index_number_indexes = len(str(largest_end_index))
         rankings: list[list[int]] = []
-        for str_token_rankings, token in zip(initial_rankings, token_ranking_data):
+        for str_token_rankings, token_candidates in zip(initial_rankings, token_ranking_data):
             int_token_rankings: list[int] = []
-            for str_ranking, ranking_data in zip(str_token_rankings, token):
+            for str_ranking, ranking_data in zip(str_token_rankings, token_candidates):
                 start_index_str_rank = self.int_2_str(ranking_data.token_match_start_index,
-                                                      largest_token_index_number_indexes)
+                                                      largest_end_index_number_indexes)
                 int_token_ranking = int(f'{str_ranking}{start_index_str_rank}')
                 int_token_rankings.append(int_token_ranking)
             rankings.append(int_token_rankings)
