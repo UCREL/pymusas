@@ -629,6 +629,11 @@ class AutotagLexiconCollection(MutableMapping):
 
     def __init__(self, data: dict[str, list[str]] | None = None) -> None:
 
+        # `patterns` must have the same keys, in the same order, as `data`: the
+        # order is the match priority and `first_match` depends on this order
+        # through the `patterns` attribute.
+        # Only modify the contents of these attributes together,
+        # through `__setitem__` and `__delitem__`.
         self.data: dict[str, list[str]] = {}
         self.patterns: dict[str, tuple[re.Pattern, re.Pattern]] = {}
         if data is not None:
@@ -768,6 +773,54 @@ class AutotagLexiconCollection(MutableMapping):
             if lemma_regex.fullmatch(lexical_value) is not None:
                 matches.append(key)
         return matches
+
+    def first_match(self, candidates: list[tuple[str, str]]
+                    ) -> tuple[str, list[int]] | None:
+        '''
+        Returns the `{lemma}|{pos}` key of the first entry in the collection
+        that matches at least one of the `candidates`, and the indexes of all
+        of the `candidates` that the entry matches, or `None` if no entry
+        matches. It stops searching at the first matching entry, therefore it
+        is quicker than calling :func:`match` for each candidate when only the
+        entry that comes first in the collection is needed.
+
+        # Parameters
+
+        candidates : `list[tuple[str, str]]`
+            The `(lexical_value, pos)` pairs to match, see :func:`match`.
+
+        # Returns
+
+        `tuple[str, list[int]] | None`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*|NUM': ['N1'],
+        ...                                        '*kg|NUM': ['N3.5']})
+        >>> candidates = [('15kg', 'NUM'), ('15KG', 'NUM'), ('15kg', 'NOUN')]
+        >>> assert collection.first_match(candidates) == ('*|NUM', [0, 1])
+        >>> assert collection.first_match([('15kg', 'NOUN')]) is None
+
+        ```
+        '''
+        for key, (lemma_regex, pos_regex) in self.patterns.items():
+            pos_matches: dict[str, bool] = {}
+            lemma_matches: dict[str, bool] = {}
+            matched_indexes: list[int] = []
+            for index, (lexical_value, pos) in enumerate(candidates):
+                if pos not in pos_matches:
+                    pos_matches[pos] = pos_regex.fullmatch(pos) is not None
+                if not pos_matches[pos]:
+                    continue
+                if lexical_value not in lemma_matches:
+                    lemma_matches[lexical_value] \
+                        = lemma_regex.fullmatch(lexical_value) is not None
+                if lemma_matches[lexical_value]:
+                    matched_indexes.append(index)
+            if matched_indexes:
+                return key, matched_indexes
+        return None
 
     def to_dictionary(self) -> dict[str, list[str]]:
         '''

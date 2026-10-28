@@ -831,6 +831,47 @@ assert collection.match('10mb', 'NOUN') == []
 assert collection.match('!', 'PUNCT') == ['*|PUNCT']
 ```
 
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.first_match"></a>
+
+### first\_match
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def first_match(
+ |     candidates: list[tuple[str, str]]
+ | ) -> tuple[str, list[int]] | None
+```
+
+Returns the `{lemma}|{pos}` key of the first entry in the collection
+that matches at least one of the `candidates`, and the indexes of all
+of the `candidates` that the entry matches, or `None` if no entry
+matches. It stops searching at the first matching entry, therefore it
+is quicker than calling [`match`](#match) for each candidate when only the
+entry that comes first in the collection is needed.
+
+<h4 id="first_match.parameters">Parameters<a className="headerlink" href="#first_match.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __candidates__ : `list[tuple[str, str]]` <br/>
+    The `(lexical_value, pos)` pairs to match, see [`match`](#match).
+
+<h4 id="first_match.returns">Returns<a className="headerlink" href="#first_match.returns" title="Permanent link">&para;</a></h4>
+
+
+- `tuple[str, list[int]] | None` <br/>
+
+<h4 id="first_match.examples">Examples<a className="headerlink" href="#first_match.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*|NUM': ['N1'],
+                                       '*kg|NUM': ['N3.5']})
+candidates = [('15kg', 'NUM'), ('15KG', 'NUM'), ('15kg', 'NOUN')]
+assert collection.first_match(candidates) == ('*|NUM', [0, 1])
+assert collection.first_match([('15kg', 'NOUN')]) is None
+```
+
 <a id="pymusas.lexicon_collection.AutotagLexiconCollection.to_dictionary"></a>
 
 ### to\_dictionary

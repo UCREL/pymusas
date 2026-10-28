@@ -127,6 +127,54 @@ def test_match() -> None:
     assert ['*|NUM', '*kg|NUM'] == collection.match('15kg', 'NUM')
 
 
+def test_first_match() -> None:
+    collection = AutotagLexiconCollection(AUTOTAG_ENTRIES)
+    assert ('*kg|NUM', [0]) == collection.first_match([('15kg', 'NUM')])
+    assert ('*kg|NUM', [1]) == collection.first_match([('15kg', 'NOUN'),
+                                                       ('15kg', 'NUM')])
+    assert collection.first_match([('15kg', 'NOUN'), ('10mb', 'NOUN')]) is None
+    assert collection.first_match([]) is None
+    assert AutotagLexiconCollection().first_match([('15kg', 'NUM')]) is None
+
+    # The entry that comes first in the collection wins, and all of the
+    # candidates it matches are returned in candidate order.
+    collection = AutotagLexiconCollection({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']})
+    candidates = [('15kg', 'NUM'), ('15KG', 'NUM'), ('15kg', 'NOUN'),
+                  ('15kg', 'NUM')]
+    assert ('*|NUM', [0, 1, 3]) == collection.first_match(candidates)
+
+    collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+    assert ('*kg|NUM', [0, 3]) == collection.first_match(candidates)
+
+
+def test_patterns_order_matches_data() -> None:
+    # `first_match` iterates `patterns` whereas the priority order is defined
+    # by `data`, so the two must always have the same order.
+    candidates = [('15kg', 'NUM')]
+    collection = AutotagLexiconCollection({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']})
+    assert list(collection.data) == list(collection.patterns)
+    assert ('*|NUM', [0]) == collection.first_match(candidates)
+
+    # Overwriting an existing entry keeps its position.
+    collection['*|NUM'] = ['N2']
+    assert ['*|NUM', '*kg|NUM'] == list(collection.data)
+    assert list(collection.data) == list(collection.patterns)
+    assert ('*|NUM', [0]) == collection.first_match(candidates)
+
+    # Deleting and re-adding an entry moves it to the end.
+    del collection['*|NUM']
+    collection['*|NUM'] = ['N1']
+    assert ['*kg|NUM', '*|NUM'] == list(collection.data)
+    assert list(collection.data) == list(collection.patterns)
+    assert ('*kg|NUM', [0]) == collection.first_match(candidates)
+
+    # The order is kept when the collection is serialised and loaded.
+    loaded = AutotagLexiconCollection.from_bytes(collection.to_bytes())
+    assert ['*kg|NUM', '*|NUM'] == list(loaded.data)
+    assert list(loaded.data) == list(loaded.patterns)
+    assert ('*kg|NUM', [0]) == loaded.first_match(candidates)
+
+
 def test_mutable_mapping_methods() -> None:
     collection = AutotagLexiconCollection(AUTOTAG_ENTRIES)
     assert 4 == len(collection)

@@ -212,27 +212,26 @@ class SingleWordRule(Rule):
 
             # Autotag patterns are only used when there is no exact match.
             if self.autotag_lexicon_collection and not token_ranking_meta_data[start_index]:
-                autotag_matches: list[tuple[str, LexicalMatch]] = []
-                for pos in token_pos_tags:
-                    for lexical_value, lexical_type in lexical_value_type:
-                        for autotag_entry in self.autotag_lexicon_collection.match(lexical_value, pos):
-                            autotag_matches.append((autotag_entry, lexical_type))
+                autotag_candidates = [(lexical_value, pos)
+                                      for pos in token_pos_tags
+                                      for lexical_value, _ in lexical_value_type]
+                autotag_lexical_types = [lexical_type
+                                         for _ in token_pos_tags
+                                         for _, lexical_type in lexical_value_type]
 
                 # Only the matching entry that comes first in the autotag
                 # lexicon is used, so the lexicon order sets the priority.
-                matched_entries = {autotag_entry for autotag_entry, _ in autotag_matches}
-                first_entry = next((autotag_entry for autotag_entry in self.autotag_lexicon_collection
-                                    if autotag_entry in matched_entries), None)
-                for autotag_entry, lexical_type in autotag_matches:
-                    if autotag_entry != first_entry:
-                        continue
+                first_match = self.autotag_lexicon_collection.first_match(autotag_candidates)
+                if first_match is not None:
+                    autotag_entry, matched_indexes = first_match
                     semantic_tags = tuple(self.autotag_lexicon_collection[autotag_entry])
-                    ranking_data = RankingMetaData(LexiconType.SINGLE_AUTOTAG,
-                                                   1, 0, False,
-                                                   lexical_type,
-                                                   start_index, end_index,
-                                                   autotag_entry, semantic_tags)
-                    token_ranking_meta_data[start_index].append(ranking_data)
+                    for matched_index in matched_indexes:
+                        ranking_data = RankingMetaData(LexiconType.SINGLE_AUTOTAG,
+                                                       1, 0, False,
+                                                       autotag_lexical_types[matched_index],
+                                                       start_index, end_index,
+                                                       autotag_entry, semantic_tags)
+                        token_ranking_meta_data[start_index].append(ranking_data)
 
             index += 1
 
