@@ -230,6 +230,7 @@ class ContextualRuleBasedRanker(LexiconEntryRanker):
             rule_max_number_wildcards = 0
             if isinstance(rule, SingleWordRule):
                 rule_max_n_gram_length = 1
+                rule_max_number_wildcards = rule.autotag_lexicon_collection.most_wildcards()
             elif isinstance(rule, MWERule):
                 rule_max_n_gram_length = rule.mwe_lexicon_collection.longest_mwe_template
                 rule_max_number_wildcards = rule.mwe_lexicon_collection.most_wildcards_in_mwe_template

@@ -175,6 +175,30 @@ def test_patterns_order_matches_data() -> None:
     assert ('*kg|NUM', [0]) == loaded.first_match(candidates)
 
 
+@pytest.mark.parametrize('pattern,expected', [('', 0), ('kg', 0), ('*', 1),
+                                               ('*kg', 1), ('*-*-*', 3),
+                                               ('[0-9]*ish', 1),
+                                               ('[0-9][0-9]*ish', 1),
+                                               ('*[0-9]*', 2),
+                                               # A `*` in a class is literal.
+                                               ('[*]kg', 0), ('[a*]*', 1),
+                                               ('[\\]*]*', 1)])
+def test_pattern_wildcard_count(pattern: str, expected: int) -> None:
+    assert expected == AutotagLexiconCollection.pattern_wildcard_count(pattern)
+
+
+def test_wildcard_count_and_most_wildcards() -> None:
+    collection = AutotagLexiconCollection(AUTOTAG_ENTRIES)
+    assert 1 == collection.wildcard_count('*kg|NUM')
+    assert 1 == collection.wildcard_count('[0-9][0-9]*ish|NUM')
+    assert 2 == collection.wildcard_count('*MB|N*')
+    # A `|` in the lemma pattern does not affect the POS pattern.
+    collection['*|*|N*'] = ['N1']
+    assert 3 == collection.wildcard_count('*|*|N*')
+    assert 3 == collection.most_wildcards()
+    assert 0 == AutotagLexiconCollection().most_wildcards()
+
+
 def test_mutable_mapping_methods() -> None:
     collection = AutotagLexiconCollection(AUTOTAG_ENTRIES)
     assert 4 == len(collection)

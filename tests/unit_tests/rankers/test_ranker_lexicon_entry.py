@@ -488,3 +488,9 @@ def test_contextual_rule_based_ranker_get_construction_arguments() -> None:
 
     del rules[1]
     assert (9, 1) == ContextualRuleBasedRanker.get_construction_arguments(rules)
+
+    # The autotag entries of a single word rule can contain wildcards.
+    autotag_rule = SingleWordRule({}, {}, autotag_lexicon_collection={'*MB|N*': ['N3.2']})
+    assert (1, 2) == ContextualRuleBasedRanker.get_construction_arguments([autotag_rule])
+    rules.append(autotag_rule)
+    assert (9, 2) == ContextualRuleBasedRanker.get_construction_arguments(rules)

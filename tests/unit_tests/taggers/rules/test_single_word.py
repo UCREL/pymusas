@@ -259,16 +259,18 @@ def test_single_word_rule_best_match() -> None:
 
 
 def _autotag_match(lexical_match: LexicalMatch, entry: str,
-                   semantic_tags: tuple[str, ...], index: int = 0
-                   ) -> RankingMetaData:
-    return RankingMetaData(LexiconType.SINGLE_AUTOTAG, 1, 0, False,
+                   semantic_tags: tuple[str, ...], index: int = 0,
+                   wildcard_count: int = 1) -> RankingMetaData:
+    return RankingMetaData(LexiconType.SINGLE_AUTOTAG, 1, wildcard_count, False,
                            lexical_match, index, index + 1, entry,
                            semantic_tags)
 
 
 def _all_lexical_matches(entry: str, semantic_tags: tuple[str, ...],
-                         index: int = 0) -> list[RankingMetaData]:
-    return [_autotag_match(lexical_match, entry, semantic_tags, index)
+                         index: int = 0, wildcard_count: int = 1
+                         ) -> list[RankingMetaData]:
+    return [_autotag_match(lexical_match, entry, semantic_tags, index,
+                           wildcard_count)
             for lexical_match in LexicalMatch]
 
 
@@ -292,8 +294,8 @@ def test_single_word_rule__AUTOTAG_CASES() -> None:
         # The patterns are case sensitive, but the token and lemma are also
         # matched after lower casing, so `10MB` matches on its token and
         # lemma only and `10mb` does not match at all.
-        [_autotag_match(LexicalMatch.TOKEN, '*MB|N*', ('N3.2', 'N5'), 6),
-         _autotag_match(LexicalMatch.LEMMA, '*MB|N*', ('N3.2', 'N5'), 6)],
+        [_autotag_match(LexicalMatch.TOKEN, '*MB|N*', ('N3.2', 'N5'), 6, 2),
+         _autotag_match(LexicalMatch.LEMMA, '*MB|N*', ('N3.2', 'N5'), 6, 2)],
         []
     ]
     compare_token_ranking_meta_data(expected_ranking_meta_data,

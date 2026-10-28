@@ -225,9 +225,10 @@ class SingleWordRule(Rule):
                 if first_match is not None:
                     autotag_entry, matched_indexes = first_match
                     semantic_tags = tuple(self.autotag_lexicon_collection[autotag_entry])
+                    wildcard_count = self.autotag_lexicon_collection.wildcard_count(autotag_entry)
                     for matched_index in matched_indexes:
                         ranking_data = RankingMetaData(LexiconType.SINGLE_AUTOTAG,
-                                                       1, 0, False,
+                                                       1, wildcard_count, False,
                                                        autotag_lexical_types[matched_index],
                                                        start_index, end_index,
                                                        autotag_entry, semantic_tags)

@@ -737,6 +737,92 @@ class AutotagLexiconCollection(MutableMapping):
             raise ValueError(f'The pattern `{pattern}` is not valid: '
                              f'{error}') from error
 
+    @staticmethod
+    def pattern_wildcard_count(pattern: str) -> int:
+        r'''
+        Returns the number of wildcards (`*`) in the `autotag` `pattern`. A `*`
+        within a character class is a literal `*`, so it is not counted, but a
+        `*` straight after a character class is, e.g. `[0-9]*ish` has 1
+        wildcard. The `pattern` is assumed to be valid, see
+        :func:`pattern_to_regex`.
+
+        # Parameters
+
+        pattern : `str`
+            The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+        # Returns
+
+        `int`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> assert 1 == AutotagLexiconCollection.pattern_wildcard_count('*kg')
+        >>> assert 3 == AutotagLexiconCollection.pattern_wildcard_count('*-[0-9]*-*')
+        >>> assert 0 == AutotagLexiconCollection.pattern_wildcard_count('[*]kg')
+
+        ```
+        '''
+        wildcard_count = 0
+        index = 0
+        while index < len(pattern):
+            character = pattern[index]
+            if character == '*':
+                wildcard_count += 1
+            elif character == '[':
+                index = AutotagLexiconCollection._character_class_end(pattern, index)
+            index += 1
+        return wildcard_count
+
+    def wildcard_count(self, key: str) -> int:
+        '''
+        Returns the number of wildcards (`*`) in the lemma and POS patterns of
+        the entry `key`, see :func:`pattern_wildcard_count`.
+
+        # Parameters
+
+        key : `str`
+            An entry in the collection in the format `{lemma}|{pos}`.
+
+        # Returns
+
+        `int`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*MB|N*': ['N3.2']})
+        >>> assert 2 == collection.wildcard_count('*MB|N*')
+
+        ```
+        '''
+        lemma, pos = key.rsplit('|', 1)
+        return (self.pattern_wildcard_count(lemma)
+                + self.pattern_wildcard_count(pos))
+
+    def most_wildcards(self) -> int:
+        '''
+        Returns the largest number of wildcards (`*`) in any one entry of the
+        collection, see :func:`wildcard_count`, it is `0` if the collection is
+        empty.
+
+        # Returns
+
+        `int`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+        ...                                        '*MB|N*': ['N3.2']})
+        >>> assert 2 == collection.most_wildcards()
+        >>> assert 0 == AutotagLexiconCollection().most_wildcards()
+
+        ```
+        '''
+        return max((self.wildcard_count(key) for key in self.data), default=0)
+
     def match(self, lexical_value: str, pos: str) -> list[str]:
         '''
         Returns the `{lemma}|{pos}` keys of all of the entries whose lemma

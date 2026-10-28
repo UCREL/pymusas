@@ -792,6 +792,104 @@ assert regex.fullmatch('.5') is not None
 assert regex.fullmatch('1x5') is None
 ```
 
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.pattern_wildcard_count"></a>
+
+### pattern\_wildcard\_count
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def pattern_wildcard_count(pattern: str) -> int
+```
+
+Returns the number of wildcards (`*`) in the `autotag` `pattern`. A `*`
+within a character class is a literal `*`, so it is not counted, but a
+`*` straight after a character class is, e.g. `[0-9]*ish` has 1
+wildcard. The `pattern` is assumed to be valid, see
+[`pattern_to_regex`](#pattern_to_regex).
+
+<h4 id="pattern_wildcard_count.parameters">Parameters<a className="headerlink" href="#pattern_wildcard_count.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __pattern__ : `str` <br/>
+    The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+<h4 id="pattern_wildcard_count.returns">Returns<a className="headerlink" href="#pattern_wildcard_count.returns" title="Permanent link">&para;</a></h4>
+
+
+- `int` <br/>
+
+<h4 id="pattern_wildcard_count.examples">Examples<a className="headerlink" href="#pattern_wildcard_count.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+assert 1 == AutotagLexiconCollection.pattern_wildcard_count('*kg')
+assert 3 == AutotagLexiconCollection.pattern_wildcard_count('*-[0-9]*-*')
+assert 0 == AutotagLexiconCollection.pattern_wildcard_count('[*]kg')
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.wildcard_count"></a>
+
+### wildcard\_count
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def wildcard_count(key: str) -> int
+```
+
+Returns the number of wildcards (`*`) in the lemma and POS patterns of
+the entry `key`, see [`pattern_wildcard_count`](#pattern_wildcard_count).
+
+<h4 id="wildcard_count.parameters">Parameters<a className="headerlink" href="#wildcard_count.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __key__ : `str` <br/>
+    An entry in the collection in the format `{lemma}|{pos}`.
+
+<h4 id="wildcard_count.returns">Returns<a className="headerlink" href="#wildcard_count.returns" title="Permanent link">&para;</a></h4>
+
+
+- `int` <br/>
+
+<h4 id="wildcard_count.examples">Examples<a className="headerlink" href="#wildcard_count.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*MB|N*': ['N3.2']})
+assert 2 == collection.wildcard_count('*MB|N*')
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.most_wildcards"></a>
+
+### most\_wildcards
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def most_wildcards() -> int
+```
+
+Returns the largest number of wildcards (`*`) in any one entry of the
+collection, see [`wildcard_count`](#wildcard_count), it is `0` if the collection is
+empty.
+
+<h4 id="most_wildcards.returns">Returns<a className="headerlink" href="#most_wildcards.returns" title="Permanent link">&para;</a></h4>
+
+
+- `int` <br/>
+
+<h4 id="most_wildcards.examples">Examples<a className="headerlink" href="#most_wildcards.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+                                       '*MB|N*': ['N3.2']})
+assert 2 == collection.most_wildcards()
+assert 0 == AutotagLexiconCollection().most_wildcards()
+```
+
 <a id="pymusas.lexicon_collection.AutotagLexiconCollection.match"></a>
 
 ### match
