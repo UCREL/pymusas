@@ -265,3 +265,9 @@ As you can see `flat white` is recognised as a drink and a proper noun, `broliga
 At the moment we assume when you are merging lexicons together they are using the same Part Of Speech (POS) tagset.
 
 :::
+
+:::tip
+
+This guide merges single word and MWE lexicons. If you also use an `autotag` lexicon, whose entries are patterns such as `*kg`, we recommend creating your own `autotag` file rather than merging, as it gives finer control over the priority order of the entries. See the [autotag syntax notes](/usage/notes/autotag_syntax) for details.
+
+:::

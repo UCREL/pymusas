@@ -41,7 +41,9 @@ class SingleWordRule(Rule):
     then `*kg|noun`, the token `15kg` with the POS tag `CD` matches both
     entries but uses `*kg|num`, as it comes first in the lexicon. These
     matches have the lexicon type
-    `SINGLE_AUTOTAG` from :class:`pymusas.lexicon_collection.LexiconType`.
+    `SINGLE_AUTOTAG` from :class:`pymusas.lexicon_collection.LexiconType`. For
+    the `autotag` pattern syntax see the
+    [notes](/usage/notes/autotag_syntax).
 
 
     # Parameters

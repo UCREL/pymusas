@@ -44,7 +44,9 @@ def single_word_rule_v2(lexicon_collection: dict[str, list[str]],
     `@misc` function register. Compared to
     `pymusas.taggers.rules.SingleWordRule.v1` it also accepts an
     `autotag_lexicon_collection`, which is used to match tokens against
-    `autotag` patterns when they have no exact single word lexicon match.
+    `autotag` patterns when they have no exact single word lexicon match, for
+    the `autotag` pattern syntax see the
+    [notes](/usage/notes/autotag_syntax).
 
     See the :class:`pymusas.taggers.rules.single_word.SingleWordRule` for
     details on parameters to this function.

@@ -51,7 +51,9 @@ e.g. with the mapping `{'CD': ['noun', 'num']}` and the entries `*kg|num`
 then `*kg|noun`, the token `15kg` with the POS tag `CD` matches both
 entries but uses `*kg|num`, as it comes first in the lexicon. These
 matches have the lexicon type
-`SINGLE_AUTOTAG` from [`pymusas.lexicon_collection.LexiconType`](/pymusas/api/lexicon_collection/#lexicontype).
+`SINGLE_AUTOTAG` from [`pymusas.lexicon_collection.LexiconType`](/pymusas/api/lexicon_collection/#lexicontype). For
+the `autotag` pattern syntax see the
+[notes](/usage/notes/autotag_syntax).
 
 
 <h4 id="singlewordrule.parameters">Parameters<a className="headerlink" href="#singlewordrule.parameters" title="Permanent link">&para;</a></h4>
