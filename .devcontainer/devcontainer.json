@@ -3,6 +3,9 @@
 {
 	"name": "Node+Python",
 	"remoteUser": "ubuntu",
+	"remoteEnv":{
+		"CLAUDE_CODE_GLOB_NO_IGNORE": "false"
+	},
 	"updateRemoteUserUID": true,
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
 	"image": "ghcr.io/ucrel/pymusas-dev-container:latest",

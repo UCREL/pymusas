@@ -25,7 +25,7 @@ If you are changing/updating a core requirement i.e. a requirement needed to run
 
 **Note**:
 
-1. In all cases you may need to add this requirement to the `tool.isort` section `known_third_party` list of the [./pyproject.toml file.](./pyproject.toml).
+1. In all cases you may need to add this requirement to the `tool.ruff.lint.isort` section `known-third-party` list of the [./pyproject.toml file.](./pyproject.toml).
 2. Add the requirement to [./binder/environment.yml](./binder/environment.yml)
 
 #### Core

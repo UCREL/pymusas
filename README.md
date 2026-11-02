@@ -136,7 +136,7 @@ uv sync --all-extras
 
 ### Running linters and tests
 
-This code base uses isort, flake8 and mypy to ensure that the format of the code is consistent and contain type hints. ISort and mypy settings can be found within [./pyproject.toml](./pyproject.toml) and the flake8 settings can be found in [./.flake8](./.flake8). To run these linters:
+This code base uses [ruff](https://docs.astral.sh/ruff/) (linting and import sorting) and [ty](https://docs.astral.sh/ty/) (type checking) to ensure that the format of the code is consistent and contain type hints. The settings for both can be found within [./pyproject.toml](./pyproject.toml). To run these linters, which will also automatically fix any fixable ruff errors such as import order:
 
 ``` bash
 make lint
@@ -162,24 +162,37 @@ make full-coverage-tests
 
 To note the functional tests that are ran within this `make` command are the tests that build the `pymusas` package and then use the built package to test that the output of the taggers are what is to be expected.
 
+**Note** `make full-coverage-tests` continues to the next step when a step fails, and it still exits successfully. This ensures the temporary `pyproject.toml` is always restored at the end. Check the output for failed tests or `error:` messages, rather than relying on the exit code of the `make` command.
+
 #### Running GPU tests
 
 **NOTE** We do not expect contributors to run these tests, the UCREL team can run these tests as part of the pull request before we merge into the main branch.
 
-The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have this docker image. The image if you run it assumes you have an Nvidia GPU and a Nvidia driver that supports **CUDA 12**.
+The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have these docker images. The images, if you run them, assume you have an Nvidia GPU and an Nvidia driver that supports the CUDA version of the image.
 
-These tests also allow us to test that the codebase can be used with the GPU version of spaCy `spacy[cuda12x]`.
+We have two GPU docker images, each tests a different CUDA, Python, and spaCy GPU setup:
 
-As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker container (to note the `0.1.0` version number of the container is not meaningful at the moment):
+| Dockerfile | CUDA | Python | PyTorch index | spaCy GPU package |
+| --- | --- | --- | --- | --- |
+| [./tests/gpu-cuda-12.9-docker.dockerfile](./tests/gpu-cuda-12.9-docker.dockerfile) | 12.9 | 3.12 | `cu128` | `spacy[cuda12x]` |
+| [./tests/gpu-cuda-13.2-docker.dockerfile](./tests/gpu-cuda-13.2-docker.dockerfile) | 13.2 | 3.14 | `cu132` | `cupy-cuda13x` |
+
+These tests allow us to test that the codebase can be used with the GPU version of spaCy. The CUDA 12.9 image tests the official `spacy[cuda12x]` extra. spaCy has no CUDA 13 extra, and the `cuda12x` extra caps `cupy-cuda12x` below version 13, which has no wheels for Python 3.13 or 3.14. So the CUDA 13.2 image installs `cupy-cuda13x` directly, which allows us to test the newest Python version we support with a newer CUDA version.
+
+As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker containers (to note the `0.1.0` version number of the containers is not meaningful at the moment):
+
+**Before running this ensure that you build and run the docker container outside of the VSCode Dev Container**
 
 ``` bash
-docker build -t pymusas-gpu:0.1.0 -f ./tests/gpu-docker.dockerfile .
+docker build -t pymusas-gpu-cuda-12.9:0.1.0 -f ./tests/gpu-cuda-12.9-docker.dockerfile .
+docker build -t pymusas-gpu-cuda-13.2:0.1.0 -f ./tests/gpu-cuda-13.2-docker.dockerfile .
 ```
 
-And then we can run the tests like so:
+And then we can run the tests like so, depending on which CUDA version your Nvidia driver supports:
 
 ``` bash
-docker run --gpus all --shm-size 4g --rm pymusas-gpu:0.1.0
+docker run --gpus all --shm-size 4g --rm pymusas-gpu-cuda-12.9:0.1.0
+docker run --gpus all --shm-size 4g --rm pymusas-gpu-cuda-13.2:0.1.0
 ```
 
 ### Benchmarking
@@ -198,6 +211,20 @@ uv python pin
 ## My-Binder
 
 If you would like to develop/test the code within this repository in a cloud hosted environment, this can be done through my-binder for free. This environment is designed to try out the code in the repository rather than for contributing to the code base. To get to this environment click on the "launch binder" badge at the top of this README. It will create a Jupyterlab environment for you on [My-Binder](https://mybinder.org/) where you can run and change the code in this repository. **Note** when in this environment please install an editable version of pymusas by opening a terminal and running the following command `pip install -e .`
+
+## Claude settings
+
+For those that use [Anthropic's Claude](https://www.anthropic.com/) we have shared some suggested settings, see [./.claude folder](./.claude) that are enforced within this project but can be easily adjusted or removed if you prefer to use your own settings or the default settings of Claude. The project level settings for Claude, can be found at [./.claude/settings.json](./.claude/settings.json) are auto generated by running the following script;
+
+``` bash
+cd .claude/hooks && uv run generate_settings.py > ../settings.json
+```
+
+This script creates a settings file with;
+* Numerous Deny permissions that have come from the list of files, stated in [./.claude/hooks/sensitive_patterns.py](./.claude/hooks/sensitive_patterns.py), that you do not want Claude to write/edit/read.
+* A pre-hook, [./.claude/hooks/block_sensitive_files.py](./.claude/hooks/block_sensitive_files.py), that catches any write/edit/read to the list of files that the Deny permissions might miss, e.g. a call to Python using Bash.
+
+**To note** this pre-hook and Deny permissions would not stop Claude from write/edit/read if Claude requests the file through an unusual regex pattern like `e*v` to get the `.env` file, but this is a best effort try to reduce Claude's access to these more sensitive files. Generally speaking if you are using API keys reduce the scope as much as possible and limit the time and resource access while developing.
 
 ## Team
 

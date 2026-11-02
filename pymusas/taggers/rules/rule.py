@@ -1,5 +1,4 @@
 from abc import abstractmethod
-from typing import List
 
 from pymusas.base import Serialise
 from pymusas.rankers.ranking_meta_data import RankingMetaData
@@ -10,7 +9,7 @@ class Rule(Serialise):
     An **abstract class** that defines the basic method, `__call__`, that is
     required for all :class:`Rule`s.
 
-    A Rule when called, `__call__`, creates a `List` of rules matches for each
+    A Rule when called, `__call__`, creates a `list` of rules matches for each
     token, whereby each rule matched is defined by the
     :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` object. These
     rules matches per token can then be, optionally, combined with other rule
@@ -19,27 +18,27 @@ class Rule(Serialise):
     '''
 
     @abstractmethod
-    def __call__(self, tokens: List[str], lemmas: List[str],
-                 pos_tags: List[str]) -> List[List[RankingMetaData]]:
+    def __call__(self, tokens: list[str], lemmas: list[str],
+                 pos_tags: list[str]) -> list[list[RankingMetaData]]:
         '''
-        For each token it returns a `List` of rules matches defined by the
+        For each token it returns a `list` of rules matches defined by the
         :class:`pymusas.rankers.ranking_meta_data.RankingMetaData` object.
 
-        Each `List` of `tokens`, `lemmas`, and `pos_tags` are assumed to be of
+        Each `list` of `tokens`, `lemmas`, and `pos_tags` are assumed to be of
         equal length.
 
         # Parameters
 
-        tokens : `List[str]`
+        tokens : `list[str]`
             The tokens that are within the text.
-        lemmas : `List[str]`
+        lemmas : `list[str]`
             The lemmas of the tokens.
-        pos_tags : `List[str]`
+        pos_tags : `list[str]`
             The Part Of Speech tags of the tokens.
 
         # Returns
 
-        `List[List[RankingMetaData]]`
+        `list[list[RankingMetaData]]`
         '''
         ...  # pragma: no cover
 

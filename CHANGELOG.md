@@ -9,13 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Support for default (`Df`) semantic tags in Multi Word Expression (MWE) templates. `MWERule` has a new optional `single_word_rule` argument, which it uses to replace the `Df` tag with the single word semantic tag of the first token in the MWE template that starts with a wildcard (`*`). See the MWE syntax notes in the documentation for details, [./docs/docs/usage/notes/mwe_syntax.md](./docs/docs/usage/notes/mwe_syntax.md).
+- `pymusas.taggers.rules.MWERule.v2` spaCy registered function, which accepts the `single_word_rule` argument, backward compatibility support through `pymusas.taggers.rules.MWERule.v1`.
+- `SingleWordRanker` in `pymusas.rankers.single_word`, a stateless ranker for the single word matches of one token, and `SingleWordRule.best_match`, which uses it to return the best single word match for a token.
+- `contains_default_tag`, `default_token_index`, and `resolve_default_tags` helper functions, and `DEFAULT_TAG_RE`, in `pymusas.utils`.
+- Support for single word `autotag` lexicons, whose `lemma` and `pos` fields are patterns, e.g. `*kg` or `[0-9][0-9]*ish`, resolves [issue 28](https://github.com/UCREL/pymusas/issues/28). The `autotag` lexicon format is defined in [Multilingual-USAS issue 36](https://github.com/UCREL/Multilingual-USAS/issues/36). See the autotag syntax notes in the documentation for details, [./docs/docs/usage/notes/autotag_syntax.md](./docs/docs/usage/notes/autotag_syntax.md).
+  - `AutotagLexiconCollection` in `pymusas.lexicon_collection`, which loads and validates `autotag` lexicons and compiles their patterns to regular expressions. When `autotag` files are merged with `AutotagLexiconCollection.tsv_merge`, later files take priority over earlier files, for both the semantic tags and the priority order of the entries. To customise an `autotag` lexicon, creating your own `autotag` file is recommended, as it gives finer control over the priority order. As the entry order sets the priority, two `AutotagLexiconCollection`s (and so two `SingleWordRule`s) with the same entries in a different order are not equal.
+  - `AutotagLexiconCollection.first_match`, which returns the first entry that matches any of the given `(lexical_value, pos)` candidates and stops searching there. `SingleWordRule` uses it so that it only scans the `autotag` lexicon once per token, stopping at the first matching entry.
+  - `AutotagLexiconCollection.pattern_wildcard_count`, `AutotagLexiconCollection.wildcard_count`, and `AutotagLexiconCollection.most_wildcards`, which count the wildcards (`*`) in `autotag` patterns and entries. `SingleWordRule` uses the count for the `lexicon_wildcard_count` of its `autotag` matches, and `ContextualRuleBasedRanker.get_construction_arguments` includes the most wildcards in a `SingleWordRule`'s `autotag` lexicon in `maximum_number_wildcards`.
+  - `LexiconType.SINGLE_AUTOTAG`, the lexicon type of `autotag` matches.
+  - `SingleWordRule` has a new optional `autotag_lexicon_collection` argument. `autotag` patterns are only matched for tokens that have no single word lexicon match, and both the lemma and POS patterns must match. If more than one `autotag` entry matches a token, only the entry that comes first in the `autotag` lexicon is used, so the lexicon order sets the priority. Lexicon order takes priority over whether the token, lemma, or their lower cased versions matched, and over the order of the POS tags in a `pos_mapper` mapping.
+  - `pymusas.taggers.rules.SingleWordRule.v2` spaCy registered function, which accepts the `autotag_lexicon_collection` argument, backward compatibility support through `pymusas.taggers.rules.SingleWordRule.v1`.
+  - `pymusas.AutotagLexiconCollection.from_tsv` spaCy registered function.
+- A second GPU docker image, [./tests/gpu-cuda-13.2-docker.dockerfile](./tests/gpu-cuda-13.2-docker.dockerfile), which tests CUDA 13.2 with Python 3.14. The existing GPU docker image has been renamed from `tests/gpu-docker.dockerfile` to [./tests/gpu-cuda-12.9-docker.dockerfile](./tests/gpu-cuda-12.9-docker.dockerfile), it now uses Python 3.12 and installs `spacy[cuda12x]>=3.8`. The README documents both images.
 - Documentation:
     - Created a new how to guide on creating a custom rule based tagger [./docs/docs/usage/how_to/create_custom_rule_based_tagger.md](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md). Now includes how to create the custom rule based tagger with mismatched POS tagsets between tokens in the running text and lexicons.
     - Linked the [combine/merge lexicons how guide](./docs/docs/usage/how_to/combine_lexicons.md) with the [creating a custom rule based tagger how to guide](./docs/docs/usage/how_to/create_custom_rule_based_tagger.md) stating that if users want a more detailed guide on creating a custom rule based tagger they should read the `creating a custom rule based tagger how to guide.`
+    - Linked the [autotag syntax notes](./docs/docs/usage/notes/autotag_syntax.md) from the `SingleWordRule` and `pymusas.taggers.rules.SingleWordRule.v2` docstrings, and from the [combine/merge lexicons how to guide](./docs/docs/usage/how_to/combine_lexicons.md).
+- An evaluation of the English rule based tagger in [./benchmarks/evaluation](./benchmarks/evaluation/), which reports top-n accuracy on the English gold datasets of the [USAS Evaluation Framework](https://github.com/UCREL/USAS-Evaluation-Framework), coverage, speed, and memory and disk requirements, for the pre-built model and the tagger built from the lexicon files with and without the autotag lexicon. Its requirements are in a new `evaluation` dependency group, which is not part of the published package. This updates the `datasets` development dependency from 4.4.2 to 5.0.1.
 
 ### Changed
 
+- Type hints now use built-in generics ([PEP 585](https://peps.python.org/pep-0585/)), e.g. `list[str]` instead of `List[str]`, and `|` unions ([PEP 604](https://peps.python.org/pep-0604/)), e.g. `str | None` instead of `Optional[str]`. Abstract types such as `Callable` and `Iterable` are imported from `collections.abc`. The types written in docstrings, and in the API documentation, follow the same style. Ruff's pyupgrade rules `UP006`, `UP007`, `UP035` and `UP045` now enforce this.
+- `Df` tags that cannot be resolved, because the `MWERule` has no `single_word_rule` or the token has no single word match, are now output as `Z99` instead of `Df`.
+- MWE templates with a `Df` tag but no token starting with a wildcard are now ignored by `MWELexiconCollection`, with a `UserWarning`.
+- Documented on the `MWELexiconCollection` class that, when a `pos_mapper` is given, POS tags in MWE templates can only contain a wildcard (`*`) if the POS tag is only a wildcard, otherwise a `ValueError` is raised. Fixed a typo in that error message.
+- `MWERule.to_bytes` uses a new serialisation format that includes the `single_word_rule`. `MWERule.from_bytes` can still load the previous format (backward compatibility).
+- `SingleWordRule.to_bytes` also serialises the `autotag_lexicon_collection`. `SingleWordRule.from_bytes` can still load the previous format (backward compatibility).
+- `ContextualRuleBasedRanker` and `SingleWordRanker` rank `autotag` matches below all other matches. `SingleWordRanker.sort_key` now returns a `tuple[bool, bool, int]`, whose first value is whether the match is an `autotag` match.
+- `SingleWordRule.best_match` includes `autotag` matches, so `Df` tags in MWE templates can be replaced using an `autotag` match when the token has no exact single word lexicon match.
+- Development tooling: replaced isort, flake8 and mypy with [ruff](https://docs.astral.sh/ruff/) (linting and import sorting) and [ty](https://docs.astral.sh/ty/) (type checking) so that linting runs faster, resolves [issue 63](https://github.com/UCREL/pymusas/issues/63). The `.flake8` file has been removed and all settings are now in `pyproject.toml`. Code in the tests, scripts and benchmarks has been updated with more precise type hints so that it type checks with ty. Modernising type hints to built-in generics is tracked in [issue 64](https://github.com/UCREL/pymusas/issues/64).
+- Development tooling: `scripts/create_temporary_version.py` and `scripts/get_version.py` now use [tomlkit](https://github.com/python-poetry/tomlkit) instead of `tomllib`/`tomli` and `tomli-w`. The `tomli` and `tomli-w` development dependencies have been replaced with `tomlkit`.
+- `make full-coverage-tests` now checks that `uv.lock` is up to date before the temporary version is set in `pyproject.toml`, and its `uv run` commands that use the project environment run with `--frozen`.
 - The [./.devcontainer/devcontainer.json](./.devcontainer/devcontainer.json) so that on the container being built the git config globally states that this working directory is safe. This is required so that documentation website can be built `make docs/build`.
+
+### Fixed
+
+- `MWERule` no longer lower cases the POS tag when creating the lower cased token and lemma matches, only the token/lemma is lower cased, as in `SingleWordRule`. Previously `TOKEN_LOWER` and `LEMMA_LOWER` matches could never match MWE templates with upper case POS tags, e.g. `ski_NOUN boot_NOUN`, unless the POS tag was a wildcard, resolves [issue 62](https://github.com/UCREL/pymusas/issues/62).
+- `SingleWordRule` and `MWERule` now raise a `ValueError` when called with `tokens`, `lemmas` and `pos_tags` of different lengths, rather than silently truncating to the shortest. Previously only `RuleBasedTagger` checked this. The `zip` calls in `ContextualRuleBasedRanker` are now also strict.
+- The API documentation generator, `scripts/py2md.py`, only removed `self` from method signatures that fit on one line, so it appeared in longer signatures such as `__init__`. `self` is now removed from all method signatures.
+- Comments and formatting in `pyproject.toml` are no longer removed when running `make full-coverage-tests`. Previously `scripts/create_temporary_version.py` re-serialised `pyproject.toml`, and the backup it restored at the end, without comments.
+- `make full-coverage-tests` no longer changes the `pymusas` version in `uv.lock` to the temporary version.
+- The unit test step of `make full-coverage-tests` failed because it installed the `dev` dependency group as an extra (`[neural,dev]`), which a built wheel does not contain. The `dev` group is now exported to a requirements file and installed from that.
+
+
+
+
+
+
 
 ## [v0.4.2](https://github.com/UCREL/pymusas/releases/tag/v0.4.2) - 2026-05-29
 

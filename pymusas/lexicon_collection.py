@@ -1,11 +1,11 @@
 import collections
-from collections.abc import MutableMapping
+from collections.abc import Generator, MutableMapping
 import csv
 from dataclasses import dataclass
 from enum import Enum, unique
 from os import PathLike
 import re
-from typing import DefaultDict, Dict, Generator, List, Optional, Set, Tuple, Union, cast
+from typing import cast
 from urllib.parse import urlparse
 import warnings
 
@@ -30,6 +30,9 @@ class LexiconType(str, Enum):
 
     SINGLE_NON_SPECIAL : `LexiconType`
         Single word lexicon lookup.
+    SINGLE_AUTOTAG : `LexiconType`
+        Single word lexicon lookup using an `autotag` pattern, see
+        :class:`AutotagLexiconCollection`.
     MWE_NON_SPECIAL : `LexiconType`
         MWE lexicon lookup.
     MWE_WILDCARD : `LexiconType`
@@ -43,13 +46,14 @@ class LexiconType(str, Enum):
     >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL
     >>> assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
     >>> assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
-    >>> all_possible_values = {'Single Non Special', 'MWE Non Special',
-    ... 'MWE Wildcard', 'MWE Curly Braces'}
+    >>> all_possible_values = {'Single Non Special', 'Single Autotag',
+    ... 'MWE Non Special', 'MWE Wildcard', 'MWE Curly Braces'}
     >>> assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconType}
     
     ```
     '''
     SINGLE_NON_SPECIAL = 'Single Non Special'
+    SINGLE_AUTOTAG = 'Single Autotag'
     MWE_NON_SPECIAL = 'MWE Non Special'
     MWE_WILDCARD = 'MWE Wildcard'
     MWE_CURLY_BRACES = 'MWE Curly Braces'
@@ -81,7 +85,7 @@ class LexiconEntry:
 
     lemma: `str`
         The lemma of a token or the token itself.
-    semantic_tags: `List[str]`
+    semantic_tags: `list[str]`
         The semantic tags associated with the `lemma` and optional `POS`.
         The semantic tags are in rank order, the most likely tag
         is the first tag in the list.
@@ -90,8 +94,8 @@ class LexiconEntry:
     '''
 
     lemma: str
-    semantic_tags: List[str]
-    pos: Optional[str] = None
+    semantic_tags: list[str]
+    pos: str | None = None
 
 
 @dataclass(init=True, repr=True, eq=True, order=False,
@@ -109,7 +113,7 @@ class LexiconMetaData:
 
     # Instance Attributes
 
-    semantic_tags : `List[str]`
+    semantic_tags : `list[str]`
         The semantic tags associated with the lexicon entry.
         The semantic tags are in rank order, the most likely tag
         is the first tag in the list.
@@ -123,7 +127,7 @@ class LexiconMetaData:
         be 2 and `ski_noun boot_noun` will be 0.
     '''
 
-    semantic_tags: List[str]
+    semantic_tags: list[str]
     n_gram_length: int
     lexicon_type: LexiconType
     wildcard_count: int
@@ -147,11 +151,11 @@ class LexiconCollection(MutableMapping):
 
     # Parameters
 
-    data: `Dict[str, List[str]]`, optional (default = `None`)
+    data: `dict[str, list[str]]`, optional (default = `None`)
 
     # Instance Attributes
 
-    data: `Dict[str, List[str]]`
+    data: `dict[str, list[str]]`
         Dictionary where the keys are `{lemma}|{pos}` and the values are
         a list of associated semantic tags. If the `data` parameter given was
         `None` then the value of this attribute will be an empty dictionary.
@@ -171,9 +175,9 @@ class LexiconCollection(MutableMapping):
 
     '''
     
-    def __init__(self, data: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, data: dict[str, list[str]] | None = None) -> None:
 
-        self.data: Dict[str, List[str]] = {}
+        self.data: dict[str, list[str]] = {}
         if data is not None:
             self.data = data
 
@@ -204,13 +208,13 @@ class LexiconCollection(MutableMapping):
             lemma += f'|{value.pos}'
         self[lemma] = value.semantic_tags
 
-    def to_dictionary(self) -> Dict[str, List[str]]:
+    def to_dictionary(self) -> dict[str, list[str]]:
         '''
         Returns the `data` instance attribute.
 
         # Returns
 
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
         '''
 
         return self.data
@@ -243,8 +247,8 @@ class LexiconCollection(MutableMapping):
         return LexiconCollection(srsly.msgpack_loads(bytes_data))
 
     @staticmethod
-    def from_tsv(tsv_file_path: Union[PathLike, str], include_pos: bool = True
-                 ) -> Dict[str, List[str]]:
+    def from_tsv(tsv_file_path: PathLike | str, include_pos: bool = True
+                 ) -> dict[str, list[str]]:
         '''
         Given a `tsv_file_path` it will return a dictionary object that can
         be used to create a :class:`LexiconCollection`.
@@ -267,7 +271,7 @@ class LexiconCollection(MutableMapping):
 
         # Parameters
 
-        tsv_file_path: `Union[PathLike, str]`
+        tsv_file_path: `PathLike | str`
             A file path or URL to a TSV file that contains at least two
             fields, with an optional third, with the following headings:
             
@@ -283,7 +287,7 @@ class LexiconCollection(MutableMapping):
 
         # Returns
         
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
         
         # Raises
         
@@ -316,7 +320,7 @@ class LexiconCollection(MutableMapping):
         '''
         minimum_field_names = {'lemma', 'semantic_tags'}
         extra_field_names = ['pos']
-        field_names_to_extract: Set[str] = set()
+        field_names_to_extract: set[str] = set()
 
         collection_from_tsv = LexiconCollection()
 
@@ -329,7 +333,7 @@ class LexiconCollection(MutableMapping):
 
         with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
-            file_field_names: Set[str] = set()
+            file_field_names: set[str] = set()
             if csv_reader.fieldnames:
                 file_field_names = set(csv_reader.fieldnames)
             if minimum_field_names.issubset(file_field_names):
@@ -352,7 +356,7 @@ class LexiconCollection(MutableMapping):
             for row in csv_reader:
                 semantic_tags: list[str] = row['semantic_tags'].split()
                 lemma: str = row['lemma']
-                pos: Optional[str] = None
+                pos: str | None = None
                 
                 if include_pos and contains_pos:
                     pos = row['pos']
@@ -479,10 +483,10 @@ class LexiconCollection(MutableMapping):
 
         return combined_lexicon_data
 
-    def __setitem__(self, key: str, value: List[str]) -> None:
+    def __setitem__(self, key: str, value: list[str]) -> None:
         self.data[key] = value
 
-    def __getitem__(self, key: str) -> List[str]:
+    def __getitem__(self, key: str) -> list[str]:
         return self.data[key]
 
     def __delitem__(self, key: str) -> None:
@@ -541,6 +545,663 @@ class LexiconCollection(MutableMapping):
         return True
 
 
+class AutotagLexiconCollection(MutableMapping):
+    r'''
+    This is a dictionary object that holds single word `autotag` lexicon
+    entries, whereby the `lemma` and `pos` of each entry are patterns rather
+    than literal values, e.g. `*[0-9]kg|NUM` or `[0-9][0-9]*ish|NUM`. The keys of
+    the dictionary are a combination of the lemma pattern and the POS pattern
+    in the following format: `{lemma}|{pos}`, the values are the associated
+    semantic tags in rank order, the most likely tag is the first tag in the
+    list.
+
+    The pattern syntax is:
+
+    1. `[...]` is a regular expression character class matching exactly one
+    character, e.g. `[0-9]` matches one digit. Within the class `\[` and `\]`
+    are literal brackets, e.g. `[\[\]]` matches `[` or `]`.
+    2. `*` straight after a character class means zero or more characters from
+    that class, e.g. `[0-9]*ish` matches `9ish`, `10ish`, and also `ish`.
+    3. `*` anywhere else means zero or more of any character, e.g. `*-year-old`
+    matches `10-year-old`.
+    4. Every other character is literal, e.g. `.`, `+`, `?`, and `(`, apart
+    from `[` and `]` which can only be used as part of a character class. A `[`
+    that is not closed, an unescaped `[` within a class, or a `]` that does not
+    close a class, e.g. `hello[a-z]]`, is an error.
+
+    A pattern has to match the whole lemma/token or POS tag. Patterns are
+    case sensitive and are never lower cased.
+
+    Every entry must have a POS pattern and that POS pattern cannot be just
+    `*`, as without a POS constraint patterns like `*kg` would match too many
+    tokens.
+
+    Each pattern is converted to a compiled regular expression, see
+    :func:`pattern_to_regex`, when it is added to the collection.
+
+    The order of the entries matters, as when more than one entry matches a
+    token the tagger uses the entry that comes first, see
+    :class:`pymusas.taggers.rules.single_word.SingleWordRule`. The order is
+    the order in which the entries were first added, adding an entry that
+    already exists updates its semantic tags but does not change its position.
+    For how the order is set when merging `autotag` TSV files, see
+    :func:`tsv_merge`.
+
+    For more information on the `autotag` syntax see the following
+    [notes](/usage/notes/autotag_syntax).
+
+    # Parameters
+
+    data : `dict[str, list[str]]`, optional (default = `None`)
+        Dictionary where the keys are `{lemma}|{pos}` patterns and the values
+        are a list of associated semantic tags.
+
+    # Instance Attributes
+
+    data : `dict[str, list[str]]`
+        Dictionary where the keys are `{lemma}|{pos}` patterns and the values
+        are a list of associated semantic tags. If the `data` parameter given
+        was `None` then the value of this attribute will be an empty dictionary.
+    patterns : `dict[str, tuple[re.Pattern, re.Pattern]]`
+        Dictionary where the keys are the same as `data` and the values are
+        the compiled regular expressions of the lemma pattern and the POS
+        pattern.
+
+    # Raises
+
+    `ValueError`
+        If a key does not contain a POS pattern, the POS pattern is just `*`,
+        or either pattern is not valid, e.g. it contains an unclosed `[` or a
+        `]` that does not close a character class.
+
+    # Examples
+    ``` python
+    >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+    >>> collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+    ...                                        '[0-9][0-9]*ish|NUM': ['N1']})
+    >>> assert collection['*kg|NUM'] == ['N3.5']
+    >>> assert collection.match('15kg', 'NUM') == ['*kg|NUM']
+    >>> assert collection.match('15kg', 'NOUN') == []
+    >>> assert collection.match('ish', 'NUM') == []
+
+    ```
+    '''
+
+    def __init__(self, data: dict[str, list[str]] | None = None) -> None:
+
+        # `patterns` must have the same keys, in the same order, as `data`: the
+        # order is the match priority and `first_match` depends on this order
+        # through the `patterns` attribute.
+        # Only modify the contents of these attributes together,
+        # through `__setitem__` and `__delitem__`.
+        self.data: dict[str, list[str]] = {}
+        self.patterns: dict[str, tuple[re.Pattern, re.Pattern]] = {}
+        if data is not None:
+            for key, value in data.items():
+                self[key] = value
+
+    @staticmethod
+    def _character_class_end(pattern: str, start_index: int) -> int:
+        r'''
+        Returns the index of the `]` that closes the character class opened by
+        the `[` at `start_index`. Within the class a `\` escapes the next
+        character, so `\[` and `\]` are literal brackets.
+
+        # Raises
+
+        `ValueError`
+            If the class is not closed, is empty, or contains an unescaped `[`.
+        '''
+        index = start_index + 1
+        while index < len(pattern):
+            character = pattern[index]
+            if character == '\\':
+                index += 2
+                continue
+            if character == '[':
+                raise ValueError(f'The pattern `{pattern}` contains an '
+                                 f'unescaped `[` at position {index} within '
+                                 'a character class, escape it with `\\[`.')
+            if character == ']':
+                if index == start_index + 1:
+                    raise ValueError(f'The character class at position '
+                                     f'{start_index} in the pattern '
+                                     f'`{pattern}` is empty.')
+                return index
+            index += 1
+        raise ValueError(f'The `[` at position {start_index} in the pattern '
+                         f'`{pattern}` is not closed by a `]`.')
+
+    @staticmethod
+    def pattern_to_regex(pattern: str) -> re.Pattern:
+        r'''
+        Returns the `autotag` `pattern` converted into a compiled regular
+        expression. For the pattern syntax see the
+        :class:`AutotagLexiconCollection` docstring. **Note** the regular
+        expression should be matched using `fullmatch`.
+
+        # Parameters
+
+        pattern : `str`
+            The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+        # Returns
+
+        `re.Pattern`
+
+        # Raises
+
+        `ValueError`
+            If the `pattern` contains a `[` that is not closed by a `]`, a `]`
+            that does not close a character class, an empty character class,
+            an unescaped `[` / `]` within a character class, or the character
+            class is not a valid regular expression character class.
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> regex = AutotagLexiconCollection.pattern_to_regex('[0-9]*.5*')
+        >>> assert regex.pattern == '[0-9]*\\.5.*'
+        >>> assert regex.fullmatch('10.5kg') is not None
+        >>> assert regex.fullmatch('.5') is not None
+        >>> assert regex.fullmatch('1x5') is None
+
+        ```
+        '''
+        regex_parts: list[str] = []
+        index = 0
+        while index < len(pattern):
+            character = pattern[index]
+            if character == '*':
+                regex_parts.append('.*')
+            elif character == '[':
+                end_index = AutotagLexiconCollection._character_class_end(
+                    pattern, index)
+                regex_parts.append(pattern[index: end_index + 1])
+                index = end_index
+                if pattern[index + 1: index + 2] == '*':
+                    regex_parts.append('*')
+                    index += 1
+            elif character == ']':
+                raise ValueError(f'The pattern `{pattern}` contains an '
+                                 f'unmatched `]` at position {index}, a `]` '
+                                 'is only a literal within a character class '
+                                 'when escaped, `\\]`.')
+            else:
+                regex_parts.append(re.escape(character))
+            index += 1
+
+        try:
+            return re.compile(''.join(regex_parts))
+        except re.error as error:
+            raise ValueError(f'The pattern `{pattern}` is not valid: '
+                             f'{error}') from error
+
+    @staticmethod
+    def pattern_wildcard_count(pattern: str) -> int:
+        r'''
+        Returns the number of wildcards (`*`) in the `autotag` `pattern`. A `*`
+        within a character class is a literal `*`, so it is not counted, but a
+        `*` straight after a character class is, e.g. `[0-9]*ish` has 1
+        wildcard. The `pattern` is assumed to be valid, see
+        :func:`pattern_to_regex`.
+
+        # Parameters
+
+        pattern : `str`
+            The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+        # Returns
+
+        `int`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> assert 1 == AutotagLexiconCollection.pattern_wildcard_count('*kg')
+        >>> assert 3 == AutotagLexiconCollection.pattern_wildcard_count('*-[0-9]*-*')
+        >>> assert 0 == AutotagLexiconCollection.pattern_wildcard_count('[*]kg')
+
+        ```
+        '''
+        wildcard_count = 0
+        index = 0
+        while index < len(pattern):
+            character = pattern[index]
+            if character == '*':
+                wildcard_count += 1
+            elif character == '[':
+                index = AutotagLexiconCollection._character_class_end(pattern, index)
+            index += 1
+        return wildcard_count
+
+    def wildcard_count(self, key: str) -> int:
+        '''
+        Returns the number of wildcards (`*`) in the lemma and POS patterns of
+        the entry `key`, see :func:`pattern_wildcard_count`.
+
+        # Parameters
+
+        key : `str`
+            An entry in the collection in the format `{lemma}|{pos}`.
+
+        # Returns
+
+        `int`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*MB|N*': ['N3.2']})
+        >>> assert 2 == collection.wildcard_count('*MB|N*')
+
+        ```
+        '''
+        lemma, pos = key.rsplit('|', 1)
+        return (self.pattern_wildcard_count(lemma)
+                + self.pattern_wildcard_count(pos))
+
+    def most_wildcards(self) -> int:
+        '''
+        Returns the largest number of wildcards (`*`) in any one entry of the
+        collection, see :func:`wildcard_count`, it is `0` if the collection is
+        empty.
+
+        # Returns
+
+        `int`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+        ...                                        '*MB|N*': ['N3.2']})
+        >>> assert 2 == collection.most_wildcards()
+        >>> assert 0 == AutotagLexiconCollection().most_wildcards()
+
+        ```
+        '''
+        return max((self.wildcard_count(key) for key in self.data), default=0)
+
+    def match(self, lexical_value: str, pos: str) -> list[str]:
+        '''
+        Returns the `{lemma}|{pos}` keys of all of the entries whose lemma
+        pattern matches the whole `lexical_value` and whose POS pattern matches
+        the whole `pos`. The keys are returned in the order they were added
+        to the collection, if there are no matches the `list` will be empty.
+
+        # Parameters
+
+        lexical_value : `str`
+            The token or lemma to match, e.g. `15kg`.
+        pos : `str`
+            The POS tag to match, e.g. `NUM`.
+
+        # Returns
+
+        `list[str]`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*MB|N*': ['N3.2'],
+        ...                                        '*|PUNCT': ['PUNCT']})
+        >>> assert collection.match('10MB', 'NOUN') == ['*MB|N*']
+        >>> assert collection.match('10mb', 'NOUN') == []
+        >>> assert collection.match('!', 'PUNCT') == ['*|PUNCT']
+
+        ```
+        '''
+        matches: list[str] = []
+        for key, (lemma_regex, pos_regex) in self.patterns.items():
+            if pos_regex.fullmatch(pos) is None:
+                continue
+            if lemma_regex.fullmatch(lexical_value) is not None:
+                matches.append(key)
+        return matches
+
+    def first_match(self, candidates: list[tuple[str, str]]
+                    ) -> tuple[str, list[int]] | None:
+        '''
+        Returns the `{lemma}|{pos}` key of the first entry in the collection
+        that matches at least one of the `candidates`, and the indexes of all
+        of the `candidates` that the entry matches, or `None` if no entry
+        matches. It stops searching at the first matching entry, therefore it
+        is quicker than calling :func:`match` for each candidate when only the
+        entry that comes first in the collection is needed.
+
+        # Parameters
+
+        candidates : `list[tuple[str, str]]`
+            The `(lexical_value, pos)` pairs to match, see :func:`match`.
+
+        # Returns
+
+        `tuple[str, list[int]] | None`
+
+        # Examples
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> collection = AutotagLexiconCollection({'*|NUM': ['N1'],
+        ...                                        '*kg|NUM': ['N3.5']})
+        >>> candidates = [('15kg', 'NUM'), ('15KG', 'NUM'), ('15kg', 'NOUN')]
+        >>> assert collection.first_match(candidates) == ('*|NUM', [0, 1])
+        >>> assert collection.first_match([('15kg', 'NOUN')]) is None
+
+        ```
+        '''
+        for key, (lemma_regex, pos_regex) in self.patterns.items():
+            pos_matches: dict[str, bool] = {}
+            lemma_matches: dict[str, bool] = {}
+            matched_indexes: list[int] = []
+            for index, (lexical_value, pos) in enumerate(candidates):
+                if pos not in pos_matches:
+                    pos_matches[pos] = pos_regex.fullmatch(pos) is not None
+                if not pos_matches[pos]:
+                    continue
+                if lexical_value not in lemma_matches:
+                    lemma_matches[lexical_value] \
+                        = lemma_regex.fullmatch(lexical_value) is not None
+                if lemma_matches[lexical_value]:
+                    matched_indexes.append(index)
+            if matched_indexes:
+                return key, matched_indexes
+        return None
+
+    def to_dictionary(self) -> dict[str, list[str]]:
+        '''
+        Returns the `data` instance attribute.
+
+        # Returns
+
+        `dict[str, list[str]]`
+        '''
+        return self.data
+
+    def to_bytes(self) -> bytes:
+        '''
+        Serialises the :class:`AutotagLexiconCollection` to a bytestring.
+
+        # Returns
+
+        `bytes`
+        '''
+        return cast(bytes, srsly.msgpack_dumps(self.data))
+
+    @staticmethod
+    def from_bytes(bytes_data: bytes) -> "AutotagLexiconCollection":
+        '''
+        Loads :class:`AutotagLexiconCollection` from the given bytestring and
+        returns it.
+
+        # Parameters
+
+        bytes_data : `bytes`
+            The bytestring to load.
+
+        # Returns
+
+        :class:`AutotagLexiconCollection`
+        '''
+        return AutotagLexiconCollection(srsly.msgpack_loads(bytes_data))
+
+    @staticmethod
+    def from_tsv(tsv_file_path: PathLike | str) -> dict[str, list[str]]:
+        '''
+        Given a `tsv_file_path` to an `autotag` lexicon file it will return a
+        dictionary object that can be used to create a
+        :class:`AutotagLexiconCollection`. The `lemma` and `pos` fields are
+        kept exactly as written, they are not lower cased.
+
+        Each line in the TSV file is added to a temporary
+        :class:`AutotagLexiconCollection`, therefore all of the patterns are
+        validated when the file is loaded.
+
+        If the file path is a URL, the file will be downloaded and cached using
+        :func:`pymusas.file_utils.download_url_file`.
+
+        # Parameters
+
+        tsv_file_path : `PathLike | str`
+            A file path or URL to a TSV file that contains at least these three
+            fields:
+
+            1. `lemma`,
+            2. `pos`,
+            3. `semantic_tags`
+
+            All other fields will be ignored.
+
+        # Returns
+
+        `dict[str, list[str]]`
+
+        # Raises
+
+        `ValueError`
+            If the field headings, `lemma`, `pos`, and `semantic_tags`, do not
+            exist in the given TSV file, or if any entry is not valid, see
+            :class:`AutotagLexiconCollection`.
+
+        # Examples
+        ``` python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     tsv_file = Path(temp_dir, 'semantic_lexicon_en_autotag.tsv')
+        ...     _ = tsv_file.write_text('lemma\\tpos\\tsemantic_tags\\n*kg\\tNUM\\tN3.5\\n',
+        ...                             encoding='utf-8')
+        ...     autotag_dict = AutotagLexiconCollection.from_tsv(tsv_file)
+        ...
+        >>> assert autotag_dict == {'*kg|NUM': ['N3.5']}
+
+        ```
+        '''
+        required_field_names = {'lemma', 'pos', 'semantic_tags'}
+
+        collection_from_tsv = AutotagLexiconCollection()
+
+        if not isinstance(tsv_file_path, str):
+            tsv_file_path = str(tsv_file_path)
+
+        parsed = urlparse(tsv_file_path)
+        if parsed.scheme in ("http", "https", "s3", "hf", "gs"):
+            tsv_file_path = file_utils.download_url_file(tsv_file_path)
+
+        with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
+            csv_reader = csv.DictReader(fp, delimiter='\t')
+            file_field_names: set[str] = set()
+            if csv_reader.fieldnames:
+                file_field_names = set(csv_reader.fieldnames)
+            if not required_field_names.issubset(file_field_names):
+                error_msg = (f"The autotag TSV file, {tsv_file_path}, given "
+                             "should contain a header that has at minimum "
+                             f"the following fields {required_field_names}. "
+                             f"The field names found were {file_field_names}")
+                raise ValueError(error_msg)
+
+            for row in csv_reader:
+                semantic_tags: list[str] = row['semantic_tags'].split()
+                collection_from_tsv[f"{row['lemma']}|{row['pos']}"] = semantic_tags
+
+        return collection_from_tsv.to_dictionary()
+
+    @staticmethod
+    def tsv_merge(*tsv_file_paths: PathLike | str) -> dict[str, list[str]]:
+        """
+        Given one or more `autotag` TSV files it will create a single
+        dictionary object with the combination of all the lexicon data in each
+        TSV, this dictionary object can then be used to create a
+        :class:`AutotagLexiconCollection`.
+
+        For more information on how the TSV data is loaded see :func:`from_tsv`.
+
+        **Note** later TSV files take precedence over earlier TSV files, for
+        both the semantic tags and the priority of the entries:
+
+        1. The entries are ordered by TSV file, last TSV file first, and
+        within a TSV file in the order they appear in that file. As the order
+        of the entries sets their priority, see :class:`AutotagLexiconCollection`,
+        an entry in a later TSV file has priority over all entries in earlier
+        TSV files, e.g. a more specific pattern in a later TSV file, `*kg|NUM`,
+        is used instead of a general pattern in an earlier TSV file, `*|NUM`.
+        2. If an entry is in more than one TSV file, the semantic tags and
+        position from the last TSV file that contains it are used, i.e. if the
+        last TSV file contains `*kg|NUM`: [`N3.5`] and the first TSV file
+        contains `*kg|NUM`: [`N1`] then the returned dictionary will only
+        contain the one entry; `*kg|NUM`: [`N3.5`].
+
+        If you want to customise an `autotag` lexicon it is recommended to
+        create your own `autotag` TSV file, e.g. a copy of the original file
+        that you then edit, rather than merging files. This gives you finer
+        control over the priority order of all of the entries.
+
+        # Parameters
+
+        *tsv_file_paths : `PathLike | str`
+            File paths and/or URLs to `autotag` TSV files, see :func:`from_tsv`.
+
+        # Returns
+
+        `dict[str, list[str]]`
+
+        # Raises
+
+        `ValueError`
+            See :func:`from_tsv`.
+
+        # Examples
+        ``` python
+        >>> from pathlib import Path
+        >>> from tempfile import TemporaryDirectory
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> with TemporaryDirectory() as temp_dir:
+        ...     published_file = Path(temp_dir, 'published_autotag.tsv')
+        ...     _ = published_file.write_text('lemma\\tpos\\tsemantic_tags\\n'
+        ...                                   '*\\tNUM\\tN1\\n*kg\\tNUM\\tN3.5\\n',
+        ...                                   encoding='utf-8')
+        ...     custom_file = Path(temp_dir, 'custom_autotag.tsv')
+        ...     _ = custom_file.write_text('lemma\\tpos\\tsemantic_tags\\n'
+        ...                                '*mg\\tNUM\\tN3.5\\n*kg\\tNUM\\tN3.6\\n',
+        ...                                encoding='utf-8')
+        ...     merged = AutotagLexiconCollection.tsv_merge(published_file, custom_file)
+        ...
+        >>> assert merged == {'*mg|NUM': ['N3.5'], '*kg|NUM': ['N3.6'], '*|NUM': ['N1']}
+        >>> assert list(merged) == ['*mg|NUM', '*kg|NUM', '*|NUM']
+
+        ```
+        """
+        combined_lexicon_data: dict[str, list[str]] = {}
+        # Later files are added first, so that their entries have priority.
+        # An entry already added comes from a later file, so it is kept.
+        for tsv_file_path in reversed(tsv_file_paths):
+            lexicon_data = AutotagLexiconCollection.from_tsv(tsv_file_path)
+            for lemma_pos, semantic_tags in lexicon_data.items():
+                if lemma_pos not in combined_lexicon_data:
+                    combined_lexicon_data[lemma_pos] = semantic_tags
+
+        return combined_lexicon_data
+
+    def __setitem__(self, key: str, value: list[str]) -> None:
+        '''
+        # Raises
+
+        `ValueError`
+            If the `key` does not contain a POS pattern, the POS pattern is
+            just `*`, or either pattern is not valid, e.g. it contains an
+            unclosed `[` or a `]` that does not close a character class.
+        '''
+        if '|' not in key:
+            raise ValueError(f'The autotag lexicon entry `{key}` does not '
+                             'contain a POS pattern, the key should be in '
+                             'the format `{lemma}|{pos}`.')
+        lemma, pos = key.rsplit('|', 1)
+        if pos == '*':
+            raise ValueError(f'The autotag lexicon entry `{key}` has a POS '
+                             'pattern of just `*`, which is not allowed as it '
+                             'would match any POS tag.')
+        try:
+            lemma_regex = self.pattern_to_regex(lemma)
+            pos_regex = self.pattern_to_regex(pos)
+        except ValueError as error:
+            raise ValueError(f'The autotag lexicon entry `{key}` is not '
+                             f'valid: {error}') from error
+
+        self.patterns[key] = (lemma_regex, pos_regex)
+        self.data[key] = value
+
+    def __getitem__(self, key: str) -> list[str]:
+        return self.data[key]
+
+    def __delitem__(self, key: str) -> None:
+        del self.data[key]
+        del self.patterns[key]
+
+    def __len__(self) -> int:
+        return len(self.data)
+
+    def __iter__(self) -> Generator[str, None, None]:
+        for key in self.data:
+            yield key
+
+    def __str__(self) -> str:
+        '''
+        Human readable string.
+        '''
+        object_str = 'AutotagLexiconCollection('
+        for index, item in enumerate(self.items()):
+            object_str += f"('{item[0]}': {item[1]}), "
+            if index == 1:
+                object_str += '... '
+                break
+        object_str += f') ({len(self)} entires in the collection)'
+        return object_str
+
+    def __repr__(self) -> str:
+        '''
+        Machine readable string. When printed and run `eval()` over the string
+        you should be able to recreate the object.
+        '''
+        return f'{self.__class__.__name__}(data={self.data})'
+
+    def __eq__(self, other: object) -> bool:
+        '''
+        Given another object to compare too it will return `True` if the other
+        object is the same class and contains the same `data` instance attribute
+        entries in the same order. The order matters as it determines which
+        entry takes priority when matching, therefore two collections with
+        the same entries in a different order are not equal.
+
+        # Parameters
+
+        other : `object`
+            The object to compare too.
+
+        # Returns
+
+        `True`
+
+        # Examples
+
+        ``` python
+        >>> from pymusas.lexicon_collection import AutotagLexiconCollection
+        >>> first = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+        >>> same_order = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+        >>> different_order = AutotagLexiconCollection({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']})
+        >>> first == same_order
+        True
+        >>> first == different_order
+        False
+
+        ```
+        '''
+        if not isinstance(other, AutotagLexiconCollection):
+            return False
+
+        return list(self.data.items()) == list(other.data.items())
+
+
 class MWELexiconCollection(MutableMapping):
     r'''
     A collection that stores Multi Word Expression (MWE) templates and their
@@ -569,29 +1230,49 @@ class MWELexiconCollection(MutableMapping):
     added to this collection, in addition a `UserWarning` will be raised stating
     this.
 
+    Any MWE template that has a default (`Df`) semantic tag, see
+    :var:`pymusas.utils.DEFAULT_TAG_RE`, must contain a token that starts with
+    a wildcard (`*`), as this is the token the `Df` tag refers to. MWE templates
+    that do not will be ignored and a `UserWarning` will be raised stating this.
+
+    **Note** when a `pos_mapper` is given, a POS tag in a MWE template can only
+    contain a wildcard (`*`) if the POS tag is only a wildcard, e.g.
+    `river_*` is allowed but `river_noun*` is not. A MWE template that does not
+    follow this raises a `ValueError`.
+
     # Parameters
 
-    data: `Dict[str, List[str]]`, optional (default = `None`)
+    data: `dict[str, list[str]]`, optional (default = `None`)
         Dictionary where the keys are MWE templates, of any :class:`LexiconType`,
         and the values are a list of associated semantic tags.
-    pos_mapper : `Dict[str, List[str]]`, optional (default = `None`)
+    pos_mapper : `dict[str, list[str]]`, optional (default = `None`)
         If not `None`, maps from the lexicon's POS tagset to the desired
-        POS tagset, whereby the mapping is a `List` of tags, at the moment there
+        POS tagset, whereby the mapping is a `list` of tags, at the moment there
         is no preference order in this list of POS tags. The POS mapping is
         useful in situations whereby the lexicon's POS tagset is different to
-        the token's. **Note** that the longer the `List[str]` for each POS
+        the token's. **Note** that the longer the `list[str]` for each POS
         mapping the longer it will take to match MWE templates. A one to one
         mapping will have no speed impact on the tagger. A selection of POS
-        mappers can be found in :mod:`pymusas.pos_mapper`.
+        mappers can be found in :mod:`pymusas.pos_mapper`. **Note** POS tags
+        in the MWE templates cannot contain a wildcard, unless the POS tag is
+        only a wildcard, see the `ValueError` below.
+
+    # Raises
+
+    `ValueError`
+        If a `pos_mapper` is given and a POS tag within a MWE template in
+        `data` contains a wildcard (`*`) along with other characters, e.g.
+        `river_noun*`. A POS tag that is only a wildcard, e.g. `river_*`,
+        is allowed.
 
     # Instance Attributes
-    
+
     **Note** if the `data` parameter given was `None` then the value of all
     dictionary attributes will be an empty dictionary and all integer values will
     be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
     will be an empty dictionary.
-    
-    meta_data: `Dict[str, LexiconMetaData]`
+
+    meta_data: `dict[str, LexiconMetaData]`
         Dictionary where the keys are MWE templates, of any type, and the values
         are their associated meta data stored in a :class:`LexiconMetaData` object.
     longest_non_special_mwe_template : `int`
@@ -606,24 +1287,24 @@ class MWELexiconCollection(MutableMapping):
         The number of wildcards in the MWE template that contains the
         most wildcards, e.g. the MWE template `ski_* *_noun` would contain 2
         wildcards. This can be 0 if you have no wildcard MWE templates.
-    mwe_regular_expression_lookup: `Dict[int, Dict[str, Dict[str, re.Pattern]]]`
+    mwe_regular_expression_lookup: `dict[int, dict[str, dict[str, re.Pattern]]]`
         A dictionary that can lookup all special syntax MWE templates there
         regular expression pattern. These templates are found first by
         their n-gram length and then their first character symbol. The regular
         expression pattern is used for quick matching within the :func:`mwe_match`.
         From the special syntax only wildcard (`*`) symbols are supported at the
         moment.
-    pos_mapper : `Dict[str, List[str]]`
+    pos_mapper : `dict[str, list[str]]`
         The given `pos_mapper`.
-    one_to_many_pos_tags : `Set[str]`
+    one_to_many_pos_tags : `set[str]`
         A set of POS tags that have a one to many mapping, this is created based
         on the `pos_mapper`. This is empty if `pos_mapper` is `None`
-    pos_mapping_lookup : `Dict[str, str]`
+    pos_mapping_lookup : `dict[str, str]`
         Only used if `pos_mapper` is not `None`. For all one-to-one POS mappings
         will store the mapped POS MWE template as keys and the original non-mapped
         (original) MWE templates as values, which can be used to lookup the meta
         data from `meta_data`.
-    pos_mapping_regular_expression_lookup : `Dict[LexiconType, Dict[int, Dict[str, Dict[str, re.Pattern]]]]`
+    pos_mapping_regular_expression_lookup : `dict[LexiconType, dict[int, dict[str, dict[str, re.Pattern]]]]`
         Only used if `pos_mapper` is not `None` and will result in
         `mwe_regular_expression_lookup` being empty as it replaces it
         functionality and extends it and by handlining the one-to-many POS
@@ -654,21 +1335,21 @@ class MWELexiconCollection(MutableMapping):
 
     '''
     
-    def __init__(self, data: Optional[Dict[str, List[str]]] = None,
-                 pos_mapper: Optional[Dict[str, List[str]]] = None) -> None:
+    def __init__(self, data: dict[str, list[str]] | None = None,
+                 pos_mapper: dict[str, list[str]] | None = None) -> None:
 
-        self.meta_data: Dict[str, LexiconMetaData] = {}
+        self.meta_data: dict[str, LexiconMetaData] = {}
         self.longest_non_special_mwe_template = 0
         self.longest_wildcard_mwe_template = 0
         self.longest_mwe_template = 0
         self.most_wildcards_in_mwe_template = 0
-        self.mwe_regular_expression_lookup: DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]\
+        self.mwe_regular_expression_lookup: collections.defaultdict[int, collections.defaultdict[str, dict[str, re.Pattern]]]\
             = collections.defaultdict(lambda: collections.defaultdict(dict))
 
-        self.pos_mapper: Dict[str, List[str]] = {}
-        self.one_to_many_pos_tags: Set[str] = set()
-        self.pos_mapping_lookup: Dict[str, str] = {}
-        self.pos_mapping_regular_expression_lookup: DefaultDict[LexiconType, DefaultDict[int, DefaultDict[str, Dict[str, re.Pattern]]]]\
+        self.pos_mapper: dict[str, list[str]] = {}
+        self.one_to_many_pos_tags: set[str] = set()
+        self.pos_mapping_lookup: dict[str, str] = {}
+        self.pos_mapping_regular_expression_lookup: collections.defaultdict[LexiconType, collections.defaultdict[int, collections.defaultdict[str, dict[str, re.Pattern]]]]\
             = collections.defaultdict(lambda: collections.defaultdict(lambda: collections.defaultdict(dict)))
         
         if pos_mapper is not None:
@@ -682,10 +1363,10 @@ class MWELexiconCollection(MutableMapping):
                 self[key] = value
 
     def mwe_match(self, mwe_template: str, mwe_type: LexiconType
-                  ) -> List[str]:
+                  ) -> list[str]:
         '''
-        Returns a `List` of MWE templates, with the given `mwe_type`, that match
-        the given `mwe_template`. If there are no matches the returned `List`
+        Returns a `list` of MWE templates, with the given `mwe_type`, that match
+        the given `mwe_template`. If there are no matches the returned `list`
         will be empty.
         
         This method applies all of the special syntax rules that should be applied
@@ -703,7 +1384,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
 
-        `Optional[List[str]]`
+        `list[str] | None`
 
         # Examples
         ``` python
@@ -715,7 +1396,7 @@ class MWELexiconCollection(MutableMapping):
         
         ```
         '''
-        mwe_templates_matches: List[str] = []
+        mwe_templates_matches: list[str] = []
         if self.pos_mapper:
             if mwe_type == LexiconType.MWE_NON_SPECIAL:
                 mwe_mapped_template = self.pos_mapping_lookup.get(mwe_template, None)
@@ -735,17 +1416,17 @@ class MWELexiconCollection(MutableMapping):
                 n_gram_length = len(mwe_template.split())
                 mwe_template_length = len(mwe_template)
                 if mwe_template_length > 0:
+                    regular_expression_lookup = self.pos_mapping_regular_expression_lookup[mwe_type][n_gram_length]
                     for character_lookup in ['*', mwe_template[0]]:
-                        regular_expression_lookup = self.pos_mapping_regular_expression_lookup[mwe_type][n_gram_length]
                         if character_lookup not in regular_expression_lookup:
                             continue
 
                         for (potential_mwe_match,
                              mwe_pattern) in regular_expression_lookup[character_lookup].items():
-                            match = mwe_pattern.match(mwe_template)
-                            if match is not None:
-                                if (match.start() == 0
-                                   and match.end() == mwe_template_length):
+                            pattern_match = mwe_pattern.match(mwe_template)
+                            if pattern_match is not None:
+                                if (pattern_match.start() == 0
+                                   and pattern_match.end() == mwe_template_length):
                                     mwe_templates_matches.append(potential_mwe_match)
         else:
             if mwe_type == LexiconType.MWE_NON_SPECIAL:
@@ -759,22 +1440,22 @@ class MWELexiconCollection(MutableMapping):
                 mwe_template_length = len(mwe_template)
                 if mwe_template_length > 0:
                     # By default all MWE matches can start with a * as it covers all characters.
+                    regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
                     for character_lookup in ['*', mwe_template[0]]:
-                        regular_expression_lookup = self.mwe_regular_expression_lookup[n_gram_length]
                         if character_lookup not in regular_expression_lookup:
                             continue
 
                         for (potential_mwe_match,
                              mwe_pattern) in regular_expression_lookup[character_lookup].items():
-                            match = mwe_pattern.match(mwe_template)
-                            if match is not None:
-                                if (match.start() == 0
-                                   and match.end() == mwe_template_length):
+                            pattern_match = mwe_pattern.match(mwe_template)
+                            if pattern_match is not None:
+                                if (pattern_match.start() == 0
+                                   and pattern_match.end() == mwe_template_length):
                                     mwe_templates_matches.append(potential_mwe_match)
 
         return mwe_templates_matches
 
-    def to_dictionary(self) -> Dict[str, List[str]]:
+    def to_dictionary(self) -> dict[str, list[str]]:
         '''
         Returns a dictionary of all MWE templates, the keys, stored in the
         collection and their associated semantic tags, the values.
@@ -783,7 +1464,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
 
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
 
         # Examples
         ``` python
@@ -810,7 +1491,7 @@ class MWELexiconCollection(MutableMapping):
         `bytes`
         '''
         serialise = {}
-        data: Dict[str, List[str]] = {key: value.semantic_tags
+        data: dict[str, list[str]] = {key: value.semantic_tags
                                       for key, value in self.meta_data.items()}
         serialise['data'] = srsly.msgpack_dumps(data)
         serialise['pos_mapper'] = srsly.msgpack_dumps(self.pos_mapper)
@@ -837,8 +1518,8 @@ class MWELexiconCollection(MutableMapping):
         return MWELexiconCollection(data, pos_mapper)
 
     @staticmethod
-    def from_tsv(tsv_file_path: Union[PathLike, str]
-                 ) -> Dict[str, List[str]]:
+    def from_tsv(tsv_file_path: PathLike | str
+                 ) -> dict[str, list[str]]:
         '''
         Given a `tsv_file_path` it will return a dictionary object
         that can be used to create a :class:`MWELexiconCollection`.
@@ -856,7 +1537,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Parameters
 
-        tsv_file_path: `Union[PathLike, str]`
+        tsv_file_path: `PathLike | str`
             A file path or URL to a TSV file that contains at least these two
             fields:
             
@@ -867,7 +1548,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Returns
         
-        `Dict[str, List[str]]`
+        `dict[str, list[str]]`
         
         # Raises
         
@@ -901,7 +1582,7 @@ class MWELexiconCollection(MutableMapping):
 
         with open(tsv_file_path, 'r', newline='', encoding='utf-8') as fp:
             csv_reader = csv.DictReader(fp, delimiter='\t')
-            file_field_names: Set[str] = set()
+            file_field_names: set[str] = set()
             if csv_reader.fieldnames:
                 file_field_names = set(csv_reader.fieldnames)
             if not minimum_field_names.issubset(file_field_names):
@@ -914,7 +1595,7 @@ class MWELexiconCollection(MutableMapping):
             
             for row in csv_reader:
                 mwe_template = ''
-                semantic_tags: List[str] = []
+                semantic_tags: list[str] = []
                 for field_name in minimum_field_names:
                     if field_name == 'semantic_tags':
                         semantic_tags = row[field_name].split()
@@ -943,7 +1624,7 @@ class MWELexiconCollection(MutableMapping):
 
         # Parameters
 
-        *tsv_file_paths: `Union[PathLike, str]`
+        *tsv_file_paths: `PathLike | str`
             File paths or URLs to a TSV file that contains at least these two
             fields:
             
@@ -1017,7 +1698,7 @@ class MWELexiconCollection(MutableMapping):
         ```
         '''
         
-        escaped_mwe_template_list: List[str] = []
+        escaped_mwe_template_list: list[str] = []
         for token, pos in utils.token_pos_tags_in_lexicon_entry(mwe_template):
             escaped_token = re.escape(token).replace(r'\*', r'[^\s_]*')
             escaped_pos = pos.replace(r'*', r'[^\s_]*')
@@ -1025,7 +1706,7 @@ class MWELexiconCollection(MutableMapping):
         escaped_mwe_template = r'\ '.join(escaped_mwe_template_list)
         return escaped_mwe_template
     
-    def __setitem__(self, key: str, value: List[str]) -> None:
+    def __setitem__(self, key: str, value: list[str]) -> None:
         '''
         # Raises
 
@@ -1039,6 +1720,13 @@ class MWELexiconCollection(MutableMapping):
                           ' within Multi Word Expression (MWE) lexicons and '
                           'therefore any MWE template that contains a `{` '
                           'or `}` will be ignored.')
+            return None
+
+        if utils.contains_default_tag(value) and utils.default_token_index(key) is None:
+            warnings.warn('A Multi Word Expression (MWE) template that contains '
+                          'a default (`Df`) semantic tag must contain a token '
+                          'that starts with a wildcard (`*`), the following '
+                          f'MWE template does not and will be ignored: {key}')
             return None
 
         semantic_tags = value
@@ -1065,27 +1753,27 @@ class MWELexiconCollection(MutableMapping):
                     self.longest_non_special_mwe_template = key_n_gram_length
         else:
             contains_one_to_many_pos_tag = False
-            pos_mapped_key_list: List[str] = []
+            pos_mapped_key_list: list[str] = []
             for token, pos in utils.token_pos_tags_in_lexicon_entry(key):
                 if '*' in pos:
                     pos_error = ('When using a POS mapper a POS tag within '
                                  'a lexicon entry cannot contain a wildcard'
                                  ' unless the POS tag is only a wildcard '
-                                 'and no other characters. Leixcon entry '
+                                 'and no other characters. Lexicon entry'
                                  'and POS tag in that entry that caused '
                                  f'this error: {key} {pos}')
                     if set(pos.strip()) != set('*'):
                         raise ValueError(pos_error)
 
                 mapped_pos_list = self.pos_mapper.get(pos, [pos])
+                mapped_pos: str
                 if len(mapped_pos_list) > 1:
                     contains_one_to_many_pos_tag = True
-                    mapped_pos = '|'.join(mapped_pos_list)
-                    mapped_pos = '(?:' + mapped_pos + ')'
-                    pos_mapped_key_list.append(f'{token}_{mapped_pos}')
+                    alternatives = '|'.join(mapped_pos_list)
+                    mapped_pos = f'(?:{alternatives})'
                 else:
                     mapped_pos = mapped_pos_list[0]
-                    pos_mapped_key_list.append(f'{token}_{mapped_pos}')
+                pos_mapped_key_list.append(f'{token}_{mapped_pos}')
             pos_mapped_key = ' '.join(pos_mapped_key_list)
             
             if '*' in pos_mapped_key:
@@ -1121,16 +1809,16 @@ class MWELexiconCollection(MutableMapping):
 
     def __delitem__(self, key: str) -> None:
         
-        def _get_lexicon_statistics() -> Tuple[int, int, int]:
+        def _get_lexicon_statistics() -> tuple[int, int, int]:
             '''
             Returns the `longest_non_special_mwe_template`,
             `longest_wildcard_mwe_template`, and `most_wildcards_in_mwe_template`
-            in the `meta_data` as a `Tuple`. This is required as after deleting
+            in the `meta_data` as a `tuple`. This is required as after deleting
             an MWE we do not know if it has affected any of these statistics.
 
             # Returns
 
-            `Tuple[int, int, int]`
+            `tuple[int, int, int]`
             '''
             longest_non_special_mwe_template = 0
             longest_wildcard_mwe_template = 0

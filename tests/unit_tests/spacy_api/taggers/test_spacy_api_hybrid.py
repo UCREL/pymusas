@@ -16,6 +16,7 @@ from pymusas.lexicon_collection import LexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.spacy_api.taggers.hybrid import HybridTagger
 from pymusas.spacy_api.utils import remove_custom_token_extension as remove_extension
+from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 from ..utils import compare_output
@@ -252,8 +253,8 @@ def test__init__() -> None:
     lexicon_lookup = LexiconCollection.from_tsv(english_lexicon_url, include_pos=True)
     lemma_lexicon_lookup = LexiconCollection.from_tsv(english_lexicon_url, include_pos=False)
     single_word_rule = SingleWordRule(lexicon_lookup, lemma_lexicon_lookup)
-    rules = [single_word_rule]
-    tagger.rules = rules  # type: ignore[assignment]
+    rules: list[Rule] = [single_word_rule]
+    tagger.rules = rules
 
     with pytest.raises(ValueError):
         tagger.initialize()
@@ -292,7 +293,7 @@ def test__init__() -> None:
     # Testing with a non-default device
     tagger = HybridTagger(device="meta")
     assert tagger.device.type == "meta"
-    tagger.initialize(rules=rules,  # type: ignore[arg-type]
+    tagger.initialize(rules=rules,
                       ranker=ranker,
                       pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
     tagger_wsd_model = cast(BEM, tagger.wsd_model)
@@ -300,7 +301,7 @@ def test__init__() -> None:
 
     # Testing that validate will move the wsd_model to the correct device
     tagger = HybridTagger(device="cpu")
-    tagger.initialize(rules=rules,  # type: ignore[arg-type]
+    tagger.initialize(rules=rules,
                       ranker=ranker,
                       pretrained_model_name_or_path="ucrelnlp/PyMUSAS-Neural-English-Small-BEM")
     tagger_wsd_model = cast(BEM, tagger.wsd_model)

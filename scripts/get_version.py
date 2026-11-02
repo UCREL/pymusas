@@ -1,12 +1,7 @@
 import argparse
-import io
-import sys
+from pathlib import Path
 
-
-if sys.version_info >= (3, 11):
-    import tomllib
-else:
-    import tomli as tomllib
+import tomlkit
 
 
 if __name__ == "__main__":
@@ -15,9 +10,8 @@ if __name__ == "__main__":
     )
     parser = argparse.ArgumentParser(description=description)
     parser.add_argument("toml_file_path",
-                        type=argparse.FileType(mode="r", encoding="utf-8"),
+                        type=Path,
                         help="File path to the pyproject.toml file")
     args = parser.parse_args()
-    toml_file_io = args.toml_file_path
-    assert isinstance(toml_file_io, io.TextIOWrapper)
-    print(tomllib.loads(toml_file_io.read())['project']['version'])
+    toml_file_path: Path = args.toml_file_path
+    print(tomlkit.parse(toml_file_path.read_text(encoding="utf-8"))['project']['version'])

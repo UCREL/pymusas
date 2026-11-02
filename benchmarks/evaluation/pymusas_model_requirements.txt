@@ -1,0 +1,7 @@
+# The requirements that are specific to evaluating the pre-built pymusas-models
+# model, which is evaluated in its own isolated environment by run_evaluation.sh
+# using the latest released version of pymusas that the model supports, rather
+# than this repository's working tree. All other requirements are exported from
+# uv.lock by run_evaluation.sh so that they match the development environment.
+pymusas==0.4.2
+en_dual_none_contextual_none @ https://github.com/UCREL/pymusas-models/releases/download/en_dual_none_contextual_none-0.4.0/en_dual_none_contextual_none-0.4.0-py3-none-any.whl

@@ -1,4 +1,4 @@
-FROM nvidia/cuda:12.8.1-cudnn-devel-ubuntu24.04
+FROM nvidia/cuda:12.9.2-cudnn-devel-ubuntu24.04
 
 RUN apt-get -y update \
     && apt-get install -y --no-install-recommends \
@@ -26,8 +26,8 @@ RUN set -o pipefail \
 ENV PATH="/home/$USERNAME/.local/bin/:$PATH"
 
 RUN uv self update
-RUN uv python install 3.13
-RUN uv venv --python=3.13 --no-project \
+RUN uv python install 3.12
+RUN uv venv --python=3.12 --no-project \
     && uv pip install torch --index-url https://download.pytorch.org/whl/cu128
 
 COPY --chown=ubuntu:ubuntu pymusas ./pymusas
@@ -35,6 +35,6 @@ COPY --chown=ubuntu:ubuntu tests ./tests
 COPY --chown=ubuntu:ubuntu pyproject.toml pyproject.toml
 RUN touch README.md LICENSE
 RUN uv pip install .[neural] --group dev
-RUN uv pip install spacy[cuda12x]
+RUN uv pip install "spacy[cuda12x]>=3.8"
 
 ENTRYPOINT ["./tests/docker_gpu_run_script.sh"]

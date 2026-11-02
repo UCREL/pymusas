@@ -2,10 +2,11 @@ from pymusas.lexicon_collection import LexiconType
 
 
 def test_lexicon_type() -> None:
-    assert 4 == len(LexiconType)
+    assert 5 == len(LexiconType)
 
     expected_output = {
         'SINGLE_NON_SPECIAL': 'Single Non Special',
+        'SINGLE_AUTOTAG': 'Single Autotag',
         'MWE_NON_SPECIAL': 'MWE Non Special',
         'MWE_WILDCARD': 'MWE Wildcard',
         'MWE_CURLY_BRACES': 'MWE Curly Braces'
@@ -18,6 +19,7 @@ def test_lexicon_type() -> None:
     
     lexicon_types = [
         LexiconType.SINGLE_NON_SPECIAL,
+        LexiconType.SINGLE_AUTOTAG,
         LexiconType.MWE_NON_SPECIAL,
         LexiconType.MWE_WILDCARD,
         LexiconType.MWE_CURLY_BRACES

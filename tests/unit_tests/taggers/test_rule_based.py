@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 import pytest
 
@@ -8,6 +7,7 @@ from pymusas.lexicon_collection import LexiconCollection, MWELexiconCollection
 from pymusas.rankers.lexicon_entry import ContextualRuleBasedRanker
 from pymusas.taggers.rule_based import RuleBasedTagger
 from pymusas.taggers.rules.mwe import MWERule
+from pymusas.taggers.rules.rule import Rule
 from pymusas.taggers.rules.single_word import SingleWordRule
 
 
@@ -16,12 +16,12 @@ TAGGER_DATA_DIR = Path(DATA_DIR, 'taggers', 'rule_based')
 
 
 def generate_test_data(test_data_file: Path,
-                       pos_mapper: Optional[Dict[str, str]] = None
-                       ) -> Tuple[List[str],
-                                  List[str],
-                                  List[str],
-                                  List[Tuple[List[str],
-                                             List[Tuple[int, int]]]
+                       pos_mapper: dict[str, str] | None = None
+                       ) -> tuple[list[str],
+                                  list[str],
+                                  list[str],
+                                  list[tuple[list[str],
+                                             list[tuple[int, int]]]
                                        ]]:
     '''
     Given the test data stored at `test_data_file` it returns this data as a
@@ -34,10 +34,10 @@ def generate_test_data(test_data_file: Path,
     contains the following:
       1. A list of expected semantic tags that should be generated based
     on the associated `token`, `lemma`, and `pos`.
-      2. A List of tuples of length 2. each `Tuple` indicates the start and end
-    token index of the associated Multi Word Expression (MWE). If the `List` contains
-    more than one `Tuple` then the MWE is discontinuous. For single word
-    expressions the `List` will only contain 1 `Tuple` which will be
+      2. A List of tuples of length 2. each `tuple` indicates the start and end
+    token index of the associated Multi Word Expression (MWE). If the `list` contains
+    more than one `tuple` then the MWE is discontinuous. For single word
+    expressions the `list` will only contain 1 `tuple` which will be
     (token_start_index, token_start_index + 1).
 
     # Parameters
@@ -51,20 +51,20 @@ def generate_test_data(test_data_file: Path,
         4. usas
         5. start_indexes
         6. end_indexes
-    pos_mapper : `Dict[str, str]`, optional (default = `None`)
+    pos_mapper : `dict[str, str]`, optional (default = `None`)
         If not `None` it will map the pos tags using this mapper.
 
     # Returns
 
-    `Tuple[List[str], List[str], List[str], List[Tuple[List[str], List[Tuple[int, int]]]]]`
+    `tuple[list[str], list[str], list[str], list[tuple[list[str], list[tuple[int, int]]]]]`
     '''
-    tokens: List[str] = []
-    lemmas: List[str] = []
-    pos_tags: List[str] = []
+    tokens: list[str] = []
+    lemmas: list[str] = []
+    pos_tags: list[str] = []
     if pos_mapper is None:
         pos_mapper = {}
     
-    expected_output: List[Tuple[List[str], List[Tuple[int, int]]]] = []
+    expected_output: list[tuple[list[str], list[tuple[int, int]]]] = []
     with test_data_file.open('r') as test_data_fp:
         for token_data in json.load(test_data_fp):
             tokens.append(token_data['token'])
@@ -74,7 +74,7 @@ def generate_test_data(test_data_file: Path,
             pos_tags.append(pos)
             
             usas_tags = token_data['usas']
-            mwe_indexes: List[Tuple[int, int]] = []
+            mwe_indexes: list[tuple[int, int]] = []
             for start, end in zip(token_data['start_indexes'],
                                   token_data['end_indexes']):
                 mwe_indexes.append((int(start), int(end)))
@@ -83,7 +83,7 @@ def generate_test_data(test_data_file: Path,
     return tokens, lemmas, pos_tags, expected_output
 
 
-def single_word_rule(pos_mapper: Optional[Dict[str, List[str]]]
+def single_word_rule(pos_mapper: dict[str, list[str]] | None
                      ) -> SingleWordRule:
     lexicon_file = Path(TAGGER_DATA_DIR, 'single_lexicon.tsv')
     single_lexicon = LexiconCollection.from_tsv(lexicon_file)
@@ -91,7 +91,7 @@ def single_word_rule(pos_mapper: Optional[Dict[str, List[str]]]
     return SingleWordRule(single_lexicon, single_lemma_lexicon, pos_mapper)
 
 
-def mwe_word_rule(pos_mapper: Optional[Dict[str, List[str]]]) -> MWERule:
+def mwe_word_rule(pos_mapper: dict[str, list[str]] | None) -> MWERule:
     lexicon_file = Path(TAGGER_DATA_DIR, 'mwe_lexicon.tsv')
     mwe_lexicon = MWELexiconCollection.from_tsv(lexicon_file)
     return MWERule(mwe_lexicon, pos_mapper)
@@ -190,3 +190,66 @@ def test_rule_based_tagger__call__() -> None:
                               mwe_word_rule(None)], ranker)
     tagger_output = tagger(test_tokens, test_lemmas, test_pos_tags)
     assert expected_output == tagger_output
+
+
+def test_rule_based_tagger__call__default_tags() -> None:
+    single_word_rule = SingleWordRule({'acting|ADJ': ['A1/Z3'],
+                                       'style|NOUN': ['A4.1']}, {})
+    mwe_rule = MWERule({'*_ADJ style_NOUN': ['C1/Df']},
+                       single_word_rule=single_word_rule)
+    rules: list[Rule] = [single_word_rule, mwe_rule]
+    ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
+    tagger = RuleBasedTagger(rules, ranker)
+
+    tokens = ['The', 'acting', 'style', '.']
+    pos_tags = ['DET', 'ADJ', 'NOUN', 'punc']
+    expected = [(['Z99'], [(0, 1)]),
+                (['C1/A1'], [(1, 3)]),
+                (['C1/A1'], [(1, 3)]),
+                (['PUNCT'], [(3, 4)])]
+    assert expected == tagger(tokens, tokens, pos_tags)
+
+
+def test_rule_based_tagger__call__autotag() -> None:
+    '''
+    `autotag` matches are used only when a token has no exact single word
+    match and they are ranked lower than MWE matches.
+    '''
+    single_word_rule = SingleWordRule({'!|PUNCT': ['E4.1+'], 'heavy|ADJ': ['N3.5+']}, {},
+                                      autotag_lexicon_collection={'*kg|NUM': ['N3.5'],
+                                                                  '*|PUNCT': ['PUNCT'],
+                                                                  '*|NOUN': ['Z0']})
+    mwe_rule = MWERule({'heavy_ADJ weight_NOUN': ['A1']})
+    rules: list[Rule] = [single_word_rule, mwe_rule]
+    ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
+    tagger = RuleBasedTagger(rules, ranker)
+
+    tokens = ['15kg', 'is', 'a', 'heavy', 'weight', '!', '?', '15kg']
+    pos_tags = ['NUM', 'AUX', 'DET', 'ADJ', 'NOUN', 'PUNCT', 'PUNCT', 'NOUN']
+    expected = [(['N3.5'], [(0, 1)]),
+                (['Z99'], [(1, 2)]),
+                (['Z99'], [(2, 3)]),
+                (['A1'], [(3, 5)]),
+                (['A1'], [(3, 5)]),
+                (['E4.1+'], [(5, 6)]),
+                (['PUNCT'], [(6, 7)]),
+                (['Z0'], [(7, 8)])]
+    assert expected == tagger(tokens, tokens, pos_tags)
+
+
+def test_rule_based_tagger__call__autotag_lexicon_order() -> None:
+    '''
+    When more than one `autotag` entry matches a token, the entry that comes
+    first in the `autotag` lexicon is used, so the output does not depend on
+    Python's hash seed.
+    '''
+    tokens = ['5kg', '5']
+    pos_tags = ['NUM', 'NUM']
+    for autotag_lexicon, expected_tags in [
+        ({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']}, [['N3.5'], ['N1']]),
+        ({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']}, [['N1'], ['N1']])
+    ]:
+        rules: list[Rule] = [SingleWordRule({}, {}, autotag_lexicon_collection=autotag_lexicon)]
+        ranker = ContextualRuleBasedRanker(*ContextualRuleBasedRanker.get_construction_arguments(rules))
+        tagger = RuleBasedTagger(rules, ranker)
+        assert expected_tags == [tags for tags, _ in tagger(tokens, tokens, pos_tags)]

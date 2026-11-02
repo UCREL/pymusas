@@ -1,4 +1,3 @@
-from typing import List
 
 from pymusas.rankers.ranking_meta_data import RankingMetaData
 from pymusas.taggers.rules.rule import Rule
@@ -8,9 +7,9 @@ def test_rule() -> None:
     
     class TestRule(Rule):
 
-        def __call__(self, tokens: List[str], lemmas: List[str],
-                     pos_tags: List[str]) -> List[List[RankingMetaData]]:
-            ranking_meta_data: List[List[RankingMetaData]] = [[]]
+        def __call__(self, tokens: list[str], lemmas: list[str],
+                     pos_tags: list[str]) -> list[list[RankingMetaData]]:
+            ranking_meta_data: list[list[RankingMetaData]] = [[]]
             return ranking_meta_data
 
         def to_bytes(self) -> bytes:

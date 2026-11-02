@@ -14,7 +14,6 @@
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def __init__(
- |     self,
  |     name: str = 'pymusas_neural_tagger',
  |     pymusas_tags_token_attr: str = 'pymusas_tags',
  |     pymusas_mwe_indexes_attr: str = 'pymusas_mwe_indexes',
@@ -29,7 +28,7 @@ of the [`pymusas.taggers.neural.NeuralTagger`](/pymusas/api/taggers/neural/#neur
 
 The component creates a list of possible candidate semantic/sense tags for
 each token in the sequence, these tags are then assigned to
-`Token._.pymusas_tags` attribute in addition a `List` of token indexes
+`Token._.pymusas_tags` attribute in addition a `list` of token indexes
 indicating if the token is part of a Multi Word Expression (MWE) is assigned
 to the `Token._.pymusas_mwe_indexes`. **NOTE** at the moment
 only single word expressions are supported.
@@ -53,17 +52,17 @@ The number of possible candidate tags for each token is determined by the
     </tr>
     <tr>
         <td> Token._.pymusas_tags </td>
-        <td> `List[str]` </td>
-        <td> Predicted tags, the first tag in the List of tags is the
+        <td> `list[str]` </td>
+        <td> Predicted tags, the first tag in the `list` of tags is the
         most likely tag.</td>
     </tr>
     <tr>
         <td> Token._.pymusas_mwe_indexes </td>
-        <td> `List[Tuple[int, int]]` </td>
-        <td> Each `Tuple` indicates the start and end token index of the
-        associated Multi Word Expression (MWE). If the `List` contains
-        more than one `Tuple` then the MWE is discontinuous. For single word
-        expressions the `List` will only contain 1 `Tuple` which will be
+        <td> `list[tuple[int, int]]` </td>
+        <td> Each `tuple` indicates the start and end token index of the
+        associated Multi Word Expression (MWE). If the `list` contains
+        more than one `tuple` then the MWE is discontinuous. For single word
+        expressions the `list` will only contain 1 `tuple` which will be
         (token_start_index, token_start_index + 1). **NOTE** at the moment
         only single word expressions are supported.</td>
     </tr>
@@ -202,11 +201,10 @@ class NeuralTagger(spacy.pipeline.pipe.Pipe):
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def initialize(
- |     self,
- |     get_examples: Optional[Callable[[], Iterable[Example]]] = None,
+ |     get_examples: Callable[[], Iterable[Example]] | None = None,
  |     *,
- |     nlp: Optional[Language] = None,
- |     pretrained_model_name_or_path: Optional[str | Path] = None
+ |     nlp: Language | None = None,
+ |     pretrained_model_name_or_path: str | Path | None = None
  | ) -> None
 ```
 
@@ -272,8 +270,7 @@ order.
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def to_disk(
- |     self,
- |     path: Union[str, Path],
+ |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
  | ) -> None
@@ -284,7 +281,7 @@ Serialises the tagger to the given `path`.
 <h4 id="to_disk.parameters">Parameters<a className="headerlink" href="#to_disk.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __path__ : `Union[str, Path]` <br/>
+- __path__ : `str | Path` <br/>
     Path to a directory. Path may be either string or `Path`-like
     object. If the directory does not exist it attempts to create a
     directory at the given `path`.
@@ -318,8 +315,7 @@ with TemporaryDirectory() as temp_dir:
 class NeuralTagger(spacy.pipeline.pipe.Pipe):
  | ...
  | def from_disk(
- |     self,
- |     path: Union[str, Path],
+ |     path: str | Path,
  |     *,
  |     exclude: Iterable[str] = SimpleFrozenList()
  | ) -> "NeuralTagger"
@@ -330,7 +326,7 @@ Loads the tagger from the given `path` in place and returns it.
 <h4 id="from_disk.parameters">Parameters<a className="headerlink" href="#from_disk.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __path__ : `Union[str, Path]` <br/>
+- __path__ : `str | Path` <br/>
     Path to an existing directory. Path may be either string or
     `Path`-like object.
 

@@ -2,7 +2,6 @@
 spaCy registered functions for creating the following rankers:
 * :class:`pymusas.rankers.lexicon_entry.ContextualRuleBasedRanker`
 '''
-from typing import List
 
 import spacy
 
@@ -11,7 +10,7 @@ from pymusas.taggers.rules.rule import Rule
 
 
 @spacy.util.registry.misc('pymusas.rankers.ContextualRuleBasedRanker.v1')
-def contextual_rule_based_ranker(rules: List[Rule]) -> ContextualRuleBasedRanker:
+def contextual_rule_based_ranker(rules: list[Rule]) -> ContextualRuleBasedRanker:
     '''
     `pymusas.rankers.ContextualRuleBasedRanker.v1` is a registered function
     under the `@misc` function register.
@@ -24,8 +23,8 @@ def contextual_rule_based_ranker(rules: List[Rule]) -> ContextualRuleBasedRanker
 
     # Parameters
 
-    rules : `List[Rule]`
-        A `List` of :class:`pymusas.taggers.rules.rule.Rule`.
+    rules : `list[Rule]`
+        A `list` of :class:`pymusas.taggers.rules.rule.Rule`.
 
     # Returns
     

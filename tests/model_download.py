@@ -24,5 +24,5 @@ if __name__ == "__main__":
     model = "ucrelnlp/PyMUSAS-Neural-English-Small-BEM"
     logger.info(f"Caching model; {model} and tokenizer too: {cache_directory}")
     BEM.from_pretrained(model, cache_dir=cache_directory)
-    AutoTokenizer.from_pretrained(model, cache_dir=cache_directory, add_prefix_space=True)  # type: ignore
+    AutoTokenizer.from_pretrained(model, cache_dir=cache_directory, add_prefix_space=True)
     logger.info(f"Download; {model}")

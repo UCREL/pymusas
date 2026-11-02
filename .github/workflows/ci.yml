@@ -130,27 +130,11 @@ jobs:
         if: steps.setup-uv.outputs.cache-hit == 'true'
         run: echo "uv cache was restored"
 
-      - name: isort
-        run: uv run isort --check-only pymusas tests scripts benchmarks
-      
-      - name: flake8 Ubuntu and Mac
-        if: ${{ runner.os == 'macOS' || runner.os == 'Linux' }}
-        run: |
-          uv run flake8 --config ./.flake8 pymusas tests scripts benchmarks
-      
-      - name: flake8 Window
-        if: ${{ runner.os == 'Windows' }}
-        run: |
-          uv run flake8 --config .\.flake8 pymusas tests scripts benchmarks
+      - name: ruff
+        run: uv run ruff check pymusas tests scripts benchmarks
 
-      - name: Cache mypy
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
-        with:
-          path: ./.mypy_cache
-          key: ${{ runner.os }}-${{ steps.python-setup.outputs.python-version }}-${{ hashFiles('uv.lock') }}
-
-      - name: mypy
-        run: uv run mypy
+      - name: ty
+        run: uv run ty check
 
       - name: Windows create HuggingFace Hub cache directory
         if: ${{ runner.os == 'Windows' }}

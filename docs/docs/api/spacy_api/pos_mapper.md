@@ -14,7 +14,7 @@ spaCy registered functions for loading Part Of Speech (POS) mappings.
 
 ```python
 @spacy.util.registry.misc('pymusas.pos_mapper.UPOS_TO_USAS_COREv1')
-def upos_to_usas_core() -> Dict[str, List[str]]
+def upos_to_usas_core() -> dict[str, list[str]]
 ```
 
 `pymusas.pos_mapper.UPOS_TO_USAS_COREv1` is a registered function under the
@@ -24,7 +24,7 @@ def upos_to_usas_core() -> Dict[str, List[str]]
 <h4 id="upos_to_usas_core.returns">Returns<a className="headerlink" href="#upos_to_usas_core.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.spacy_api.pos_mapper.usas_core_to_upos"></a>
 
@@ -32,7 +32,7 @@ def upos_to_usas_core() -> Dict[str, List[str]]
 
 ```python
 @spacy.util.registry.misc('pymusas.pos_mapper.USAS_CORE_TO_UPOSv1')
-def usas_core_to_upos() -> Dict[str, List[str]]
+def usas_core_to_upos() -> dict[str, list[str]]
 ```
 
 `pymusas.pos_mapper.USAS_CORE_TO_UPOSv1` is a registered function under the
@@ -42,7 +42,7 @@ def usas_core_to_upos() -> Dict[str, List[str]]
 <h4 id="usas_core_to_upos.returns">Returns<a className="headerlink" href="#usas_core_to_upos.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.spacy_api.pos_mapper.penn_chinese_treebank_to_usas_core"></a>
 
@@ -50,7 +50,7 @@ def usas_core_to_upos() -> Dict[str, List[str]]
 
 ```python
 @spacy.util.registry.misc('pymusas.pos_mapper.PENN_CHINESE_TREEBANK_TO_USAS_COREv1')
-def penn_chinese_treebank_to_usas_core() -> Dict[str, List[str]]
+def penn_chinese_treebank_to_usas_core() -> dict[str, list[str]]
 ```
 
 `pymusas.pos_mapper.PENN_CHINESE_TREEBANK_TO_USAS_COREv1` is a registered
@@ -60,7 +60,7 @@ function under the `@misc` function register. It returns the
 <h4 id="penn_chinese_treebank_to_usas_core.returns">Returns<a className="headerlink" href="#penn_chinese_treebank_to_usas_core.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.spacy_api.pos_mapper.usas_core_to_penn_chinese_treebank"></a>
 
@@ -68,7 +68,7 @@ function under the `@misc` function register. It returns the
 
 ```python
 @spacy.util.registry.misc('pymusas.pos_mapper.USAS_CORE_TO_PENN_CHINESE_TREEBANKv1')
-def usas_core_to_penn_chinese_treebank() -> Dict[str, List[str]]
+def usas_core_to_penn_chinese_treebank() -> dict[str, list[str]]
 ```
 
 `pymusas.pos_mapper.USAS_CORE_TO_PENN_CHINESE_TREEBANKv1` is a registered
@@ -78,7 +78,7 @@ function under the `@misc` function register. It returns the
 <h4 id="usas_core_to_penn_chinese_treebank.returns">Returns<a className="headerlink" href="#usas_core_to_penn_chinese_treebank.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.spacy_api.pos_mapper.basic_corcencc_to_usas_core"></a>
 
@@ -86,7 +86,7 @@ function under the `@misc` function register. It returns the
 
 ```python
 @spacy.util.registry.misc('pymusas.pos_mapper.BASIC_CORCENCC_TO_USAS_COREv1')
-def basic_corcencc_to_usas_core() -> Dict[str, List[str]]
+def basic_corcencc_to_usas_core() -> dict[str, list[str]]
 ```
 
 `pymusas.pos_mapper.BASIC_CORCENCC_TO_USAS_COREv1` is a registered
@@ -96,7 +96,7 @@ function under the `@misc` function register. It returns the
 <h4 id="basic_corcencc_to_usas_core.returns">Returns<a className="headerlink" href="#basic_corcencc_to_usas_core.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.spacy_api.pos_mapper.usas_core_to_basic_corcencc"></a>
 
@@ -104,7 +104,7 @@ function under the `@misc` function register. It returns the
 
 ```python
 @spacy.util.registry.misc('pymusas.pos_mapper.USAS_CORE_TO_BASIC_CORCENCCv1')
-def usas_core_to_basic_corcencc() -> Dict[str, List[str]]
+def usas_core_to_basic_corcencc() -> dict[str, list[str]]
 ```
 
 `pymusas.pos_mapper.USAS_CORE_TO_BASIC_CORCENCCv1` is a registered
@@ -114,5 +114,5 @@ function under the `@misc` function register. It returns the
 <h4 id="usas_core_to_basic_corcencc.returns">Returns<a className="headerlink" href="#usas_core_to_basic_corcencc.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 

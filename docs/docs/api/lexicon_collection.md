@@ -29,6 +29,9 @@ example below.
 
 - __SINGLE\_NON\_SPECIAL__ : `LexiconType` <br/>
     Single word lexicon lookup.
+- __SINGLE\_AUTOTAG__ : `LexiconType` <br/>
+    Single word lexicon lookup using an `autotag` pattern, see
+    [`AutotagLexiconCollection`](#autotaglexiconcollection).
 - __MWE\_NON\_SPECIAL__ : `LexiconType` <br/>
     MWE lexicon lookup.
 - __MWE\_WILDCARD__ : `LexiconType` <br/>
@@ -43,8 +46,8 @@ from pymusas.lexicon_collection import LexiconType
 assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL
 assert 'Single Non Special' == LexiconType.SINGLE_NON_SPECIAL.value
 assert 'SINGLE_NON_SPECIAL' == LexiconType.SINGLE_NON_SPECIAL.name
-all_possible_values = {'Single Non Special', 'MWE Non Special',
-'MWE Wildcard', 'MWE Curly Braces'}
+all_possible_values = {'Single Non Special', 'Single Autotag',
+'MWE Non Special', 'MWE Wildcard', 'MWE Curly Braces'}
 assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconType}
 ```
 
@@ -56,6 +59,16 @@ assert all_possible_values == {lexicon_type.value for lexicon_type in LexiconTyp
 class LexiconType(str, Enum):
  | ...
  | SINGLE_NON_SPECIAL = 'Single Non Special'
+```
+
+<a id="pymusas.lexicon_collection.LexiconType.SINGLE_AUTOTAG"></a>
+
+#### SINGLE\_AUTOTAG
+
+```python
+class LexiconType(str, Enum):
+ | ...
+ | SINGLE_AUTOTAG = 'Single Autotag'
 ```
 
 <a id="pymusas.lexicon_collection.LexiconType.MWE_NON_SPECIAL"></a>
@@ -127,7 +140,7 @@ Attributes.
 
 - __lemma__ : `str` <br/>
     The lemma of a token or the token itself.
-- __semantic\_tags__ : `List[str]` <br/>
+- __semantic\_tags__ : `list[str]` <br/>
     The semantic tags associated with the `lemma` and optional `POS`.
     The semantic tags are in rank order, the most likely tag
     is the first tag in the list.
@@ -151,7 +164,7 @@ class LexiconEntry:
 ```python
 class LexiconEntry:
  | ...
- | semantic_tags: List[str] = None
+ | semantic_tags: list[str] = None
 ```
 
 <a id="pymusas.lexicon_collection.LexiconEntry.pos"></a>
@@ -161,7 +174,7 @@ class LexiconEntry:
 ```python
 class LexiconEntry:
  | ...
- | pos: Optional[str] = None
+ | pos: str | None = None
 ```
 
 <a id="pymusas.lexicon_collection.LexiconMetaData"></a>
@@ -186,7 +199,7 @@ Attributes.
 <h4 id="lexiconmetadata.instance_attributes">Instance Attributes<a className="headerlink" href="#lexiconmetadata.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __semantic\_tags__ : `List[str]` <br/>
+- __semantic\_tags__ : `list[str]` <br/>
     The semantic tags associated with the lexicon entry.
     The semantic tags are in rank order, the most likely tag
     is the first tag in the list.
@@ -206,7 +219,7 @@ Attributes.
 ```python
 class LexiconMetaData:
  | ...
- | semantic_tags: List[str] = None
+ | semantic_tags: list[str] = None
 ```
 
 <a id="pymusas.lexicon_collection.LexiconMetaData.n_gram_length"></a>
@@ -246,10 +259,7 @@ class LexiconMetaData:
 ```python
 class LexiconCollection(MutableMapping):
  | ...
- | def __init__(
- |     self,
- |     data: Optional[Dict[str, List[str]]] = None
- | ) -> None
+ | def __init__(data: dict[str, list[str]] | None = None) -> None
 ```
 
 This is a dictionary object that will hold [`LexiconEntry`](#lexiconentry) data in a fast to
@@ -269,12 +279,12 @@ Expression (MWE) see the [`MWELexiconCollection`](#mwelexiconcollection).
 <h4 id="lexiconcollection.parameters">Parameters<a className="headerlink" href="#lexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __data__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
 
 <h4 id="lexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#lexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]` <br/>
+- __data__ : `dict[str, list[str]]` <br/>
     Dictionary where the keys are `{lemma}|{pos}` and the values are
     a list of associated semantic tags. If the `data` parameter given was
     `None` then the value of this attribute will be an empty dictionary.
@@ -300,7 +310,6 @@ assert least_likely_tag == 'A1'
 class LexiconCollection(MutableMapping):
  | ...
  | def add_lexicon_entry(
- |     self,
  |     value: LexiconEntry,
  |     include_pos: bool = True
  | ) -> None
@@ -333,7 +342,7 @@ overwrite the existing entry.
 ```python
 class LexiconCollection(MutableMapping):
  | ...
- | def to_dictionary() -> Dict[str, List[str]]
+ | def to_dictionary() -> dict[str, list[str]]
 ```
 
 Returns the `data` instance attribute.
@@ -341,7 +350,7 @@ Returns the `data` instance attribute.
 <h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <a id="pymusas.lexicon_collection.LexiconCollection.to_bytes"></a>
 
@@ -394,9 +403,9 @@ class LexiconCollection(MutableMapping):
  | ...
  | @staticmethod
  | def from_tsv(
- |     tsv_file_path: Union[PathLike, str],
+ |     tsv_file_path: PathLike | str,
  |     include_pos: bool = True
- | ) -> Dict[str, List[str]]
+ | ) -> dict[str, list[str]]
 ```
 
 Given a `tsv_file_path` it will return a dictionary object that can
@@ -421,7 +430,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.parameters">Parameters<a className="headerlink" href="#from_tsv.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+- __tsv\_file\_path__ : `PathLike | str` <br/>
     A file path or URL to a TSV file that contains at least two
     fields, with an optional third, with the following headings:
 
@@ -438,7 +447,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
 
@@ -644,6 +653,610 @@ object is the same class and contains the same `data` instance attribute.
 
 - `True` <br/>
 
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection"></a>
+
+## AutotagLexiconCollection
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def __init__(data: dict[str, list[str]] | None = None) -> None
+```
+
+This is a dictionary object that holds single word `autotag` lexicon
+entries, whereby the `lemma` and `pos` of each entry are patterns rather
+than literal values, e.g. `*[0-9]kg|NUM` or `[0-9][0-9]*ish|NUM`. The keys of
+the dictionary are a combination of the lemma pattern and the POS pattern
+in the following format: `{lemma}|{pos}`, the values are the associated
+semantic tags in rank order, the most likely tag is the first tag in the
+list.
+
+The pattern syntax is:
+
+1. `[...]` is a regular expression character class matching exactly one
+character, e.g. `[0-9]` matches one digit. Within the class `\[` and `\]`
+are literal brackets, e.g. `[\[\]]` matches `[` or `]`.
+2. `*` straight after a character class means zero or more characters from
+that class, e.g. `[0-9]*ish` matches `9ish`, `10ish`, and also `ish`.
+3. `*` anywhere else means zero or more of any character, e.g. `*-year-old`
+matches `10-year-old`.
+4. Every other character is literal, e.g. `.`, `+`, `?`, and `(`, apart
+from `[` and `]` which can only be used as part of a character class. A `[`
+that is not closed, an unescaped `[` within a class, or a `]` that does not
+close a class, e.g. `hello[a-z]]`, is an error.
+
+A pattern has to match the whole lemma/token or POS tag. Patterns are
+case sensitive and are never lower cased.
+
+Every entry must have a POS pattern and that POS pattern cannot be just
+`*`, as without a POS constraint patterns like `*kg` would match too many
+tokens.
+
+Each pattern is converted to a compiled regular expression, see
+[`pattern_to_regex`](#pattern_to_regex), when it is added to the collection.
+
+The order of the entries matters, as when more than one entry matches a
+token the tagger uses the entry that comes first, see
+[`pymusas.taggers.rules.single_word.SingleWordRule`](/pymusas/api/taggers/rules/single_word/#singlewordrule). The order is
+the order in which the entries were first added, adding an entry that
+already exists updates its semantic tags but does not change its position.
+For how the order is set when merging `autotag` TSV files, see
+[`tsv_merge`](#tsv_merge).
+
+For more information on the `autotag` syntax see the following
+[notes](/usage/notes/autotag_syntax).
+
+<h4 id="autotaglexiconcollection.parameters">Parameters<a className="headerlink" href="#autotaglexiconcollection.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __data__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
+    Dictionary where the keys are `{lemma}|{pos}` patterns and the values
+    are a list of associated semantic tags.
+
+<h4 id="autotaglexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#autotaglexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
+
+
+- __data__ : `dict[str, list[str]]` <br/>
+    Dictionary where the keys are `{lemma}|{pos}` patterns and the values
+    are a list of associated semantic tags. If the `data` parameter given
+    was `None` then the value of this attribute will be an empty dictionary.
+- __patterns__ : `dict[str, tuple[re.Pattern, re.Pattern]]` <br/>
+    Dictionary where the keys are the same as `data` and the values are
+    the compiled regular expressions of the lemma pattern and the POS
+    pattern.
+
+<h4 id="autotaglexiconcollection.raises">Raises<a className="headerlink" href="#autotaglexiconcollection.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If a key does not contain a POS pattern, the POS pattern is just `*`,
+    or either pattern is not valid, e.g. it contains an unclosed `[` or a
+    `]` that does not close a character class.
+
+<h4 id="autotaglexiconcollection.examples">Examples<a className="headerlink" href="#autotaglexiconcollection.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+                                       '[0-9][0-9]*ish|NUM': ['N1']})
+assert collection['*kg|NUM'] == ['N3.5']
+assert collection.match('15kg', 'NUM') == ['*kg|NUM']
+assert collection.match('15kg', 'NOUN') == []
+assert collection.match('ish', 'NUM') == []
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.pattern_to_regex"></a>
+
+### pattern\_to\_regex
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def pattern_to_regex(pattern: str) -> re.Pattern
+```
+
+Returns the `autotag` `pattern` converted into a compiled regular
+expression. For the pattern syntax see the
+[`AutotagLexiconCollection`](#autotaglexiconcollection) docstring. **Note** the regular
+expression should be matched using `fullmatch`.
+
+<h4 id="pattern_to_regex.parameters">Parameters<a className="headerlink" href="#pattern_to_regex.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __pattern__ : `str` <br/>
+    The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+<h4 id="pattern_to_regex.returns">Returns<a className="headerlink" href="#pattern_to_regex.returns" title="Permanent link">&para;</a></h4>
+
+
+- `re.Pattern` <br/>
+
+<h4 id="pattern_to_regex.raises">Raises<a className="headerlink" href="#pattern_to_regex.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the `pattern` contains a `[` that is not closed by a `]`, a `]`
+    that does not close a character class, an empty character class,
+    an unescaped `[` / `]` within a character class, or the character
+    class is not a valid regular expression character class.
+
+<h4 id="pattern_to_regex.examples">Examples<a className="headerlink" href="#pattern_to_regex.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+regex = AutotagLexiconCollection.pattern_to_regex('[0-9]*.5*')
+assert regex.pattern == '[0-9]*\\.5.*'
+assert regex.fullmatch('10.5kg') is not None
+assert regex.fullmatch('.5') is not None
+assert regex.fullmatch('1x5') is None
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.pattern_wildcard_count"></a>
+
+### pattern\_wildcard\_count
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def pattern_wildcard_count(pattern: str) -> int
+```
+
+Returns the number of wildcards (`*`) in the `autotag` `pattern`. A `*`
+within a character class is a literal `*`, so it is not counted, but a
+`*` straight after a character class is, e.g. `[0-9]*ish` has 1
+wildcard. The `pattern` is assumed to be valid, see
+[`pattern_to_regex`](#pattern_to_regex).
+
+<h4 id="pattern_wildcard_count.parameters">Parameters<a className="headerlink" href="#pattern_wildcard_count.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __pattern__ : `str` <br/>
+    The `autotag` pattern, e.g. `*kg` or `[0-9][0-9]*ish`.
+
+<h4 id="pattern_wildcard_count.returns">Returns<a className="headerlink" href="#pattern_wildcard_count.returns" title="Permanent link">&para;</a></h4>
+
+
+- `int` <br/>
+
+<h4 id="pattern_wildcard_count.examples">Examples<a className="headerlink" href="#pattern_wildcard_count.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+assert 1 == AutotagLexiconCollection.pattern_wildcard_count('*kg')
+assert 3 == AutotagLexiconCollection.pattern_wildcard_count('*-[0-9]*-*')
+assert 0 == AutotagLexiconCollection.pattern_wildcard_count('[*]kg')
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.wildcard_count"></a>
+
+### wildcard\_count
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def wildcard_count(key: str) -> int
+```
+
+Returns the number of wildcards (`*`) in the lemma and POS patterns of
+the entry `key`, see [`pattern_wildcard_count`](#pattern_wildcard_count).
+
+<h4 id="wildcard_count.parameters">Parameters<a className="headerlink" href="#wildcard_count.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __key__ : `str` <br/>
+    An entry in the collection in the format `{lemma}|{pos}`.
+
+<h4 id="wildcard_count.returns">Returns<a className="headerlink" href="#wildcard_count.returns" title="Permanent link">&para;</a></h4>
+
+
+- `int` <br/>
+
+<h4 id="wildcard_count.examples">Examples<a className="headerlink" href="#wildcard_count.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*MB|N*': ['N3.2']})
+assert 2 == collection.wildcard_count('*MB|N*')
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.most_wildcards"></a>
+
+### most\_wildcards
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def most_wildcards() -> int
+```
+
+Returns the largest number of wildcards (`*`) in any one entry of the
+collection, see [`wildcard_count`](#wildcard_count), it is `0` if the collection is
+empty.
+
+<h4 id="most_wildcards.returns">Returns<a className="headerlink" href="#most_wildcards.returns" title="Permanent link">&para;</a></h4>
+
+
+- `int` <br/>
+
+<h4 id="most_wildcards.examples">Examples<a className="headerlink" href="#most_wildcards.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*kg|NUM': ['N3.5'],
+                                       '*MB|N*': ['N3.2']})
+assert 2 == collection.most_wildcards()
+assert 0 == AutotagLexiconCollection().most_wildcards()
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.match"></a>
+
+### match
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def match(lexical_value: str, pos: str) -> list[str]
+```
+
+Returns the `{lemma}|{pos}` keys of all of the entries whose lemma
+pattern matches the whole `lexical_value` and whose POS pattern matches
+the whole `pos`. The keys are returned in the order they were added
+to the collection, if there are no matches the `list` will be empty.
+
+<h4 id="match.parameters">Parameters<a className="headerlink" href="#match.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __lexical\_value__ : `str` <br/>
+    The token or lemma to match, e.g. `15kg`.
+- __pos__ : `str` <br/>
+    The POS tag to match, e.g. `NUM`.
+
+<h4 id="match.returns">Returns<a className="headerlink" href="#match.returns" title="Permanent link">&para;</a></h4>
+
+
+- `list[str]` <br/>
+
+<h4 id="match.examples">Examples<a className="headerlink" href="#match.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*MB|N*': ['N3.2'],
+                                       '*|PUNCT': ['PUNCT']})
+assert collection.match('10MB', 'NOUN') == ['*MB|N*']
+assert collection.match('10mb', 'NOUN') == []
+assert collection.match('!', 'PUNCT') == ['*|PUNCT']
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.first_match"></a>
+
+### first\_match
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def first_match(
+ |     candidates: list[tuple[str, str]]
+ | ) -> tuple[str, list[int]] | None
+```
+
+Returns the `{lemma}|{pos}` key of the first entry in the collection
+that matches at least one of the `candidates`, and the indexes of all
+of the `candidates` that the entry matches, or `None` if no entry
+matches. It stops searching at the first matching entry, therefore it
+is quicker than calling [`match`](#match) for each candidate when only the
+entry that comes first in the collection is needed.
+
+<h4 id="first_match.parameters">Parameters<a className="headerlink" href="#first_match.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __candidates__ : `list[tuple[str, str]]` <br/>
+    The `(lexical_value, pos)` pairs to match, see [`match`](#match).
+
+<h4 id="first_match.returns">Returns<a className="headerlink" href="#first_match.returns" title="Permanent link">&para;</a></h4>
+
+
+- `tuple[str, list[int]] | None` <br/>
+
+<h4 id="first_match.examples">Examples<a className="headerlink" href="#first_match.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+collection = AutotagLexiconCollection({'*|NUM': ['N1'],
+                                       '*kg|NUM': ['N3.5']})
+candidates = [('15kg', 'NUM'), ('15KG', 'NUM'), ('15kg', 'NOUN')]
+assert collection.first_match(candidates) == ('*|NUM', [0, 1])
+assert collection.first_match([('15kg', 'NOUN')]) is None
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.to_dictionary"></a>
+
+### to\_dictionary
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def to_dictionary() -> dict[str, list[str]]
+```
+
+Returns the `data` instance attribute.
+
+<h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
+
+
+- `dict[str, list[str]]` <br/>
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.to_bytes"></a>
+
+### to\_bytes
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def to_bytes() -> bytes
+```
+
+Serialises the [`AutotagLexiconCollection`](#autotaglexiconcollection) to a bytestring.
+
+<h4 id="to_bytes.returns">Returns<a className="headerlink" href="#to_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- `bytes` <br/>
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.from_bytes"></a>
+
+### from\_bytes
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def from_bytes(bytes_data: bytes) -> "AutotagLexiconCollection"
+```
+
+Loads [`AutotagLexiconCollection`](#autotaglexiconcollection) from the given bytestring and
+returns it.
+
+<h4 id="from_bytes.parameters">Parameters<a className="headerlink" href="#from_bytes.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __bytes\_data__ : `bytes` <br/>
+    The bytestring to load.
+
+<h4 id="from_bytes.returns">Returns<a className="headerlink" href="#from_bytes.returns" title="Permanent link">&para;</a></h4>
+
+
+- [`AutotagLexiconCollection`](#autotaglexiconcollection) <br/>
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.from_tsv"></a>
+
+### from\_tsv
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def from_tsv(
+ |     tsv_file_path: PathLike | str
+ | ) -> dict[str, list[str]]
+```
+
+Given a `tsv_file_path` to an `autotag` lexicon file it will return a
+dictionary object that can be used to create a
+[`AutotagLexiconCollection`](#autotaglexiconcollection). The `lemma` and `pos` fields are
+kept exactly as written, they are not lower cased.
+
+Each line in the TSV file is added to a temporary
+[`AutotagLexiconCollection`](#autotaglexiconcollection), therefore all of the patterns are
+validated when the file is loaded.
+
+If the file path is a URL, the file will be downloaded and cached using
+[`pymusas.file_utils.download_url_file`](/pymusas/api/file_utils/#download_url_file).
+
+<h4 id="from_tsv.parameters">Parameters<a className="headerlink" href="#from_tsv.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __tsv\_file\_path__ : `PathLike | str` <br/>
+    A file path or URL to a TSV file that contains at least these three
+    fields:
+
+    1. `lemma`,
+    2. `pos`,
+    3. `semantic_tags`
+
+    All other fields will be ignored.
+
+<h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
+
+
+- `dict[str, list[str]]` <br/>
+
+<h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the field headings, `lemma`, `pos`, and `semantic_tags`, do not
+    exist in the given TSV file, or if any entry is not valid, see
+    [`AutotagLexiconCollection`](#autotaglexiconcollection).
+
+<h4 id="from_tsv.examples">Examples<a className="headerlink" href="#from_tsv.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from pymusas.lexicon_collection import AutotagLexiconCollection
+with TemporaryDirectory() as temp_dir:
+    tsv_file = Path(temp_dir, 'semantic_lexicon_en_autotag.tsv')
+    _ = tsv_file.write_text('lemma\\tpos\\tsemantic_tags\\n*kg\\tNUM\\tN3.5\\n',
+                            encoding='utf-8')
+    autotag_dict = AutotagLexiconCollection.from_tsv(tsv_file)
+
+assert autotag_dict == {'*kg|NUM': ['N3.5']}
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.tsv_merge"></a>
+
+### tsv\_merge
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | @staticmethod
+ | def tsv_merge(
+ |     *tsv_file_paths: PathLike | str
+ | ) -> dict[str, list[str]]
+```
+
+Given one or more `autotag` TSV files it will create a single
+dictionary object with the combination of all the lexicon data in each
+TSV, this dictionary object can then be used to create a
+[`AutotagLexiconCollection`](#autotaglexiconcollection).
+
+For more information on how the TSV data is loaded see [`from_tsv`](#from_tsv).
+
+**Note** later TSV files take precedence over earlier TSV files, for
+both the semantic tags and the priority of the entries:
+
+1. The entries are ordered by TSV file, last TSV file first, and
+within a TSV file in the order they appear in that file. As the order
+of the entries sets their priority, see [`AutotagLexiconCollection`](#autotaglexiconcollection),
+an entry in a later TSV file has priority over all entries in earlier
+TSV files, e.g. a more specific pattern in a later TSV file, `*kg|NUM`,
+is used instead of a general pattern in an earlier TSV file, `*|NUM`.
+2. If an entry is in more than one TSV file, the semantic tags and
+position from the last TSV file that contains it are used, i.e. if the
+last TSV file contains `*kg|NUM`: [`N3.5`] and the first TSV file
+contains `*kg|NUM`: [`N1`] then the returned dictionary will only
+contain the one entry; `*kg|NUM`: [`N3.5`].
+
+If you want to customise an `autotag` lexicon it is recommended to
+create your own `autotag` TSV file, e.g. a copy of the original file
+that you then edit, rather than merging files. This gives you finer
+control over the priority order of all of the entries.
+
+<h4 id="tsv_merge.parameters">Parameters<a className="headerlink" href="#tsv_merge.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __*tsv\_file\_paths__ : `PathLike | str` <br/>
+    File paths and/or URLs to `autotag` TSV files, see [`from_tsv`](#from_tsv).
+
+<h4 id="tsv_merge.returns">Returns<a className="headerlink" href="#tsv_merge.returns" title="Permanent link">&para;</a></h4>
+
+
+- `dict[str, list[str]]` <br/>
+
+<h4 id="tsv_merge.raises">Raises<a className="headerlink" href="#tsv_merge.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    See [`from_tsv`](#from_tsv).
+
+<h4 id="tsv_merge.examples">Examples<a className="headerlink" href="#tsv_merge.examples" title="Permanent link">&para;</a></h4>
+
+``` python
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from pymusas.lexicon_collection import AutotagLexiconCollection
+with TemporaryDirectory() as temp_dir:
+    published_file = Path(temp_dir, 'published_autotag.tsv')
+    _ = published_file.write_text('lemma\\tpos\\tsemantic_tags\\n'
+                                  '*\\tNUM\\tN1\\n*kg\\tNUM\\tN3.5\\n',
+                                  encoding='utf-8')
+    custom_file = Path(temp_dir, 'custom_autotag.tsv')
+    _ = custom_file.write_text('lemma\\tpos\\tsemantic_tags\\n'
+                               '*mg\\tNUM\\tN3.5\\n*kg\\tNUM\\tN3.6\\n',
+                               encoding='utf-8')
+    merged = AutotagLexiconCollection.tsv_merge(published_file, custom_file)
+
+assert merged == {'*mg|NUM': ['N3.5'], '*kg|NUM': ['N3.6'], '*|NUM': ['N1']}
+assert list(merged) == ['*mg|NUM', '*kg|NUM', '*|NUM']
+```
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.__setitem__"></a>
+
+### \_\_setitem\_\_
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def __setitem__(key: str, value: list[str]) -> None
+```
+
+<h4 id="__setitem__.raises">Raises<a className="headerlink" href="#__setitem__.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If the `key` does not contain a POS pattern, the POS pattern is
+    just `*`, or either pattern is not valid, e.g. it contains an
+    unclosed `[` or a `]` that does not close a character class.
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.__str__"></a>
+
+### \_\_str\_\_
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def __str__() -> str
+```
+
+Human readable string.
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.__repr__"></a>
+
+### \_\_repr\_\_
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def __repr__() -> str
+```
+
+Machine readable string. When printed and run `eval()` over the string
+you should be able to recreate the object.
+
+<a id="pymusas.lexicon_collection.AutotagLexiconCollection.__eq__"></a>
+
+### \_\_eq\_\_
+
+```python
+class AutotagLexiconCollection(MutableMapping):
+ | ...
+ | def __eq__(other: object) -> bool
+```
+
+Given another object to compare too it will return `True` if the other
+object is the same class and contains the same `data` instance attribute
+entries in the same order. The order matters as it determines which
+entry takes priority when matching, therefore two collections with
+the same entries in a different order are not equal.
+
+<h4 id="__eq__.parameters">Parameters<a className="headerlink" href="#__eq__.parameters" title="Permanent link">&para;</a></h4>
+
+
+- __other__ : `object` <br/>
+    The object to compare too.
+
+<h4 id="__eq__.returns">Returns<a className="headerlink" href="#__eq__.returns" title="Permanent link">&para;</a></h4>
+
+
+- `True` <br/>
+
+<h4 id="__eq__.examples">Examples<a className="headerlink" href="#__eq__.examples" title="Permanent link">&para;</a></h4>
+
+
+``` python
+from pymusas.lexicon_collection import AutotagLexiconCollection
+first = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+same_order = AutotagLexiconCollection({'*kg|NUM': ['N3.5'], '*|NUM': ['N1']})
+different_order = AutotagLexiconCollection({'*|NUM': ['N1'], '*kg|NUM': ['N3.5']})
+first == same_order
+True
+first == different_order
+False
+```
+
 <a id="pymusas.lexicon_collection.MWELexiconCollection"></a>
 
 ## MWELexiconCollection
@@ -652,9 +1265,8 @@ object is the same class and contains the same `data` instance attribute.
 class MWELexiconCollection(MutableMapping):
  | ...
  | def __init__(
- |     self,
- |     data: Optional[Dict[str, List[str]]] = None,
- |     pos_mapper: Optional[Dict[str, List[str]]] = None
+ |     data: dict[str, list[str]] | None = None,
+ |     pos_mapper: dict[str, list[str]] | None = None
  | ) -> None
 ```
 
@@ -684,21 +1296,42 @@ any MWE templates that contain a `{` or `}` will be ignored and will not be
 added to this collection, in addition a `UserWarning` will be raised stating
 this.
 
+Any MWE template that has a default (`Df`) semantic tag, see
+[`pymusas.utils.DEFAULT_TAG_RE`](/pymusas/api/utils/#default_tag_re), must contain a token that starts with
+a wildcard (`*`), as this is the token the `Df` tag refers to. MWE templates
+that do not will be ignored and a `UserWarning` will be raised stating this.
+
+**Note** when a `pos_mapper` is given, a POS tag in a MWE template can only
+contain a wildcard (`*`) if the POS tag is only a wildcard, e.g.
+`river_*` is allowed but `river_noun*` is not. A MWE template that does not
+follow this raises a `ValueError`.
+
 <h4 id="mwelexiconcollection.parameters">Parameters<a className="headerlink" href="#mwelexiconcollection.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __data__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __data__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     Dictionary where the keys are MWE templates, of any [`LexiconType`](#lexicontype),
     and the values are a list of associated semantic tags.
-- __pos\_mapper__ : `Dict[str, List[str]]`, optional (default = `None`) <br/>
+- __pos\_mapper__ : `dict[str, list[str]]`, optional (default = `None`) <br/>
     If not `None`, maps from the lexicon's POS tagset to the desired
-    POS tagset, whereby the mapping is a `List` of tags, at the moment there
+    POS tagset, whereby the mapping is a `list` of tags, at the moment there
     is no preference order in this list of POS tags. The POS mapping is
     useful in situations whereby the lexicon's POS tagset is different to
-    the token's. **Note** that the longer the `List[str]` for each POS
+    the token's. **Note** that the longer the `list[str]` for each POS
     mapping the longer it will take to match MWE templates. A one to one
     mapping will have no speed impact on the tagger. A selection of POS
-    mappers can be found in [`pymusas.pos_mapper`](/pymusas/api/pos_mapper).
+    mappers can be found in [`pymusas.pos_mapper`](/pymusas/api/pos_mapper). **Note** POS tags
+    in the MWE templates cannot contain a wildcard, unless the POS tag is
+    only a wildcard, see the `ValueError` below.
+
+<h4 id="mwelexiconcollection.raises">Raises<a className="headerlink" href="#mwelexiconcollection.raises" title="Permanent link">&para;</a></h4>
+
+
+- `ValueError` <br/>
+    If a `pos_mapper` is given and a POS tag within a MWE template in
+    `data` contains a wildcard (`*`) along with other characters, e.g.
+    `river_noun*`. A POS tag that is only a wildcard, e.g. `river_*`,
+    is allowed.
 
 <h4 id="mwelexiconcollection.instance_attributes">Instance Attributes<a className="headerlink" href="#mwelexiconcollection.instance_attributes" title="Permanent link">&para;</a></h4>
 
@@ -708,7 +1341,7 @@ dictionary attributes will be an empty dictionary and all integer values will
 be `0`. If `pos_mapper` parameter was `None` then the `pos_mapper` attribute
 will be an empty dictionary.
 
-- __meta\_data__ : `Dict[str, LexiconMetaData]` <br/>
+- __meta\_data__ : `dict[str, LexiconMetaData]` <br/>
     Dictionary where the keys are MWE templates, of any type, and the values
     are their associated meta data stored in a [`LexiconMetaData`](#lexiconmetadata) object.
 - __longest\_non\_special\_mwe\_template__ : `int` <br/>
@@ -723,24 +1356,24 @@ will be an empty dictionary.
     The number of wildcards in the MWE template that contains the
     most wildcards, e.g. the MWE template `ski_* *_noun` would contain 2
     wildcards. This can be 0 if you have no wildcard MWE templates.
-- __mwe\_regular\_expression\_lookup__ : `Dict[int, Dict[str, Dict[str, re.Pattern]]]` <br/>
+- __mwe\_regular\_expression\_lookup__ : `dict[int, dict[str, dict[str, re.Pattern]]]` <br/>
     A dictionary that can lookup all special syntax MWE templates there
     regular expression pattern. These templates are found first by
     their n-gram length and then their first character symbol. The regular
     expression pattern is used for quick matching within the [`mwe_match`](#mwe_match).
     From the special syntax only wildcard (`*`) symbols are supported at the
     moment.
-- __pos\_mapper__ : `Dict[str, List[str]]` <br/>
+- __pos\_mapper__ : `dict[str, list[str]]` <br/>
     The given `pos_mapper`.
-- __one\_to\_many\_pos\_tags__ : `Set[str]` <br/>
+- __one\_to\_many\_pos\_tags__ : `set[str]` <br/>
     A set of POS tags that have a one to many mapping, this is created based
     on the `pos_mapper`. This is empty if `pos_mapper` is `None`
-- __pos\_mapping\_lookup__ : `Dict[str, str]` <br/>
+- __pos\_mapping\_lookup__ : `dict[str, str]` <br/>
     Only used if `pos_mapper` is not `None`. For all one-to-one POS mappings
     will store the mapped POS MWE template as keys and the original non-mapped
     (original) MWE templates as values, which can be used to lookup the meta
     data from `meta_data`.
-- __pos\_mapping\_regular\_expression\_lookup__ : `Dict[LexiconType, Dict[int, Dict[str, Dict[str, re.Pattern]]]]` <br/>
+- __pos\_mapping\_regular\_expression\_lookup__ : `dict[LexiconType, dict[int, dict[str, dict[str, re.Pattern]]]]` <br/>
     Only used if `pos_mapper` is not `None` and will result in
     `mwe_regular_expression_lookup` being empty as it replaces it
     functionality and extends it and by handlining the one-to-many POS
@@ -777,14 +1410,13 @@ assert ({k: dict(v) for k, v in mwe_collection.mwe_regular_expression_lookup.ite
 class MWELexiconCollection(MutableMapping):
  | ...
  | def mwe_match(
- |     self,
  |     mwe_template: str,
  |     mwe_type: LexiconType
- | ) -> List[str]
+ | ) -> list[str]
 ```
 
-Returns a `List` of MWE templates, with the given `mwe_type`, that match
-the given `mwe_template`. If there are no matches the returned `List`
+Returns a `list` of MWE templates, with the given `mwe_type`, that match
+the given `mwe_template`. If there are no matches the returned `list`
 will be empty.
 
 This method applies all of the special syntax rules that should be applied
@@ -804,7 +1436,7 @@ special syntax rules see the following [notes](/usage/notes/mwe_syntax).
 <h4 id="mwe_match.returns">Returns<a className="headerlink" href="#mwe_match.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Optional[List[str]]` <br/>
+- `list[str] | None` <br/>
 
 <h4 id="mwe_match.examples">Examples<a className="headerlink" href="#mwe_match.examples" title="Permanent link">&para;</a></h4>
 
@@ -823,7 +1455,7 @@ assert ['*_noun boot_noun', '*_noun *_noun'] == collection.mwe_match('walking_no
 ```python
 class MWELexiconCollection(MutableMapping):
  | ...
- | def to_dictionary() -> Dict[str, List[str]]
+ | def to_dictionary() -> dict[str, list[str]]
 ```
 
 Returns a dictionary of all MWE templates, the keys, stored in the
@@ -834,7 +1466,7 @@ This can then be used to re-create a [`MWELexiconCollection`](#mwelexiconcollect
 <h4 id="to_dictionary.returns">Returns<a className="headerlink" href="#to_dictionary.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <h4 id="to_dictionary.examples">Examples<a className="headerlink" href="#to_dictionary.examples" title="Permanent link">&para;</a></h4>
 
@@ -900,8 +1532,8 @@ class MWELexiconCollection(MutableMapping):
  | ...
  | @staticmethod
  | def from_tsv(
- |     tsv_file_path: Union[PathLike, str]
- | ) -> Dict[str, List[str]]
+ |     tsv_file_path: PathLike | str
+ | ) -> dict[str, list[str]]
 ```
 
 Given a `tsv_file_path` it will return a dictionary object
@@ -921,7 +1553,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.parameters">Parameters<a className="headerlink" href="#from_tsv.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __tsv\_file\_path__ : `Union[PathLike, str]` <br/>
+- __tsv\_file\_path__ : `PathLike | str` <br/>
     A file path or URL to a TSV file that contains at least these two
     fields:
 
@@ -933,7 +1565,7 @@ come from the [AllenNLP library](https://github.com/allenai/allennlp/blob/main/a
 <h4 id="from_tsv.returns">Returns<a className="headerlink" href="#from_tsv.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Dict[str, List[str]]` <br/>
+- `dict[str, list[str]]` <br/>
 
 <h4 id="from_tsv.raises">Raises<a className="headerlink" href="#from_tsv.raises" title="Permanent link">&para;</a></h4>
 
@@ -982,7 +1614,7 @@ could cause issues during tag time.
 <h4 id="tsv_merge.parameters">Parameters<a className="headerlink" href="#tsv_merge.parameters" title="Permanent link">&para;</a></h4>
 
 
-- __*tsv\_file\_paths__ : `Union[PathLike, str]` <br/>
+- __*tsv\_file\_paths__ : `PathLike | str` <br/>
     File paths or URLs to a TSV file that contains at least these two
     fields:
 
@@ -1067,7 +1699,7 @@ assert r'ano_prep\ carta_[^\s_]*' == mwe_escaped
 ```python
 class MWELexiconCollection(MutableMapping):
  | ...
- | def __setitem__(key: str, value: List[str]) -> None
+ | def __setitem__(key: str, value: list[str]) -> None
 ```
 
 <h4 id="__setitem__.raises">Raises<a className="headerlink" href="#__setitem__.raises" title="Permanent link">&para;</a></h4>

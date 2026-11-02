@@ -15,7 +15,7 @@ def n_gram_indexes(
     sequence: Sequence[Any],
     min_n: int,
     max_n: int
-) -> Iterator[Tuple[int, int]]
+) -> Iterator[tuple[int, int]]
 ```
 
 Returns n-grams as indexes of the `sequence`,
@@ -39,7 +39,7 @@ order of largest n-grams first. If you only want one n-gram size then set
 <h4 id="n_gram_indexes.returns">Returns<a className="headerlink" href="#n_gram_indexes.returns" title="Permanent link">&para;</a></h4>
 
 
-- `Iterator[Tuple[int, int]]` <br/>
+- `Iterator[tuple[int, int]]` <br/>
 
 <h4 id="n_gram_indexes.raises">Raises<a className="headerlink" href="#n_gram_indexes.raises" title="Permanent link">&para;</a></h4>
 

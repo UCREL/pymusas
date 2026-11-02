@@ -1,0 +1,5 @@
+lemma	pos	semantic_tags
+*kg	NUM	N3.5
+[0-9][0-9]*ish	NUM	N1
+*	PUNCT	PUNCT
+*MB	N*	N3.2 N5

@@ -3,8 +3,9 @@ Base classes for custom classes to inherit from.
 """
 
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 import importlib
-from typing import Iterable, List, cast
+from typing import cast
 
 import srsly
 
@@ -106,7 +107,7 @@ class Serialise(ABC):
 
         `bytes`
         '''
-        serialised_objects: List[bytes] = []
+        serialised_objects: list[bytes] = []
         for serialise_object in serialise_objects:
             serialised_object \
                 = Serialise.serialise_object_to_bytes(serialise_object)
@@ -130,8 +131,8 @@ class Serialise(ABC):
 
         `Iterable[Serialise]`
         '''
-        serialised_objects: List[bytes] = srsly.msgpack_loads(bytes_data)
-        serialise_objects: List[Serialise] = []
+        serialised_objects: list[bytes] = srsly.msgpack_loads(bytes_data)
+        serialise_objects: list[Serialise] = []
         for serialised_object in serialised_objects:
             serialise_object \
                 = Serialise.serialise_object_from_bytes(serialised_object)
