@@ -168,22 +168,31 @@ To note the functional tests that are ran within this `make` command are the tes
 
 **NOTE** We do not expect contributors to run these tests, the UCREL team can run these tests as part of the pull request before we merge into the main branch.
 
-The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have this docker image. The image if you run it assumes you have an Nvidia GPU and a Nvidia driver that supports **CUDA 12**.
+The GPU tests are the same tests as we run in `make full-coverage-tests` but some of these tests are skipped when we request the model to run in GPU mode this is why we have these docker images. The images, if you run them, assume you have an Nvidia GPU and an Nvidia driver that supports the CUDA version of the image.
 
-These tests also allow us to test that the codebase can be used with the GPU version of spaCy `spacy[cuda12x]`.
+We have two GPU docker images, each tests a different CUDA, Python, and spaCy GPU setup:
 
-As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker container (to note the `0.1.0` version number of the container is not meaningful at the moment):
+| Dockerfile | CUDA | Python | PyTorch index | spaCy GPU package |
+| --- | --- | --- | --- | --- |
+| [./tests/gpu-cuda-12.9-docker.dockerfile](./tests/gpu-cuda-12.9-docker.dockerfile) | 12.9 | 3.12 | `cu128` | `spacy[cuda12x]` |
+| [./tests/gpu-cuda-13.2-docker.dockerfile](./tests/gpu-cuda-13.2-docker.dockerfile) | 13.2 | 3.14 | `cu132` | `cupy-cuda13x` |
+
+These tests allow us to test that the codebase can be used with the GPU version of spaCy. The CUDA 12.9 image tests the official `spacy[cuda12x]` extra. spaCy has no CUDA 13 extra, and the `cuda12x` extra caps `cupy-cuda12x` below version 13, which has no wheels for Python 3.13 or 3.14. So the CUDA 13.2 image installs `cupy-cuda13x` directly, which allows us to test the newest Python version we support with a newer CUDA version.
+
+As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker containers (to note the `0.1.0` version number of the containers is not meaningful at the moment):
 
 **Before running this ensure that you build and run the docker container outside of the VSCode Dev Container**
 
 ``` bash
-docker build -t pymusas-gpu:0.1.0 -f ./tests/gpu-docker.dockerfile .
+docker build -t pymusas-gpu-cuda-12.9:0.1.0 -f ./tests/gpu-cuda-12.9-docker.dockerfile .
+docker build -t pymusas-gpu-cuda-13.2:0.1.0 -f ./tests/gpu-cuda-13.2-docker.dockerfile .
 ```
 
-And then we can run the tests like so:
+And then we can run the tests like so, depending on which CUDA version your Nvidia driver supports:
 
 ``` bash
-docker run --gpus all --shm-size 4g --rm pymusas-gpu:0.1.0
+docker run --gpus all --shm-size 4g --rm pymusas-gpu-cuda-12.9:0.1.0
+docker run --gpus all --shm-size 4g --rm pymusas-gpu-cuda-13.2:0.1.0
 ```
 
 ### Benchmarking
