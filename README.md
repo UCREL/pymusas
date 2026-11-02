@@ -174,6 +174,8 @@ These tests also allow us to test that the codebase can be used with the GPU ver
 
 As we do not have GPU infrastructure on the CI pipeline, we can run the GPU tests locally use the following docker container (to note the `0.1.0` version number of the container is not meaningful at the moment):
 
+**Before running this ensure that you build and run the docker container outside of the VSCode Dev Container**
+
 ``` bash
 docker build -t pymusas-gpu:0.1.0 -f ./tests/gpu-docker.dockerfile .
 ```
