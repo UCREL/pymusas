@@ -6,10 +6,12 @@ wiki_token_limit="100000"
 text_unit="paragraph"
 speed_repeats="3"
 python_version="3.13"
+spacy_model="en_core_web_sm"
+spacy_model_version="3.8.0"
 
 # Help message
 usage() {
-    echo "Usage: $0 [--wiki-token-limit WIKI_TOKEN_LIMIT] [--text-unit TEXT_UNIT] [--speed-repeats SPEED_REPEATS] [--python-version PYTHON_VERSION] [--help]"
+    echo "Usage: $0 [--wiki-token-limit WIKI_TOKEN_LIMIT] [--text-unit TEXT_UNIT] [--speed-repeats SPEED_REPEATS] [--python-version PYTHON_VERSION] [--spacy-model SPACY_MODEL] [--spacy-model-version SPACY_MODEL_VERSION] [--help]"
     echo "Evaluates the English rule based taggers for accuracy, coverage, speed, and resources,"
     echo "and prints the results as markdown tables to stdout. The taggers evaluated are:"
     echo "  1. The pre-built pymusas-models model, using the latest released version of pymusas."
@@ -26,7 +28,7 @@ usage() {
 }
 
 # Parse arguments using getopt
-if ! TEMP=$(getopt -o 'w:u:s:p:h' --long 'wiki-token-limit:,text-unit:,speed-repeats:,python-version:,help' -n "$0" -- "$@"); then
+if ! TEMP=$(getopt -o 'w:u:s:p:m:v:h' --long 'wiki-token-limit:,text-unit:,speed-repeats:,python-version:,spacy-model:,spacy-model-version:,help' -n "$0" -- "$@"); then
     usage
 fi
 
@@ -50,6 +52,14 @@ while true; do
             ;;
         -p|--python-version)
             python_version="$2"
+            shift 2
+            ;;
+        -m|--spacy-model)
+            spacy_model="$2"
+            shift 2
+            ;;
+        -v|--spacy-model-version)
+            spacy_model_version="$2"
             shift 2
             ;;
         -h|--help)
@@ -82,7 +92,13 @@ evaluation_options=(
     --wiki-token-limit "${wiki_token_limit}"
     --text-unit "${text_unit}"
     --speed-repeats "${speed_repeats}"
+    --spacy-model "${spacy_model}"
 )
+
+# The spaCy model is not a dependency of the project, so that it is not installed
+# by the development setup or CI. It is added to each isolated environment from
+# its wheel, which uv downloads once and then reads from its cache.
+spacy_model_url="https://github.com/explosion/spacy-models/releases/download/${spacy_model}-${spacy_model_version}/${spacy_model}-${spacy_model_version}-py3-none-any.whl"
 
 results_file=$(mktemp --suffix=.jsonl)
 lock_requirements_file=$(mktemp --suffix=.txt)
@@ -97,12 +113,14 @@ echo "Evaluating the pre-built pymusas-models model" >&2
 uv run --isolated --no-project --python "${python_version}" \
     --with-requirements "${lock_requirements_file}" \
     --with-requirements ./pymusas_model_requirements.txt \
+    --with "${spacy_model_url}" \
     ./evaluate_rule_based_tagger.py --tagger pymusas-model \
     "${evaluation_options[@]}" --output-file "${results_file}" >&2
 
 for autotag_option in --no-autotag --autotag; do
     echo "Evaluating the tagger built from the lexicon files with ${autotag_option}" >&2
     uv run --isolated --frozen --no-default-groups --group evaluation --python "${python_version}" \
+        --with "${spacy_model_url}" \
         ./evaluate_rule_based_tagger.py --tagger lexicons "${autotag_option}" \
         "${evaluation_options[@]}" --output-file "${results_file}" >&2
 done

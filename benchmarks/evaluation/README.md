@@ -30,7 +30,7 @@ To evaluate all three taggers and print the results as markdown tables to stdout
 ./run_evaluation.sh > evaluation_results.md
 ```
 
-`./run_evaluation.sh --help` lists the options, which are the size of the finewiki sample (`--wiki-token-limit`), whether each finewiki text is a paragraph or a whole article (`--text-unit`), the number of times the finewiki sample is tagged when measuring speed (`--speed-repeats`), and the Python version every tagger is evaluated with (`--python-version`, default `3.13`).
+`./run_evaluation.sh --help` lists the options, which are the size of the finewiki sample (`--wiki-token-limit`), whether each finewiki text is a paragraph or a whole article (`--text-unit`), the number of times the finewiki sample is tagged when measuring speed (`--speed-repeats`), and the Python version every tagger is evaluated with (`--python-version`, default `3.13`), and the spaCy model and its version (`--spacy-model`, default `en_core_web_sm`, and `--spacy-model-version`, default `3.8.0`).
 
 ### Run time
 
@@ -46,7 +46,7 @@ Use the default options when creating results that you want to compare.
 To evaluate a single tagger configuration, e.g. while you are making a change, use `evaluate_rule_based_tagger.py`, `--help` lists all of the options;
 
 ``` bash
-PYTHONHASHSEED=0 uv run evaluate_rule_based_tagger.py --autotag
+PYTHONHASHSEED=0 uv run --with https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl evaluate_rule_based_tagger.py --autotag
 ```
 
 To use your own lexicon files, push them to a GitHub repository and use the `--lexicon-repo` and `--lexicon-commit` options. The results of different runs can be combined into one set of tables by saving them with `--output-file results.jsonl` and then running `uv run format_evaluation_results.py results.jsonl`.
@@ -64,7 +64,7 @@ The tagger's output can depend on Python's hash randomisation: when lexicon entr
 * The pre-built model uses the latest released version of pymusas from PyPI, and the pre-built model, which are stated in [./pymusas_model_requirements.txt](./pymusas_model_requirements.txt). Therefore the baseline is not affected by changes to this repository, including breaking changes.
 * The lexicon taggers use this repository's working tree.
 
-All other requirements, e.g. spaCy and `en_core_web_sm`, are exported from `uv.lock` so that they are the same in every environment, and every environment uses the same Python version, which is `3.13` by default and can be changed with `--python-version`. The environments only contain the `evaluation` dependency group, therefore they do not contain `torch`, which spaCy imports when it is installed.
+All other requirements, e.g. spaCy, are exported from `uv.lock` so that they are the same in every environment, and every environment uses the same Python version, which is `3.13` by default and can be changed with `--python-version`. The environments only contain the `evaluation` dependency group, therefore they do not contain `torch`, which spaCy imports when it is installed. The spaCy model is not in the `evaluation` dependency group, so that it is not installed by the development setup or CI, instead `run_evaluation.sh` adds it to each environment from its GitHub release wheel, which uv downloads once and then reads from its cache.
 
 When a new version of pymusas is released, update the `pymusas` version in [./pymusas_model_requirements.txt](./pymusas_model_requirements.txt), and when a new pre-built model is released update the model's URL in the same file and the `PRE_BUILT_MODEL_NAME` in [./tagger_utils.py](./tagger_utils.py) if its name has changed.
 
@@ -123,7 +123,7 @@ All of the data is downloaded once and cached in the pymusas cache directory, `~
 
 The gold datasets are already split into sentences, and each sentence is tagged as its own text using the gold tokenisation. Each finewiki text is a paragraph (a non-empty line of an article) by default, or a whole article with `--text-unit document`, which is tokenised by spaCy. No sentence splitter is used.
 
-The POS tags and lemmas that the tagger requires come from the `en_core_web_sm` spaCy model. `evaluate_rule_based_tagger.py` can use another spaCy model with `--spacy-model`, e.g. `en_core_web_trf`, which you need to install yourself, `run_evaluation.sh` always uses `en_core_web_sm` so that the POS tags and lemmas are the same in every environment.
+The POS tags and lemmas that the tagger requires come from the `en_core_web_sm` spaCy model. `evaluate_rule_based_tagger.py` can use another spaCy model with `--spacy-model`, e.g. `en_core_web_trf`, which you need to make available yourself, e.g. with `uv run --with MODEL_WHEEL_URL`. `run_evaluation.sh` uses the same spaCy model in every environment, `en_core_web_sm` by default, so that the POS tags and lemmas are the same, and `--spacy-model` and `--spacy-model-version` change it.
 
 ## Metrics
 

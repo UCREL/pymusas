@@ -78,7 +78,6 @@ dev = [
     "tomlkit>=0.15.1",
 ]
 evaluation = [
-    "en-core-web-sm",
     "huggingface-hub>=0.36.0",
     "psutil>=7.2.1",
     "pyarrow>=22.0.0",
@@ -103,9 +102,6 @@ index = "pytorch"
 [tool.uv.sources.usas-evaluation-framework]
 git = "https://github.com/UCREL/USAS-Evaluation-Framework"
 rev = "08f95072f74afefdb4b1207e8320938f860f940e"
-
-[tool.uv.sources.en-core-web-sm]
-url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl"
 
 [tool.uv.build-backend]
 module-name = "pymusas"

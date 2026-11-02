@@ -50,7 +50,7 @@ Speed and memory are only comparable on the same machine. Saving CPU model, core
 The cache key covers revision, token limit and text unit, but not the sampling logic. If that logic changes, an old cached sample would be reused silently.
 
 **14. Rethink how CI gets the evaluation requirements.**
-With `default-groups = "all"`, every CI job clones the framework and downloads `en_core_web_sm`. An alternative is to leave `evaluation` out of the default groups and have `make lint` and CI install it explicitly for `ty`. A scheduled CI job could also run a small evaluation and flag regressions.
+With `default-groups = "all"`, every CI job clones the framework. An alternative is to leave `evaluation` out of the default groups and have `make lint` and CI install it explicitly for `ty`. A scheduled CI job could also run a small evaluation and flag regressions.
 
 **15. Extend to other taggers and languages.**
 The code is organised for it: `TaggerConfig`, plus the gold datasets the framework provides for other languages. Neural and hybrid taggers would mainly need a separate peak-memory setup, since they need `torch`.
