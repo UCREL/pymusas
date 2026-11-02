@@ -267,9 +267,9 @@ class MWERule(Rule):
         lemmas_lower_with_pos: list[str] = []
         for token, lemma, pos in zip(tokens, lemmas, pos_tags, strict=True):
             tokens_with_pos.append(f'{token}_{pos}')
-            tokens_lower_with_pos.append(f'{token}_{pos}'.lower())
+            tokens_lower_with_pos.append(f'{token.lower()}_{pos}')
             lemmas_with_pos.append(f'{lemma}_{pos}')
-            lemmas_lower_with_pos.append(f'{lemma}_{pos}'.lower())
+            lemmas_lower_with_pos.append(f'{lemma.lower()}_{pos}')
         
         number_tokens = len(tokens)
         token_ranking_meta_data: list[list[RankingMetaData]] \

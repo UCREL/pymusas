@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- `MWERule` no longer lower cases the POS tag when creating the lower cased token and lemma matches, only the token/lemma is lower cased, as in `SingleWordRule`. Previously `TOKEN_LOWER` and `LEMMA_LOWER` matches could never match MWE templates with upper case POS tags, e.g. `ski_NOUN boot_NOUN`, unless the POS tag was a wildcard, resolves [issue 62](https://github.com/UCREL/pymusas/issues/62).
 - `SingleWordRule` and `MWERule` now raise a `ValueError` when called with `tokens`, `lemmas` and `pos_tags` of different lengths, rather than silently truncating to the shortest. Previously only `RuleBasedTagger` checked this. The `zip` calls in `ContextualRuleBasedRanker` are now also strict.
 - The API documentation generator, `scripts/py2md.py`, only removed `self` from method signatures that fit on one line, so it appeared in longer signatures such as `__init__`. `self` is now removed from all method signatures.
 - Comments and formatting in `pyproject.toml` are no longer removed when running `make full-coverage-tests`. Previously `scripts/create_temporary_version.py` re-serialised `pyproject.toml`, and the backup it restored at the end, without comments.

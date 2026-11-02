@@ -352,9 +352,8 @@ def test_mwe_rule_default_tags(mwe_semantic_tags: list[str],
     token_ranking_meta_data = mwe_rule(tokens, tokens, pos_tags)
     assert [] == token_ranking_meta_data[0]
     for token_index in [1, 2]:
-        # A token and lemma match, the lower cased matches also lower case
-        # the POS tags and therefore do not match.
-        assert 2 == len(token_ranking_meta_data[token_index])
+        # Token, lemma, lower cased token and lower cased lemma matches.
+        assert 4 == len(token_ranking_meta_data[token_index])
         for ranking_meta_data in token_ranking_meta_data[token_index]:
             assert (1, 3) == (ranking_meta_data.token_match_start_index,
                               ranking_meta_data.token_match_end_index)
@@ -405,6 +404,21 @@ def test_mwe_rule_default_tags_single_word_match_priority() -> None:
     mwe_rule = MWERule(mwe_lexicon, single_word_rule=single_word_rule)
     template_tags = _mwe_semantic_tags(mwe_rule, tokens, lemmas, pos_tags)
     assert {'*_ADJ style_NOUN': ('C1',)} == template_tags
+
+
+def test_mwe_rule_lower_case_matches_keep_pos_case() -> None:
+    tokens = lemmas = ['Ski', 'Boot']
+    pos_tags = ['NOUN', 'NOUN']
+
+    mwe_rule = MWERule({'ski_NOUN boot_NOUN': ['K5.1']})
+    for token_matches in mwe_rule(tokens, lemmas, pos_tags):
+        assert ['TOKEN_LOWER', 'LEMMA_LOWER'] == [match.lexical_match.name
+                                                  for match in token_matches]
+
+    # POS tags are case sensitive, so a lower cased POS template does not
+    # match upper cased POS tags.
+    mwe_rule = MWERule({'ski_noun boot_noun': ['K5.1']})
+    assert [[], []] == mwe_rule(tokens, lemmas, pos_tags)
 
 
 def test_mwe_rule_default_tags_uses_single_word_pos_mapper() -> None:
